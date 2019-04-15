@@ -1,9 +1,19 @@
+/[Ll]ibrary/
+/[Tt]emp/
+/[Oo]bj/
+/[Bb]uild/
+/[Bb]uilds/
+/[Ll]ogs/
+
 [Ll]ibrary/
 [Tt]emp/
 [Oo]bj/
 [Bb]uild/
 [Bb]uilds/
 Assets/AssetStoreTools*
+Assets/_textures/
+Assets/Bearded Man Studios Inc/
+Assets/CorcraStudio/
 
 # Visual Studio cache directory
 .vs/
