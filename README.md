@@ -28,7 +28,7 @@ A step by step series of examples that tell you how to get a development env run
 
 We use GitHub for versioning. For the versions available, see the [tags on this repository](https://github.com/JoeY34kaze/medieval_survival/tags). 
 ## Project development plan
-Project development plan can be found [here](other_file.md).
+Project development plan can be found [here](Action_plan.md).
 
 ## Authors
 
