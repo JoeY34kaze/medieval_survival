@@ -78,5 +78,80 @@ This is quite a broad feature and encompassess all of the weapons that a player 
  - crossbows (2handed)
  
  Under this feature also belong some status effects like CC, knockout, cripple, bleed, poison.
- 
  ####  Feature 6 - Siege weapons:
+ Player will need special weapons to deal damage to player structures which arent complete shit-tier. These weapons include:
+ - Trebuchet
+ 		Player crafts a trebuchet starter kit that he can then deploy at a suitable flat terrain that is not in enemy zone of control or inside a no-build zone. Upon placing a the starter kit, the player must supply it with resources needed for the trebuchet to build itself up.
+		After the trebuchet was built a player can craft 3 different types of ammunition:
+			- Practice shot	: cheaply made shot used for calibration. Deals 0 damage.
+			- Stone shot	: Projectile made from stone, a bit costly and deals moderate splash damage to everything.
+			- Tar shot		: Stone shot covered in tar and lit on fire. Upon impact deals splash damage and sets shit on fire yo.
+		Trebuchet is vulnerable to fire damage and can be destroyed by players if not defended.
+ ####  Feature 7 - Swimming & water:
+ 
+ ####  Feature 8 - Team system & pinging:
+ 		Players are grouped in teams/clans allowing them to better coordinate with eachother.
+		Damage to teammates is reduced by a certain percentage.
+		Player can hold MMouse button to bring up a radial menu to ping for locations / objects / enemies. Teammates can then ping on said ping to acknowledge his ping and in case of a pinged item, mark it for themselves for a certain amount of time. Basically Apex.
+ ####  Feature 9 - Sliding:
+ 	Apex
+ ####  Feature 10 - Animals:
+ Animals have always been the bread and butter of civilizations. Or mybe just butter.
+ There are 2 types of animals:
+ - Non - interactable animals:
+ 	Ducks, deer, bears, etc
+- Interactable animals:
+- - **Dog**
+		Good boy.
+			Can be used as a companion when going outside of a base.
+			Can be used as help for hunting / tracking prey.
+			Can be used for tracking hostile players.
+			
+			Has several states:
+			- Track prey: Tracks nearest non hostile animal for hunt.
+			- Track Players: Tracks nearest hostile player that is not in certain range od his base. When player engages in combat or if the dog is attacked, the dog becomes hostile.
+			- Ignore: Dog doesnt attack under any condition.
+			- Defend self: Dog will become hostile after being attacked.
+			- Defend Player: Dog will become hostile after him or player is attacked.
+			- Assist: Dog will become hostile after player attacks a living thing.
+			- Hostile: Dog will attack nearest enemy, but prioritize the enemy that the player is attacking.
+			
+			Dog moves somewhat faster than player and as such is usefull in chasing down fleeing players.
+- - **Horse**
+		Strong boy.
+			Can be ridden by a player.
+			Horse is faster than a player.
+			Player can place his inventory bags on a horse, 2-4 max.
+			Horses can draw carriage, allowing players to carry even more items.
+			Horse-drawn carriages can be instructed to move to various POI's where a player owned slave is present to collect gathered resources. In this case the carriage must be accompanied by a player owned slave. Enemy players can attack the carriage, causing it to drop items. Horses and the slave are immune to damage during this process. Nearby players and owner are notified if someone is attacking a resource wagon.
+- - **Oxen**
+		Beast of burden.
+			Used to draw carriages instead of a horse. Is slower than a horse, but can carry more.
+			
+ ####  Feature 11 - Respawn mechanic:
+ 		When player's health reaches 0 from combat damage he is downed. If he fails to pick himself up the player dies.
+		If a player is poisoned the player skips the downed state and straight up dies depending on the poison used.
+		Once the player has died a box spawns next to his body, containing the entirety of his inventory.
+		The player then respawns at the position of his eldest offspring. The said offspring is destroyed and player's avatar takes the appearence of the destroyed offspring. Any romance modifiers are reset. Actually all modifiers are reset.
+		If player has no offspring he plays as his next sibling.
+		if no sibling the player has to wait for a set amount of time? then he spawns next to his last spouse/mother, sister-wife, idk lol, who magically got impregnated by a local postman apparently.
+ ####  Feature 12 - Player progeniture:
+ probably nothing too graphic, kinda like HEAT? I'm not sure i give a shit about a rating though so who knows.
+ 		Player uses offspring and siblings as a means to speed up his respawn timers.
+		To create an offspring a player must find a suitable mate of the opposite sex.
+		Player can mate with other players of they are of different sex.
+		Player can mate with NPC's that he successfully woos.
+		Player can have sex with his slaves freely.
+		
+ ####  Feature 13 - PVE points of interest:
+ 		Places on the map where building is not allowed. Some places are rich in resources (mines) and can be used to send slaves to gather resources. These places can be contested for control by players.
+		Some places give you some buffs?
+		Some places teach you some emotes or recipes stuff like that.
+ ####  Feature 14 - Easy server hosting:
+ 		It is in our interest for every baindead retard to be able to host a server.
+ ####  Feature 15 - Steam integration:
+ 		It's gonna be hosted on steam.
+ ####  Feature 16 - Armor & clothes system:
+ 		
+ ####  Feature 17 - Inventory system:
+ 
