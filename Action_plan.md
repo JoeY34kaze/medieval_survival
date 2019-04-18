@@ -120,6 +120,7 @@ This is quite a broad feature and encompassess all of the weapons that a player 
 			Dog moves somewhat faster than player and as such is usefull in chasing down fleeing players.
 - - **Horse**
 		Strong boy.
+		
 			Can be ridden by a player.
 			Horse is faster than a player.
 			Player can place his inventory bags on a horse, 2-4 max.
@@ -138,6 +139,7 @@ This is quite a broad feature and encompassess all of the weapons that a player 
 		if no sibling the player has to wait for a set amount of time? then he spawns next to his last spouse/mother, sister-wife, idk lol, who magically got impregnated by a local postman apparently.
  ####  Feature 12 - Player progeniture:
  probably nothing too graphic, kinda like HEAT? I'm not sure i give a shit about a rating though so who knows.
+ 
  		Player uses offspring and siblings as a means to speed up his respawn timers.
 		To create an offspring a player must find a suitable mate of the opposite sex.
 		Player can mate with other players of they are of different sex.
