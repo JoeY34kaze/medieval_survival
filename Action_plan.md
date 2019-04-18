@@ -81,6 +81,7 @@ This is quite a broad feature and encompassess all of the weapons that a player 
  ####  Feature 6 - Siege weapons:
  Player will need special weapons to deal damage to player structures which arent complete shit-tier. These weapons include:
  - Trebuchet
+ 
  		Player crafts a trebuchet starter kit that he can then deploy at a suitable flat terrain that is not in enemy zone of control or inside a no-build zone. Upon placing a the starter kit, the player must supply it with resources needed for the trebuchet to build itself up.
 		After the trebuchet was built a player can craft 3 different types of ammunition:
 			- Practice shot	: cheaply made shot used for calibration. Deals 0 damage.
