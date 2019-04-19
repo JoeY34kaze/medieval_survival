@@ -68,16 +68,30 @@ Base building will be the most similar to Conan Exiles. Big Blocks. Upgradable b
 ####  Feature 5 - Personal weapons:
 This is quite a broad feature and encompassess all of the weapons that a player can use in regular PVP. Generally this includes (can be changed):
  - one handed bladed weapons
+   * Arming sword: A simple yet prestigous one handed sword used by knights and lower ranking members alike. Arming sword was a relatively poor weapon against contemporary armour but it had low weight and was extremely efficient against an unarmoured opponent. Good at slashing, good at stabbing. 
+   * Viking sword: A relatively primitive weapon compared to an arming sword. They were heavier and less balanced, but were extremely durable and in some cases their workmanship surpassed most weapons from the later eras. They were almost always used in a combination with a shield. Good at slashing, average at stabbing.
+   *seax: A germanic one bladed weapon used for cutting. It was employed as a personal weapon for a common tribesman. Good for slashing and cutting, pretty shit for stabbing. 
+   * messer/falchion: Single bladed weapon used in the later medieval era and used mostly by non noble soldiers and mercenaries. Despite being a choice for poorer troops, the weapons was of relative high quality and was able to deliver powerfull blows without chipping away. Very good at slashing, poor at stabbing.
+   
  - one handed blunt weapons
+   * Knopped mace: A light mace wth a wooden handle usually made from cast bronze and iron. Historically it was employed mostly by poor tribesmen in the east or East european soldiers. A very cost effiencent with Average swings and slight armour penetration. [Progression](https://memestatic1.fjcdn.com/comments/+_858c82ae2c4e4e26382ff09c6aaa450e.jpg)
+   * Flanged mace: A heavier yet suprisingly balanced mace used historically by islamic armies and later European ones. Earlier type of flanged maces had wooden handle and iron macehead, later variantions were made entirely made from steel. Powerfull swings and extreme armour penetration.
+   Spiked mace: A mace with protruding spikes. Effiecent against earlier types of armour like chainmail, uneffiecent against plate. GOOD swings, Average armour penetration
+   Horsemans hammer: A hammer used by knights, usually from horseback. It had a blunt side, with a spike on the other. Powerfull swings, good armour penetration.
+   
+   
+   
  - two handed bladed weapons
- - two handed blunt weapons
- - spears (2 handed)
+ - two weaponsanded blunt (polearms) 
+ - spears (1/2 handed)
  - shields (1 handed)
  - daggers (dual wielded)
  - bows (2 handed)
  - crossbows (2handed)
  
+ 
  Under this feature also belong some status effects like CC, knockout, cripple, bleed, poison.
+ 
  ####  Feature 6 - Siege weapons:
  Player will need special weapons to deal damage to player structures which arent complete shit-tier. These weapons include:
  - Trebuchet
