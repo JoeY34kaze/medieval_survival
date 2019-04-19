@@ -74,7 +74,7 @@ This is quite a broad feature and encompassess all of the weapons that a player 
    * messer/falchion: Single bladed weapon used in the later medieval era and used mostly by non noble soldiers and mercenaries. Despite being a choice for poorer troops, the weapons was of relative high quality and was able to deliver powerfull blows without chipping away. Very good at slashing, poor at stabbing.
    
  - one handed blunt weapons
-   * Knopped mace: A light mace wth a wooden handle usually made from cast bronze and iron. Historically it was employed mostly by poor tribesmen in the east or East european soldiers. A very cost effiencent with Average swings and slight armour penetration. [Progression](https://memestatic1.fjcdn.com/comments/+_858c82ae2c4e4e26382ff09c6aaa450e.jpg)
+   * Knopped mace: A light mace wth a wooden handle usually made from cast bronze and iron. Historically it was employed mostly by poor tribesmen in the east or East european soldiers. A very cost effiencent with Average swings and slight armour penetration. ![Progression](https://memestatic1.fjcdn.com/comments/+_858c82ae2c4e4e26382ff09c6aaa450e.jpg)
    * Flanged mace: A heavier yet suprisingly balanced mace used historically by islamic armies and later European ones. Earlier type of flanged maces had wooden handle and iron macehead, later variantions were made entirely made from steel. Powerfull swings and extreme armour penetration.
    Spiked mace: A mace with protruding spikes. Effiecent against earlier types of armour like chainmail, uneffiecent against plate. GOOD swings, Average armour penetration
    Horsemans hammer: A hammer used by knights, usually from horseback. It had a blunt side, with a spike on the other. Powerfull swings, good armour penetration.
