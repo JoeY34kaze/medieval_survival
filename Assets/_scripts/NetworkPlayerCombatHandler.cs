@@ -16,7 +16,7 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
         set { this.combat_mode = value; }
     }
 
-    private bool in_attack_animation = false;
+    public bool in_attack_animation = false;
     private Animator animator;
     private player_local_locks player_local_locks;
     private NetworkPlayerStats stats;
@@ -50,6 +50,7 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
                 slot.GetChild(previous_weapon).gameObject.SetActive(false);
                 slot.GetChild(newVal).gameObject.SetActive(true);
             }
+            animator.SetInteger("current_weapon", newVal);
             networkObject.SendRpc(RPC_CHANGE_CURRENT_WEAPON, Receivers.OthersProximity, (int)newVal, -1,this.previous_weapon,0);
             Debug.Log("owner poslal rpc da clienti updejtajo njegov trenutni weapon");
         }
@@ -96,7 +97,7 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
         check_for_weapon_switch();
 
         if (in_attack_animation) {
-            if (animator.GetCurrentAnimatorStateInfo(1).IsName("combat_layer.in_combat_idle")) {
+            if (animator.GetCurrentAnimatorStateInfo(1).IsName("combat_layer.in_combat_idle") || animator.GetCurrentAnimatorStateInfo(1).IsName("combat_layer.1h_sword_idle")) {
                 in_attack_animation = false;
 
             }
@@ -144,7 +145,8 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
 
     private bool current_weapon_can_perform_block()
     {
-        return true;
+        if (this.Currently_equipped_weapon < 2) return true;
+        else return false;
     }
 
     private void check_for_weapon_switch()
@@ -321,6 +323,7 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
         int prev_weapon_id2 = args.GetNext<int>();
         this.Currently_equipped_weapon = new_weapon_id1;
 
+        animator.SetInteger("current_weapon", new_weapon_id1);
         if (prev_weapon_id1 == -1) {
             foreach (Transform slot in equipped_weapon_slots) {
                 for (int i=0;i<slot.childCount;i++) {
