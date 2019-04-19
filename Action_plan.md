@@ -68,21 +68,28 @@ Base building will be the most similar to Conan Exiles. Big Blocks. Upgradable b
 ####  Feature 5 - Personal weapons:
 This is quite a broad feature and encompassess all of the weapons that a player can use in regular PVP. Generally this includes (can be changed):
  - one handed bladed weapons
-   * Arming sword: A simple yet prestigous one handed sword used by knights and lower ranking members alike. Arming sword was a relatively poor weapon against contemporary armour but it had low weight and was extremely efficient against an unarmoured opponent. Good at slashing, good at stabbing. 
-   * Viking sword: A relatively primitive weapon compared to an arming sword. They were heavier and less balanced, but were extremely durable and in some cases their workmanship surpassed most weapons from the later eras. They were almost always used in a combination with a shield. Good at slashing, average at stabbing.
-   *seax: A germanic one bladed weapon used for cutting. It was employed as a personal weapon for a common tribesman. Good for slashing and cutting, pretty shit for stabbing. 
-   * messer/falchion: Single bladed weapon used in the later medieval era and used mostly by non noble soldiers and mercenaries. Despite being a choice for poorer troops, the weapons was of relative high quality and was able to deliver powerfull blows without chipping away. Very good at slashing, poor at stabbing.
+   * Arming sword: A simple yet prestigous one handed sword used by knights and lower ranking members alike. Arming sword was a relatively poor weapon against contemporary armour but it had low weight and was extremely efficient against an unarmoured opponent. Good at slashing, good at stabbing, Bad reach.
+   * Viking sword: A relatively primitive weapon compared to an arming sword. They were heavier and less balanced, but were extremely durable and in some cases their workmanship surpassed most weapons from the later eras. They were almost always used in a combination with a shield. Good at slashing, average at stabbing, bad reach.
+   *seax: A germanic one bladed weapon used for cutting. It was employed as a personal weapon for a common tribesman. Good for slashing and cutting, pretty shit for stabbing very bad reach. 
+   * messer/falchion: Single bladed weapon used in the later medieval era and used mostly by non noble soldiers and mercenaries. Despite being a choice for poorer troops, the weapons was of relative high quality and was able to deliver powerfull blows without chipping away. Very good at slashing, poor at stabbing, bad reach.
    
  - one handed blunt weapons
-   * Knopped mace: A light mace wth a wooden handle usually made from cast bronze and iron. Historically it was employed mostly by poor tribesmen in the east or East european soldiers. A very cost effiencent with Average swings and slight armour penetration. ![Progression](https://memestatic1.fjcdn.com/comments/+_858c82ae2c4e4e26382ff09c6aaa450e.jpg)
-   * Flanged mace: A heavier yet suprisingly balanced mace used historically by islamic armies and later European ones. Earlier type of flanged maces had wooden handle and iron macehead, later variantions were made entirely made from steel. Powerfull swings and extreme armour penetration.
-   Spiked mace: A mace with protruding spikes. Effiecent against earlier types of armour like chainmail, uneffiecent against plate. GOOD swings, Average armour penetration
-   Horsemans hammer: A hammer used by knights, usually from horseback. It had a blunt side, with a spike on the other. Powerfull swings, good armour penetration.
-   
-   
+   * Knopped mace: A light mace wth a wooden handle usually made from cast bronze and iron. Historically it was employed mostly by poor tribesmen in the east or East european soldiers. A very cost effiencent weapon with Average swings and slight armour penetration, very bad reach. ![Progression](https://memestatic1.fjcdn.com/comments/+_858c82ae2c4e4e26382ff09c6aaa450e.jpg)
+   * Flanged mace: A heavier yet suprisingly balanced mace used historically by islamic armies and later European ones. Earlier type of flanged maces had wooden handle and iron macehead, later variantions were made entirely made from steel. Powerfull swings and extreme armour penetration, very bad reach.
+   Spiked mace: A mace with protruding spikes. Effiecent against earlier types of armour like chainmail, uneffiecent against plate. GOOD swings, Average armour penetration, very bad reach.
+   Horsemans hammer: A hammer used by knights, usually from horseback. It had a blunt side, with a spike on the other. Powerfull swings, good armour penetration, very bad/bad reach.
    
  - two handed bladed weapons
- - two weaponsanded blunt (polearms) 
+   * Longsword: A two handed sword that required a lot of knowledge and skill to use. As the time went on the the armour progressed, the tip of the blace became more and more pointed and sharp in order to compete with it. Very Good as slashing, very good at stabbing, slight armour penetration with stab attacks, average reach.
+   Grosse messer/military falchion: A two handed single blade sword, used mostly by poorer troops and merceneries. While poorer quality tham longsword, it was still able to deliver powerfull blows. Superior at slashing, bad at stabbing.
+   * Claymore: A slightly larger and less "wieldy" type of long sword, used by Scotish highlanders. Superior at slashing, good at sta stabbing.
+   * Zveihandler: The biggest swoords on the battlefield used by the biggest men on the battlefield. It was used to defend critical formation and to disrupt pike formation. The size of the weapon alone made caused internal injuries even while wearing and armour. Superior at slashing, poor at stabbing, slight armour penetration. 
+   
+ - two handed blunt weapons (polearms) 
+   * War hammer: A two handed hammer used mostly by noble fighters. It's shorter than most polearms but is faster, more agile and made especially to ruin the day for even the most armoured opponents. Good blows. average stabs, very good armour penetration.
+   * Halberd: Am multi purposeful weapons of good range used for slashing, stabbing, and hooking. Later variantions were designed to penetrate armour. Good slashes, good stabs, average armour penetration.
+   +Poleaxe: A smaller polearm with an axehead, spike, and a hammer, used mostly by knights. Very good slashing, average stabs.
+   
  - spears (1/2 handed)
  - shields (1 handed)
  - daggers (dual wielded)
