@@ -13,12 +13,16 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
     /// </summary>
     public float normal_speed = 1.0f;
 
+
     public float sprint_modifier = 2.0f;
     public float crouched_modifier = 0.25f;
 
     public float visina_skoka = 2.0f;
 
-    private bool crouched; 
+    private bool crouched;
+
+    public float light_weapon_speed_modifier = 0.8f;
+    public float heavy_weapon_speed_modifier = 0.6f;
 
     private float speed = 1.0f;
     private Animator anim;
@@ -26,17 +30,20 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
 
 
     public float dolzina_za_ground_check_raycast = 0.4f;
+    public float distance_from_center_raycast = 0.2f;
     private bool isGrounded = true;
     private bool in_a_jump = false;
 
     private Rigidbody rigidbody;
 
     private NetworkPlayerAnimationLogic animation_handler_script;
+    private NetworkPlayerCombatHandler combat_handler_script;
     
     private void Awake()
     {
         anim = GetComponent<Animator>();
         rigidbody = GetComponent<Rigidbody>();
+        combat_handler_script = GetComponent<NetworkPlayerCombatHandler>();
     }
 
     private void FixedUpdate()
@@ -59,6 +66,12 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
         if (crouched) speed = speed * crouched_modifier;
 
 
+        //---------------------------------------------------DA TE MAL POSLOWA K NAPADAS Z WEAPONOM----------------------------------------------
+        if (combat_handler_script.in_attack_animation) {
+            if (combat_handler_script.Currently_equipped_weapon == 2) speed *= light_weapon_speed_modifier;
+        }
+        //----------------------------------------------------------------------------------------------------------------------------------------
+
         Vector3 next_position = transform.position;
 
         Vector3 dirVector = (transform.forward * Input.GetAxis("Vertical") +transform.right * Input.GetAxis("Horizontal")).normalized * speed * Time.fixedDeltaTime;
@@ -71,7 +84,7 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
 
         transform.eulerAngles = transform.eulerAngles + turnAngle.eulerAngles;
 
-        check_ground_raycast();
+        check_ground_raycast(distance_from_center_raycast);
 
         //gravity
         //if(!isGrounded)
@@ -98,9 +111,14 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
         networkObject.rotation = transform.rotation;
     }
 
-    private void check_ground_raycast()
+    private void check_ground_raycast(float distance_from_center)
     {
         bool b = Physics.Raycast(transform.position, Vector3.down, dolzina_za_ground_check_raycast);
+
+        if (!b) b = Physics.Raycast(transform.position + transform.forward * distance_from_center, Vector3.down, dolzina_za_ground_check_raycast);
+        if (!b) b = Physics.Raycast(transform.position - transform.forward * distance_from_center, Vector3.down, dolzina_za_ground_check_raycast);
+        if (!b) b = Physics.Raycast(transform.position + transform.right * distance_from_center, Vector3.down, dolzina_za_ground_check_raycast);
+        if (!b) b = Physics.Raycast(transform.position - transform.right * distance_from_center, Vector3.down, dolzina_za_ground_check_raycast);
 
         isGrounded = b;
         anim.SetBool("grounded", b);

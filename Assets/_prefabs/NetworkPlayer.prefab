@@ -1597,11 +1597,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 225dc11a4eca7804b814e384e39eb786, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  normal_speed: 2
+  normal_speed: 1.8
   sprint_modifier: 2
   crouched_modifier: 0.35
   visina_skoka: 3.42
+  light_weapon_speed_modifier: 0.8
+  heavy_weapon_speed_modifier: 0.6
   movement_collider_checker: {fileID: 8645856331740573224}
+  dolzina_za_ground_check_raycast: 0.4
 --- !u!114 &5856920410521040789
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1651,6 +1654,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   combat_mode: 0
   blocking: 0
+  in_attack_animation: 0
   combat_sound_effects:
   - {fileID: 5834470938225872258, guid: 75fae846ed60a9344b8226a84c76a726, type: 3}
   equipped_weapon_slots:
