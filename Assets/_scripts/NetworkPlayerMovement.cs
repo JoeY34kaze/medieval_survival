@@ -30,6 +30,7 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
 
 
     public float dolzina_za_ground_check_raycast = 0.4f;
+    public float distance_from_center_raycast = 0.2f;
     private bool isGrounded = true;
     private bool in_a_jump = false;
 
@@ -83,7 +84,7 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
 
         transform.eulerAngles = transform.eulerAngles + turnAngle.eulerAngles;
 
-        check_ground_raycast();
+        check_ground_raycast(distance_from_center_raycast);
 
         //gravity
         //if(!isGrounded)
@@ -110,9 +111,14 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
         networkObject.rotation = transform.rotation;
     }
 
-    private void check_ground_raycast()
+    private void check_ground_raycast(float distance_from_center)
     {
         bool b = Physics.Raycast(transform.position, Vector3.down, dolzina_za_ground_check_raycast);
+
+        if (!b) b = Physics.Raycast(transform.position + transform.forward * distance_from_center, Vector3.down, dolzina_za_ground_check_raycast);
+        if (!b) b = Physics.Raycast(transform.position - transform.forward * distance_from_center, Vector3.down, dolzina_za_ground_check_raycast);
+        if (!b) b = Physics.Raycast(transform.position + transform.right * distance_from_center, Vector3.down, dolzina_za_ground_check_raycast);
+        if (!b) b = Physics.Raycast(transform.position - transform.right * distance_from_center, Vector3.down, dolzina_za_ground_check_raycast);
 
         isGrounded = b;
         anim.SetBool("grounded", b);
