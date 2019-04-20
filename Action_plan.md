@@ -26,6 +26,7 @@
 - Markets (slave, horse, items) (20)
 - Island hopping (Sailing) (20)
 - Central City (21)
+- Head on spikes (22)
 
 ## 2 Detailed descriptions of features:
 ####  Feature S1 - Server Database:
@@ -272,3 +273,5 @@ This is quite a broad feature and encompassess all of the weapons that a player 
 		5.) Player bounty registration and claiming.
  			- (Feature 18)
  
+ ####  Feature 22 - Head on spikes:
+		Upon executing a aplayer player get his head. with that he can craft a head on pike that can be placed infront of the base as a decoration.
