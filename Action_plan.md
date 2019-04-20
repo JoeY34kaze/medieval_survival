@@ -140,7 +140,12 @@ This is quite a broad feature and encompassess all of the weapons that a player 
 			- Stone shot	: Projectile made from stone, a bit costly and deals moderate splash damage to everything.
 			- Tar shot		: Stone shot covered in tar and lit on fire. Upon impact deals splash damage and sets shit on fire yo.
 		Trebuchet is vulnerable to fire damage and can be destroyed by players if not defended.
+- Axes for shit tier defences.
+- Balistae
+
  ####  Feature 7 - Swimming & water:
+ 
+ swoosh
  
  ####  Feature 8 - Team system & pinging:
  		Players are grouped in teams/clans allowing them to better coordinate with eachother.
