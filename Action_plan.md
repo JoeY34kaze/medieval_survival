@@ -21,6 +21,11 @@
 - Steam integration (15)
 - Armor & clothes system (16)
 - Inventory system (17)
+- Bounty system (18)
+- Insurance system (19)
+- Markets (slave, horse, items) (20)
+- Island hopping (Sailing) (20)
+- Central City (21)
 
 ## 2 Detailed descriptions of features:
 ####  Feature S1 - Server Database:
@@ -60,6 +65,32 @@ Player can enslave other players. An act during which the avatar of the submissi
 
 ####  Feature 3 - Base building:
 Base building will be the most similar to Conan Exiles. Big Blocks. Upgradable blocks rather that many blocks. Bases will have upkeep set accordingly. Base decorations and all that will be explained here at a later date.
+
+##### Expanded feature 3.1: Base upkeep
+	- Players are limited to 2 types of bases:
+		1.) Guild base / main base
+		2.) Raiding base / Temporary shitshack.
+	Guild Base:
+		Player builds a shitshack and places a guild emblem somewhere (wall) which prevents the building from decay. For the crest to funnction it needs to be fed a resource ( probably gold), bigger the base = more resource consumption. Consumption is calculated on the amount of blocks in a base * average distance of block from the crest.
+		All of the players in the guild are limited to one Guild base, if player has his own base it becomes a Shit shack after joining a guild. Guild Master's base always takes priority in designation of guild base.
+		If the emblem runs out of resources, players get a warning and base slowly starts taking damage from decay.
+	Temporary shitshack:
+		The fist base that a player can build, it's just a regular base without emblem. If a player is already in a guild with a guild house he cannot build a new guild base unless he leaves the guild. 
+		Guild can place Shitshacks without limits.
+		Shitshacks are subject to Decay.
+		Shitshacks cannot be placed too close to emblems of other guilds.
+		Usually they will be used for temporary bases when raiding, hunting, shit like that.
+##### Expanded feature 3.2: Stockpile
+	Players can keep their loot within their base in items designed specificly for the purpose of storage:
+		1.) Stockpile:
+			An area withing the base or a large chest? where all manner of items can be placed.
+			Every crafting table and Player that belongs to the guild can access this stockpile automatically when crafting. This eliminates the need to look over chests for required materials, placing them in inventory, placing them in crafting table and crafting. You just press craft and it does it.
+			Stockpile cannot be secured. In the case of raid everything in stockpile can be taken by raiders.
+			
+		2.) Chest:
+			A much smaller storage unit designed specifically to store high value items like gold, best gear and high level resources.
+			Unlike stockpile this container can be locked and raiders have to spend more time and effort to get whats inside.
+			When the item is destroyed by raiders, a certain percentage of items inside are destroyed.
 
 ####  Feature 4 - Biological needs:
 	Player has a meter for thirst and food. When they fal below or to 0 they get increasing debuffs that end when player dies or when he raises the meter above 0. Thirst is raised by water, hunger is raised by eating.
@@ -176,6 +207,36 @@ This is quite a broad feature and encompassess all of the weapons that a player 
  ####  Feature 15 - Steam integration:
  		It's gonna be hosted on steam.
  ####  Feature 16 - Armor & clothes system:
- 		
+ 		Probably going to be like witcher 3-ish.
  ####  Feature 17 - Inventory system:
+ 		Player has a loadout of items that are currently equipped. These items do not calculate into the inventory weight.
+		Aside from this, player has a certain amount of inventory slots where he can place items inside. Inventory is limited by its weight. To compensate for this, player can craft backpacks.
+		
+		Backpack:
+			Player crafted item, one of the most basic and common items in the game. Greately increases the weight available for player to carry. The heavier the backpack, the slower the player walks. Items inside the backpack are bound to backpack, not the player.
+			When player enters combat he can choose to drop a backpack, allowing him to be unburdened and free to fight his agressor on par.
+			Backpack can be placed / dropped on the ground. It can then be picked up by any player by interacting with it.
+			Backpack can be placed on a horse. A horse can carry around 4 backpacks worth of weight, can be changed incase horses will have different stats.
+			Backpacks can be placed on wagons, wagon can hold a fuckload of weight. Used for gathering resources and raiding.
+ ####  Feature 18 - Bounty system:
+  		
+ ####  Feature 19 - Insurance system:
+   
+ ####  Feature 20 - Markets (slave, horse, items):
+ 
+ ####  Feature 21 - Island hopping ( Sailing ):
+ 
+ ####  Feature 22 - Central City:
+ 		Somewhere in the middle of the map is an npc city where combat is forbidden. City offers several services that the player can use:
+		1.) Slave market
+			Broken slaves can be auctioned off to other players. Players place their bid on a slave. Each slave is being sold for an amount of time specified by the seller. Seller can set an optional buyout price at which a buyer can instantly buy the slave. If no buyout price is placed or paid, the slave is sold to the highest bidder once the timer runs out.
+			If no bids are placed the slave will be teleported inside the sellers house, close to the wheel of pain/emblem or something like that. The seller is notified that no one wanted to buy his slave.
+		2.) Horse market
+			-Horses will probably be able to be bred, as such some horses are more valuable than others. Selling works by the same principle as slaves.
+		3.) Auction house / item market:
+			- Player can auction some of the items he possesses off by the same system as slaves. Player is limited to X amount of items that are currently selling.
+		4.) Player item insurance:
+			- Player can pay a large amount of gold in order to insure his equipped item/s. (Feature 19)
+		5.) Player bounty registration and claiming.
+ 			- (Feature 18)
  
