@@ -219,11 +219,38 @@ This is quite a broad feature and encompassess all of the weapons that a player 
 			Backpack can be placed on a horse. A horse can carry around 4 backpacks worth of weight, can be changed incase horses will have different stats.
 			Backpacks can be placed on wagons, wagon can hold a fuckload of weight. Used for gathering resources and raiding.
  ####  Feature 18 - Bounty system:
-  		
+  	Scenario:
+	
+	Player A is a farmer. while farming for resources, he gets ganked by player B. Player A is angry and goes to Central City and places a bounty on player B. Player C is focused on PVP and is notified about a newly created bounty. He travels to the nearest notice board and accepts the bounty contract. Player C finds Player B and knocks him out. He then draggs him or his head (specified by bounty) to the Central city's office where he trades in his prey in exchange for a bounty reward, paid by player A.
+		There are several types of bounties:
+			- 1) Kill player: Bounty reward is paid when a bounty hunter brings the head of player B to the central city's office.
+			
+			- 2) Kidnap player: Bounty hunter needs to knock player B out and drag him to the office. 
+			Contract is more expensive.
+			
+			- 3) Kill relative: Same as 1, but it targets player B's relative ( child or spouse).
+			
+			- 4) kidnap relative : Same as 2, but it targets player B's relative ( child or spouse).
+			
+			- 5) Kill guild member: Same as 1, but it targets player B or his guild members.
+			
+			- 6) kidnap guild member: Same as 1, but it targets player B or his guild members.
+		
+		Player A can place several bounties ( max X ), where he pays the reward in advance, allowing for bigger persistence of threat upon player B.
+		
+		One time contracts:
+			- Conquest: The most expensive contract, set by the central city, not the player A.
+				Player C has to raid player B nad bring some proof of it to the central city to be paid.
+				
  ####  Feature 19 - Insurance system:
-   
+ 		Player can pay a large amount of gold to insure his equipped item for a certain amount of time.
+		Insurance is valid when he is outside his base.
+		Insured items are not dropped upon death, but are transferred to central city storage.
+		Player who  insured it can get them after a certain amount of time.
+		This is mostly meant for bounty hunters who suck.
  ####  Feature 20 - Markets (slave, horse, items):
- 
+ 		Described in Feature 22.
+		
  ####  Feature 21 - Island hopping ( Sailing ):
  
  ####  Feature 22 - Central City:
