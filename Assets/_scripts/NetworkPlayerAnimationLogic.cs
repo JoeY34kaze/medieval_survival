@@ -11,13 +11,12 @@ public class NetworkPlayerAnimationLogic : NetworkPlayerAnimationBehavior
 
     //private bool needNetworkAnimUpdate = false;
     private Quaternion chestRotation;
-    private Transform chest;
+    public Transform chest;
     public Transform _camera_framework;
     // ---------------------------------FUNCTIONS-------------------------------------
     void Awake()
     {
         anim = gameObject.GetComponent<Animator>();
-        chest = anim.GetBoneTransform(HumanBodyBones.Chest);
     }
 
 
@@ -103,7 +102,7 @@ public class NetworkPlayerAnimationLogic : NetworkPlayerAnimationBehavior
             chestRotation = networkObject.chestRotation;
         }
 
-        chest.rotation = chestRotation;
+        chest.rotation = chestRotation * Quaternion.Euler(new Vector3(0,0,-90));
 
 
         

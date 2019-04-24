@@ -26,7 +26,7 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
 
     private float speed = 1.0f;
     private Animator anim;
-    public CapsuleCollider movement_collider_checker;
+    //public CapsuleCollider movement_collider_checker;
 
 
     public float dolzina_za_ground_check_raycast = 0.4f;
