@@ -7,6 +7,7 @@ using BeardedManStudios.Forge.Networking.Unity;
 public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
 {
     private Transform player_cam;
+    private NetworkPlayerStats stats;
     public float radius = 4f; // ce je distance od camere manjsi kot to lahko interactamo
 
     private NetWorker myNetWorker;
@@ -20,6 +21,7 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
     // Update is called once per frame
     void Update()
     {
+        if (stats == null) stats = GetComponent<NetworkPlayerStats>();
         if (player_cam == null)
         {
             setup_player_cam();
@@ -61,7 +63,7 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
                         if (Input.GetButtonDown("Interact"))
                         {
                             Debug.Log("Interacting with " + hit.collider.name + " with distance of " + hit.distance);
-                            interactable.interact(this);
+                            interactable.interact(stats.server_id);
                         }
                     }
                 }
@@ -77,40 +79,42 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
         this.player_cam = GetComponent<player_camera_handler>().player_cam.transform;
     }
 
+    /*
+        internal void HandleItemPickupServerSide(int item_id, int quantity)//ugotovil smo da je pickable item. djmo vprasat server ce nam dovoli pickup
+        {
+            Debug.Log("Sending to server for aprooval");
 
-    internal void HandleItemPickupServerSide(int item_id, int quantity)//ugotovil smo da je pickable item. djmo vprasat server ce nam dovoli pickup
-    {
-        Debug.Log("Sending to server for aprooval");
-        networkObject.SendRpc(RPC_ITEM_PICKUP_REQUEST, Receivers.Server, GetComponent<NetworkPlayerStats>().server_id, item_id, quantity);
-    }
+            //tukej treba nekak zravn poslat tud eno referenco da bo server vedu kter objekt mora unicit.
+            networkObject.SendRpc(RPC_ITEM_PICKUP_REQUEST, Receivers.Server, stats.server_id, item_id, quantity);
+        }
 
-    public override void ItemPickupRequest(RpcArgs args)//tole zmer dobi samo server
-    {
-        if (!networkObject.IsServer) return;
-        Debug.Log("Server received item pickup request");
-        uint player_id = args.GetNext<uint>();
-        int id = args.GetNext<int>();
-        int quantity = args.GetNext<int>();
+        public override void ItemPickupRequest(RpcArgs args)//tole zmer dobi samo server
+        {
+            if (!networkObject.IsServer) return;
+            Debug.Log("Server received item pickup request");
+            uint player_id = args.GetNext<uint>();
+            int id = args.GetNext<int>();
+            int quantity = args.GetNext<int>();
 
-        //check players inventory and other shit if he can pick the item up.
-        //destroy item if player can carry all or split it if player cant carry all
+            //check players inventory and other shit if he can pick the item up.
+            //destroy item if player can carry all or split it if player cant carry all
 
 
-            lock (myNetWorker.Players)//send response
-            {
-                myNetWorker.IteratePlayers((player) =>
+                lock (myNetWorker.Players)//send response
                 {
-                    if (player.NetworkId == player_id)
+                    myNetWorker.IteratePlayers((player) =>
                     {
-                        Debug.Log("Item pickup aprooved on server! "+ player);
-                        networkObject.SendRpc(player, RPC_ITEM_PICKUP_RESPONSE, id,quantity);
-                        return;
-                    }
-                });
-            }
-        
-    }
+                        if (player.NetworkId == player_id)
+                        {
+                            Debug.Log("Item pickup aprooved on server! "+ player);
+                            networkObject.SendRpc(player, RPC_ITEM_PICKUP_RESPONSE, id,quantity);
+                            return;
+                        }
+                    });
+                }
 
+        }
+         
     public override void ItemPickupResponse(RpcArgs args)
     {
         if (!networkObject.IsOwner) return;
@@ -119,5 +123,10 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
 
         //add into inventory since all was aprooved
         Debug.Log("Inventory aprooval received on client.");
+    }
+    */
+
+    public void call_owner_rpc_item_pickup_response() {
+
     }
 }
