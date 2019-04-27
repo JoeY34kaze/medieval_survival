@@ -87,9 +87,11 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
             //tukej treba nekak zravn poslat tud eno referenco da bo server vedu kter objekt mora unicit.
             networkObject.SendRpc(RPC_ITEM_PICKUP_REQUEST, Receivers.Server, stats.server_id, item_id, quantity);
         }
-
-        public override void ItemPickupRequest(RpcArgs args)//tole zmer dobi samo server
+        */
+        public override void ItemPickupRequest(RpcArgs args)//tole zmer dobi samo server----------------------------------------NEDELA NIKJER ZDLE TOLE
         {
+        Debug.Log("STUMP!!!");
+        return;
             if (!networkObject.IsServer) return;
             Debug.Log("Server received item pickup request");
             uint player_id = args.GetNext<uint>();
@@ -124,9 +126,11 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
         //add into inventory since all was aprooved
         Debug.Log("Inventory aprooval received on client.");
     }
-    */
+    
 
-    public void call_owner_rpc_item_pickup_response() {
+    public void call_owner_rpc_item_pickup_response(int item_id, int quantity) {
+        Debug.Log("sending response to owner of player");
 
+        networkObject.SendRpc(RPC_ITEM_PICKUP_RESPONSE, Receivers.Owner, item_id, quantity);
     }
 }

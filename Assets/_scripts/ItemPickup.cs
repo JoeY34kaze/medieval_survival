@@ -3,6 +3,7 @@ using BeardedManStudios.Forge.Networking.Generated;
 using BeardedManStudios.Forge.Networking;
 using BeardedManStudios.Forge.Networking.Unity;
 using System;
+using System.Collections.Generic;
 
 public class ItemPickup : Interactable {
     public int item_id; //ujemat se mora z id-jem itema na playerju ce je na playerju al pa nevem
@@ -21,6 +22,7 @@ public class ItemPickup : Interactable {
 
     public override void DestroyWrapper(RpcArgs args)
     {
+        Debug.Log("fucker dead");
         networkObject.Destroy();
     }
 
@@ -45,6 +47,7 @@ public class ItemPickup : Interactable {
                 if (player.NetworkId == player_id)
                 {
                     Debug.Log("Item pickup aprooved on server! " + player);
+                    //List<NetworkObject> nl = myNetWorker.NetworkObjectList;
                     handle_response_from_server(item_id,quantity,player);
                     return;
                 }
@@ -55,9 +58,12 @@ public class ItemPickup : Interactable {
     private void handle_response_from_server(int item_id, int quantity, NetworkingPlayer player)
     {
         //send response to NetworkPlayerInteraction to handle getting it into inventory
-
+        GameObject player_obj = FindByid(player.NetworkId);
+        player_obj.GetComponent<NetworkPlayerInteraction>().call_owner_rpc_item_pickup_response(item_id,quantity);
 
         //send response to yourself to kill yourself
+        Debug.Log("sending kill signal to the fucker");
+        networkObject.SendRpc(RPC_DESTROY_WRAPPER, Receivers.Owner);
     }
 
     public override void ItemPickupResponse(RpcArgs args)
