@@ -68,7 +68,7 @@ public class ItemPickup : Interactable {
 
     public override void ItemPickupResponse(RpcArgs args)
     {
-
+        //empty, NetworkPlayerInteraction script handles this.
     }
 
 }

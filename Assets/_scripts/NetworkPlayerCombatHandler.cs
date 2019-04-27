@@ -20,7 +20,7 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
     private Animator animator;
     private player_local_locks player_local_locks;
     private NetworkPlayerStats stats;
-    private Mapper mapper;
+    //private Mapper mapper;
     public GameObject[] combat_sound_effects;
 
     public Transform[] equipped_weapon_slots;
@@ -64,7 +64,7 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
         animator = GetComponent<Animator>();
         player_local_locks = GetComponent<player_local_locks>();
         stats = GetComponent<NetworkPlayerStats>();
-        mapper = GameObject.Find("Mapper").GetComponent<Mapper>();
+        //mapper = GameObject.Find("Mapper").GetComponent<Mapper>();
 
 
     }

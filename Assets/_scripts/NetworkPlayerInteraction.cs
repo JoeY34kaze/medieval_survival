@@ -9,6 +9,8 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
     private Transform player_cam;
     private NetworkPlayerStats stats;
     public float radius = 4f; // ce je distance od camere manjsi kot to lahko interactamo
+    private NetworkPlayerInventory player_inventory;
+    //private Mapper mapper; sm dau u instance oziroma singleton i think
 
     private NetWorker myNetWorker;
     protected override void NetworkStart()
@@ -21,7 +23,10 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
     // Update is called once per frame
     void Update()
     {
+        if (!networkObject.IsOwner) return;
         if (stats == null) stats = GetComponent<NetworkPlayerStats>();
+        if (player_inventory == null) player_inventory = GetComponent<NetworkPlayerInventory>();
+        //if(mapper==null)mapper = GameObject.Find("Mapper").GetComponent<Mapper>();
         if (player_cam == null)
         {
             setup_player_cam();
@@ -124,6 +129,8 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
         int quantity = args.GetNext<int>();
 
         //add into inventory since all was aprooved
+        //za nahrbtnike bi mrde pustu ks u inventory skripti da se ukvarja z tem najbrz
+        player_inventory.Add(Mapper.instance.getItemById(item_id), quantity);
         Debug.Log("Inventory aprooval received on client.");
     }
     

@@ -13,8 +13,38 @@ public class Mapper : MonoBehaviour
      * 1 - unarmed block
      * 
      */
+    public static Mapper instance;
+
+    private void Awake()
+    {
+        instance = this;
+    }
+
+
+    public Item[] items;//0,1 so pesti pa unarmed block tko da rabmo za 2 znizat oziroma pristet ko iscemo id
+
     public GameObject[] equippable_weapons;
     public string[] passthrough_tags;
+
+    public Item getItemById(int id) {
+        if (id - 2 < items.Length)
+        {
+            return items[id - 2];
+        }
+        else {
+            Debug.LogError("Accessing item that doesnt exist ina Array!");
+            return null;
+        }
+    }
+
+    public int getIdFromItem(Item i) {
+        for (int j= 0; j < items.Length; j++) {
+            if (items[j].Equals(i)) return j;
+        }
+        Debug.LogError("No id for this item!");
+        return -1;
+    }
+
 
     internal int getWeaponIdFromName(string name)
     {

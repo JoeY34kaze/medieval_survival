@@ -2029,6 +2029,7 @@ GameObject:
   - component: {fileID: 143386555281383409}
   - component: {fileID: 5542566147419541656}
   - component: {fileID: 3674254602760150681}
+  - component: {fileID: 7040696969213881553}
   m_Layer: 9
   m_Name: NetworkPlayer
   m_TagString: Player
@@ -2323,6 +2324,19 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 416884bfec47e614a8fb0598ace505b6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  radius: 4
+--- !u!114 &7040696969213881553
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4050820139605508289}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 13f4f0952c9b0a64cbae806620ce4726, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!1 &4071417591800162448
