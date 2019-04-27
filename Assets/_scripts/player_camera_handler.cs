@@ -16,6 +16,7 @@ public class player_camera_handler : NetworkPlayerCameraHandlerBehavior
     public Transform point_to_look_at_on_player;
     public float mouse_sensitivity_multiplier = 1.0f;
 
+    public Camera player_cam;
 
 
     // CE BO DAT KAMERO POD KOTOM JE TREBA POHENDLAT DA JE ZMER VODORAVNO KER DRUGAC JE NEKEJ WONKY
@@ -25,16 +26,17 @@ public class player_camera_handler : NetworkPlayerCameraHandlerBehavior
 
     
         if (!networkObject.IsOwner) return;
-        Camera.main.transform.parent = this._camera_framework;
-        Camera.main.transform.localPosition = Vector3.zero;
-        Camera.main.transform.localRotation = Quaternion.Euler(camera_rotation_offset);
+        player_cam = Camera.main;
+        player_cam.transform.parent = this._camera_framework;
+        player_cam.transform.localPosition = Vector3.zero;
+        player_cam.transform.localRotation = Quaternion.Euler(camera_rotation_offset);
     }
 
     void LateUpdate()
     {
         if (!networkObject.IsOwner) return;
-        Camera.main.transform.localPosition = camera_starting_offset;
-        Camera.main.transform.localRotation = Quaternion.Euler(camera_rotation_offset);
+        player_cam.transform.localPosition = camera_starting_offset;
+        player_cam.transform.localRotation = Quaternion.Euler(camera_rotation_offset);
 
         //float mouseX = Input.GetAxis("Mouse X");
         float mouseY = Input.GetAxis("Mouse Y");

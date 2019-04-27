@@ -2028,6 +2028,7 @@ GameObject:
   - component: {fileID: 8627526465975648055}
   - component: {fileID: 143386555281383409}
   - component: {fileID: 5542566147419541656}
+  - component: {fileID: 3674254602760150681}
   m_Layer: 9
   m_Name: NetworkPlayer
   m_TagString: Player
@@ -2244,13 +2245,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f1dea70eabea8d94c89594179dc984a8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  camera_starting_offset: {x: 0.1, y: 0.4, z: -2}
+  camera_starting_offset: {x: 0.3, y: 0.2, z: -2}
   camera_rotation_offset: {x: 0, y: 0, z: 0}
   inverse_vertical: 0
   freeLook: 0
   _camera_framework: {fileID: 6878084338605114859}
   point_to_look_at_on_player: {fileID: 7270387366539822506}
   mouse_sensitivity_multiplier: 1
+  player_cam: {fileID: 0}
 --- !u!114 &723099925318411826
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2311,6 +2313,18 @@ MonoBehaviour:
   DrawAdjustBones: 0
   BoneMesh: {fileID: 4300000, guid: e4d8ea710507f2b40b99b122b39885a3, type: 3}
   Filter: 
+--- !u!114 &3674254602760150681
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4050820139605508289}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 416884bfec47e614a8fb0598ace505b6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &4071417591800162448
 GameObject:
   m_ObjectHideFlags: 0
