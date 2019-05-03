@@ -8,6 +8,7 @@ public class reticle_hit : MonoBehaviour
 
     void OnEnable()
     {
+
         AnimatorClipInfo[] clipInfo = animator.GetCurrentAnimatorClipInfo(0);
         Destroy(gameObject, clipInfo[0].clip.length);
     }
