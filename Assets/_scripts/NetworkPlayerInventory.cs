@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 using BeardedManStudios.Forge.Networking.Generated;
+using System;
+using BeardedManStudios.Forge.Networking.Unity;
 
 public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
 {
@@ -20,13 +22,19 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         inventoryUi.linkPersonalInventoryList(this);
     }
 
+    private void Update()
+    {
+        if(networkObject.IsOwner)
+            //if(!inventoryUi.isSetup())
+                inventoryUi.linkPersonalInventoryList(this);
+    }
 
-   /* public void Add(Item item) {
-        if (!networkObject.IsOwner) return;
-        items.Add(item);
-        if(onItemChangedCallback!=null)
-            onItemChangedCallback.Invoke();
-    }*/
+    /* public void Add(Item item) {
+         if (!networkObject.IsOwner) return;
+         items.Add(item);
+         if(onItemChangedCallback!=null)
+             onItemChangedCallback.Invoke();
+     }*/
 
     public void Add(Item item, int quantity)
     {
@@ -39,7 +47,20 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
     {
         if (!networkObject.IsOwner) return;
         items.Remove(item);
+        //NETWORKINSTANTIATE THE DROPPED ITEM!
+        instantiateDroppedItem(item);
         if (onItemChangedCallback != null)
             onItemChangedCallback.Invoke();
+    }
+
+    private void instantiateDroppedItem(Item item)
+    {
+        NetworkManager.Instance.InstantiateInteractable_object(0, transform.position + transform.forward);
+    }
+
+    internal NetworkPlayerInventory link_inventory_to_ui_owner()
+    {
+        if (networkObject.IsOwner) return this;
+        else return null;
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 using BeardedManStudios.Forge.Networking.Generated;
+using System;
 
 /* This object updates the inventory UI. */
 
@@ -10,7 +11,7 @@ public class InventoryUI : MonoBehaviour
     public Transform itemsParent;   // The parent object of all the items
     public GameObject inventoryUI;  // The entire UI
 
-    public NetworkPlayerInventory npInventory;
+    private NetworkPlayerInventory npInventory;
     private List<Item> inventory_list;    // Our current inventory
 
     InventorySlot[] slots;  // List of all the slots
@@ -22,16 +23,21 @@ public class InventoryUI : MonoBehaviour
     }
 
     public void linkPersonalInventoryList(NetworkPlayerInventory npi) {
-
+        Debug.Log("LINKING");
         npInventory = npi;
         inventory_list = npi.items;
         npInventory.onItemChangedCallback += UpdateUI;    // Subscribe to the onItemChanged callback
         slots = itemsParent.GetComponentsInChildren<InventorySlot>();
     }
 
+    public bool isSetup() {
+        if (npInventory == null || inventory_list == null) return false;
+        else return true;
+    }
+
     void Update()
     {
-
+        if (npInventory == null) request_link_with_owner_player();
         if (npInventory != null)
         {
             //Debug.Log("networkPlayerInventory not null");
@@ -51,7 +57,20 @@ public class InventoryUI : MonoBehaviour
                 }
             }
         }
-        else { //Debug.Log("This should never be showing. what the fuck...");
+        else { Debug.Log("This should never be showing. what the fuck...");
+        }
+    }
+
+    private void request_link_with_owner_player()
+    {
+        NetworkPlayerInventory npi_fix = null;
+        foreach (GameObject player in GameObject.FindGameObjectsWithTag("Player")) {
+            npi_fix=player.GetComponent<NetworkPlayerInventory>().link_inventory_to_ui_owner();
+            if (npi_fix != null) {
+                this.npInventory = npi_fix;
+                this.inventory_list = npi_fix.items;
+                return;
+            }
         }
     }
 
@@ -75,5 +94,10 @@ public class InventoryUI : MonoBehaviour
                 slots[i].ClearSlot();
             }
         }
+    }
+
+    public void RemoveItem(int inventory_slot) {
+        Item removedItem = slots[inventory_slot].GetItem();
+        npInventory.Remove(removedItem);
     }
 }

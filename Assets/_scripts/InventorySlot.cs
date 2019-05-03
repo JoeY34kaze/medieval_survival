@@ -18,6 +18,11 @@ public class InventorySlot : MonoBehaviour
         icon.enabled = true;
     }
 
+    public Item GetItem() {
+
+        return this.item;
+    }
+
     // Clear the slot
     public void ClearSlot()
     {
