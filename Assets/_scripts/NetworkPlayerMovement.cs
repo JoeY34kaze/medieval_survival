@@ -28,7 +28,7 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
     private Animator anim;
     //public CapsuleCollider movement_collider_checker;
 
-
+    public bool do_ragdoll = false;
     public float dolzina_za_ground_check_raycast = 0.4f;
     public float distance_from_center_raycast = 0.2f;
     private bool isGrounded = true;
@@ -38,7 +38,11 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
 
     private NetworkPlayerAnimationLogic animation_handler_script;
     private NetworkPlayerCombatHandler combat_handler_script;
-    
+
+    //--------------------------------RAGDOLL --------------- tutorial v=RrWrnp2DLD8 ------------------------
+
+
+
     private void Awake()
     {
         anim = GetComponent<Animator>();
@@ -46,19 +50,34 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
         combat_handler_script = GetComponent<NetworkPlayerCombatHandler>();
     }
 
+
     private void FixedUpdate()
     { //CE DELAMO KAKSNE EMOTE MORAMO ZAKLENT OPCIJO DA SE LAHKO PLAYER PREMIKA!!! SICER SE ZJEBE GROUND DETECTION
-
 
         // If we are not the owner of this network object then we should
         // move this cube to the position/rotation dictated by the owner
         if (!networkObject.IsOwner)
         {
+
+
             transform.position = networkObject.position;
             transform.rotation = networkObject.rotation;
+
+            if (!rigidbody.isKinematic) rigidbody.isKinematic = true; //clipping issues
+            if (rigidbody.detectCollisions) rigidbody.detectCollisions = false;
             return;
         }
         if (animation_handler_script == null) { animation_handler_script = GetComponent<NetworkPlayerAnimationLogic>(); }
+
+        if (do_ragdoll)
+        {
+
+            GetComponent<UMA.Dynamics.UMAPhysicsAvatar>().ragdolled = true;
+            networkObject.SendRpc(RPC_RAGDOLL, Receivers.Others);
+
+            return;//najbrz spawnat box z playerjevimi itemi pa mrde kamero okol vrtet kej tazga
+        }
+
 
         crouched = anim.GetBool("crouched");
         speed = normal_speed;
@@ -111,6 +130,7 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
         networkObject.rotation = transform.rotation;
     }
 
+
     private void check_ground_raycast(float distance_from_center)
     {
         bool b = Physics.Raycast(transform.position, Vector3.down, dolzina_za_ground_check_raycast);
@@ -134,34 +154,39 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
 
     }
 
-   /* void OnCollisionEnter(Collision collision)
+    public override void ragdoll(RpcArgs args)//mrde preimenovat v player death pa izpisat ksno stvar playerjim. mogoce gor desno kdo je koga ubiu alk pa kej dunno.
     {
-        Debug.Log("GROUNDED!");
-        if (collision.gameObject.tag != ("Player") && Physics.Raycast(transform.position, Vector3.down,0.4f))
-        {
-            isGrounded = true;
-            anim.SetBool("grounded", true);
-        }
-    }
-    // This function is a callback for when the collider is no longer in contact with a previously collided object.
-    void OnCollisionExit(Collision collision)
-    {
-        Debug.Log("NOT GROUNDED!");
-        if (collision.gameObject.tag != ("Player"))
-        {
-            isGrounded = false;
-            anim.SetBool("grounded", false);
-        }
+        GetComponent<UMA.Dynamics.UMAPhysicsAvatar>().ragdolled = true;
     }
 
-    void OnCollisionStay(Collision collisionInfo)
-    {
-        if (collisionInfo.collider.gameObject.tag != ("Player") && Physics.Raycast(transform.position, Vector3.down, 0.4f))
-        {
-            isGrounded = true;
-            anim.SetBool("grounded", true);
-        }
-    }
-    */
+    /* void OnCollisionEnter(Collision collision)
+     {
+         Debug.Log("GROUNDED!");
+         if (collision.gameObject.tag != ("Player") && Physics.Raycast(transform.position, Vector3.down,0.4f))
+         {
+             isGrounded = true;
+             anim.SetBool("grounded", true);
+         }
+     }
+     // This function is a callback for when the collider is no longer in contact with a previously collided object.
+     void OnCollisionExit(Collision collision)
+     {
+         Debug.Log("NOT GROUNDED!");
+         if (collision.gameObject.tag != ("Player"))
+         {
+             isGrounded = false;
+             anim.SetBool("grounded", false);
+         }
+     }
+
+     void OnCollisionStay(Collision collisionInfo)
+     {
+         if (collisionInfo.collider.gameObject.tag != ("Player") && Physics.Raycast(transform.position, Vector3.down, 0.4f))
+         {
+             isGrounded = true;
+             anim.SetBool("grounded", true);
+         }
+     }
+     */
 
 }

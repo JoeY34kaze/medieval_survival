@@ -49,6 +49,7 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
             foreach (Transform slot in equipped_weapon_slots) {
                 slot.GetChild(previous_weapon).gameObject.SetActive(false);
                 slot.GetChild(newVal).gameObject.SetActive(true);
+                slot.GetChild(newVal).gameObject.GetComponent<Collider>().enabled = false;
             }
             animator.SetInteger("current_weapon", newVal);
             networkObject.SendRpc(RPC_CHANGE_CURRENT_WEAPON, Receivers.OthersProximity, (int)newVal, -1,this.previous_weapon,0);
@@ -260,13 +261,13 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
     /// <summary>
     /// Na serverju se aktivira collider na weaponu s ktermu napadamo. to metodo naj bi klical animation event.
     /// </summary>
-    /// <param name="index_roke">0-leva true, 1 desna true, 2 obe true | 3-leva false, 4- desna false, 5- obe false</param>
+    /// <param name="index_roke">-1 - disable both , 0-leva true, 1 desna true, 2 obe true </param>
     public void activate_weapon_collider_server(int index_roke) {
         if (!networkObject.IsServer) return;
-        bool active_l = true;
-        bool active_r = true;
-        if (index_roke == 3 || index_roke == 5) active_l = false;
-        if (index_roke == 4 || index_roke == 5) active_r = false;
+        bool active_l = false;
+        bool active_r = false;
+        if (index_roke == 0 || index_roke == 2) active_l = true;
+        if (index_roke == 1 || index_roke == 2) active_r = true;
         Debug.Log("Activating colliders " + index_roke+" "+active_l+active_r);
         if (this.equipped_weapon_slots[0].GetChild(this.Currently_equipped_weapon).GetComponent<Collider>().enabled != active_l)
         {//change left arm
@@ -327,8 +328,12 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
         if (prev_weapon_id1 == -1) {
             foreach (Transform slot in equipped_weapon_slots) {
                 for (int i=0;i<slot.childCount;i++) {
-                    if(new_weapon_id1!=i)slot.GetChild(i).gameObject.SetActive(false);
-                    else slot.GetChild(i).gameObject.SetActive(true);
+                    if (new_weapon_id1 != i) slot.GetChild(i).gameObject.SetActive(false);
+                    else
+                    {
+                        slot.GetChild(i).gameObject.SetActive(true);
+                        slot.GetChild(i).gameObject.GetComponent<Collider>().enabled = false;
+                    }
                 }
             }
         }
@@ -337,7 +342,8 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
         {
             slot.GetChild(prev_weapon_id1).gameObject.SetActive(false);
             slot.GetChild(new_weapon_id1).gameObject.SetActive(true);
-        }
+            slot.GetChild(new_weapon_id1).gameObject.GetComponent<Collider>().enabled = false;
+            }
     }
 
 }
