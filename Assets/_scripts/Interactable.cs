@@ -21,10 +21,11 @@ public class Interactable : Interactable_objectBehavior
     private void Start()
     {
         local_lock = GetComponent<InteractableLocalLock>();
-        Debug.Log("found lock");
+        //Debug.Log("found lock");
     }
     private void Update()
     {
+        if (networkObject == null) return;
         if (networkObject.IsServer && !networkObject.IsOwner) {
             networkObject.TakeOwnership();
             //assignOwnership je za server ampak rabs mu dat networkPlayer argument.
