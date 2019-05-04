@@ -27,6 +27,8 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
     void Update()
     {
 
+        if (networkObject == null) return;
+        if (!networkObject.IsOwner) return;
         // Check to see if we should open/close the inventory
         if (Input.GetButtonDown("Inventory"))
         {
