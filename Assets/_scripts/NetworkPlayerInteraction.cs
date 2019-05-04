@@ -10,7 +10,6 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
     private NetworkPlayerStats stats;
     public float radius = 4f; // ce je distance od camere manjsi kot to lahko interactamo
     private NetworkPlayerInventory player_inventory;
-    //private Mapper mapper; sm dau u instance oziroma singleton i think
 
     private NetWorker myNetWorker;
     protected override void NetworkStart()

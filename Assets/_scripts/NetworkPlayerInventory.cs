@@ -7,14 +7,14 @@ using BeardedManStudios.Forge.Networking.Unity;
 
 public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
 {
-    public int space = 20;
-    public List<Item> items = new List<Item>();
+    public int space = 20; // kao space inventorija
+    public List<Item> items = new List<Item>(); // seznam itemov, ubistvu inventorij
     public delegate void OnItemChanged();
     public OnItemChanged onItemChangedCallback;
 
-    public GameObject panel_inventory;
-    public GameObject inventorySlotsParent;
-    InventorySlot[] slots;  // List of all the slots
+    public GameObject panel_inventory; //celotna panela za inventorij, to se izrise ko prtisnes "i"
+    public GameObject inventorySlotsParent; // parent object od slotov da jih komot dobis v array
+    InventorySlot[] slots;  // predstavlajo slote v inventoriju, vsak drzi en item. 
 
     private void Start()
     {
@@ -43,7 +43,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
             }
         }
 
-        UpdateUI();
+        UpdateUI(); // za test sm dau
 
 
     }
@@ -91,21 +91,15 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
     }
 
 
-    public void RemoveItem(int inventory_slot)
+    public void RemoveItem(int inventory_slot) // to se klice z slota na OnDrop eventu
     {
         Item itemToRemove = slots[inventory_slot].GetItem();
         this.Remove(itemToRemove);
     }
 
 
-    private void instantiateDroppedItem(Item item)
+    private void instantiateDroppedItem(Item item) // instantiate it when dropped
     {
         NetworkManager.Instance.InstantiateInteractable_object(0, transform.position + transform.forward);
-    }
-
-    internal NetworkPlayerInventory link_inventory_to_ui_owner()
-    {
-        if (networkObject.IsOwner) return this;
-        else return null;
     }
 }

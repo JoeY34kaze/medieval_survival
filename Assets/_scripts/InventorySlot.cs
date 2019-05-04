@@ -19,7 +19,6 @@ public class InventorySlot : MonoBehaviour
     }
 
     public Item GetItem() {
-
         return this.item;
     }
 
