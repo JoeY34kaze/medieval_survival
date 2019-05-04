@@ -12,29 +12,40 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
     public delegate void OnItemChanged();
     public OnItemChanged onItemChangedCallback;
 
-    private InventoryUI inventoryUi;
+    public GameObject panel_inventory;
+    public GameObject inventorySlotsParent;
+    InventorySlot[] slots;  // List of all the slots
 
-    //private bool linked_with_InventoryUI = false;
     private void Start()
     {
         if (!networkObject.IsOwner) return;
-        inventoryUi =Mapper.instance.GetComponentInChildren<InventoryUI>();
-        inventoryUi.linkPersonalInventoryList(this);
+        onItemChangedCallback += UpdateUI;    // Subscribe to the onItemChanged callback
+        slots = inventorySlotsParent.GetComponentsInChildren<InventorySlot>();
     }
 
-    private void Update()
+
+    void Update()
     {
-        if(networkObject.IsOwner)
-            //if(!inventoryUi.isSetup())
-                inventoryUi.linkPersonalInventoryList(this);
+
+        // Check to see if we should open/close the inventory
+        if (Input.GetButtonDown("Inventory"))
+        {
+        panel_inventory.SetActive(!panel_inventory.activeSelf);
+            if (panel_inventory.activeSelf)
+            {
+                Cursor.lockState = CursorLockMode.None;
+                Cursor.visible = true;
+            }
+            else
+            {
+                Cursor.lockState = CursorLockMode.Locked;
+                Cursor.visible = false;
+            }
+        }
+        
     }
 
-    /* public void Add(Item item) {
-         if (!networkObject.IsOwner) return;
-         items.Add(item);
-         if(onItemChangedCallback!=null)
-             onItemChangedCallback.Invoke();
-     }*/
+
 
     public void Add(Item item, int quantity)
     {
@@ -52,6 +63,36 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         if (onItemChangedCallback != null)
             onItemChangedCallback.Invoke();
     }
+
+    // Update the inventory UI by:
+    //		- Adding items
+    //		- Clearing empty slots
+    // This is called using a delegate on the Inventory.
+    void UpdateUI()
+    {
+        Debug.Log("Updating inventory ui");
+        // Loop through all the slots
+        for (int i = 0; i < slots.Length; i++)
+        {
+            if (i < this.items.Count)  // If there is an item to add
+            {
+                slots[i].AddItem(this.items[i]);   // Add it
+            }
+            else
+            {
+                // Otherwise clear the slot
+                slots[i].ClearSlot();
+            }
+        }
+    }
+
+
+    public void RemoveItem(int inventory_slot)
+    {
+        Item itemToRemove = slots[inventory_slot].GetItem();
+        this.Remove(itemToRemove);
+    }
+
 
     private void instantiateDroppedItem(Item item)
     {

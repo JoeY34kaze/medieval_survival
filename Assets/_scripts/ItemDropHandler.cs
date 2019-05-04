@@ -6,6 +6,13 @@ using UnityEngine.EventSystems;
 
 public class ItemDropHandler : MonoBehaviour, IDropHandler
 {
+    private NetworkPlayerInventory networkPlayerInventory;
+
+    private void Start()
+    {
+        networkPlayerInventory = transform.root.GetComponent<NetworkPlayerInventory>();
+    }
+
     public void OnDrop(PointerEventData eventData)
     {
         RectTransform invSlot = transform as RectTransform;
@@ -18,7 +25,7 @@ public class ItemDropHandler : MonoBehaviour, IDropHandler
         else {
 
             Debug.Log("Remove item " + invSlot.name);
-            transform.parent.GetComponent<InventoryUI>().RemoveItem(getIndexFromName(invSlot.name));
+            networkPlayerInventory.RemoveItem(getIndexFromName(invSlot.name));
         }
     }
 

@@ -3,37 +3,30 @@ using UnityEngine;
 using BeardedManStudios.Forge.Networking.Generated;
 using System;
 
-/* This object updates the inventory UI. */
+/* This object updates the inventory UI. */ //--------------------------------------------------------CURRENTLY OBSOLETE
 
 public class InventoryUI : MonoBehaviour
 {
 
-    public Transform itemsParent;   // The parent object of all the items
-    public GameObject inventoryUI;  // The entire UI
+    //public Transform itemsParent;   // The parent object of all the items
+    //public GameObject inventoryUI;  // The entire UI
 
-    private NetworkPlayerInventory npInventory;
-    private List<Item> inventory_list;    // Our current inventory
+   // private NetworkPlayerInventory networkPlayerInventory;
+    //private List<Item> inventory_list;    // Our current inventory
 
-    InventorySlot[] slots;  // List of all the slots
+    //InventorySlot[] slots;  // List of all the slots
 
-    void Start()
-    {
+    //void Start()
+    //{
+        //Debug.Log("LINKING");
+        //networkPlayerInventory = GetComponent<NetworkPlayerInventory>();
+        //inventory_list = networkPlayerInventory.items;
+       // networkPlayerInventory.onItemChangedCallback += UpdateUI;    // Subscribe to the onItemChanged callback
+        //slots = itemsParent.GetComponentsInChildren<InventorySlot>();
+        //slots = itemsParent.GetComponentsInChildren<InventorySlot>();
+   // }
 
-        slots = itemsParent.GetComponentsInChildren<InventorySlot>();
-    }
-
-    public void linkPersonalInventoryList(NetworkPlayerInventory npi) {
-        Debug.Log("LINKING");
-        npInventory = npi;
-        inventory_list = npi.items;
-        npInventory.onItemChangedCallback += UpdateUI;    // Subscribe to the onItemChanged callback
-        slots = itemsParent.GetComponentsInChildren<InventorySlot>();
-    }
-
-    public bool isSetup() {
-        if (npInventory == null || inventory_list == null) return false;
-        else return true;
-    }
+        /*
 
     void Update()
     {
@@ -60,7 +53,7 @@ public class InventoryUI : MonoBehaviour
         else { Debug.Log("This should never be showing. what the fuck...");
         }
     }
-
+/*
     private void request_link_with_owner_player()
     {
         NetworkPlayerInventory npi_fix = null;
@@ -73,12 +66,12 @@ public class InventoryUI : MonoBehaviour
             }
         }
     }
-
+    */
     // Update the inventory UI by:
     //		- Adding items
     //		- Clearing empty slots
     // This is called using a delegate on the Inventory.
-    void UpdateUI()
+   /* void UpdateUI()
     {
 
         // Loop through all the slots
@@ -95,9 +88,11 @@ public class InventoryUI : MonoBehaviour
             }
         }
     }
-
+    */
+/*
     public void RemoveItem(int inventory_slot) {
         Item removedItem = slots[inventory_slot].GetItem();
         npInventory.Remove(removedItem);
     }
+    */
 }
