@@ -42,7 +42,10 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
                 Cursor.visible = false;
             }
         }
-        
+
+        UpdateUI();
+
+
     }
 
 
@@ -71,6 +74,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
     void UpdateUI()
     {
         Debug.Log("Updating inventory ui");
+        if(slots==null) slots = inventorySlotsParent.GetComponentsInChildren<InventorySlot>();
         // Loop through all the slots
         for (int i = 0; i < slots.Length; i++)
         {
