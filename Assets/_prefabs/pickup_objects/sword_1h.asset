@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: sword_1h
   m_EditorClassIdentifier: 
   Display_name: Iron sword
+  type: 6
   icon: {fileID: 21300000, guid: aaf0ffac735cfaf48b1499a0440f7a65, type: 3}
   damage: 20
   id: 2
