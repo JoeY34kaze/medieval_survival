@@ -367,6 +367,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         }
         else if (invSlot.GetComponent<InventorySlot>() is InventorySlotPersonal && this.draggedItemParent.GetComponent<InventorySlot>() is InventorySlotLoadout)
         {
+            LoadoutToInventory(invSlot);
             Debug.Log("Premikamo iz loadouta v inventorij");
         }
         else if (invSlot.GetComponent<InventorySlot>() is InventorySlotPersonal && this.draggedItemParent.GetComponent<InventorySlot>() is InventorySlotPersonal)
@@ -381,6 +382,25 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
 
         if (onItemChangedCallback != null)
             onItemChangedCallback.Invoke();
+    }
+
+    private void LoadoutToInventory(RectTransform invSlot)
+    {
+        if (this.items.Count < this.inventorySlotsParent.transform.childCount)
+        {
+            Item.Type t = this.draggedItemParent.GetComponent<InventorySlotLoadout>().type;
+            Item loadout_item = null;
+            loadout_item = PopLoadoutItem(t);
+
+            if (loadout_item != null)
+            {//da rabmo item dat v inventorij
+                Add(loadout_item, 1);
+            }
+        }
+        else
+        {
+            Debug.Log("No Space in inventory!");
+        }
     }
 
     private void instantiateDroppedItem(Item item) // instantiate it when dropped
