@@ -16,18 +16,20 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
 
     public GameObject panel_inventory; //celotna panela za inventorij, to se izrise ko prtisnes "i"
     public GameObject inventorySlotsParent; // parent object od slotov da jih komot dobis v array
-    InventorySlot[] slots;  // predstavlajo slote v inventoriju, vsak drzi en item. 
+    InventorySlotPersonal[] slots;  // predstavlajo slote v inventoriju, vsak drzi en item. 
+
+
 
     //-------------------------------LOADOUT SLOTS-----------------------------
-    public loadoutSlot loadout_head;
-    public loadoutSlot loadout_chest;
-    public loadoutSlot loadout_hands;
-    public loadoutSlot loadout_legs;
-    public loadoutSlot loadout_feet;
-    public loadoutSlot loadout_ranged;
-    public loadoutSlot loadout_weapon_0;
-    public loadoutSlot loadout_weapon_1;
-    public loadoutSlot loadout_shield;
+    public InventorySlotLoadout loadout_head;
+    public InventorySlotLoadout loadout_chest;
+    public InventorySlotLoadout loadout_hands;
+    public InventorySlotLoadout loadout_legs;
+    public InventorySlotLoadout loadout_feet;
+    public InventorySlotLoadout loadout_ranged;
+    public InventorySlotLoadout loadout_weapon_0;
+    public InventorySlotLoadout loadout_weapon_1;
+    public InventorySlotLoadout loadout_shield;
 
     private Item head;
     private Item chest;
@@ -162,7 +164,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
     {
         if (!networkObject.IsOwner) return;
         onItemChangedCallback += UpdateUI;    // Subscribe to the onItemChanged callback
-        slots = inventorySlotsParent.GetComponentsInChildren<InventorySlot>();
+        slots = inventorySlotsParent.GetComponentsInChildren<InventorySlotPersonal>();
     }
 
 
@@ -204,7 +206,17 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         if (!networkObject.IsOwner) return;
         items.Remove(item);
         //NETWORKINSTANTIATE THE DROPPED ITEM!
-        instantiateDroppedItem(item);
+        if (onItemChangedCallback != null)
+            onItemChangedCallback.Invoke();
+    }
+
+    public void DropItem(int inventory_slot) {//isto k remove item samo da vrze item v svet.
+        if (!networkObject.IsOwner) return;
+
+        Item i = slots[inventory_slot].GetItem();
+        items.Remove(i);
+        instantiateDroppedItem(i);
+
         if (onItemChangedCallback != null)
             onItemChangedCallback.Invoke();
     }
@@ -217,7 +229,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
     void UpdateUI()
     {
 
-        if(slots==null) slots = inventorySlotsParent.GetComponentsInChildren<InventorySlot>();
+        if(slots==null) slots = inventorySlotsParent.GetComponentsInChildren<InventorySlotPersonal>();
         // Loop through all the slots
         for (int i = 0; i < slots.Length; i++)
         {
@@ -281,15 +293,105 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
     }
 
 
-    public void RemoveItem(int inventory_slot) // to se klice z slota na OnDrop eventu
+    public void RemoveItem(int inventory_slot) // to se klice z slota na OnDrop eventu ko vrzemo item iz inventorija
     {
         Item itemToRemove = slots[inventory_slot].GetItem();
         this.Remove(itemToRemove);
     }
 
+    /// <summary>
+    /// klice se ko iz inventorija dropamo item na loadout panel
+    /// startingParent je inventorij, target je loadout
+    /// </summary>
+    /// <param name="startingParent"></param>
+    /// <param name="targetParent"></param>
+    private void InventoryToLoadout(RectTransform loa)//
+    {
+
+        Item loadout_item = null;
+        loadout_item = PopLoadoutItem(this.draggedItemParent.GetComponent<InventorySlotPersonal>().GetItem().type);
+
+        int index = getIndexFromName(this.draggedItemParent.name);
+        Item inventory_item = this.items[index];//poisce item glede na id-ju slota. id dobi iz imena tega starsa.
+
+
+        try_to_upgrade_loadout(inventory_item);//to bo zmer slo cez ker je slot ze prazen. smo ga izpraznli z popom
+        RemoveItem(index);
+        if (loadout_item != null)
+        {//loadout ni bil prazen prej tko da rabmo item dat v inventorij
+            Add(loadout_item,1);
+        }
+
+    }
+
+    private Item PopLoadoutItem(Item.Type t)
+    {
+        switch (t)
+        {
+            case Item.Type.head:
+                return head;
+            case Item.Type.chest:
+                return chest;
+            case Item.Type.hands:
+                return hands;
+            case Item.Type.legs:
+                return legs;
+            case Item.Type.feet:
+                return feet;
+            case Item.Type.ranged:
+                return ranged;
+            case Item.Type.weapon:
+                if (getIndexFromName(this.draggedItemParent.name) == 0)//tale check se bo izvedel samo ce se akcija sprozi ob dragganju
+                    return weapon_0;
+                else
+                    return weapon_1;
+            case Item.Type.shield:
+                return shield;
+            default:
+                Debug.LogError("Item type doesnt match anything. shits fucked yo");
+                break;
+        }
+        return null;
+    }
+
+    /// <summary>
+    /// ko je drop event panela klice to metodo. vse se handla potem tukaj v tej skripti.
+    /// </summary>
+    /// <param name="invSlot"></param>
+    internal void handleInventorySlotOnDragDropEvent(RectTransform invSlot)
+    {
+        if (invSlot.GetComponent<InventorySlot>() is InventorySlotLoadout && this.draggedItemParent.GetComponent<InventorySlot>() is InventorySlotPersonal)
+        {
+            Debug.Log("Premikamo iz inventorija v loadout");
+            InventoryToLoadout(invSlot);
+        }
+        else if (invSlot.GetComponent<InventorySlot>() is InventorySlotPersonal && this.draggedItemParent.GetComponent<InventorySlot>() is InventorySlotLoadout)
+        {
+            Debug.Log("Premikamo iz loadouta v inventorij");
+        }
+        else if (invSlot.GetComponent<InventorySlot>() is InventorySlotPersonal && this.draggedItemParent.GetComponent<InventorySlot>() is InventorySlotPersonal)
+        {
+            Debug.Log("Premikamo item znotraj inventorija");
+        }
+        else if (invSlot.GetComponent<InventorySlot>() is InventorySlotLoadout && this.draggedItemParent.GetComponent<InventorySlot>() is InventorySlotLoadout)
+        {
+            Debug.Log("Premikamo item znotraj loadouta.");
+        }
+        this.draggedItemParent = null;
+
+        if (onItemChangedCallback != null)
+            onItemChangedCallback.Invoke();
+    }
 
     private void instantiateDroppedItem(Item item) // instantiate it when dropped
     {
         NetworkManager.Instance.InstantiateInteractable_object(0, transform.position + transform.forward);
+    }
+
+    private int getIndexFromName(string name)
+    {
+        string[] a = name.Split('(');
+        string[] b = a[a.Length - 1].Split(')');
+        return Int32.Parse(b[0]);
     }
 }

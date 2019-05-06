@@ -1,48 +1,39 @@
-﻿using System;
+﻿using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-/* Sits on all InventorySlots. */
-
-public class InventorySlot : MonoBehaviour
+public abstract class InventorySlot : MonoBehaviour
 {
-
     public Image icon;          // Reference to the Icon image
-    Item item;  // Current item in the slot
+    protected Item item;  // Current item in the slot
+    protected Image icon_background;          // Reference to the Icon image to display when empty
+    public int index;
 
-    // Add item to the slot
+    private void Start()
+    {
+        icon_background = GetComponentInChildren<Image>();
+    }
+
     public void AddItem(Item newItem)
     {
         item = newItem;
-
         icon.sprite = item.icon;
         icon.enabled = true;
     }
 
-    public Item GetItem() {
+    public Item GetItem()
+    {
         return this.item;
-    }
-    public Item PopItem() {
-        if (this.item == null) return null;
-        Item i = this.item;
-        transform.root.GetComponent<NetworkPlayerInventory>().RemoveItem(getIndexFromName(transform.name));
-        return i;
     }
 
     // Clear the slot
     public void ClearSlot()
     {
         item = null;
-
-        icon.sprite = null;
-        icon.enabled = false;
+        icon.sprite = icon_background.sprite;
+        icon.enabled = true;
     }
 
-    private int getIndexFromName(string name)
-    {
-        string[] a = name.Split('(');
-        string[] b = a[a.Length - 1].Split(')');
-        return Int32.Parse(b[0]);
-    }
-
+    public abstract Item PopItem();
 }
