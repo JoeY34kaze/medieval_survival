@@ -25,7 +25,7 @@ public class ItemDragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, I
         //pofiksat hierarhijo se za personal inventorij in loadout ker sicer ne detecta ker je unity ui prizadet
         transform.parent.SetAsFirstSibling();
 
-        Debug.Log("start drag " + transform.parent.name);
+        //Debug.Log("start drag " + transform.parent.name);
     }
 
     public void OnDrag(PointerEventData eventData)
@@ -36,7 +36,7 @@ public class ItemDragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, I
 
     public void OnEndDrag(PointerEventData eventData)
     {
-        Debug.Log("end drag "+transform.parent.name);
+        //Debug.Log("end drag "+transform.parent.name);
         if (transform.GetComponent<InventorySlot>() is InventorySlotPersonal)
         {
             transform.SetSiblingIndex(npi.draggedParent_sibling_index);

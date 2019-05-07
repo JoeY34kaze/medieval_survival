@@ -9,7 +9,7 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
     private Transform player_cam;
     private NetworkPlayerStats stats;
     public float radius = 4f; // ce je distance od camere manjsi kot to lahko interactamo
-    private NetworkPlayerInventory player_inventory;
+    private NetworkPlayerInventory networkPlayerInventory;
 
     private NetWorker myNetWorker;
     protected override void NetworkStart()
@@ -24,7 +24,7 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
     {
         if (!networkObject.IsOwner) return;
         if (stats == null) stats = GetComponent<NetworkPlayerStats>();
-        if (player_inventory == null) player_inventory = GetComponent<NetworkPlayerInventory>();
+        if (networkPlayerInventory == null) networkPlayerInventory = GetComponent<NetworkPlayerInventory>();
         //if(mapper==null)mapper = GameObject.Find("Mapper").GetComponent<Mapper>();
         if (player_cam == null)
         {
@@ -67,7 +67,13 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
                         if (Input.GetButtonDown("Interact"))
                         {
                             Debug.Log("Interacting with " + hit.collider.name + " with distance of " + hit.distance);
-                            interactable.interact(stats.server_id);
+
+
+                            if (interactable is ItemPickup)
+                                if (networkPlayerInventory.hasInventorySpace())
+                                    interactable.interact(stats.server_id);
+                                else
+                                    handleInventoryFull();
                         }
                     }
                 }
@@ -76,6 +82,11 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
                 }
             }
         }
+    }
+
+    internal void handleInventoryFull()
+    {
+
     }
 
     private void setup_player_cam()
@@ -87,13 +98,20 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
     public override void ItemPickupResponse(RpcArgs args)
     {
         if (!networkObject.IsOwner) return;
+
         int item_id = args.GetNext<int>();
         int quantity = args.GetNext<int>();
 
+        if (!networkPlayerInventory.hasInventorySpace())
+        {
+            Debug.Log("Inventory Full!");
+            handleInventoryFull();
+            networkPlayerInventory.instantiateDroppedItem(Mapper.instance.getItemById(item_id), quantity);
+        }
         //add into inventory since all was aprooved
         //za nahrbtnike bi mrde pustu ks u inventory skripti da se ukvarja z tem najbrz
         Debug.Log("adding into npInventory");
-        player_inventory.AddFirst(Mapper.instance.getItemById(item_id), quantity);
+        networkPlayerInventory.AddFirst(Mapper.instance.getItemById(item_id), quantity);
         Debug.Log("Inventory aprooval received on client.");
     }
     

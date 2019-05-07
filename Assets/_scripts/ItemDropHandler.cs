@@ -21,7 +21,7 @@ public class ItemDropHandler : MonoBehaviour, IDropHandler
 
         if (RectTransformUtility.RectangleContainsScreenPoint(invSlot, Input.mousePosition))//smo dropal nekam na valid inventorij plac
         {
-            Debug.Log(networkPlayerInventory.draggedItemParent.name+"'s child was dropped on " + invSlot.name+" ");
+            //Debug.Log(networkPlayerInventory.draggedItemParent.name+"'s child was dropped on " + invSlot.name+" ");
 
             //koda se bo malo podvajala ker bi sicer biu prevelik clusterfuck od metode
 
@@ -29,7 +29,7 @@ public class ItemDropHandler : MonoBehaviour, IDropHandler
         }
         else {//smo dropal nekam tko da mora past na tla. gremo prevert s kje smo potegnil
             InventorySlot inventorySlot = networkPlayerInventory.draggedItemParent.GetComponent<InventorySlot>();
-            Debug.Log("Called on " + gameObject.name);
+            //Debug.Log("Called on " + gameObject.name);
             if (inventorySlot is InventorySlotPersonal) networkPlayerInventory.DropItemFromPersonalInventory(getIndexFromName(invSlot.name));
             else if (inventorySlot is InventorySlotLoadout) {
                 InventorySlotLoadout ldslt = (InventorySlotLoadout)inventorySlot;

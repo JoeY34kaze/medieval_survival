@@ -115,7 +115,15 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         return r;
     }
 
-    public void SetLoadoutItem(Item i, int index)
+    internal bool hasInventorySpace()
+    {
+        foreach (Item i in this.items)
+            if (i == null)
+                return true;
+        return false;
+    }
+
+    public bool SetLoadoutItem(Item i, int index)
     {//vrne item s katermu smo ga zamenjal al pa null ce je biu prej prazn slot
         Item r = i;
         switch (i.type)
@@ -148,8 +156,9 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
                     shield = i;
                 break;
             default:
-                break;
+                return false;
         }
+        return true;
     }
     /// <summary>
     /// funkcija vrne true ce je item upgrade zdejsnjemu gearu in ga doda direkt na playerjev loadout tukej nj bi sla vsa tista logika k je treba. zaenkrat smao pogleda ce je null in ga doda not ce je null
@@ -316,7 +325,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         if (!networkObject.IsOwner) return;
         Item i = slots[inventory_slot].GetItem();
         removePersonalInventoryItem(inventory_slot);
-        instantiateDroppedItem(i);
+        instantiateDroppedItem(i,1);
         if (onItemChangedCallback != null)
             onItemChangedCallback.Invoke();
     }
@@ -325,7 +334,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
     {
         if (!networkObject.IsOwner) return;
         Item i = PopLoadoutItem(type, index);
-        instantiateDroppedItem(i);
+        instantiateDroppedItem(i,1);
         if (onItemChangedCallback != null)
             onItemChangedCallback.Invoke();
     }
@@ -418,8 +427,8 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         Item inventory_item = this.items[inv_index];//poisce item glede na id-ju slota. id dobi iz imena tega starsa.
 
 
-        SetLoadoutItem(inventory_item, loadout_index);//to bo zmer slo cez ker je slot ze prazen. smo ga izpraznli z popom
-        Remove(inv_index);
+        if(SetLoadoutItem(inventory_item, loadout_index))//to bo zmer slo cez ker je slot ze prazen. smo ga izpraznli z popom. vrne true ce je item biu valid za nek loadout slot.
+            Remove(inv_index);
         if (loadout_item != null)
         {//loadout ni bil prazen prej tko da rabmo item dat v inventorij
             Add(loadout_item,1, inv_index);
@@ -487,22 +496,22 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
     {
         if (invSlot.GetComponent<InventorySlot>() is InventorySlotLoadout && this.draggedItemParent.GetComponent<InventorySlot>() is InventorySlotPersonal)
         {
-            Debug.Log("Premikamo iz inventorija v loadout");
+            //Debug.Log("Premikamo iz inventorija v loadout");
             InventoryToLoadout(invSlot);
         }
         else if (invSlot.GetComponent<InventorySlot>() is InventorySlotPersonal && this.draggedItemParent.GetComponent<InventorySlot>() is InventorySlotLoadout)
         {
             LoadoutToInventory(invSlot);
-            Debug.Log("Premikamo iz loadouta v inventorij");
+            //Debug.Log("Premikamo iz loadouta v inventorij");
         }
         else if (invSlot.GetComponent<InventorySlot>() is InventorySlotPersonal && this.draggedItemParent.GetComponent<InventorySlot>() is InventorySlotPersonal)
         {
-            Debug.Log("Premikamo item znotraj inventorija");
+            //Debug.Log("Premikamo item znotraj inventorija");
             InventoryToInventory(invSlot);
         }
         else if (invSlot.GetComponent<InventorySlot>() is InventorySlotLoadout && this.draggedItemParent.GetComponent<InventorySlot>() is InventorySlotLoadout)
         {
-            Debug.Log("Premikamo item znotraj loadouta.");
+            //Debug.Log("Premikamo item znotraj loadouta.");
             LoadoutToLoadout(invSlot);
         }
         this.draggedItemParent = null;//tole nastavmo tud na drag handlerju just in case
@@ -537,22 +546,41 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
 
     private void LoadoutToInventory(RectTransform invSlot)
     {
-        if (getFreePersonalInventorySpace() >0)
-        {
-            Item.Type t = this.draggedItemParent.GetComponent<InventorySlotLoadout>().type;
+        int index = getIndexFromName(invSlot.name);
+        Item.Type t = this.draggedItemParent.GetComponent<InventorySlotLoadout>().type;
+
+
+        if (t== this.items[index].type)//enum comparison nj bi baje delov z == in ne .Equals
+        {//ce se item ujema naj se zamenja
             Item loadout_item = null;
-            loadout_item = PopLoadoutItem(t,getIndexFromName(this.draggedItemParent.name));
-            int index = getIndexFromName(invSlot.name);
+            int loadout_index= getIndexFromName(this.draggedItemParent.name);
+            loadout_item = PopLoadoutItem(t, loadout_index);
+
+            Item inventory_item = this.items[index];
+            if (loadout_item != null)
+            {
+                Add(loadout_item, 1, index);
+                SetLoadoutItem(inventory_item, loadout_index);
+            }
+        }
+        else if (hasInventorySpace())
+        {
+            Item loadout_item = null;
+            loadout_item = PopLoadoutItem(t, getIndexFromName(this.draggedItemParent.name));
+            
             if (loadout_item != null)
             {//da rabmo item dat v inventorij
-                Add(loadout_item, 1,index);
+                if (this.items[index] == null)
+                    Add(loadout_item, 1, index);
+                else AddFirst(loadout_item, 1);
             }
         }
         else
         {
-            Debug.Log("No Space in inventory!");
+            Debug.Log("No Space in inventory and cannot switch!");
         }
     }
+
 
     private int getFreePersonalInventorySpace()
     {
@@ -563,15 +591,18 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         return cunt;
     }
 
-    private void instantiateDroppedItem(Item item) // instantiate it when dropped
+    internal void instantiateDroppedItem(Item item, int quantity) // instantiate it when dropped
     {
-        NetworkManager.Instance.InstantiateInteractable_object(0, transform.position + transform.forward);
+        NetworkManager.Instance.InstantiateInteractable_object(item.id-2, transform.position + transform.forward);
     }
 
     private int getIndexFromName(string name)
     {
         string[] a = name.Split('(');
         string[] b = a[a.Length - 1].Split(')');
-        return Int32.Parse(b[0]);
+        int n;
+        if (int.TryParse(b[0], out n))
+            return n;
+        return -1;
     }
 }
