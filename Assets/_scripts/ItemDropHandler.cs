@@ -19,7 +19,7 @@ public class ItemDropHandler : MonoBehaviour, IDropHandler
     {
         RectTransform invSlot = transform as RectTransform;
 
-        if (RectTransformUtility.RectangleContainsScreenPoint(invSlot, Input.mousePosition))
+        if (RectTransformUtility.RectangleContainsScreenPoint(invSlot, Input.mousePosition))//smo dropal nekam na valid inventorij plac
         {
             Debug.Log(networkPlayerInventory.draggedItemParent.name+"'s child was dropped on " + invSlot.name+" ");
 
@@ -27,10 +27,14 @@ public class ItemDropHandler : MonoBehaviour, IDropHandler
 
             networkPlayerInventory.handleInventorySlotOnDragDropEvent(invSlot);
         }
-        else {
-
+        else {//smo dropal nekam tko da mora past na tla. gremo prevert s kje smo potegnil
+            InventorySlot inventorySlot = networkPlayerInventory.draggedItemParent.GetComponent<InventorySlot>();
             Debug.Log("Called on " + gameObject.name);
-            networkPlayerInventory.DropItem(getIndexFromName(invSlot.name));
+            if (inventorySlot is InventorySlotPersonal) networkPlayerInventory.DropItemFromPersonalInventory(getIndexFromName(invSlot.name));
+            else if (inventorySlot is InventorySlotLoadout) {
+                InventorySlotLoadout ldslt = (InventorySlotLoadout)inventorySlot;
+                networkPlayerInventory.DropItemFromLoadout(ldslt.type, ldslt.index);
+            }
         }
     }
     private int getIndexFromName(string name)

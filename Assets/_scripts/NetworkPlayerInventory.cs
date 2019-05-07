@@ -8,14 +8,15 @@ using BeardedManStudios.Forge.Networking.Unity;
 public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
 {
     public Transform draggedItemParent = null;//mrde bolsa resitev obstaja ker nemaram statikov uporablat ampak lej. dela
+    public int draggedParent_sibling_index = -1;
 
     public int space = 20; // kao space inventorija
-    public List<Item> items = new List<Item>(); // seznam itemov, ubistvu inventorij
+    public Item[] items; // seznam itemov, ubistvu inventorij
     public delegate void OnItemChanged();
     public OnItemChanged onItemChangedCallback;
 
     public GameObject panel_inventory; //celotna panela za inventorij, to se izrise ko prtisnes "i"
-    public GameObject inventorySlotsParent; // parent object od slotov da jih komot dobis v array
+    public Transform[] panel_personalInventorySlots;
     InventorySlotPersonal[] slots;  // predstavlajo slote v inventoriju, vsak drzi en item. 
 
 
@@ -149,8 +150,6 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
             default:
                 break;
         }
-        if (onItemChangedCallback != null)
-            onItemChangedCallback.Invoke();
     }
     /// <summary>
     /// funkcija vrne true ce je item upgrade zdejsnjemu gearu in ga doda direkt na playerjev loadout tukej nj bi sla vsa tista logika k je treba. zaenkrat smao pogleda ce je null in ga doda not ce je null
@@ -204,7 +203,10 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
     {
         if (!networkObject.IsOwner) return;
         onItemChangedCallback += UpdateUI;    // Subscribe to the onItemChanged callback
-        slots = inventorySlotsParent.GetComponentsInChildren<InventorySlotPersonal>();
+        slots = new InventorySlotPersonal[panel_personalInventorySlots.Length];
+        for(int i=0;i<slots.Length;i++)
+            slots[i]=panel_personalInventorySlots[i].GetComponent<InventorySlotPersonal>();
+        this.items = new Item[slots.Length];
     }
 
 
@@ -232,31 +234,98 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         }
     }
 
+    public void addToPersonalInventory(Item item, int quantity, int index) {
+        if (index < 0)
+        {//dodaj na prvo mesto ki je null
+            addToPersonalInventoryFirstEmpty(item);
+        }
+        else {//dodaj na mesto oznaceno z index ce ni polno, sicer na prvo prazno mesto
+            if (items[index] != null) addToPersonalInventoryFirstEmpty(item);
+            else items[index] = item;
+        }
+    }
 
+    private void addToPersonalInventoryFirstEmpty(Item item)
+    {
+        for (int i = 0; i < items.Length; i++) {
+            if (items[i] == null) {
+                items[i] = item;
+                return;
+            }
+        }
+    }
 
-    public void Add(Item item, int quantity)
+    private void removePersonalInventoryItem(int index)
+    {
+        if (index > -1 || index < items.Length)
+            items[index] = null;
+    }
+
+    private void removePersonalInventoryItem(Item i, int index) {
+        if (index == -1)
+        {
+            removePersonalInventoryItemFirstMatch(i);
+        }
+        else {
+            items[index] = null;
+        }
+    }
+
+    private void removePersonalInventoryItemFirstMatch(Item it)
+    {
+        for (int i = 0; i < items.Length; i++) {
+            if (items[i].Equals(it)) {
+                items[i] = null;
+                return;
+            }
+        }
+    }
+
+    public void Add(Item item, int quantity, int index)
     {
         if (!networkObject.IsOwner) return;
-        items.Add(item);//nekej bo treba nrdit za hranjenje kolicine. recimo kamen pa take fore
+        addToPersonalInventory(item,quantity,index);//nekej bo treba nrdit za hranjenje kolicine. recimo kamen pa take fore
         if (onItemChangedCallback != null)
             onItemChangedCallback.Invoke();
     }
-    public void Remove(Item item)
+
+    public void AddFirst(Item item, int quantity)
     {
         if (!networkObject.IsOwner) return;
-        items.Remove(item);
-        //NETWORKINSTANTIATE THE DROPPED ITEM!
+        addToPersonalInventory(item, quantity, -1);//nekej bo treba nrdit za hranjenje kolicine. recimo kamen pa take fore
+        if (onItemChangedCallback != null)
+            onItemChangedCallback.Invoke();
+    }
+    public void RemoveFirst(Item item)
+    {
+        if (!networkObject.IsOwner) return;
+        removePersonalInventoryItem(item, -1);
         if (onItemChangedCallback != null)
             onItemChangedCallback.Invoke();
     }
 
-    public void DropItem(int inventory_slot) {//isto k remove item samo da vrze item v svet.
+    public void Remove(int inventory_slot) // to se klice z slota na OnDrop eventu ko vrzemo item iz inventorija
+    {
         if (!networkObject.IsOwner) return;
+        removePersonalInventoryItem(inventory_slot);
+        if (onItemChangedCallback != null)
+            onItemChangedCallback.Invoke();
+    }
 
+    public void DropItemFromPersonalInventory(int inventory_slot) {//isto k remove item samo da vrze item v svet.
+        if (!networkObject.IsOwner) return;
         Item i = slots[inventory_slot].GetItem();
-        items.Remove(i);
+        removePersonalInventoryItem(inventory_slot);
         instantiateDroppedItem(i);
+        if (onItemChangedCallback != null)
+            onItemChangedCallback.Invoke();
+    }
 
+    internal void DropItemFromLoadout(Item.Type type, int index)
+    {
+        if (!networkObject.IsOwner) return;
+        Item i = PopLoadoutItem(type, index);
+        instantiateDroppedItem(i);
         if (onItemChangedCallback != null)
             onItemChangedCallback.Invoke();
     }
@@ -268,12 +337,10 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
     // This is called using a delegate on the Inventory.
     void UpdateUI()
     {
-
-        if(slots==null) slots = inventorySlotsParent.GetComponentsInChildren<InventorySlotPersonal>();
-        // Loop through all the slots
+        //personal inventory
         for (int i = 0; i < slots.Length; i++)
         {
-            if (i < this.items.Count)  // If there is an item to add
+            if (items[i]!=null)  // If there is an item to add
             {
                 slots[i].AddItem(this.items[i]);   // Add it
             }
@@ -333,11 +400,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
     }
 
 
-    public void RemoveItem(int inventory_slot) // to se klice z slota na OnDrop eventu ko vrzemo item iz inventorija
-    {
-        Item itemToRemove = slots[inventory_slot].GetItem();
-        this.Remove(itemToRemove);
-    }
+
 
     /// <summary>
     /// klice se ko iz inventorija dropamo item na loadout panel
@@ -356,10 +419,10 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
 
 
         SetLoadoutItem(inventory_item, loadout_index);//to bo zmer slo cez ker je slot ze prazen. smo ga izpraznli z popom
-        RemoveItem(inv_index);
+        Remove(inv_index);
         if (loadout_item != null)
         {//loadout ni bil prazen prej tko da rabmo item dat v inventorij
-            Add(loadout_item,1);
+            Add(loadout_item,1, inv_index);
         }
 
     }
@@ -435,16 +498,30 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         else if (invSlot.GetComponent<InventorySlot>() is InventorySlotPersonal && this.draggedItemParent.GetComponent<InventorySlot>() is InventorySlotPersonal)
         {
             Debug.Log("Premikamo item znotraj inventorija");
+            InventoryToInventory(invSlot);
         }
         else if (invSlot.GetComponent<InventorySlot>() is InventorySlotLoadout && this.draggedItemParent.GetComponent<InventorySlot>() is InventorySlotLoadout)
         {
             Debug.Log("Premikamo item znotraj loadouta.");
             LoadoutToLoadout(invSlot);
         }
-        this.draggedItemParent = null;
+        this.draggedItemParent = null;//tole nastavmo tud na drag handlerju just in case
 
         if (onItemChangedCallback != null)
             onItemChangedCallback.Invoke();
+    }
+
+    /// <summary>
+    /// menjamo pozicije itemov znotraj inventorija. ubistvu ni nekih komplikacij.
+    /// </summary>
+    /// <param name="invSlot"></param>
+    private void InventoryToInventory(RectTransform invSlot)
+    {
+        int index1 = getIndexFromName(invSlot.name);
+        int index2 = getIndexFromName(this.draggedItemParent.name);
+        Item temp = items[index1];
+        this.items[index1] = this.items[index2];
+        this.items[index2] = temp;
     }
 
     /// <summary>
@@ -460,21 +537,30 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
 
     private void LoadoutToInventory(RectTransform invSlot)
     {
-        if (this.items.Count < this.inventorySlotsParent.transform.childCount)
+        if (getFreePersonalInventorySpace() >0)
         {
             Item.Type t = this.draggedItemParent.GetComponent<InventorySlotLoadout>().type;
             Item loadout_item = null;
             loadout_item = PopLoadoutItem(t,getIndexFromName(this.draggedItemParent.name));
-
+            int index = getIndexFromName(invSlot.name);
             if (loadout_item != null)
             {//da rabmo item dat v inventorij
-                Add(loadout_item, 1);
+                Add(loadout_item, 1,index);
             }
         }
         else
         {
             Debug.Log("No Space in inventory!");
         }
+    }
+
+    private int getFreePersonalInventorySpace()
+    {
+        int cunt = 0;
+        foreach (Item i in items)
+            if (i == null)
+                cunt++;
+        return cunt;
     }
 
     private void instantiateDroppedItem(Item item) // instantiate it when dropped
