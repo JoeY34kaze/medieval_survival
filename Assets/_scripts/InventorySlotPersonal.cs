@@ -8,13 +8,6 @@ public class InventorySlotPersonal : InventorySlot
 {
 
 
-    public override Item PopItem() {
-        if (this.item == null) return null;
-        Item i = this.item;
-        transform.root.GetComponent<NetworkPlayerInventory>().RemoveItem(getIndexFromName(transform.name));
-        return i;
-    }
-
 
     private int getIndexFromName(string name)
     {

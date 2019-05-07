@@ -18,13 +18,4 @@ public class InventorySlotLoadout : InventorySlot
 
 
 
-    public override Item PopItem()
-    {
-        if (this.item == null) return null;
-        Item i = this.item;
-        transform.root.GetComponent<NetworkPlayerInventory>().RemoveItemLoadout(this.type,index);
-        return i;
-    }
-
-
 }

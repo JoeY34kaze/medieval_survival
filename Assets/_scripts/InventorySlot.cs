@@ -35,5 +35,4 @@ public abstract class InventorySlot : MonoBehaviour
         icon.enabled = true;
     }
 
-    public abstract Item PopItem();
 }

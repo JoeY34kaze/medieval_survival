@@ -20,6 +20,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
 
 
 
+
     //-------------------------------LOADOUT SLOTS-----------------------------
     public InventorySlotLoadout loadout_head;
     public InventorySlotLoadout loadout_chest;
@@ -40,6 +41,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
     private Item weapon_0;
     private Item weapon_1;
     private Item shield;
+
 
     /// <summary>
     /// proba upgrejdat loadout z itemom i. vrne item i ce ni upgrade. vrne item s katermu ga je zamenov ce je upgrade bil, vrne null ce je biu prazn slot prej
@@ -112,6 +114,44 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         return r;
     }
 
+    public void SetLoadoutItem(Item i, int index)
+    {//vrne item s katermu smo ga zamenjal al pa null ce je biu prej prazn slot
+        Item r = i;
+        switch (i.type)
+        {
+            case Item.Type.head:
+                    head = i;
+                break;
+            case Item.Type.chest:
+                    chest = i;
+                break;
+            case Item.Type.hands:
+                    hands = i;
+                break;
+            case Item.Type.legs:
+                    legs = i;
+                break;
+            case Item.Type.feet:
+                    feet = i;
+                break;
+            case Item.Type.ranged:
+                    ranged = i;
+                break;
+            case Item.Type.weapon://tole se nobe zmer zamenjal ker tega nocmo. equipa nj se samo ce je slot prazen
+                if (index == 0)
+                    weapon_0 = i;
+                else
+                    weapon_1 = i;
+                break;
+            case Item.Type.shield:
+                    shield = i;
+                break;
+            default:
+                break;
+        }
+        if (onItemChangedCallback != null)
+            onItemChangedCallback.Invoke();
+    }
     /// <summary>
     /// funkcija vrne true ce je item upgrade zdejsnjemu gearu in ga doda direkt na playerjev loadout tukej nj bi sla vsa tista logika k je treba. zaenkrat smao pogleda ce je null in ga doda not ce je null
     /// </summary>
@@ -274,7 +314,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         if (this.ranged != null)
             loadout_ranged.AddItem(this.ranged);
         else
-            loadout_weapon_0.ClearSlot();
+            loadout_ranged.ClearSlot();
 
         if (this.weapon_0 != null)
             loadout_weapon_0.AddItem(this.weapon_0);
@@ -282,7 +322,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
             loadout_weapon_0.ClearSlot();
 
         if (this.weapon_1 != null)
-            loadout_weapon_0.AddItem(this.weapon_1);
+            loadout_weapon_1.AddItem(this.weapon_1);
         else
             loadout_weapon_1.ClearSlot();
 
@@ -307,16 +347,16 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
     /// <param name="targetParent"></param>
     private void InventoryToLoadout(RectTransform loa)//
     {
-
+        int loadout_index = getIndexFromName(loa.name);
         Item loadout_item = null;
-        loadout_item = PopLoadoutItem(this.draggedItemParent.GetComponent<InventorySlotPersonal>().GetItem().type);
+        loadout_item = PopLoadoutItem(this.draggedItemParent.GetComponent<InventorySlotPersonal>().GetItem().type, loadout_index);
 
-        int index = getIndexFromName(this.draggedItemParent.name);
-        Item inventory_item = this.items[index];//poisce item glede na id-ju slota. id dobi iz imena tega starsa.
+        int inv_index = getIndexFromName(this.draggedItemParent.name);
+        Item inventory_item = this.items[inv_index];//poisce item glede na id-ju slota. id dobi iz imena tega starsa.
 
 
-        try_to_upgrade_loadout(inventory_item);//to bo zmer slo cez ker je slot ze prazen. smo ga izpraznli z popom
-        RemoveItem(index);
+        SetLoadoutItem(inventory_item, loadout_index);//to bo zmer slo cez ker je slot ze prazen. smo ga izpraznli z popom
+        RemoveItem(inv_index);
         if (loadout_item != null)
         {//loadout ni bil prazen prej tko da rabmo item dat v inventorij
             Add(loadout_item,1);
@@ -324,34 +364,56 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
 
     }
 
-    private Item PopLoadoutItem(Item.Type t)
+    private Item PopLoadoutItem(Item.Type t,int index)
     {
+        Item i = null;
         switch (t)
         {
             case Item.Type.head:
-                return head;
+                i = head;
+                head = null;
+                break; ;
             case Item.Type.chest:
-                return chest;
+                i=chest;
+                chest = null;
+                break;
             case Item.Type.hands:
-                return hands;
+                i =hands;
+                hands = null;
+                break;
             case Item.Type.legs:
-                return legs;
+                i= legs;
+                legs = null;
+                break;
             case Item.Type.feet:
-                return feet;
+                i= feet;
+                feet = null;
+                break;
             case Item.Type.ranged:
-                return ranged;
+                i= ranged;
+                ranged = null;
+                break;
             case Item.Type.weapon:
-                if (getIndexFromName(this.draggedItemParent.name) == 0)//tale check se bo izvedel samo ce se akcija sprozi ob dragganju
-                    return weapon_0;
+                if (index == 0)
+                {
+                    i = weapon_0;
+                    weapon_0 = null;
+                }
                 else
-                    return weapon_1;
+                {
+                    i = weapon_1;
+                    weapon_1 = null;
+                }
+                break;
             case Item.Type.shield:
-                return shield;
+                i= shield;
+                shield = null;
+                break;
             default:
                 Debug.LogError("Item type doesnt match anything. shits fucked yo");
                 break;
         }
-        return null;
+        return i;
     }
 
     /// <summary>
@@ -377,11 +439,23 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         else if (invSlot.GetComponent<InventorySlot>() is InventorySlotLoadout && this.draggedItemParent.GetComponent<InventorySlot>() is InventorySlotLoadout)
         {
             Debug.Log("Premikamo item znotraj loadouta.");
+            LoadoutToLoadout(invSlot);
         }
         this.draggedItemParent = null;
 
         if (onItemChangedCallback != null)
             onItemChangedCallback.Invoke();
+    }
+
+    /// <summary>
+    /// edina stvar ki jo lahko menja sta weapona tko da tukaj nebo kompliciranja
+    /// </summary>
+    /// <param name="invSlot"></param>
+    private void LoadoutToLoadout(RectTransform invSlot)
+    {
+            Item temp = weapon_1;
+            weapon_1 = weapon_0;
+            weapon_0 = temp;
     }
 
     private void LoadoutToInventory(RectTransform invSlot)
@@ -390,7 +464,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         {
             Item.Type t = this.draggedItemParent.GetComponent<InventorySlotLoadout>().type;
             Item loadout_item = null;
-            loadout_item = PopLoadoutItem(t);
+            loadout_item = PopLoadoutItem(t,getIndexFromName(this.draggedItemParent.name));
 
             if (loadout_item != null)
             {//da rabmo item dat v inventorij
