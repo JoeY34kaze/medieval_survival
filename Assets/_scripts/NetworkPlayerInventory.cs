@@ -243,6 +243,24 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         }
     }
 
+    internal int GetRanged()
+    {
+        if (this.ranged == null) return 0;//unarmed
+        return this.ranged.id;
+    }
+
+    internal int GetWeapon1()
+    {
+        if (this.weapon_1 == null) return 0;//unarmed
+        return this.weapon_1.id;
+    }
+
+    internal int GetWeapon0()
+    {
+        if (this.weapon_0 == null) return 0;//unarmed
+        return this.weapon_0.id;
+    }
+
     public void addToPersonalInventory(Item item, int quantity, int index) {
         if (index < 0)
         {//dodaj na prvo mesto ki je null
@@ -516,6 +534,8 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         }
         this.draggedItemParent = null;//tole nastavmo tud na drag handlerju just in case
 
+        GetComponent<NetworkPlayerCombatHandler>().update_equipped_weapons();
+
         if (onItemChangedCallback != null)
             onItemChangedCallback.Invoke();
     }
@@ -550,17 +570,19 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         Item.Type t = this.draggedItemParent.GetComponent<InventorySlotLoadout>().type;
 
 
-        if (t== this.items[index].type)//enum comparison nj bi baje delov z == in ne .Equals
+        if (this.items[index]!=null)//enum comparison nj bi baje delov z == in ne .Equals
         {//ce se item ujema naj se zamenja
-            Item loadout_item = null;
-            int loadout_index= getIndexFromName(this.draggedItemParent.name);
-            loadout_item = PopLoadoutItem(t, loadout_index);
+            if (t==this.items[index].type) {
+                Item loadout_item = null;
+                int loadout_index = getIndexFromName(this.draggedItemParent.name);
+                loadout_item = PopLoadoutItem(t, loadout_index);
 
-            Item inventory_item = this.items[index];
-            if (loadout_item != null)
-            {
-                Add(loadout_item, 1, index);
-                SetLoadoutItem(inventory_item, loadout_index);
+                Item inventory_item = this.items[index];
+                if (loadout_item != null)
+                {
+                    Add(loadout_item, 1, index);
+                    SetLoadoutItem(inventory_item, loadout_index);
+                }
             }
         }
         else if (hasInventorySpace())

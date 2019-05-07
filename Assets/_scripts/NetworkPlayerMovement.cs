@@ -87,7 +87,7 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
 
         //---------------------------------------------------DA TE MAL POSLOWA K NAPADAS Z WEAPONOM----------------------------------------------
         if (combat_handler_script.in_attack_animation) {
-            if (combat_handler_script.Currently_equipped_weapon == 2) speed *= light_weapon_speed_modifier;
+            if (combat_handler_script.index_of_currently_selected_weapon_from_equipped_weapons == 2) speed *= light_weapon_speed_modifier;
         }
         //----------------------------------------------------------------------------------------------------------------------------------------
 
