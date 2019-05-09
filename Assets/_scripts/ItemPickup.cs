@@ -56,22 +56,11 @@ public class ItemPickup : Interactable {
 
         //check players inventory and other shit if he can pick the item up.
         //destroy item if player can carry all or split it if player cant carry all
-        
 
-        NetWorker myNetWorker = GameObject.Find("NetworkManager(Clone)").GetComponent<NetworkManager>().Networker; // mrde dat na singleton, zakaj ni na singleton?
-        lock (myNetWorker.Players)//send response
-        {
-            myNetWorker.IteratePlayers((player) =>
-            {
-                if (player.NetworkId == player_id)
-                {
-                    Debug.Log("Item pickup aprooved on server! " + player);
-                    //List<NetworkObject> nl = myNetWorker.NetworkObjectList;
-                    handle_response_from_server(item_id,quantity,player);
-                    return;
-                }
-            });
-        }
+        handle_response_from_server(item_id,quantity,args.Info.SendingPlayer);//args.Info is a godsend
+        return;
+
+        
     }
 
     private void handle_response_from_server(int item_id, int quantity, NetworkingPlayer player)
@@ -81,9 +70,8 @@ public class ItemPickup : Interactable {
         GameObject player_obj = FindByid(player.NetworkId);
         Debug.Log("sending pickup response signal to player");
         player_obj.GetComponent<NetworkPlayerInteraction>().call_owner_rpc_item_pickup_response(item_id,quantity);
-
-        //send response to yourself to kill yourself
-        Debug.Log("sending kill signal to the fucker");
+        //send response to yourself to kill itself
+        Debug.Log("sending kill signal the object");
         
 
         handle_network_destruction_server();

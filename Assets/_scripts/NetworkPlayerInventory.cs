@@ -12,7 +12,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
     public int draggedParent_sibling_index = -1;
 
     public int space = 20; // kao space inventorija
-    public Item[] items; // seznam itemov, ubistvu inventorij
+    public Item[] items = new Item[20]; // seznam itemov, ubistvu inventorij
     public delegate void OnItemChanged();
     public OnItemChanged onItemChangedCallback;
 
@@ -43,7 +43,6 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
     private Item weapon_0;
     private Item weapon_1;
     private Item shield;
-    private bool pendingUpdateOfPickedWeapon=false;
 
 
 
@@ -244,12 +243,28 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
 
     private void Start()
     {
-        if (!networkObject.IsOwner) return;
-        onItemChangedCallback += UpdateUI;    // Subscribe to the onItemChanged callback
-        slots = new InventorySlotPersonal[panel_personalInventorySlots.Length];
-        for(int i=0;i<slots.Length;i++)
-            slots[i]=panel_personalInventorySlots[i].GetComponent<InventorySlotPersonal>();
-        this.items = new Item[slots.Length];
+        if (networkObject.IsOwner)
+        {
+            onItemChangedCallback += UpdateUI;    // Subscribe to the onItemChanged callback
+            slots = new InventorySlotPersonal[panel_personalInventorySlots.Length];
+            for (int i = 0; i < slots.Length; i++)
+                slots[i] = panel_personalInventorySlots[i].GetComponent<InventorySlotPersonal>();
+            items = new Item[slots.Length];
+        }
+        else if (networkObject.IsServer)
+        {
+            slots = new InventorySlotPersonal[panel_personalInventorySlots.Length];
+            for (int i = 0; i < slots.Length; i++)
+                slots[i] = panel_personalInventorySlots[i].GetComponent<InventorySlotPersonal>();
+            items = new Item[slots.Length];
+        }
+        else {
+            //prazno da nemore vidt esp hack
+            slots = new InventorySlotPersonal[panel_personalInventorySlots.Length];
+            for (int i = 0; i < slots.Length; i++)
+                slots[i] = panel_personalInventorySlots[i].GetComponent<InventorySlotPersonal>();
+            items = new Item[slots.Length];
+        }
     }
 
 
@@ -259,6 +274,9 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         if (networkObject == null) return;
         if (!networkObject.IsOwner) return;
         // Check to see if we should open/close the inventory
+        //Debug.Log("items - " + this.items.Length);
+        if (this.items.Length == 0) this.items = new Item[20];//hacky bug fix. makes me sick about this brah. mrde dat u onNetworkConnected al pa kej
+
         if (Input.GetButtonDown("Inventory"))
         {
         panel_inventory.SetActive(!panel_inventory.activeSelf);
@@ -618,6 +636,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
 
     private void sendNetworkUpdate(bool inv, bool loadout)
     {
+        
         if (inv)
         {
             short i0, i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, i14, i15, i16, i17, i18, i19;

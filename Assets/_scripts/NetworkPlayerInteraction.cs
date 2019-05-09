@@ -68,7 +68,6 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
                         {
                             Debug.Log("Interacting with " + hit.collider.name + " with distance of " + hit.distance);
 
-
                             if (interactable is ItemPickup)
                                 if (networkPlayerInventory.hasInventorySpace())
                                     interactable.interact(stats.server_id);
