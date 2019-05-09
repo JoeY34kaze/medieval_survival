@@ -27,6 +27,7 @@
 - Island hopping (Sailing) (20)
 - Central City (21)
 - Head on spikes (22)
+- Boats
 
 ## 2 Detailed descriptions of features:
 ####  Feature S1 - Server Database:
@@ -50,7 +51,7 @@ Player can enslave other players. An act during which the avatar of the submissi
 	The act of catching & binding a player completes successfully when the offending player drags the downed player into the object/station designed to break the captures player's spirit.
 #####  Expanded Feature 2.2 - Slave breaking:
 	Upon being delivered to the slave breaking station, the submissive player is killed and respawned accordingly. At the same time the slave breaking station receives a new object (a slave to break) with the DNA appearence of the captured player. After a certain time the slave is broken and you have yourself a slave.
-#####  Expanded Feature 2.1 - Slave management:
+#####  Expanded Feature 2.3 - Slave management:
 	A clan is limited to a set amount of slaves they can have because otherwise it will fuck with server performance. 
 	Slaves can be equipped with gear and have their own inventory, much like a player. 
 	Owner of a slave can designate one slave as his follower who will follow him and fight with him. Slave's hostility can be set to following states:
@@ -63,7 +64,7 @@ Player can enslave other players. An act during which the avatar of the submissi
 	Slaves can also be placed around the Owner's base where they will be hostile to unauthorized players. 
 	Slaves can also potentially be tasked with gathering resources from Points Of Interest around the map if some requirements are met.
 	Slaves of the opposite sex can be used for the purpose of Player's progeniture.
-
+	
 ####  Feature 3 - Base building:
 Base building will be the most similar to Conan Exiles. Big Blocks. Upgradable blocks rather that many blocks. Bases will have upkeep set accordingly. Base decorations and all that will be explained here at a later date.
 
