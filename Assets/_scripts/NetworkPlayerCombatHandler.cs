@@ -160,7 +160,7 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
 
 
             //treba nekej nrdit da pofejkas attack. torej iz main attack animacije bo treba skocit v nevtralno ce da med attackom block recimo
-            if (this.in_attack_animation && this.blocking)
+            if (this.in_attack_animation && Input.GetButtonDown("Fire2"))
             {
                 this.in_attack_animation = false;
                 animator.SetTrigger("feign");
