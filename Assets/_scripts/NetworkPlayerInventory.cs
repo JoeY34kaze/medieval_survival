@@ -4,6 +4,7 @@ using UnityEngine;
 using BeardedManStudios.Forge.Networking.Generated;
 using System;
 using BeardedManStudios.Forge.Networking.Unity;
+using BeardedManStudios.Forge.Networking;
 
 public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
 {
@@ -42,6 +43,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
     private Item weapon_0;
     private Item weapon_1;
     private Item shield;
+    private bool pendingUpdateOfPickedWeapon=false;
 
 
 
@@ -99,10 +101,16 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
                 break;
             case Item.Type.weapon://tole se nobe zmer zamenjal ker tega nocmo. equipa nj se samo ce je slot prazen
                 if (weapon_0 == null)
+                {
                     weapon_0 = i;
+                    r = null;
+                }
                 else if (weapon_1 == null)
+                {
                     weapon_1 = i;
-                    break;
+                    r = null;
+                }
+                break;
             case Item.Type.shield:
                 if (compareGear(shield, i))
                 {
@@ -117,6 +125,23 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         if (onItemChangedCallback != null)
             onItemChangedCallback.Invoke();
         return r;
+    }
+
+    internal void handleItemPickup(Item item, int quantity)
+    {
+        Item resp=try_to_upgrade_loadout(item);
+        if (resp != null)
+            AddFirst(resp, quantity);
+        else
+        {//vse updejtat ker ta funkcija negre cez uno tavelko...
+
+
+            NetworkPlayerCombatHandler n = GetComponent<NetworkPlayerCombatHandler>();
+            n.update_equipped_weapons();//tole bo treba v delegata
+            n.setCurrentWeaponToFirstNotEmpty();
+
+            sendNetworkUpdate(false, true);//samo loadout poslemo
+        }
     }
 
     internal void OnRightClick(GameObject g)//tole lahko potem pri ciscenju kode z malo preurejanja damo v uno tavelko metodo
@@ -373,6 +398,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
     // This is called using a delegate on the Inventory.
     void UpdateUI()
     {
+        if (!networkObject.IsOwner) return;
         //personal inventory
         for (int i = 0; i < slots.Length; i++)
         {
@@ -541,25 +567,29 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         if (invSlot != null)
         {
             InventorySlot to = invSlot.GetComponent<InventorySlot>();
-            if (invSlot.GetComponent<InventorySlot>() is InventorySlotLoadout && from is InventorySlotPersonal)
+
+            if (!to.Equals(from))
             {
-                //Debug.Log("Premikamo iz inventorija v loadout");
-                InventoryToLoadout(invSlot,false);
-            }
-            else if (invSlot.GetComponent<InventorySlot>() is InventorySlotPersonal && from is InventorySlotLoadout)
-            {
-                LoadoutToInventory(invSlot,false);
-                //Debug.Log("Premikamo iz loadouta v inventorij");
-            }
-            else if (invSlot.GetComponent<InventorySlot>() is InventorySlotPersonal && from is InventorySlotPersonal)
-            {
-                //Debug.Log("Premikamo item znotraj inventorija");
-                InventoryToInventory(invSlot);
-            }
-            else if (invSlot.GetComponent<InventorySlot>() is InventorySlotLoadout && from is InventorySlotLoadout)
-            {
-                //Debug.Log("Premikamo item znotraj loadouta.");
-                LoadoutToLoadout(invSlot);
+                if (invSlot.GetComponent<InventorySlot>() is InventorySlotLoadout && from is InventorySlotPersonal)
+                {
+                    //Debug.Log("Premikamo iz inventorija v loadout");
+                    InventoryToLoadout(invSlot, false);
+                }
+                else if (invSlot.GetComponent<InventorySlot>() is InventorySlotPersonal && from is InventorySlotLoadout)
+                {
+                    LoadoutToInventory(invSlot, false);
+                    //Debug.Log("Premikamo iz loadouta v inventorij");
+                }
+                else if (invSlot.GetComponent<InventorySlot>() is InventorySlotPersonal && from is InventorySlotPersonal)
+                {
+                    //Debug.Log("Premikamo item znotraj inventorija");
+                    InventoryToInventory(invSlot);
+                }
+                else if (invSlot.GetComponent<InventorySlot>() is InventorySlotLoadout && from is InventorySlotLoadout)
+                {
+                    //Debug.Log("Premikamo item znotraj loadouta.");
+                    LoadoutToLoadout(invSlot);
+                }
             }
         }
         else {//right click event
@@ -577,6 +607,125 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
 
         if (onItemChangedCallback != null)
             onItemChangedCallback.Invoke();
+
+
+
+
+        sendNetworkUpdate(true,true);
+
+
+    }
+
+    private void sendNetworkUpdate(bool inv, bool loadout)
+    {
+        if (inv)
+        {
+            short i0, i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, i14, i15, i16, i17, i18, i19;
+
+
+
+            if (this.items[0] == null) i0 = -1;
+            else i0 = (short)this.items[0].id;
+
+            if (this.items[1] == null) i1 = -1;
+            else i1 = (short)this.items[1].id;
+
+            if (this.items[2] == null) i2 = -1;
+            else i2 = (short)this.items[2].id;
+
+            if (this.items[3] == null) i3 = -1;
+            else i3 = (short)this.items[3].id;
+
+            if (this.items[4] == null) i4 = -1;
+            else i4 = (short)this.items[4].id;
+
+            if (this.items[5] == null) i5 = -1;
+            else i5 = (short)this.items[5].id;
+
+            if (this.items[6] == null) i6 = -1;
+            else i6 = (short)this.items[6].id;
+
+            if (this.items[7] == null) i7 = -1;
+            else i7 = (short)this.items[7].id;
+
+            if (this.items[8] == null) i8 = -1;
+            else i8 = (short)this.items[8].id;
+
+            if (this.items[9] == null) i9 = -1;
+            else i9 = (short)this.items[9].id;
+
+            if (this.items[10] == null) i10 = -1;
+            else i10 = (short)this.items[10].id;
+
+            if (this.items[11] == null) i11 = -1;
+            else i11 = (short)this.items[11].id;
+
+            if (this.items[12] == null) i12 = -1;
+            else i12 = (short)this.items[12].id;
+
+            if (this.items[13] == null) i13 = -1;
+            else i13 = (short)this.items[13].id;
+
+            if (this.items[14] == null) i14 = -1;
+            else i14 = (short)this.items[14].id;
+
+            if (this.items[15] == null) i15 = -1;
+            else i15 = (short)this.items[15].id;
+
+            if (this.items[16] == null) i16 = -1;
+            else i16 = (short)this.items[16].id;
+
+            if (this.items[17] == null) i17 = -1;
+            else i17 = (short)this.items[17].id;
+
+            if (this.items[18] == null) i18 = -1;
+            else i18 = (short)this.items[18].id;
+
+            if (this.items[19] == null) i19 = -1;
+            else i19 = (short)this.items[19].id;
+
+            networkObject.SendRpc(RPC_SEND_PERSONAL_INVENTORY_UPDATE, Receivers.Server,
+                i0,
+                i1,
+                i2,
+                i4,
+                i5,
+                i6,
+                i7,
+                i8,
+                i9,
+                i10,
+                i11,
+                i12,
+                i13,
+                i14,
+                i15,
+                i16,
+                i17,
+                i18,
+                i19);
+        }
+
+        if (loadout)
+        {
+            short l0 = -1, l1 = -1, l2 = -1, l3 = -1, l4 = -1, l5 = -1, l6 = -1, l7 = -1, l8 = -1;
+
+            if (this.head != null) l0 = (short)this.head.id;
+            if (this.chest != null) l1 = (short)this.chest.id;
+            if (this.hands != null) l2 = (short)this.hands.id;
+            if (this.legs != null) l3 = (short)this.legs.id;
+            if (this.feet != null) l4 = (short)this.feet.id;
+
+            if (this.ranged != null) l5 = (short)this.ranged.id;
+            if (this.weapon_0 != null) l6 = (short)this.weapon_0.id;
+            if (this.weapon_1 != null) l7 = (short)this.weapon_1.id;
+            if (this.shield != null) l8 = (short)this.shield.id;
+
+
+            networkObject.SendRpc(RPC_SEND_LOADOUT_UPDATE, Receivers.OthersProximity,
+                l0, l1, l2, l3, l4, l5, l6, l7, l8
+                );
+        }
     }
 
     /// <summary>
@@ -672,5 +821,51 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         if (int.TryParse(b[0], out n))
             return n;
         return -1;
+    }
+
+    public override void SendPersonalInventoryUpdate(RpcArgs args)
+    {//nc zrihtan za kolicino
+        if (!networkObject.IsServer) return;
+
+        //server side checks for anticheat
+
+
+        for (int i = 0; i < 20; i++)
+        {
+            short item_id = args.GetNext<short>();
+            if(item_id>0)this.items[i] = Mapper.instance.getItemById((int)item_id);
+        }
+
+
+    }
+
+    public override void SendLoadoutUpdate(RpcArgs args)
+    {
+        int i = (int)args.GetNext<short>();
+        if(i>0)this.head = Mapper.instance.getItemById(i);
+
+         i = (int)args.GetNext<short>();
+        if (i > 0) this.chest = Mapper.instance.getItemById(i);
+
+        i = (int)args.GetNext<short>();
+        if (i > 0) this.hands = Mapper.instance.getItemById(i);
+
+        i = (int)args.GetNext<short>();
+        if (i > 0) this.legs = Mapper.instance.getItemById(i);
+
+        i = (int)args.GetNext<short>();
+        if (i > 0) this.feet = Mapper.instance.getItemById(i);
+
+        i = (int)args.GetNext<short>();
+        if (i > 0) this.ranged = Mapper.instance.getItemById(i);
+
+        i = (int)args.GetNext<short>();
+        if (i > 0) this.weapon_0 = Mapper.instance.getItemById(i);
+
+        i = (int)args.GetNext<short>();
+        if (i > 0) this.weapon_1 = Mapper.instance.getItemById(i);
+
+        i = (int)args.GetNext<short>();
+        if (i > 0) this.shield = Mapper.instance.getItemById(i);
     }
 }

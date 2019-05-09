@@ -31,8 +31,9 @@ public abstract class InventorySlot : MonoBehaviour
     public void ClearSlot()
     {
         item = null;
-        icon.sprite = icon_background.sprite;
-        icon.enabled = true;
+        //icon.sprite = icon_background.sprite;
+        icon.sprite = null;
+        icon.enabled = false;
     }
 
 }

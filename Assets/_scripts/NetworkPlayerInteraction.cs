@@ -111,7 +111,8 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
         //add into inventory since all was aprooved
         //za nahrbtnike bi mrde pustu ks u inventory skripti da se ukvarja z tem najbrz
         Debug.Log("adding into npInventory");
-        networkPlayerInventory.AddFirst(Mapper.instance.getItemById(item_id), quantity);
+        networkPlayerInventory.handleItemPickup(Mapper.instance.getItemById(item_id), quantity);
+        
         Debug.Log("Inventory aprooval received on client.");
     }
     

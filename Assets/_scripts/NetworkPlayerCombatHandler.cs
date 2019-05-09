@@ -108,6 +108,11 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
         networkObject.combatmode = this.combat_mode; //ce bo treba zmanjsevat bandwidth lahko tole zamenjamo z rpc ampak je treba nrdit buffered rpc al pa nekejker se sicer lahko zgodi da bi biu en u combat mode in pride do playerja in bi ga ta player vidu da ni u combat modu. that causes problems. ce bomo sploh mel te mode al nevm
     }
 
+    internal void setCurrentWeaponToFirstNotEmpty()//overrides what is currently selected
+    {
+        for (int i = 0; i < 5; i++) if (equipped_weapons[i] > 1) this.index_of_currently_selected_weapon_from_equipped_weapons = i;
+    }
+
     private void check_and_handle_combat()
     {
         check_and_handle_combat_mode();
@@ -177,7 +182,7 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
         if (Input.GetAxis("Mouse ScrollWheel") > 0f && !this.blocking) // forward - menja weapone. unarmed fist - unarmed block se skippa vmes - weapon0 - weapon1 - ranged
         {
 
-            update_equipped_weapons();
+            update_equipped_weapons();//tole mislm da je dodolj pohendlan ze u networkPlayerInventory
 
 
             //djmo scrollat samo prek weaponov k niso unarmed. nocmo trikat misko premaknt ker je povsod unarmed
@@ -218,7 +223,10 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
         //ce je trenutno equipan item, ki ni v equipped weapons ga moramo deaktivirat.
 
         int index_prev = getSiblingIndexOfFirstActiveChild();
-        if (this.equipped_weapons[this.index_of_currently_selected_weapon_from_equipped_weapons] != index_prev)
+        if (index_prev == -1) {
+            //do nothing
+        }
+        else if (this.equipped_weapons[this.index_of_currently_selected_weapon_from_equipped_weapons] != index_prev)
         {
             this.index_of_currently_selected_weapon_from_equipped_weapons = 0;
             if (index_prev > -1)
