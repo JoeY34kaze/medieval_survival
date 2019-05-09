@@ -38,7 +38,7 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
 
     private NetworkPlayerAnimationLogic animation_handler_script;
     private NetworkPlayerCombatHandler combat_handler_script;
-
+    private NetworkPlayerInventory networkPlayerInventory;
     //--------------------------------RAGDOLL --------------- tutorial v=RrWrnp2DLD8 ------------------------
 
 
@@ -48,6 +48,7 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
         anim = GetComponent<Animator>();
         rigidbody = GetComponent<Rigidbody>();
         combat_handler_script = GetComponent<NetworkPlayerCombatHandler>();
+        networkPlayerInventory = GetComponent<NetworkPlayerInventory>();
     }
 
 
@@ -99,9 +100,11 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
 
         next_position +=dirVector ;
 
-        Quaternion turnAngle = Quaternion.AngleAxis(Input.GetAxis("Mouse X") * GetComponent<player_camera_handler>().mouse_sensitivity_multiplier, Vector3.up);
-
-        transform.eulerAngles = transform.eulerAngles + turnAngle.eulerAngles;
+        if (!networkPlayerInventory.panel_inventory.activeSelf)//ce nimamo odprt inventorij - to je samo za horizontalno premikanje miske. vertikalno je nekje drugje
+        {
+            Quaternion turnAngle = Quaternion.AngleAxis(Input.GetAxis("Mouse X") * GetComponent<player_camera_handler>().mouse_sensitivity_multiplier, Vector3.up);
+            transform.eulerAngles = transform.eulerAngles + turnAngle.eulerAngles;
+        }
 
         check_ground_raycast(distance_from_center_raycast);
 

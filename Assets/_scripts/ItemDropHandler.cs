@@ -6,7 +6,7 @@ using UnityEngine.EventSystems;
 /// <summary>
 /// skripta lezi na paneli inventory slota. kontrolira kaj se dogaja z itemom, ki ga dropa na to panelo
 /// </summary>
-public class ItemDropHandler : MonoBehaviour, IDropHandler
+public class ItemDropHandler : MonoBehaviour, IDropHandler , IPointerClickHandler
 {
     private NetworkPlayerInventory networkPlayerInventory;
 
@@ -25,7 +25,7 @@ public class ItemDropHandler : MonoBehaviour, IDropHandler
 
             //koda se bo malo podvajala ker bi sicer biu prevelik clusterfuck od metode
 
-            networkPlayerInventory.handleInventorySlotOnDragDropEvent(invSlot);
+            networkPlayerInventory.handleInventorySlotOnDragDropEvent(invSlot,null,false);
         }
         else {//smo dropal nekam tko da mora past na tla. gremo prevert s kje smo potegnil
             InventorySlot inventorySlot = networkPlayerInventory.draggedItemParent.GetComponent<InventorySlot>();
@@ -39,10 +39,20 @@ public class ItemDropHandler : MonoBehaviour, IDropHandler
             }
         }
     }
+
+
+
+
     private int getIndexFromName(string name)
     {
         string[] a = name.Split('(');
         string[] b = a[a.Length - 1].Split(')');
         return Int32.Parse(b[0]);
+    }
+
+    public void OnPointerClick(PointerEventData eventData)
+    {
+        if (eventData.button == PointerEventData.InputButton.Right && GetComponent<InventorySlot>().GetItem()!=null)
+            networkPlayerInventory.OnRightClick(gameObject);
     }
 }

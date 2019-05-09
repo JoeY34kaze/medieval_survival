@@ -220,6 +220,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   icon: {fileID: 7934522589448827181}
+  index: 0
 --- !u!114 &6316133624032957186
 MonoBehaviour:
   m_ObjectHideFlags: 0

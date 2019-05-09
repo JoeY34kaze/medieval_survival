@@ -44,6 +44,10 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
     private Item shield;
 
 
+
+
+
+
     /// <summary>
     /// proba upgrejdat loadout z itemom i. vrne item i ce ni upgrade. vrne item s katermu ga je zamenov ce je upgrade bil, vrne null ce je biu prazn slot prej
     /// </summary>
@@ -113,6 +117,11 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         if (onItemChangedCallback != null)
             onItemChangedCallback.Invoke();
         return r;
+    }
+
+    internal void OnRightClick(GameObject g)//tole lahko potem pri ciscenju kode z malo preurejanja damo v uno tavelko metodo
+    {
+        handleInventorySlotOnDragDropEvent(null, g.transform, true);
     }
 
     internal bool hasInventorySpace()
@@ -435,9 +444,19 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
     /// </summary>
     /// <param name="startingParent"></param>
     /// <param name="targetParent"></param>
-    private void InventoryToLoadout(RectTransform loa)//
+    private void InventoryToLoadout(RectTransform loa, bool rightClick)//
     {
-        int loadout_index = getIndexFromName(loa.name);
+
+        int loadout_index = 0;
+        if (!rightClick)
+        {
+            loadout_index = getIndexFromName(loa.name);
+        }
+        else {//right click- loa je null
+            if (weapon_0 != null) loadout_index = 1;
+        }
+
+
         Item loadout_item = null;
         loadout_item = PopLoadoutItem(this.draggedItemParent.GetComponent<InventorySlotPersonal>().GetItem().type, loadout_index);
 
@@ -445,12 +464,13 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         Item inventory_item = this.items[inv_index];//poisce item glede na id-ju slota. id dobi iz imena tega starsa.
 
 
-        if(SetLoadoutItem(inventory_item, loadout_index))//to bo zmer slo cez ker je slot ze prazen. smo ga izpraznli z popom. vrne true ce je item biu valid za nek loadout slot.
+        if (SetLoadoutItem(inventory_item, loadout_index))//to bo zmer slo cez ker je slot ze prazen. smo ga izpraznli z popom. vrne true ce je item biu valid za nek loadout slot.
             Remove(inv_index);
         if (loadout_item != null)
         {//loadout ni bil prazen prej tko da rabmo item dat v inventorij
-            Add(loadout_item,1, inv_index);
+            Add(loadout_item, 1, inv_index);
         }
+
 
     }
 
@@ -510,31 +530,50 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
     /// ko je drop event panela klice to metodo. vse se handla potem tukaj v tej skripti.
     /// </summary>
     /// <param name="invSlot"></param>
-    internal void handleInventorySlotOnDragDropEvent(RectTransform invSlot)
+    internal void handleInventorySlotOnDragDropEvent(RectTransform invSlot, Transform parent, bool rightClick)
     {
-        if (invSlot.GetComponent<InventorySlot>() is InventorySlotLoadout && this.draggedItemParent.GetComponent<InventorySlot>() is InventorySlotPersonal)
+        if (parent == null)
+            parent = this.draggedItemParent;
+        this.draggedItemParent = parent.GetComponent<RectTransform>();
+
+        InventorySlot from = parent.GetComponent<InventorySlot>();
+
+        if (invSlot != null)
         {
-            //Debug.Log("Premikamo iz inventorija v loadout");
-            InventoryToLoadout(invSlot);
+            InventorySlot to = invSlot.GetComponent<InventorySlot>();
+            if (invSlot.GetComponent<InventorySlot>() is InventorySlotLoadout && from is InventorySlotPersonal)
+            {
+                //Debug.Log("Premikamo iz inventorija v loadout");
+                InventoryToLoadout(invSlot,false);
+            }
+            else if (invSlot.GetComponent<InventorySlot>() is InventorySlotPersonal && from is InventorySlotLoadout)
+            {
+                LoadoutToInventory(invSlot,false);
+                //Debug.Log("Premikamo iz loadouta v inventorij");
+            }
+            else if (invSlot.GetComponent<InventorySlot>() is InventorySlotPersonal && from is InventorySlotPersonal)
+            {
+                //Debug.Log("Premikamo item znotraj inventorija");
+                InventoryToInventory(invSlot);
+            }
+            else if (invSlot.GetComponent<InventorySlot>() is InventorySlotLoadout && from is InventorySlotLoadout)
+            {
+                //Debug.Log("Premikamo item znotraj loadouta.");
+                LoadoutToLoadout(invSlot);
+            }
         }
-        else if (invSlot.GetComponent<InventorySlot>() is InventorySlotPersonal && this.draggedItemParent.GetComponent<InventorySlot>() is InventorySlotLoadout)
-        {
-            LoadoutToInventory(invSlot);
-            //Debug.Log("Premikamo iz loadouta v inventorij");
-        }
-        else if (invSlot.GetComponent<InventorySlot>() is InventorySlotPersonal && this.draggedItemParent.GetComponent<InventorySlot>() is InventorySlotPersonal)
-        {
-            //Debug.Log("Premikamo item znotraj inventorija");
-            InventoryToInventory(invSlot);
-        }
-        else if (invSlot.GetComponent<InventorySlot>() is InventorySlotLoadout && this.draggedItemParent.GetComponent<InventorySlot>() is InventorySlotLoadout)
-        {
-            //Debug.Log("Premikamo item znotraj loadouta.");
-            LoadoutToLoadout(invSlot);
+        else {//right click event
+            if (from is InventorySlotPersonal)
+            {
+                InventoryToLoadout(null, true);
+            }
+            else if (from is InventorySlotLoadout) {
+                LoadoutToInventory(null,true);
+            }
         }
         this.draggedItemParent = null;//tole nastavmo tud na drag handlerju just in case
 
-        GetComponent<NetworkPlayerCombatHandler>().update_equipped_weapons();
+        GetComponent<NetworkPlayerCombatHandler>().update_equipped_weapons();//tole bo treba v delegata
 
         if (onItemChangedCallback != null)
             onItemChangedCallback.Invoke();
@@ -564,24 +603,28 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
             weapon_0 = temp;
     }
 
-    private void LoadoutToInventory(RectTransform invSlot)
+    private void LoadoutToInventory(RectTransform invSlot, bool rightClick)
     {
-        int index = getIndexFromName(invSlot.name);
+        int index = -1;
+
+        if (!rightClick) index = getIndexFromName(invSlot.name);
         Item.Type t = this.draggedItemParent.GetComponent<InventorySlotLoadout>().type;
 
-
-        if (this.items[index]!=null)//enum comparison nj bi baje delov z == in ne .Equals
-        {//ce se item ujema naj se zamenja
-            if (t==this.items[index].type) {
-                Item loadout_item = null;
-                int loadout_index = getIndexFromName(this.draggedItemParent.name);
-                loadout_item = PopLoadoutItem(t, loadout_index);
-
-                Item inventory_item = this.items[index];
-                if (loadout_item != null)
+        if (index != -1) {//za right click
+            if (this.items[index] != null)//enum comparison nj bi baje delov z == in ne .Equals
+            {//ce se item ujema naj se zamenja
+                if (t == this.items[index].type)
                 {
-                    Add(loadout_item, 1, index);
-                    SetLoadoutItem(inventory_item, loadout_index);
+                    Item loadout_item = null;
+                    int loadout_index = getIndexFromName(this.draggedItemParent.name);
+                    loadout_item = PopLoadoutItem(t, loadout_index);
+
+                    Item inventory_item = this.items[index];
+                    if (loadout_item != null)
+                    {
+                        Add(loadout_item, 1, index);
+                        SetLoadoutItem(inventory_item, loadout_index);
+                    }
                 }
             }
         }
@@ -589,11 +632,14 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         {
             Item loadout_item = null;
             loadout_item = PopLoadoutItem(t, getIndexFromName(this.draggedItemParent.name));
-            
+
             if (loadout_item != null)
             {//da rabmo item dat v inventorij
-                if (this.items[index] == null)
-                    Add(loadout_item, 1, index);
+                if(!rightClick)
+                    if (this.items[index] == null)
+                        Add(loadout_item, 1, index);
+                    else
+                        AddFirst(loadout_item, 1);
                 else AddFirst(loadout_item, 1);
             }
         }

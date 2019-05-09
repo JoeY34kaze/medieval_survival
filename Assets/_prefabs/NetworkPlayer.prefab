@@ -3490,6 +3490,7 @@ MonoBehaviour:
   equipped_weapon_slots:
   - {fileID: 2169459720401964971}
   - {fileID: 2048528667891861577}
+  equipped_weapons: 
   possible_melee_weapons: 0000000000000000
 --- !u!114 &4281506579215346488
 MonoBehaviour:

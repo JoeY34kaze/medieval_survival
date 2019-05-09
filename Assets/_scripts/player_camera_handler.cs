@@ -17,8 +17,12 @@ public class player_camera_handler : NetworkPlayerCameraHandlerBehavior
     public float mouse_sensitivity_multiplier = 1.0f;
 
     public Camera player_cam;
+    private NetworkPlayerInventory networkPlayerInventory;
 
-
+    private void Awake()
+    {
+        this.networkPlayerInventory = GetComponent<NetworkPlayerInventory>();
+    }
     // CE BO DAT KAMERO POD KOTOM JE TREBA POHENDLAT DA JE ZMER VODORAVNO KER DRUGAC JE NEKEJ WONKY
     protected override void NetworkStart()
     { 
@@ -35,7 +39,10 @@ public class player_camera_handler : NetworkPlayerCameraHandlerBehavior
     void LateUpdate()
     {
         if (!networkObject.IsOwner) return;
-        player_cam.transform.localPosition = camera_starting_offset;
+        if (networkPlayerInventory.panel_inventory.activeSelf) return;
+
+
+            player_cam.transform.localPosition = camera_starting_offset;
         player_cam.transform.localRotation = Quaternion.Euler(camera_rotation_offset);
 
         //float mouseX = Input.GetAxis("Mouse X");

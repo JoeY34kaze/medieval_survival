@@ -102,6 +102,7 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
             handle_animations_from_rpcs();
             return;
         }
+        if (networkPlayerInventory.panel_inventory.activeSelf) return;
 
         check_and_handle_combat();//keyboard input glede combata
         networkObject.combatmode = this.combat_mode; //ce bo treba zmanjsevat bandwidth lahko tole zamenjamo z rpc ampak je treba nrdit buffered rpc al pa nekejker se sicer lahko zgodi da bi biu en u combat mode in pride do playerja in bi ga ta player vidu da ni u combat modu. that causes problems. ce bomo sploh mel te mode al nevm
