@@ -13,6 +13,20 @@ public class ItemPickup : Interactable {
     //zaenkrat smao pove da je item k se ga lahko pobere
 
 
+    IEnumerator changeOwner()//hacky, but we save 1 rpc call because of it
+    {
+        yield return new WaitForSeconds(1);
+        if (networkObject.IsServer) networkObject.TakeOwnership();
+    }
+
+    protected override void NetworkStart()
+    {
+        base.NetworkStart();
+        // TODO:  Your initialization code that relies on network setup for this object goes here
+        StartCoroutine(changeOwner());
+
+    }
+
     internal override void interact(uint server_id)//sprozi na playerju
     {
         if (local_lock.item_allows_interaction)

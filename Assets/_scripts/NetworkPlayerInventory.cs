@@ -44,7 +44,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
     private Item weapon_1;
     private Item shield;
 
-
+    private Camera c;
 
 
 
@@ -829,7 +829,9 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
 
     internal void instantiateDroppedItem(Item item, int quantity) // instantiate it when dropped
     {
-        NetworkManager.Instance.InstantiateInteractable_object(item.id-2, transform.position + transform.forward);
+        if(c==null)c=GetComponentInChildren<Camera>();
+        Interactable_objectBehavior b =NetworkManager.Instance.InstantiateInteractable_object(item.id-2, c.transform.position+(c.transform.forward*3));
+        b.gameObject.GetComponent<Rigidbody>().AddForce(c.transform.forward*1500);
     }
 
     private int getIndexFromName(string name)
