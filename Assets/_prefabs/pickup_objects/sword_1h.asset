@@ -19,3 +19,4 @@ MonoBehaviour:
   id: 2
   prefab_pickup: {fileID: 1566654935662004460, guid: 7d09e4243d4bf0e4197bce45a4178b1b,
     type: 3}
+  weapon_animation_class: 2

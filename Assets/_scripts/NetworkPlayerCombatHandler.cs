@@ -20,6 +20,7 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
     private Animator animator;
     private player_local_locks player_local_locks;
     private NetworkPlayerStats stats;
+
     private NetworkPlayerInventory networkPlayerInventory;
     //private Mapper mapper;
     public GameObject[] combat_sound_effects;
@@ -49,6 +50,7 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
     private void On_Current_weapon_changed(int newVal)
     {
         Debug.Log(this.previous_weapon + "WEAPON HAS BEEN CHANGED! " + newVal);
+        animator.SetInteger("weapon_animation_class", getWeaponClassForAnimator(equipped_weapons[newVal]));
         if (combat_mode == 0) return;
         if (networkObject.IsOwner)
         {
@@ -58,11 +60,16 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
                 slot.GetChild(equipped_weapons[newVal]).gameObject.SetActive(true);
                 slot.GetChild(equipped_weapons[newVal]).gameObject.GetComponent<Collider>().enabled = false;
             }
-            animator.SetInteger("current_weapon", equipped_weapons[newVal]);
             networkObject.SendRpc(RPC_CHANGE_CURRENT_WEAPON, Receivers.OthersProximity, equipped_weapons[newVal], -1, equipped_weapons[this.previous_weapon], 0);
             Debug.Log("owner poslal rpc da clienti updejtajo njegov trenutni weapon");
         }
     }
+
+    private int getWeaponClassForAnimator(int v)//tole bo treba updejtat i guess
+    {
+        return Mapper.instance.getItemById(this.equipped_weapons[v]).weapon_animation_class;
+    }
+
     //------------------------------------------------------------------------------------------NETWORKING-----------------------------------------------------------
 
     private void Start()
@@ -366,6 +373,7 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
         animator.SetBool("combat_blocking", false);
         this.blocking = false;
         //fire1 se mora itak resetirat ker je trigger
+
 
     }
 
