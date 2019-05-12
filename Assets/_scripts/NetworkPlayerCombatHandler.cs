@@ -25,9 +25,65 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
     //private Mapper mapper;
     public GameObject[] combat_sound_effects;
 
-    public Transform[] equipped_weapon_slots;
+    public Transform weapon_slot;
+    public Transform shield_slot;
 
-    public int[] equipped_weapons;
+    private int equipped_shield_dont_access_this = 1;//zmer bo id shielda, ce ni u loadoutu shielda bo meu unarmed block
+    public int currently_equipped_shield {
+        get { return this.equipped_shield_dont_access_this; }
+        set {
+            if (this.equipped_shield_dont_access_this == value) return;
+            else {
+                equipped_shield_dont_access_this = value;
+                if (Current_shield_changed_event != null)
+                    Current_shield_changed_event(this.equipped_shield_dont_access_this);
+            }
+        }
+    }
+    public delegate void On_Current_Shield_Variable_Change_Delegate(int n);
+    public event On_Current_Shield_Variable_Change_Delegate Current_shield_changed_event;
+    private void On_Current_shield_changed(int n) {
+
+        Debug.Log("Shield HAS BEEN CHANGED! " + n);
+        if (combat_mode == 0) return;
+        if (networkObject.IsOwner)
+        {
+            if (n != 1)
+            {
+                if (this.shield_slot.GetChild(1).gameObject.activeSelf)//ce slucajn drzimo block
+                {
+                    this.shield_slot.GetChild(1).gameObject.SetActive(false);
+                }
+                this.shield_slot.GetChild(GetChildIndexOfShieldFromId(n)).gameObject.SetActive(true);
+                this.shield_slot.GetChild(GetChildIndexOfShieldFromId(n)).gameObject.GetComponent<Collider>().enabled = false;
+            }
+            else
+            {
+                disable_all_shields();
+            }
+            networkObject.SendRpc(RPC_CHANGE_CURRENT_SHIELD, Receivers.OthersProximity, n);
+        }
+        //animator?
+        //izrisavanje
+        //rpcji
+    }
+
+    private int GetChildIndexOfShieldFromId(int n)
+    {
+        if (n == 3) {//id je iron shield, vrni pozicijo na roki k je.
+            return 2;
+        }
+        return 1;
+    }
+
+    private void disable_all_shields()
+    {
+        foreach(Transform c in shield_slot) {
+            if (c.gameObject.activeSelf) c.gameObject.SetActive(false);
+        }
+    }
+
+    public int[] equipped_weapons;//weaponi k so u loadoutu od playerja
 
     public uint[] possible_melee_weapons = new uint[2];
     private int previous_weapon;
@@ -54,19 +110,18 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
         if (combat_mode == 0) return;
         if (networkObject.IsOwner)
         {
-            foreach (Transform slot in equipped_weapon_slots)
-            {
-                slot.GetChild(equipped_weapons[previous_weapon]).gameObject.SetActive(false);
-                slot.GetChild(equipped_weapons[newVal]).gameObject.SetActive(true);
-                slot.GetChild(equipped_weapons[newVal]).gameObject.GetComponent<Collider>().enabled = false;
-            }
-            networkObject.SendRpc(RPC_CHANGE_CURRENT_WEAPON, Receivers.OthersProximity, equipped_weapons[newVal], -1, equipped_weapons[this.previous_weapon], 0);
+            this.weapon_slot.GetChild(equipped_weapons[previous_weapon]).gameObject.SetActive(false);
+            this.weapon_slot.GetChild(equipped_weapons[newVal]).gameObject.SetActive(true);
+            this.weapon_slot.GetChild(equipped_weapons[newVal]).gameObject.GetComponent<Collider>().enabled = false;
+
+            networkObject.SendRpc(RPC_CHANGE_CURRENT_WEAPON, Receivers.OthersProximity, equipped_weapons[newVal], equipped_weapons[this.previous_weapon]);
             Debug.Log("owner poslal rpc da clienti updejtajo njegov trenutni weapon");
         }
     }
 
-    private int getWeaponClassForAnimator(int v)//tole bo treba updejtat i guess
+    private int getWeaponClassForAnimator(int v)//tole bo treba updejtat i guess.
     {
+        if (this.equipped_weapons[v] < 2) return 0;
         return Mapper.instance.getItemById(this.equipped_weapons[v]).weapon_animation_class;
     }
 
@@ -79,6 +134,7 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
         this.equipped_weapons[1] = 1;
         this.equipped_weapons[2] = 0;
         this.equipped_weapons[3] = 0;
+        this.currently_equipped_shield = 1;
     }
 
     private void Awake()
@@ -87,15 +143,12 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
         player_local_locks = GetComponent<player_local_locks>();
         stats = GetComponent<NetworkPlayerStats>();
         networkPlayerInventory = GetComponent<NetworkPlayerInventory>();
-        //mapper = GameObject.Find("Mapper").GetComponent<Mapper>();
-
-
     }
     protected override void NetworkStart()
     {
         base.NetworkStart();
         this.Current_weapon_change_event += On_Current_weapon_changed; //registriramo delegata
-
+        this.Current_shield_changed_event += On_Current_shield_changed;
     }
 
     private void Update()
@@ -130,22 +183,17 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
             if (animator.GetCurrentAnimatorStateInfo(1).IsName("combat_layer.in_combat_idle") || animator.GetCurrentAnimatorStateInfo(1).IsName("combat_layer.1h_sword_idle"))
             {
                 in_attack_animation = false;
-
             }
         }
-
         if (this.combat_mode == 1)
         {
-
             if (Input.GetButtonDown("Fire1") && !this.in_attack_animation && !this.blocking)
             {
                 execute_main_attack();
             }
-
-
             else if (Input.GetButtonDown("Fire2"))
             {//blocking-------------------------------------------------------------
-                if (current_weapon_can_perform_block())
+                if (current_shield_can_perform_block())
                 {
                     this.blocking = true;
                     block_activate();
@@ -172,16 +220,18 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
                 this.in_attack_animation = false;
                 animator.SetTrigger("feign");
                 networkObject.SendRpc(RPC_NETWORK_FEIGN, Receivers.OthersProximity);
-                //set_offensive_colliders_on_weapons(false);
             }
         }
 
     }
-
-    private bool current_weapon_can_perform_block()
+    /// <summary>
+    /// ce bojo meli shieldi durability al pa kej tazga
+    /// </summary>
+    /// <returns></returns>
+    private bool current_shield_can_perform_block()
     {
-        if (this.equipped_weapons[this.index_of_currently_selected_weapon_from_equipped_weapons] == 0) return true;
-        else return false;
+        Debug.Log("Trying to perform block!");
+        return true;
     }
 
     private void check_for_weapon_switch()
@@ -211,12 +261,6 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
 
             this.index_of_currently_selected_weapon_from_equipped_weapons = next_index;
         }
-        else if (Input.GetAxis("Mouse ScrollWheel") < 0f) // menja shielde
-        {
-            //int stevilo_weaponov = equipped_weapon_slots[0].childCount;
-            //if (this.Currently_equipped_weapon - 1 < 0) this.Currently_equipped_weapon = stevilo_weaponov - 1;// ker je 0 indexed
-            //else this.Currently_equipped_weapon = (this.Currently_equipped_weapon - 1) % stevilo_weaponov;
-        }
     }
 
     public void update_equipped_weapons()
@@ -227,9 +271,22 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
         this.equipped_weapons[3] = networkPlayerInventory.GetWeapon1();
         this.equipped_weapons[4] = networkPlayerInventory.GetRanged();
 
-        //ce je trenutno equipan item, ki ni v equipped weapons ga moramo deaktivirat.
+        int prev_shield = this.currently_equipped_shield;
+        this.currently_equipped_shield=networkPlayerInventory.GetShield();
 
-        int index_prev = getSiblingIndexOfFirstActiveChild();
+        if (prev_shield != this.currently_equipped_shield) {//prslo je do spremembe shielda
+            disable_all_shields();
+            if (this.currently_equipped_shield != 1)
+            {
+                shield_slot.GetChild(GetChildIndexOfShieldFromId(this.currently_equipped_shield)).gameObject.SetActive(true);//ga takoj izrise
+                networkObject.SendRpc(RPC_CHANGE_CURRENT_SHIELD, Receivers.OthersProximity, this.currently_equipped_shield);
+            }
+        }
+
+
+
+        //ce je trenutno equipan item, ki ni v equipped weapons ga moramo deaktivirat.
+        int index_prev = getSiblingIndexOfFirstActiveChild_Weapon();
         if (index_prev == -1) {
             //do nothing
         }
@@ -238,41 +295,50 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
             this.index_of_currently_selected_weapon_from_equipped_weapons = 0;
             if (index_prev > -1)
             {
-                this.equipped_weapon_slots[0].GetChild(index_prev).gameObject.SetActive(false);//tole bo treba najbrz spravt tud v rpc al pa nekej
-                this.equipped_weapon_slots[1].GetChild(index_prev).gameObject.SetActive(false);
+                this.weapon_slot.GetChild(index_prev).gameObject.SetActive(false);//tole bo treba najbrz spravt tud v rpc al pa nekej
             }
         }
     }
 
-    private int getSiblingIndexOfFirstActiveChild()
+    private int getSiblingIndexOfFirstActiveChild_Weapon()
     {
         int k = -1;
-        for (int i = 0; i < equipped_weapon_slots.Length; i++)
-            for (int j = 0; j < equipped_weapon_slots[i].childCount; j++)
+
+        for (int j = 0; j < weapon_slot.childCount; j++)
+        {
+            if (weapon_slot.GetChild(j).gameObject.activeSelf)
             {
-                if (equipped_weapon_slots[i].GetChild(j).gameObject.activeSelf)
-                {
-                    return j;
-                }
+                return j;
             }
+        }
         return k;
     }
 
     private void block_activate()
     {
-        if (this.equipped_weapons[this.index_of_currently_selected_weapon_from_equipped_weapons] == 0)
-        {
-            this.index_of_currently_selected_weapon_from_equipped_weapons = 1;
+        if (this.currently_equipped_shield == 1)
+        {//unarmed block or block with weapon
+            Debug.Log("Blocking with unarmed / weapon");
         }
+        else {
+            //perform block with shield
+            Debug.Log("Blocking with shield!");
+        } 
 
     }
 
     private void block_deactivate()
     {
-        if (this.equipped_weapons[this.index_of_currently_selected_weapon_from_equipped_weapons] == 1)
-        {
-            this.index_of_currently_selected_weapon_from_equipped_weapons = 0;
+        if (this.currently_equipped_shield == 1)
+        {//unarmed block or block with weapon
+            Debug.Log("Stopped blocking with unarmed / weapon");
         }
+        else
+        {
+            //perform block with shield
+            Debug.Log("Stopped blocking with shield!");
+        }
+
     }
 
     private void check_and_handle_combat_mode()
@@ -284,8 +350,9 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
                 Combat_mode = 1;
                 if (networkObject.IsOwner)
                 {
-                    //this.Currently_equipped_weapon = 0;
+
                     enable_current_weapon();
+                    enable_current_shield();
                 }
             }
             else
@@ -293,6 +360,7 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
                 Combat_mode = 0;//tole ksnej stlacmo v delegata da loh klicemo evente
                 reset_all_combat_related_animator_parameters();
                 disable_all_possible_equipped_weapons();
+                place_shield_on_back();
             }
         }
 
@@ -300,11 +368,23 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
 
     }
 
+    private void place_shield_on_back()
+    {
+        Debug.Log("Treba implementirat da se da shield na hrbet.");
+    }
+
+    private void enable_current_shield()
+    {
+        if (!networkObject.IsOwner) return;
+        if (this.currently_equipped_shield == 1) return;
+        this.shield_slot.GetChild(GetChildIndexOfShieldFromId(this.currently_equipped_shield)).gameObject.SetActive(true);
+        networkObject.SendRpc(RPC_CHANGE_CURRENT_SHIELD, Receivers.OthersProximity, this.currently_equipped_shield);
+    }
+
     private void disable_all_possible_equipped_weapons()
     {
-        foreach (Transform s in equipped_weapon_slots)
-            foreach (Transform c in s)
-                c.gameObject.SetActive(false);
+        foreach (Transform c in weapon_slot)
+            c.gameObject.SetActive(false);
     }
 
     /// <summary>
@@ -313,11 +393,10 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
     private void enable_current_weapon()
     {
         if (!networkObject.IsOwner) return;
-        foreach (Transform slot in this.equipped_weapon_slots)
-        {
-            slot.GetChild(this.equipped_weapons[index_of_currently_selected_weapon_from_equipped_weapons]).gameObject.SetActive(true);
-        }
-        networkObject.SendRpc(RPC_CHANGE_CURRENT_WEAPON, Receivers.OthersProximity, this.equipped_weapons[index_of_currently_selected_weapon_from_equipped_weapons], -1, -1, -1);
+
+        weapon_slot.GetChild(this.equipped_weapons[index_of_currently_selected_weapon_from_equipped_weapons]).gameObject.SetActive(true);
+
+        networkObject.SendRpc(RPC_CHANGE_CURRENT_WEAPON, Receivers.OthersProximity, this.equipped_weapons[index_of_currently_selected_weapon_from_equipped_weapons], -1);
     }
 
 
@@ -380,22 +459,19 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
     /// <summary>
     /// Na serverju se aktivira collider na weaponu s ktermu napadamo. to metodo naj bi klical animation event.
     /// </summary>
-    /// <param name="index_roke">-1 - disable both , 0-leva true, 1 desna true, 2 obe true </param>
+    /// <param name="index_roke">-ubistvu je samo true pa false. 1 se enabla desna roka. -1 se disabla desna roka. </param>
     public void activate_weapon_collider_server(int index_roke)
     {
         if (!networkObject.IsServer) return;
         bool active_l = false;
         bool active_r = false;
-        if (index_roke == 0 || index_roke == 2) active_l = true;
+        //if (index_roke == 0 || index_roke == 2) active_l = true;
         if (index_roke == 1 || index_roke == 2) active_r = true;
         Debug.Log("Activating colliders " + index_roke + " " + active_l + active_r);
-        if (this.equipped_weapon_slots[0].GetChild(this.equipped_weapons[this.index_of_currently_selected_weapon_from_equipped_weapons]).GetComponent<Collider>().enabled != active_l)
-        {//change left arm
-            this.equipped_weapon_slots[0].GetChild(this.equipped_weapons[this.index_of_currently_selected_weapon_from_equipped_weapons]).GetComponent<Weapon_collider_handler>().set_offensive_colliders(active_l);
-        }
-        if (this.equipped_weapon_slots[1].GetChild(this.equipped_weapons[this.index_of_currently_selected_weapon_from_equipped_weapons]).GetComponent<Collider>().enabled != active_r)
+
+        if (this.weapon_slot.GetChild(this.equipped_weapons[this.index_of_currently_selected_weapon_from_equipped_weapons]).GetComponent<Collider>().enabled != active_r)
         {//change right colider
-            this.equipped_weapon_slots[1].GetChild(this.equipped_weapons[this.index_of_currently_selected_weapon_from_equipped_weapons]).GetComponent<Weapon_collider_handler>().set_offensive_colliders(active_r);
+            this.weapon_slot.GetChild(this.equipped_weapons[this.index_of_currently_selected_weapon_from_equipped_weapons]).GetComponent<Weapon_collider_handler>().set_offensive_colliders(active_r);
         }
     }
 
@@ -442,34 +518,43 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
     {
         if (networkObject.IsOwner) return;
         int new_weapon_id1 = args.GetNext<int>();
-        int new_weapon_id2 = args.GetNext<int>();
         int prev_weapon_id1 = args.GetNext<int>();
-        int prev_weapon_id2 = args.GetNext<int>();
-        //this.index_of_currently_selected_weapon_from_equipped_weapons = new_weapon_id1;
 
         animator.SetInteger("current_weapon", new_weapon_id1);
         if (prev_weapon_id1 == -1)
         {
-            foreach (Transform slot in equipped_weapon_slots)
-            {
-                for (int i = 0; i < slot.childCount; i++)
+
+                for (int i = 0; i < this.weapon_slot.childCount; i++)
                 {
-                    if (new_weapon_id1 != i) slot.GetChild(i).gameObject.SetActive(false);
+                    if (new_weapon_id1 != i) this.weapon_slot.GetChild(i).gameObject.SetActive(false);
                     else
                     {
-                        slot.GetChild(i).gameObject.SetActive(true);
-                        slot.GetChild(i).gameObject.GetComponent<Collider>().enabled = false;
+                        this.weapon_slot.GetChild(i).gameObject.SetActive(true);
+                        this.weapon_slot.GetChild(i).gameObject.GetComponent<Collider>().enabled = false;
                     }
                 }
-            }
+            
         }
         else
-            foreach (Transform slot in equipped_weapon_slots)
-            {
-                slot.GetChild(prev_weapon_id1).gameObject.SetActive(false);
-                slot.GetChild(new_weapon_id1).gameObject.SetActive(true);
-                slot.GetChild(new_weapon_id1).gameObject.GetComponent<Collider>().enabled = false;
-            }
+            this.weapon_slot.GetChild(prev_weapon_id1).gameObject.SetActive(false);
+            this.weapon_slot.GetChild(new_weapon_id1).gameObject.SetActive(true);
+            this.weapon_slot.GetChild(new_weapon_id1).gameObject.GetComponent<Collider>().enabled = false;
     }
 
+    public override void ChangeCurrentShield(RpcArgs args)
+    {
+        if (networkObject.IsOwner) return;
+        int new_id = args.GetNext<int>();
+
+        if (new_id == 1)
+        {
+            disable_all_shields();
+        }
+        else {
+            disable_all_shields();//kr tk
+            int ch = GetChildIndexOfShieldFromId(new_id);
+            shield_slot.GetChild(ch).gameObject.SetActive(true);
+            shield_slot.GetChild(ch).GetComponent<Collider>().enabled = true;//nj kar skos detektira? ce ma player na hrbtu recimo bi blo najbrz fajn ce bi blokiral puscice
+        }
+    }
 }

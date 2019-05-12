@@ -307,6 +307,12 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         return this.weapon_1.id;
     }
 
+    internal int GetShield()
+    {
+        if (this.shield == null) return 1;//unarmed
+        return this.shield.id;
+    }
+
     internal int GetWeapon0()
     {
         if (this.weapon_0 == null) return 0;//unarmed
