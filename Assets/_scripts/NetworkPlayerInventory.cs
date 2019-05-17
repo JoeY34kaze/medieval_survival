@@ -413,6 +413,10 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         Item i = slots[inventory_slot].GetItem();
         removePersonalInventoryItem(inventory_slot);
         instantiateDroppedItem(i,1);
+
+        //rpc update
+        sendNetworkUpdate(true, false);
+
         if (onItemChangedCallback != null)
             onItemChangedCallback.Invoke();
     }
@@ -422,6 +426,10 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         if (!networkObject.IsOwner) return;
         Item i = PopLoadoutItem(type, index);
         instantiateDroppedItem(i,1);
+
+        //rpc update
+        sendNetworkUpdate(false, true);
+
         if (onItemChangedCallback != null)
             onItemChangedCallback.Invoke();
     }

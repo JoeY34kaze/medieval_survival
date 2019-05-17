@@ -121,8 +121,14 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
 
     private int getWeaponClassForAnimator(int v)//tole bo treba updejtat i guess.
     {
-        if (this.equipped_weapons[v] < 2) return 0;
-        return Mapper.instance.getItemById(this.equipped_weapons[v]).weapon_animation_class;
+        if (networkObject.IsOwner)//bo poiskal glede na array weaponov k jih ima equipane
+        {
+            if (this.equipped_weapons[v] < 2) return 0;
+            return Mapper.instance.getItemById(this.equipped_weapons[v]).weapon_animation_class;
+        }
+        else {//bo poiskal glede na direktn id weapona k ima v rok ker mislm da ne sinhronizira vseh potrebnih spremenlivk da bi delov po isti fori kot za ownerja
+            return Mapper.instance.getItemById(v).weapon_animation_class;
+        }
     }
 
     //------------------------------------------------------------------------------------------NETWORKING-----------------------------------------------------------
@@ -287,7 +293,7 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
 
 
 
-        //ce je trenutno equipan item, ki ni v equipped weapons ga moramo deaktivirat.
+        //ce je trenutno equipan item, ki ni v equipped weapons ga moramo deaktivirat in sinhronizirat network.
         int index_prev = getSiblingIndexOfFirstActiveChild_Weapon();
         if (index_prev == -1) {
             //do nothing
@@ -299,6 +305,8 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
             {
                 this.weapon_slot.GetChild(index_prev).gameObject.SetActive(false);//tole bo treba najbrz spravt tud v rpc al pa nekej
             }
+            //send rpc
+            networkObject.SendRpc(RPC_CHANGE_CURRENT_WEAPON, Receivers.OthersProximity, this.equipped_weapons[index_of_currently_selected_weapon_from_equipped_weapons], -1);
         }
     }
 
@@ -406,7 +414,13 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
     {
 
         animator.SetBool("combat_blocking", this.blocking);
-        if (animator.GetInteger("combat_mode") != (int)Combat_mode) animator.SetInteger("combat_mode", (int)Combat_mode);
+        if (animator.GetInteger("combat_mode") != (int)Combat_mode)
+        {
+            animator.SetInteger("combat_mode", (int)Combat_mode);
+            //disablat weapon k ma u rok.
+            if((int)Combat_mode==0)
+                disable_all_possible_equipped_weapons();
+        }
     }
 
 
@@ -471,9 +485,10 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
         if (index_roke == 1 || index_roke == 2) active_r = true;
         Debug.Log("Activating colliders " + index_roke + " " + active_l + active_r);
 
-        if (this.weapon_slot.GetChild(this.equipped_weapons[this.index_of_currently_selected_weapon_from_equipped_weapons]).GetComponent<Collider>().enabled != active_r)
+        int ind = getSiblingIndexOfFirstActiveChild_Weapon();
+        if (this.weapon_slot.GetChild(ind).GetComponent<Collider>().enabled != active_r)
         {//change right colider
-            this.weapon_slot.GetChild(this.equipped_weapons[this.index_of_currently_selected_weapon_from_equipped_weapons]).GetComponent<Weapon_collider_handler>().set_offensive_colliders(active_r);
+            this.weapon_slot.GetChild(ind).GetComponent<Weapon_collider_handler>().set_offensive_colliders(active_r);
         }
     }
 
@@ -519,28 +534,34 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
     public override void ChangeCurrentWeapon(RpcArgs args)
     {
         if (networkObject.IsOwner) return;
-        int new_weapon_id1 = args.GetNext<int>();
-        int prev_weapon_id1 = args.GetNext<int>();
+        int new_weapon_id = args.GetNext<int>();
+        int prev_weapon_id = args.GetNext<int>();
 
-        animator.SetInteger("current_weapon", new_weapon_id1);
-        if (prev_weapon_id1 == -1)
+        if (prev_weapon_id == -1)
         {
 
-                for (int i = 0; i < this.weapon_slot.childCount; i++)
+            for (int i = 0; i < this.weapon_slot.childCount; i++)
+            {
+                if (new_weapon_id != i) this.weapon_slot.GetChild(i).gameObject.SetActive(false);
+                else
                 {
-                    if (new_weapon_id1 != i) this.weapon_slot.GetChild(i).gameObject.SetActive(false);
-                    else
-                    {
-                        this.weapon_slot.GetChild(i).gameObject.SetActive(true);
-                        this.weapon_slot.GetChild(i).gameObject.GetComponent<Collider>().enabled = false;
-                    }
+                    this.weapon_slot.GetChild(i).gameObject.SetActive(true);
+                    this.weapon_slot.GetChild(i).gameObject.GetComponent<Collider>().enabled = false;
                 }
-            
+            }
+
         }
         else
-            this.weapon_slot.GetChild(prev_weapon_id1).gameObject.SetActive(false);
-            this.weapon_slot.GetChild(new_weapon_id1).gameObject.SetActive(true);
-            this.weapon_slot.GetChild(new_weapon_id1).gameObject.GetComponent<Collider>().enabled = false;
+        {
+            this.weapon_slot.GetChild(prev_weapon_id).gameObject.SetActive(false);
+            this.weapon_slot.GetChild(new_weapon_id).gameObject.SetActive(true);
+            this.weapon_slot.GetChild(new_weapon_id).gameObject.GetComponent<Collider>().enabled = false;
+        }
+
+        if(new_weapon_id<2)
+            animator.SetInteger("weapon_animation_class", 0);
+        else//mamo en weapon not k nima unarmed animacije. torej je id vecji od 1
+            animator.SetInteger("weapon_animation_class", getWeaponClassForAnimator(new_weapon_id));
     }
 
     public override void ChangeCurrentShield(RpcArgs args)
