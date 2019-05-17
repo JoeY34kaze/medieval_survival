@@ -109,7 +109,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5327fb6c6a24cc849aecfd7685c43422, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  item_id: 3
+  i: {fileID: 11400000, guid: 83169d4d528f372429129bc6e7f237ea, type: 2}
   quantity: 1
   stackable: 0
 --- !u!65 &5266176857241076448

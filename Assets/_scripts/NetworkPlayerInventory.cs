@@ -466,20 +466,20 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         if (this.chest != null)
             loadout_chest.AddItem(this.chest);
         else
-            loadout_head.ClearSlot();
+            loadout_chest.ClearSlot();
 
         if (this.hands != null)
-            loadout_chest.AddItem(this.hands);
+            loadout_hands.AddItem(this.hands);
         else
             loadout_hands.ClearSlot();
 
         if (this.legs != null)
-            loadout_head.AddItem(this.legs);
+            loadout_legs.AddItem(this.legs);
         else
             loadout_legs.ClearSlot();
 
         if (this.feet != null)
-            loadout_head.AddItem(this.feet);
+            loadout_feet.AddItem(this.feet);
         else
             loadout_feet.ClearSlot();
 

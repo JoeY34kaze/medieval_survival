@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5ba0d0d991d7fd84490deca31f6fb3d9, type: 3}
+  m_Name: gauntlets_steel
+  m_EditorClassIdentifier: 
+  Display_name: Steel Gauntlets
+  type: 2
+  icon: {fileID: 21300000, guid: fbcd5dc74c7e77a428bcb369e68acd9b, type: 3}
+  damage: 0
+  id: 4
+  prefab_pickup: {fileID: 139793432851148391, guid: 15a8163b3ad581c43aa2afa8433ed440,
+    type: 3}
+  weapon_animation_class: -1
+  wardrobeRecipe: {fileID: 11400000, guid: e28b219888854d841af61399412102bc, type: 2}
