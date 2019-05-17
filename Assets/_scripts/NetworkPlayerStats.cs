@@ -101,7 +101,11 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
 
     public void Update()
     {
-        if (networkObject == null) return; //tole lahko verjetn vse damo v start
+        if (networkObject == null)
+        {
+            Debug.LogError("networkObject is null.");
+            return;
+        }
         if (myNetWorker == null)
         {
             if (GameObject.Find("NetworkManager(Clone)") != null)

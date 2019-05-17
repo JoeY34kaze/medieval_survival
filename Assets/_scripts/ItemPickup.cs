@@ -16,6 +16,7 @@ public class ItemPickup : Interactable {
     IEnumerator changeOwner()//hacky, but we save 1 rpc call because of it
     {
         yield return new WaitForSeconds(1);
+        if (networkObject == null) { Debug.LogError("networkObject is null."); }
         if (networkObject.IsServer) networkObject.TakeOwnership();
     }
 
@@ -29,6 +30,8 @@ public class ItemPickup : Interactable {
 
     internal override void interact(uint server_id)//sprozi na playerju
     {
+        if (networkObject == null) { Debug.LogError("networkObject is null."); }
+
         if (local_lock.item_allows_interaction)
         {
             Debug.Log("Sending from local object to server for aprooval");
@@ -55,6 +58,7 @@ public class ItemPickup : Interactable {
 
     public override void HandleItemPickupServerSide(RpcArgs args)
     {
+        if (networkObject == null) { Debug.LogError("networkObject is null."); }
         if (!networkObject.IsServer) return;
         Debug.Log("Server received item pickup request");
         if (!local_lock.item_allows_interaction) {

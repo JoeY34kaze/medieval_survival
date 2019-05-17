@@ -22,6 +22,7 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
     // Update is called once per frame
     void Update()
     {
+        if (networkObject == null) { Debug.LogError("networkObject is null."); return; }
         if (!networkObject.IsOwner) return;
         if (stats == null) stats = GetComponent<NetworkPlayerStats>();
         if (networkPlayerInventory == null) networkPlayerInventory = GetComponent<NetworkPlayerInventory>();

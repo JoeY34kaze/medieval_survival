@@ -63,7 +63,9 @@ public class NetworkPlayerAnimationLogic : NetworkPlayerAnimationBehavior
 
     private void Update()
     {
-        if (networkObject == null) return;
+        if (networkObject == null) {
+            Debug.LogError("networkObject is null.");
+            return; }
 
         if (!networkObject.IsOwner) return;
 

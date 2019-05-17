@@ -153,7 +153,9 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
 
     private void Update()
     {
-        if (networkObject == null) return;
+        if (networkObject == null) {
+            Debug.LogError("networkObject is null.");
+            return; }
         if (!networkObject.IsOwner)
         {
             //Debug.Log("Got combat mode " + networkObject.combatmode);

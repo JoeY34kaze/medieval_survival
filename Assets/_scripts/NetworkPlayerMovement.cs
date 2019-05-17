@@ -57,6 +57,11 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
 
         // If we are not the owner of this network object then we should
         // move this cube to the position/rotation dictated by the owner
+        if (networkObject == null)
+        {
+            Debug.LogError("networkObject is null.");
+            return;
+        }
         if (!networkObject.IsOwner)
         {
 

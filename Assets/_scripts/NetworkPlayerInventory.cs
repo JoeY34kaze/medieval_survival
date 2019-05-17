@@ -271,7 +271,10 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
     void Update()
     {
 
-        if (networkObject == null) return;
+        if (networkObject == null) {
+            Debug.LogError("networkObject is null.");
+            return;
+        }
         if (!networkObject.IsOwner) return;
         // Check to see if we should open/close the inventory
         //Debug.Log("items - " + this.items.Length);

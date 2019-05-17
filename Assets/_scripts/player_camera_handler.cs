@@ -38,6 +38,11 @@ public class player_camera_handler : NetworkPlayerCameraHandlerBehavior
 
     void LateUpdate()
     {
+        if (networkObject == null)
+        {
+            Debug.LogError("networkObject is null.");
+            return;
+        }
         if (!networkObject.IsOwner) return;
         if (networkPlayerInventory.panel_inventory.activeSelf) return;
 
