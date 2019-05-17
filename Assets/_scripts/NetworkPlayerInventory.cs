@@ -241,8 +241,10 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         }
     }
 
-    private void Start()
+    protected override void NetworkStart()
     {
+        base.NetworkStart();
+
         if (networkObject.IsOwner)
         {
             onItemChangedCallback += UpdateUI;    // Subscribe to the onItemChanged callback
@@ -258,13 +260,15 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
                 slots[i] = panel_personalInventorySlots[i].GetComponent<InventorySlotPersonal>();
             items = new Item[slots.Length];
         }
-        else {
-            //prazno da nemore vidt esp hack
+        else
+        {
+            //prazno da nemore vidt esp hack - zaenkrat se tud tle nrdi ker nekej buga sicer.
             slots = new InventorySlotPersonal[panel_personalInventorySlots.Length];
             for (int i = 0; i < slots.Length; i++)
                 slots[i] = panel_personalInventorySlots[i].GetComponent<InventorySlotPersonal>();
             items = new Item[slots.Length];
         }
+
     }
 
 
@@ -285,6 +289,10 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         panel_inventory.SetActive(!panel_inventory.activeSelf);
             if (onItemChangedCallback != null)
                 onItemChangedCallback.Invoke();
+            else
+                Debug.LogError("onItemChangedCallback je null.");
+
+            onItemChangedCallback.Invoke();
             if (panel_inventory.activeSelf)
             {
                 Cursor.lockState = CursorLockMode.None;
@@ -716,6 +724,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
                 i0,
                 i1,
                 i2,
+                i3,
                 i4,
                 i5,
                 i6,
@@ -787,14 +796,19 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         if (!rightClick) index = getIndexFromName(invSlot.name);
         Item.Type t = this.draggedItemParent.GetComponent<InventorySlotLoadout>().type;
 
+        Item loadout_item = null;
+        int loadout_index = getIndexFromName(this.draggedItemParent.name);
+        loadout_item = PopLoadoutItem(t, loadout_index);
+        if (loadout_item == null) {
+            Debug.LogError("dragged loadout item is null. this is not possible.");
+            return;
+        }
+
         if (index != -1) {//za right click
-            if (this.items[index] != null)//enum comparison nj bi baje delov z == in ne .Equals
-            {//ce se item ujema naj se zamenja
-                if (t == this.items[index].type)
+            if (this.items[index] != null)//ce smo potegnil na item k ze obstaja.
+            {
+                if (t == this.items[index].type)//ce se item ujema naj se zamenja
                 {
-                    Item loadout_item = null;
-                    int loadout_index = getIndexFromName(this.draggedItemParent.name);
-                    loadout_item = PopLoadoutItem(t, loadout_index);
 
                     Item inventory_item = this.items[index];
                     if (loadout_item != null)
@@ -803,22 +817,29 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
                         SetLoadoutItem(inventory_item, loadout_index);
                     }
                 }
+                else if (hasInventorySpace()) //ce se ne ujema ga mormo dodat na prvo prazno mesto v inventoriju
+                {
+                    //da rabmo item dat v inventorij
+                    AddFirst(loadout_item, 1);
+                }
+                else
+                {
+                    Debug.Log("No Space in inventory and cannot switch!");
+                }
+            }
+            else {//dodaj na ta slot.
+                Add(loadout_item, 1, index);
             }
         }
         else if (hasInventorySpace())
         {
-            Item loadout_item = null;
-            loadout_item = PopLoadoutItem(t, getIndexFromName(this.draggedItemParent.name));
-
-            if (loadout_item != null)
-            {//da rabmo item dat v inventorij
-                if(!rightClick)
-                    if (this.items[index] == null)
-                        Add(loadout_item, 1, index);
-                    else
-                        AddFirst(loadout_item, 1);
-                else AddFirst(loadout_item, 1);
-            }
+            //da rabmo item dat v inventorij
+            if (!rightClick)
+                if (this.items[index] == null)
+                    Add(loadout_item, 1, index);
+                else
+                    AddFirst(loadout_item, 1);
+            else AddFirst(loadout_item, 1);
         }
         else
         {
