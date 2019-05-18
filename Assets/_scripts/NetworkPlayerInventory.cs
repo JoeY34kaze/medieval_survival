@@ -5,6 +5,8 @@ using BeardedManStudios.Forge.Networking.Generated;
 using System;
 using BeardedManStudios.Forge.Networking.Unity;
 using BeardedManStudios.Forge.Networking;
+using UMA;
+using UMA.CharacterSystem;
 
 public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
 {
@@ -21,7 +23,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
     InventorySlotPersonal[] slots;  // predstavlajo slote v inventoriju, vsak drzi en item. 
 
 
-
+    private DynamicCharacterAvatar avatar;
 
     //-------------------------------LOADOUT SLOTS-----------------------------
     public InventorySlotLoadout loadout_head;
@@ -39,15 +41,56 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
     private Item hands;
     private Item legs;
     private Item feet;
+
+    public delegate void OnLoadoutChanged();
+    public OnLoadoutChanged onLoadoutChangedCallback;
+
+
     private Item ranged;
     private Item weapon_0;
     private Item weapon_1;
     private Item shield;
 
+
     private Camera c;
 
 
+    private void Start()
+    {
+        this.avatar = GetComponent<DynamicCharacterAvatar>();
+    }
 
+    void refresh_UMA_equipped_gear()
+    {
+        avatar.ClearSlots();
+
+        if (this.head != null)
+        {
+            avatar.SetSlot("Head", this.head.recipeName);
+        }
+
+        if (this.chest != null)
+        {
+            avatar.SetSlot("Chest", this.chest.recipeName);
+        }
+
+        if (this.hands != null)
+        {
+            avatar.SetSlot("Hands", this.hands.recipeName);
+        }
+
+        if (this.legs != null)
+        {
+            avatar.SetSlot("Legs", this.legs.recipeName);
+        }
+
+        if (this.feet != null)
+        {
+            avatar.SetSlot("Feet", this.feet.recipeName);
+        }
+
+        avatar.BuildCharacter();
+    }
 
     /// <summary>
     /// proba upgrejdat loadout z itemom i. vrne item i ce ni upgrade. vrne item s katermu ga je zamenov ce je upgrade bil, vrne null ce je biu prazn slot prej
@@ -128,7 +171,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
 
     internal void handleItemPickup(Item item, int quantity)
     {
-        Item resp=try_to_upgrade_loadout(item);
+        Item resp = try_to_upgrade_loadout(item);
         if (resp != null)
             AddFirst(resp, quantity);
         else
@@ -162,22 +205,22 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         switch (i.type)
         {
             case Item.Type.head:
-                    head = i;
+                head = i;
                 break;
             case Item.Type.chest:
-                    chest = i;
+                chest = i;
                 break;
             case Item.Type.hands:
-                    hands = i;
+                hands = i;
                 break;
             case Item.Type.legs:
-                    legs = i;
+                legs = i;
                 break;
             case Item.Type.feet:
-                    feet = i;
+                feet = i;
                 break;
             case Item.Type.ranged:
-                    ranged = i;
+                ranged = i;
                 break;
             case Item.Type.weapon://tole se nobe zmer zamenjal ker tega nocmo. equipa nj se samo ce je slot prazen
                 if (index == 0)
@@ -186,7 +229,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
                     weapon_1 = i;
                 break;
             case Item.Type.shield:
-                    shield = i;
+                shield = i;
                 break;
             default:
                 return false;
@@ -248,28 +291,17 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         if (networkObject.IsOwner)
         {
             onItemChangedCallback += UpdateUI;    // Subscribe to the onItemChanged callback
-            slots = new InventorySlotPersonal[panel_personalInventorySlots.Length];
-            for (int i = 0; i < slots.Length; i++)
-                slots[i] = panel_personalInventorySlots[i].GetComponent<InventorySlotPersonal>();
-            items = new Item[slots.Length];
-        }
-        else if (networkObject.IsServer)
-        {
-            slots = new InventorySlotPersonal[panel_personalInventorySlots.Length];
-            for (int i = 0; i < slots.Length; i++)
-                slots[i] = panel_personalInventorySlots[i].GetComponent<InventorySlotPersonal>();
-            items = new Item[slots.Length];
-        }
-        else
-        {
-            //prazno da nemore vidt esp hack - zaenkrat se tud tle nrdi ker nekej buga sicer.
-            slots = new InventorySlotPersonal[panel_personalInventorySlots.Length];
-            for (int i = 0; i < slots.Length; i++)
-                slots[i] = panel_personalInventorySlots[i].GetComponent<InventorySlotPersonal>();
-            items = new Item[slots.Length];
         }
 
+        slots = new InventorySlotPersonal[panel_personalInventorySlots.Length];
+        for (int i = 0; i < slots.Length; i++)
+            slots[i] = panel_personalInventorySlots[i].GetComponent<InventorySlotPersonal>();
+        items = new Item[slots.Length];
+
+        onLoadoutChangedCallback += refresh_UMA_equipped_gear;
     }
+
+
 
 
     void Update()
@@ -292,7 +324,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
             else
                 Debug.LogError("onItemChangedCallback je null.");
 
-            onItemChangedCallback.Invoke();
+            //onItemChangedCallback.Invoke();
             if (panel_inventory.activeSelf)
             {
                 Cursor.lockState = CursorLockMode.None;
@@ -770,6 +802,9 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
             networkObject.SendRpc(RPC_SEND_LOADOUT_UPDATE, Receivers.OthersProximity,
                 l0, l1, l2, l3, l4, l5, l6, l7, l8
                 );
+
+            if (onLoadoutChangedCallback != null)
+                onLoadoutChangedCallback.Invoke();
         }
     }
 
@@ -900,6 +935,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
 
     public override void SendLoadoutUpdate(RpcArgs args)
     {
+
         int i = (int)args.GetNext<short>();
         if(i>0)this.head = Mapper.instance.getItemById(i);
 
@@ -926,5 +962,8 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
 
         i = (int)args.GetNext<short>();
         if (i > 0) this.shield = Mapper.instance.getItemById(i);
+
+        if (onLoadoutChangedCallback != null)
+            onLoadoutChangedCallback.Invoke();
     }
 }

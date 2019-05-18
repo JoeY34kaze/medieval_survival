@@ -20,4 +20,4 @@ MonoBehaviour:
   prefab_pickup: {fileID: 139793432851148391, guid: 15a8163b3ad581c43aa2afa8433ed440,
     type: 3}
   weapon_animation_class: -1
-  wardrobeRecipe: {fileID: 11400000, guid: e28b219888854d841af61399412102bc, type: 2}
+  recipeName: hands_2
