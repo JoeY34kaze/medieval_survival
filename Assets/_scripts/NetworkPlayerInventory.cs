@@ -904,7 +904,11 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
     {
         if(c==null)c=GetComponentInChildren<Camera>();
         Interactable_objectBehavior b =NetworkManager.Instance.InstantiateInteractable_object(item.id-2, c.transform.position+(c.transform.forward*3));
-        b.gameObject.GetComponent<Rigidbody>().AddForce(c.transform.forward*1500);
+        Rigidbody rb = b.gameObject.GetComponent<Rigidbody>();
+        if (rb == null) rb = b.gameObject.GetComponentInChildren<Rigidbody>();
+        if (rb!=null)
+            rb.AddForce(c.transform.forward*1500);
+
     }
 
     private int getIndexFromName(string name)

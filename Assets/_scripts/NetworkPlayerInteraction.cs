@@ -40,9 +40,14 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
 
             if (Physics.Raycast(ray, out hit, 50)) {
 
-                Debug.DrawRay(player_cam.position, player_cam.forward,Color.blue);
+                Debug.DrawRay(player_cam.position, player_cam.forward*10,Color.blue);
+
+                //Debug.Log("raycast : "+hit.collider.name);
 
                 Interactable interactable = hit.collider.GetComponent<Interactable>();
+                if(interactable==null) interactable = hit.collider.GetComponentInParent<Interactable>();//je collider popravlen zarad neujemanja pivota ker je blender ziva nocna mora
+
+
                 if (interactable != null)
                 {
                     //izriši eno obrobo al pa nekej samo tolk da player vidi je stvari lezijo na tleh
