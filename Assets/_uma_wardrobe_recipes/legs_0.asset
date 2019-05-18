@@ -17,11 +17,19 @@ MonoBehaviour:
   compatibleRaces:
   - HumanMale
   - HumanMaleDCS
+  - HumanFemale
+  - HumanFemaleDCS
   wardrobeRecipeThumbs:
   - race: HumanMale
     filename: 
     thumb: {fileID: 21300000, guid: e425c5ca4eed8c64d9224fd7a35daa23, type: 3}
   - race: HumanMaleDCS
+    filename: 
+    thumb: {fileID: 0}
+  - race: HumanFemale
+    filename: 
+    thumb: {fileID: 0}
+  - race: HumanFemaleDCS
     filename: 
     thumb: {fileID: 0}
   wardrobeSlot: Legs
@@ -30,5 +38,5 @@ MonoBehaviour:
   suppressWardrobeSlots: []
   activeWardrobeSet: []
   MeshHideAssets: []
-  recipeString: '{"version":3,"packedSlotDataList":[],"slotsV2":[],"slotsV3":[{"id":"","scale":1,"copyIdx":-1,"overlays":[]},{"id":"","scale":1,"copyIdx":-1,"overlays":[]},{"id":"","scale":1,"copyIdx":-1,"overlays":[]},{"id":"","scale":1,"copyIdx":-1,"overlays":[]},{"id":"","scale":1,"copyIdx":-1,"overlays":[]},{"id":"LegsMalePack1Type1a","scale":100,"copyIdx":-1,"overlays":[{"id":"LegsMalePack1Type1a_Overlay","colorIdx":0,"rect":[0,0,0,0]}]}],"colors":[],"fColors":[{"name":"","colors":[255,255,255,255,0,0,0,0,255,255,255,255,0,0,0,0,255,255,255,255,0,0,0,0]}],"sharedColorCount":0,"race":"","packedDna":[]}'
+  recipeString: '{"version":3,"packedSlotDataList":[],"slotsV2":[],"slotsV3":[{"id":"","scale":1,"copyIdx":-1,"overlays":[]},{"id":"","scale":1,"copyIdx":-1,"overlays":[]},{"id":"","scale":1,"copyIdx":-1,"overlays":[]},{"id":"","scale":1,"copyIdx":-1,"overlays":[]},{"id":"","scale":1,"copyIdx":-1,"overlays":[]},{"id":"LegsMalePack1Type1a","scale":100,"copyIdx":-1,"overlays":[{"id":"LegsMalePack1Type1a_Overlay","colorIdx":0,"rect":[0,0,0,0]}]}],"colors":[],"fColors":[{"name":"-","colors":[255,255,255,255,0,0,0,0,255,255,255,255,0,0,0,0,255,255,255,255,0,0,0,0]}],"sharedColorCount":0,"race":"","packedDna":[]}'
   replaces: Nothing

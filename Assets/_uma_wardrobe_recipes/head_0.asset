@@ -10,18 +10,26 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f0188188c253e0c4bb9b46e19fa7312e, type: 3}
-  m_Name: helm_0
+  m_Name: head_0
   m_EditorClassIdentifier: 
   recipeType: Wardrobe
   DisplayValue: HelmMalePack1Type1a
   compatibleRaces:
   - HumanMale
   - HumanMaleDCS
+  - HumanFemale
+  - HumanFemaleDCS
   wardrobeRecipeThumbs:
   - race: HumanMale
     filename: 
     thumb: {fileID: 21300000, guid: cd9850f6704e89c47aa25800f0de53a8, type: 3}
   - race: HumanMaleDCS
+    filename: 
+    thumb: {fileID: 0}
+  - race: HumanFemale
+    filename: 
+    thumb: {fileID: 0}
+  - race: HumanFemaleDCS
     filename: 
     thumb: {fileID: 0}
   wardrobeSlot: Helmet
@@ -30,5 +38,5 @@ MonoBehaviour:
   - Hair
   activeWardrobeSet: []
   MeshHideAssets: []
-  recipeString: '{"version":3,"packedSlotDataList":[],"slotsV2":[],"slotsV3":[{"id":"","scale":1,"copyIdx":-1,"overlays":[]},{"id":"","scale":1,"copyIdx":-1,"overlays":[]},{"id":"HelmMalePack1Type1a","scale":100,"copyIdx":-1,"overlays":[{"id":"HelmMalePack1Type1a_Overlay","colorIdx":0,"rect":[0,0,0,0]}]}],"colors":[],"fColors":[{"name":"","colors":[255,255,255,255,0,0,0,0,255,255,255,255,0,0,0,0,255,255,255,255,0,0,0,0]}],"sharedColorCount":0,"race":"","packedDna":[]}'
+  recipeString: '{"version":3,"packedSlotDataList":[],"slotsV2":[],"slotsV3":[{"id":"","scale":1,"copyIdx":-1,"overlays":[]},{"id":"","scale":1,"copyIdx":-1,"overlays":[]},{"id":"HelmMalePack1Type1a","scale":100,"copyIdx":-1,"overlays":[{"id":"HelmMalePack1Type1a_Overlay","colorIdx":0,"rect":[0,0,0,0]}]}],"colors":[],"fColors":[{"name":"-","colors":[255,255,255,255,0,0,0,0,255,255,255,255,0,0,0,0,255,255,255,255,0,0,0,0]}],"sharedColorCount":0,"race":"","packedDna":[]}'
   replaces: Nothing
