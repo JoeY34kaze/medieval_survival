@@ -66,7 +66,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
 
         if (this.head != null)
         {
-            avatar.SetSlot("Head", this.head.recipeName);
+            avatar.SetSlot("Helmet", this.head.recipeName);
         }
 
         if (this.chest != null)
