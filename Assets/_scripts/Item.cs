@@ -11,6 +11,7 @@ public class Item : ScriptableObject
     public Type type;
     public Sprite icon = null;
     public int damage;
+    public float damage_reduction = 0;
     public int id;
     public GameObject prefab_pickup;
     public  int weapon_animation_class;//za switchanje po animatorju iz not_in_combat state na primern idle state. 0-unarmed, 2-1h sword, 3-1h shield

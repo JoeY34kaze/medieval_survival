@@ -19,36 +19,83 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
     public float torso_damage_multiplier = 1.0f;
     public float limb_damage_multiplier = 0.75f;
 
-    public float block_damage_reduction = 0.025f;
+    public float block_damage_reduction = 0.025f;  //to bomo pobral z itema
 
-    public float fire1_cooldown = 1.5f;
+    public float fire1_cooldown = 1.0f;
 
-    public float player_weapon_instantiation_cooldown = 2.0f;
-
-
-
+    private NetworkPlayerInventory npi;
 
     /*
      HOW DAMAGE WORKS RIGHT NOW:
      na serverju se detektira hit. trenutno edina skripta ki to dela je Weapon_Collider_handler, ki poklice tole metodo. ta metoda izracuna nov health od tega k je bil napaden. to vrednost poslje
      napadenmu playerju da si poupdejta health. ta player pol ko si je updejtov health poslje nov rpc vsem drugim da nj si nastavijo njegov health na njegov health. tud server(i can see how this is bad ampak za prototip me ne skrbi.)
          */
-    public void take_weapon_damage_server_authority(float dmg, string tag_passive, string tag_agressor ,uint passive_player_server_network_id, uint agressor_server_network_id)
+    public void take_weapon_damage_server_authority(Item weapon,string tag_passive, string tag_agressor ,uint passive_player_server_network_id, uint agressor_server_network_id)
     {
+        
         //tag je za tag colliderja. coll_0 = headshot, coll_1 = body/torso, coll2=arms/legs
         networkObject.SendRpc(RPC_UPDATE_ALL_PLAYER_ID, Receivers.Server);
         if (networkObject.IsServer)
         {
+            if (npi == null) npi = GetComponent<NetworkPlayerInventory>();
+
+            float dmg;
+            if (weapon == null)
+            {//unarmed combat. posebej napisat vrednosti. enakob o za block
+                dmg = 5;
+            }
+            else {//poberemo vrednosti iz weapona
+                dmg = weapon.damage;
+            }
+            
             //-----------------------------------------DAMAGE MODIFIERS----------------------------------------------------
             float current_block_damage_reduction = 1.0f;
-            if (tag_passive.Equals("block_player")) current_block_damage_reduction = block_damage_reduction;
+            if (tag_passive.Equals("block_player"))
+            {
+                current_block_damage_reduction = block_damage_reduction;
+
+                //tukaj manjka koda za shield. treba poiskat playyerja pa ugotovit kter shield ima v roki za block
+            }
 
 
-            float locational_damage_reduction = torso_damage_multiplier;
+            float locational_damage_reduction = 0;
             if (tag_passive.Equals("coll_0")) locational_damage_reduction = head_damage_multiplier;
+            else if (tag_passive.Equals("coll_1")) locational_damage_reduction = torso_damage_multiplier;
             else if(tag_passive.Equals("coll_2")) locational_damage_reduction = limb_damage_multiplier;
 
-            float all_modifiers = locational_damage_reduction * current_block_damage_reduction;
+            //-----------armor values
+            float armor_damage_reduction_modifier = 0;
+            Item temp;
+            if (tag_passive.Equals("coll_0"))
+            {
+                temp = npi.getHeadItem();
+                if (temp != null)
+                    armor_damage_reduction_modifier = temp.damage_reduction;
+
+            }
+            else if (tag_passive.Equals("coll_1"))
+            {
+                temp = npi.getChestItem();
+                if (temp != null)
+                    armor_damage_reduction_modifier = temp.damage_reduction;
+
+                temp = npi.getHandsItem();
+                if (temp != null)
+                    armor_damage_reduction_modifier += temp.damage_reduction;
+
+            }
+            else if (tag_passive.Equals("coll_2")) {
+                temp = npi.getLegsItem();
+                if (temp != null)
+                    armor_damage_reduction_modifier = temp.damage_reduction;
+
+                temp = npi.getFeetItem();
+                if (temp != null)
+                    armor_damage_reduction_modifier += temp.damage_reduction;
+            }
+
+            armor_damage_reduction_modifier = 1 - armor_damage_reduction_modifier;
+            float all_modifiers = locational_damage_reduction * current_block_damage_reduction * armor_damage_reduction_modifier;
             //-------------------------------------------------------------------------------------------------------------
             float final_damage_taken = dmg * all_modifiers;
             this.health -= final_damage_taken;

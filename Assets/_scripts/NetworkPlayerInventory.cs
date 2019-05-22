@@ -169,6 +169,27 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         return r;
     }
 
+    internal Item getHeadItem()
+    {
+        return this.head;
+    }
+    internal Item getChestItem()
+    {
+        return this.chest;
+    }
+    internal Item getHandsItem()
+    {
+        return this.hands;
+    }
+    internal Item getLegsItem()
+    {
+        return this.legs;
+    }
+    internal Item getFeetItem()
+    {
+        return this.feet;
+    }
+
     internal void handleItemPickup(Item item, int quantity)
     {
         Item resp = try_to_upgrade_loadout(item);

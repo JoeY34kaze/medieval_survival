@@ -5,10 +5,8 @@ using UnityEngine;
 
 public class Weapon_collider_handler : MonoBehaviour
 {
-
-    public float weapon_damage = 15;
-    
-    void OnTriggerEnter(Collider other)
+    public Item item;
+    void OnTriggerEnter(Collider other)//nima networkobjekta. ce je server se preverja v stats.
     {
         Debug.Log("HIT - " + other.gameObject.name);
        // if (this.player == null || this.player_stats == null) {
@@ -20,10 +18,21 @@ public class Weapon_collider_handler : MonoBehaviour
 
         //print(player_stats.server_id+"   -   "+player_stats.player_name.text+" Collision detected with trigger object " + other.transform.root.gameObject.GetComponent<NetworkPlayerStats>().server_id +" - "+ other.gameObject.GetComponent<NetworkPlayerStats>().player_name.text);
         //if (other.transform.root.gameObject.Equals(player)) { Debug.Log("Im hitting myself."); }
-        if (other.transform.root.name.Equals("NetworkPlayer(Clone)") && !other.transform.root.gameObject.Equals(transform.root.gameObject) && !other.transform.name.Equals("NetworkPlayer(Clone)") && !gameObject.CompareTag("block_player")) {//ce je player && ce ni moj player && ce ni playerjev movement collider(kter je samo za movement)
-            Debug.Log("Hit another player in the " + other.name +" | "+ other.tag);
-            other.transform.root.gameObject.GetComponent<NetworkPlayerStats>().take_weapon_damage_server_authority(weapon_damage, other.tag, gameObject.tag, other.transform.root.gameObject.GetComponent<NetworkPlayerStats>().server_id, transform.root.gameObject.GetComponent<NetworkPlayerStats>().server_id);
-            if(gameObject.tag.Equals("weapon_player"))this.set_offensive_colliders(false); 
+        if (other.transform.root.name.Equals("NetworkPlayer(Clone)") && !other.transform.root.gameObject.Equals(transform.root.gameObject) && !other.transform.name.Equals("NetworkPlayer(Clone)")) {//ce je player && ce ni moj player && ce ni playerjev movement collider(kter je samo za movement)
+
+
+            if (gameObject.CompareTag("block_player"))
+            {
+                //zadel smo enemy shield
+
+            }
+            else
+            {
+                Debug.Log("Hit another player in the " + other.name + " | " + other.tag);
+
+                other.transform.root.gameObject.GetComponent<NetworkPlayerStats>().take_weapon_damage_server_authority(this.item,other.tag, gameObject.tag, other.transform.root.gameObject.GetComponent<NetworkPlayerStats>().server_id, transform.root.gameObject.GetComponent<NetworkPlayerStats>().server_id);
+                if (gameObject.tag.Equals("weapon_player")) this.set_offensive_colliders(false);
+            }
         }
         
     }
