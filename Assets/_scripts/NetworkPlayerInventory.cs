@@ -924,12 +924,25 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
     internal void instantiateDroppedItem(Item item, int quantity) // instantiate it when dropped
     {
         if(c==null)c=GetComponentInChildren<Camera>();
-        Interactable_objectBehavior b =NetworkManager.Instance.InstantiateInteractable_object(item.id-2, c.transform.position+(c.transform.forward*3));
+        Interactable_objectBehavior b =NetworkManager.Instance.InstantiateInteractable_object(getNetworkIdFromItem(item), c.transform.position+(c.transform.forward*3));
         Rigidbody rb = b.gameObject.GetComponent<Rigidbody>();
         if (rb == null) rb = b.gameObject.GetComponentInChildren<Rigidbody>();
         if (rb!=null)
             rb.AddForce(c.transform.forward*1500);
 
+    }
+
+    private int getNetworkIdFromItem(Item item)
+    {
+        GameObject[] items = NetworkManager.Instance.Interactable_objectNetworkObject;
+
+        for (int i = 0; i < items.Length; i++) {
+            if (items[i].GetComponent<ItemPickup>().i.id == item.id)
+                return i;
+        }
+        throw new Exception("failed to get Id for networkBehaviour instantiation");
+
+        
     }
 
     private int getIndexFromName(string name)

@@ -70,10 +70,11 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
 
     private int GetChildIndexOfShieldFromId(int n)
     {
-        if (n == 3) {//id je iron shield, vrni pozicijo na roki k je.
-            return 2;
-        }
-        return 1;
+        foreach (Transform c in shield_slot)
+            if (c.GetComponent<identifier_helper>().id == n)
+                return c.transform.GetSiblingIndex();
+
+        throw new Exception("Cannot find sibling id for shield from item id!");
     }
 
     private void disable_all_shields()
@@ -286,7 +287,17 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
             disable_all_shields();
             if (this.currently_equipped_shield != 1)
             {
-                shield_slot.GetChild(GetChildIndexOfShieldFromId(this.currently_equipped_shield)).gameObject.SetActive(true);//ga takoj izrise
+                foreach (Transform c in shield_slot)
+                {
+                    
+                    if (c.GetComponent<identifier_helper>().id == this.currently_equipped_shield)
+                    {
+                        c.gameObject.SetActive(true);
+                        break;
+                    }
+                }
+
+
                 networkObject.SendRpc(RPC_CHANGE_CURRENT_SHIELD, Receivers.OthersProximity, this.currently_equipped_shield);
             }
         }
