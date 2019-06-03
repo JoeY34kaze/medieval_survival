@@ -975,31 +975,40 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
     {
 
         int i = (int)args.GetNext<short>();
-        if(i>0)this.head = Mapper.instance.getItemById(i);
+        if (i >= 0) this.head = Mapper.instance.getItemById(i);
+        else this.head = null;
 
          i = (int)args.GetNext<short>();
-        if (i > 0) this.chest = Mapper.instance.getItemById(i);
+        if (i >= 0) this.chest = Mapper.instance.getItemById(i);
+        else this.chest = null;
 
         i = (int)args.GetNext<short>();
-        if (i > 0) this.hands = Mapper.instance.getItemById(i);
+        if (i >= 0) this.hands = Mapper.instance.getItemById(i);
+        else this.hands = null;
 
         i = (int)args.GetNext<short>();
-        if (i > 0) this.legs = Mapper.instance.getItemById(i);
+        if (i >= 0) this.legs = Mapper.instance.getItemById(i);
+        else this.legs = null;
 
         i = (int)args.GetNext<short>();
-        if (i > 0) this.feet = Mapper.instance.getItemById(i);
+        if (i >= 0) this.feet = Mapper.instance.getItemById(i);
+        else this.feet = null;
 
         i = (int)args.GetNext<short>();
-        if (i > 0) this.ranged = Mapper.instance.getItemById(i);
+        if (i >= 0) this.ranged = Mapper.instance.getItemById(i);
+        else this.ranged = null;
 
         i = (int)args.GetNext<short>();
-        if (i > 0) this.weapon_0 = Mapper.instance.getItemById(i);
+        if (i >= 0) this.weapon_0 = Mapper.instance.getItemById(i);
+        else this.weapon_0 = null;
 
         i = (int)args.GetNext<short>();
-        if (i > 0) this.weapon_1 = Mapper.instance.getItemById(i);
+        if (i >= 0) this.weapon_1 = Mapper.instance.getItemById(i);
+        else this.weapon_1 = null;
 
         i = (int)args.GetNext<short>();
-        if (i > 0) this.shield = Mapper.instance.getItemById(i);
+        if (i >= 0) this.shield = Mapper.instance.getItemById(i);
+        else this.shield = null;
 
         if (onLoadoutChangedCallback != null)
             onLoadoutChangedCallback.Invoke();

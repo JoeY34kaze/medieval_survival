@@ -1,0 +1,30 @@
+# 3ds Max Wavefront OBJ Exporter v0.97b - (c)2007 guruware
+# File Created: 25.04.2017 23:19:27
+
+newmtl shild_textur
+	Ns 56.0000
+	Ni 1.5000
+	d 1.0000
+	Tr 0.0000
+	Tf 1.0000 1.0000 1.0000 
+	illum 2
+	Ka 0.5882 0.5882 0.5882
+	Kd 0.5882 0.5882 0.5882
+	Ks 0.4410 0.4410 0.4410
+	Ke 0.0000 0.0000 0.0000
+	map_Ka C:\Users\SHALVA\Desktop\turboskvito\shield\shield\shield\testure shield.jpg
+	map_Kd C:\Users\SHALVA\Desktop\turboskvito\shield\shield\shield\testure shield.jpg
+
+newmtl skin
+	Ns 10.0000
+	Ni 1.5000
+	d 1.0000
+	Tr 0.0000
+	Tf 1.0000 1.0000 1.0000 
+	illum 2
+	Ka 0.5882 0.5882 0.5882
+	Kd 0.5882 0.5882 0.5882
+	Ks 0.0000 0.0000 0.0000
+	Ke 0.0000 0.0000 0.0000
+	map_Ka C:\Users\SHALVA\Desktop\turboskvito\shield\shield\shield\skin.jpg
+	map_Kd C:\Users\SHALVA\Desktop\turboskvito\shield\shield\shield\skin.jpg
