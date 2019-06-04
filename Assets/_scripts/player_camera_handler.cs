@@ -13,11 +13,11 @@ public class player_camera_handler : NetworkPlayerCameraHandlerBehavior
     public bool freeLook = false;
 
     public Transform _camera_framework;
-    public Transform point_to_look_at_on_player;
     public float mouse_sensitivity_multiplier = 1.0f;
 
     public Camera player_cam;
     private NetworkPlayerInventory networkPlayerInventory;
+
 
     private void Awake()
     {
@@ -34,6 +34,7 @@ public class player_camera_handler : NetworkPlayerCameraHandlerBehavior
         player_cam.transform.parent = this._camera_framework;
         player_cam.transform.localPosition = Vector3.zero;
         player_cam.transform.localRotation = Quaternion.Euler(camera_rotation_offset);
+
     }
 
     void LateUpdate()

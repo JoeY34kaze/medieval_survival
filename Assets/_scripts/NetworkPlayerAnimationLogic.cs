@@ -13,10 +13,12 @@ public class NetworkPlayerAnimationLogic : NetworkPlayerAnimationBehavior
     private Quaternion chestRotation;
     public Transform chest;
     public Transform _camera_framework;
+    private NetworkPlayerStats stats;
     // ---------------------------------FUNCTIONS-------------------------------------
     void Awake()
     {
         anim = gameObject.GetComponent<Animator>();
+        stats = GetComponent<NetworkPlayerStats>();
     }
 
 
@@ -94,18 +96,18 @@ public class NetworkPlayerAnimationLogic : NetworkPlayerAnimationBehavior
 
     private void LateUpdate()
     {
-        if (networkObject.IsOwner)
-        {
-            chestRotation = _camera_framework.rotation;
-            networkObject.chestRotation = chestRotation;
+        if (!stats.downed) {
+            if (networkObject.IsOwner)
+            {
+                chestRotation = _camera_framework.rotation;
+                networkObject.chestRotation = chestRotation;
+            }
+            else
+            {
+                chestRotation = networkObject.chestRotation;
+            }
+            chest.rotation = chestRotation * Quaternion.Euler(new Vector3(0, 0, -90));
         }
-        else
-        {
-            chestRotation = networkObject.chestRotation;
-        }
-
-        chest.rotation = chestRotation * Quaternion.Euler(new Vector3(0,0,-90));
-
 
         
     }
@@ -191,6 +193,6 @@ public class NetworkPlayerAnimationLogic : NetworkPlayerAnimationBehavior
             GetComponent<NetworkPlayerMovement>().do_ragdoll = true;
             Debug.Log("dead!");
         }
-        anim.SetLayerWeight(1, 1);
+        anim.SetLayerWeight(anim.GetLayerIndex("combat_layer"), 1);
     }
 }
