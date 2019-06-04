@@ -58,7 +58,29 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
     private void Start()
     {
         this.avatar = GetComponent<DynamicCharacterAvatar>();
+
+        slots = new InventorySlotPersonal[panel_personalInventorySlots.Length];
+        for (int i = 0; i < slots.Length; i++)
+            slots[i] = panel_personalInventorySlots[i].GetComponent<InventorySlotPersonal>();
+        items = new Item[slots.Length];
     }
+
+    protected override void NetworkStart()
+    {
+        base.NetworkStart();
+
+        if (networkObject.IsOwner)
+        {
+            onItemChangedCallback += UpdateUI;    // Subscribe to the onItemChanged callback
+        }
+
+        onLoadoutChangedCallback += refresh_UMA_equipped_gear;
+
+
+        //request update from all close clients to synchronize their gear - mrde se nrdi da en client k je kr nekje pa ne zamenja weapona prleti do njega in ga ubije z neviodnimn weaponom.
+        networkObject.SendRpc(RPC_REQUEST_LOADOUT_ON_CONNECT, Receivers.OthersProximity);
+    }
+
 
     void refresh_UMA_equipped_gear()
     {
@@ -305,22 +327,6 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         }
     }
 
-    protected override void NetworkStart()
-    {
-        base.NetworkStart();
-
-        if (networkObject.IsOwner)
-        {
-            onItemChangedCallback += UpdateUI;    // Subscribe to the onItemChanged callback
-        }
-
-        slots = new InventorySlotPersonal[panel_personalInventorySlots.Length];
-        for (int i = 0; i < slots.Length; i++)
-            slots[i] = panel_personalInventorySlots[i].GetComponent<InventorySlotPersonal>();
-        items = new Item[slots.Length];
-
-        onLoadoutChangedCallback += refresh_UMA_equipped_gear;
-    }
 
 
 
@@ -712,7 +718,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
 
     }
 
-    private void sendNetworkUpdate(bool inv, bool loadout)
+    private void sendNetworkUpdate(bool inv, bool loadout) //LOADOUT JE SAMO ZA UMA OBLEKE!!!!!!
     {
         
         if (inv)
@@ -813,12 +819,15 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
             if (this.hands != null) l2 = (short)this.hands.id;
             if (this.legs != null) l3 = (short)this.legs.id;
             if (this.feet != null) l4 = (short)this.feet.id;
+            /*
+            if (this.ranged != null) l5 = (short)this.ranged.id;//NE DELA - BO TREBA UPDEJTAT. ZAENKRAT SE UPORABLA GetComponent<NetworkPlayerCombatHandler>().update_equipped_weapons();   KER JE BLO ZE PREJ IMPLEMENTIRAN!!
+            if (this.weapon_0 != null) l6 = (short)this.weapon_0.id;//NE DELA - BO TREBA UPDEJTAT. ZAENKRAT SE UPORABLA GetComponent<NetworkPlayerCombatHandler>().update_equipped_weapons();   KER JE BLO ZE PREJ IMPLEMENTIRAN!!
+            if (this.weapon_1 != null) l7 = (short)this.weapon_1.id;//NE DELA - BO TREBA UPDEJTAT. ZAENKRAT SE UPORABLA GetComponent<NetworkPlayerCombatHandler>().update_equipped_weapons();   KER JE BLO ZE PREJ IMPLEMENTIRAN!!
+            if (this.shield != null) l8 = (short)this.shield.id;//NE DELA - BO TREBA UPDEJTAT. ZAENKRAT SE UPORABLA GetComponent<NetworkPlayerCombatHandler>().update_equipped_weapons();   KER JE BLO ZE PREJ IMPLEMENTIRAN!!
+            */
 
-            if (this.ranged != null) l5 = (short)this.ranged.id;
-            if (this.weapon_0 != null) l6 = (short)this.weapon_0.id;
-            if (this.weapon_1 != null) l7 = (short)this.weapon_1.id;
-            if (this.shield != null) l8 = (short)this.shield.id;
 
+            GetComponent<NetworkPlayerCombatHandler>().send_network_update_weapons();//weapon trenutno equipan pa shield
 
             networkObject.SendRpc(RPC_SEND_LOADOUT_UPDATE, Receivers.OthersProximity,
                 l0, l1, l2, l3, l4, l5, l6, l7, l8
@@ -921,15 +930,13 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         return cunt;
     }
 
-    internal void instantiateDroppedItem(Item item, int quantity) // instantiate it when dropped
+    internal void instantiateDroppedItem(Item item, int quantity) // instantiate it when dropped - zapakiral v rpc da se poslje vseskup na server
     {
-        if(c==null)c=GetComponentInChildren<Camera>();
-        Interactable_objectBehavior b =NetworkManager.Instance.InstantiateInteractable_object(getNetworkIdFromItem(item), c.transform.position+(c.transform.forward*3));
-        Rigidbody rb = b.gameObject.GetComponent<Rigidbody>();
-        if (rb == null) rb = b.gameObject.GetComponentInChildren<Rigidbody>();
-        if (rb!=null)
-            rb.AddForce(c.transform.forward*1500);
+        if (!networkObject.IsOwner) return;
 
+        if(c==null)c=GetComponentInChildren<Camera>();
+
+        networkObject.SendRpc(RPC_NETWORK_INSTANTIATION_SERVER_REQUEST, Receivers.Server, getNetworkIdFromItem(item), c.transform.position + (c.transform.forward * 3), c.transform.forward);
     }
 
     private int getNetworkIdFromItem(Item item)
@@ -994,23 +1001,43 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         if (i >= 0) this.feet = Mapper.instance.getItemById(i);
         else this.feet = null;
 
+        /*
         i = (int)args.GetNext<short>();
-        if (i >= 0) this.ranged = Mapper.instance.getItemById(i);
+        if (i >= 0) this.ranged = Mapper.instance.getItemById(i);//NE DELA - BO TREBA UPDEJTAT. ZAENKRAT SE UPORABLA GetComponent<NetworkPlayerCombatHandler>().update_equipped_weapons();   KER JE BLO ZE PREJ IMPLEMENTIRAN!!
         else this.ranged = null;
 
         i = (int)args.GetNext<short>();
-        if (i >= 0) this.weapon_0 = Mapper.instance.getItemById(i);
+        if (i >= 0) this.weapon_0 = Mapper.instance.getItemById(i);//NE DELA - BO TREBA UPDEJTAT. ZAENKRAT SE UPORABLA GetComponent<NetworkPlayerCombatHandler>().update_equipped_weapons();   KER JE BLO ZE PREJ IMPLEMENTIRAN!!
         else this.weapon_0 = null;
 
         i = (int)args.GetNext<short>();
-        if (i >= 0) this.weapon_1 = Mapper.instance.getItemById(i);
+        if (i >= 0) this.weapon_1 = Mapper.instance.getItemById(i);//NE DELA - BO TREBA UPDEJTAT. ZAENKRAT SE UPORABLA GetComponent<NetworkPlayerCombatHandler>().update_equipped_weapons();   KER JE BLO ZE PREJ IMPLEMENTIRAN!!
         else this.weapon_1 = null;
 
         i = (int)args.GetNext<short>();
-        if (i >= 0) this.shield = Mapper.instance.getItemById(i);
+        if (i >= 0) this.shield = Mapper.instance.getItemById(i);//NE DELA - BO TREBA UPDEJTAT. ZAENKRAT SE UPORABLA GetComponent<NetworkPlayerCombatHandler>().update_equipped_weapons();   KER JE BLO ZE PREJ IMPLEMENTIRAN!!
         else this.shield = null;
-
+        */
         if (onLoadoutChangedCallback != null)
             onLoadoutChangedCallback.Invoke();
     }
+
+    public override void RequestLoadoutOnConnect(RpcArgs args)
+    {
+        //obleke
+        sendNetworkUpdate(false, true);//tole poslje vsem okol sebe, ne samo temu k ga rab. optimiziacija ksnej.
+    }
+
+    public override void NetworkInstantiationServerRequest(RpcArgs args)
+    {
+        int net_id = args.GetNext<int>();
+        Vector3 pos = args.GetNext<Vector3>();
+        Vector3 dir = args.GetNext<Vector3>();
+        Interactable_objectBehavior b = NetworkManager.Instance.InstantiateInteractable_object(net_id, pos);
+
+        //apply force on clients
+        b.gameObject.GetComponent<Interactable>().setForce(pos,dir);
+
+    }
+
 }

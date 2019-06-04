@@ -113,4 +113,38 @@ public class ItemPickup : Interactable {
         networkObject.Destroy();
 
     }
+
+    public override void setForce(Vector3 pos, Vector3 dir) {
+        if (!networkObject.IsServer) return;
+        networkObject.SendRpc(RPC_APPLY_FORCE_ON_INSTANTIATION, Receivers.Others, pos, dir); //Receivers.All loh rata overkill z stevilom igralcev. optimizacija kasnej
+
+        //za server posebej ker iz meni neznanga razloga ne dela ce dam receivers.all itak na serverju ni vazno v koncni fazi tolk. mogoce za anticheat al pa kej..
+        Rigidbody rb = GetComponent<Rigidbody>();
+        if (rb == null) rb = GetComponentInChildren<Rigidbody>();
+        if (rb != null)
+        {
+            rb.velocity = Vector3.zero; //ce ma ksno gravitacijo
+            rb.angularVelocity = Vector3.zero; //?
+
+            transform.position = pos;//da se zacne na isti poziciji kot na serverju
+            rb.AddForce(dir * 1500);
+        }
+    }
+
+    public override void ApplyForceOnInstantiation(RpcArgs args)
+    {
+        Vector3 pos = args.GetNext<Vector3>();
+        Vector3 dir = args.GetNext<Vector3>();
+
+        Rigidbody rb = GetComponent<Rigidbody>();
+        if (rb == null) rb = GetComponentInChildren<Rigidbody>();
+        if (rb != null)
+        {
+            rb.velocity = Vector3.zero; //ce ma ksno gravitacijo
+            rb.angularVelocity = Vector3.zero; //?
+
+            transform.position = pos;//da se zacne na isti poziciji kot na serverju
+            rb.AddForce(dir * 1500);
+        }
+    }
 }

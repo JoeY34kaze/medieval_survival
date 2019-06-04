@@ -64,4 +64,14 @@ public class Interactable : Interactable_objectBehavior
 
         return null;
     }
+
+    public override void ApplyForceOnInstantiation(RpcArgs args)
+    {
+        throw new NotImplementedException();
+    }
+
+    public virtual void setForce(Vector3 pos, Vector3 dir)
+    {
+        throw new NotImplementedException();
+    }
 }

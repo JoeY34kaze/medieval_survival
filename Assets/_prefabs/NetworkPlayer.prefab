@@ -3482,6 +3482,8 @@ MonoBehaviour:
   limb_damage_multiplier: 0.75
   block_damage_reduction: 0.025
   fire1_cooldown: 1
+  sound_effects_on_player:
+  - {fileID: 2312515853737920592, guid: 60bafb51ae267014e9c4a7125a00fad0, type: 3}
 --- !u!114 &8177753189296896474
 MonoBehaviour:
   m_ObjectHideFlags: 0

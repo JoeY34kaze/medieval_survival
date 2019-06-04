@@ -25,6 +25,8 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
 
     private NetworkPlayerInventory npi;
 
+    public GameObject[] sound_effects_on_player;
+
     /*
      HOW DAMAGE WORKS RIGHT NOW:
      na serverju se detektira hit. trenutno edina skripta ki to dela je Weapon_Collider_handler, ki poklice tole metodo. ta metoda izracuna nov health od tega k je bil napaden. to vrednost poslje
@@ -109,7 +111,7 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
                     if (player.NetworkId == passive_player_server_network_id) //passive target
                     {
                         //Debug.Log("Victim found! "+ passive_player_server_network_id);
-                        networkObject.SendRpc(player, RPC_SET_HEALTH_PASSIVE_TARGET, this.health);
+                        networkObject.SendRpc(player, RPC_SET_HEALTH_PASSIVE_TARGET, this.health, tag_passive);
                         count++;
                     }
 
@@ -214,7 +216,10 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
        // if (networkObject.IsOwner)
         //{            //if its the owner change the value on other clients
         //Debug.Log("Changing Health from server's RPC");
+        
         this.health = args.GetNext<float>();
+        string tag = args.GetNext<string>();
+        if (!tag.Equals("block_player")) GameObject.Instantiate(this.sound_effects_on_player[0]);
         this.healthBar.fillAmount = this.health / (this.max_health);
             networkObject.SendRpc(RPC_SET_HEALTH_ON_OTHERS,Receivers.Others, this.health);
         //}

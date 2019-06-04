@@ -45,7 +45,6 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
     private void On_Current_shield_changed(int n) {
 
         Debug.Log("Shield HAS BEEN CHANGED! " + n);
-        if (combat_mode == 0) return;
         if (networkObject.IsOwner)
         {
             if (n != 1)
@@ -55,7 +54,7 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
                     this.shield_slot.GetChild(1).gameObject.SetActive(false);
                 }
                 this.shield_slot.GetChild(GetChildIndexOfShieldFromId(n)).gameObject.SetActive(true);
-                this.shield_slot.GetChild(GetChildIndexOfShieldFromId(n)).gameObject.GetComponent<Collider>().enabled = false;
+                //this.shield_slot.GetChild(GetChildIndexOfShieldFromId(n)).gameObject.GetComponent<Collider>().enabled = false;
             }
             else
             {
@@ -108,7 +107,7 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
     {
         Debug.Log(this.previous_weapon + "WEAPON HAS BEEN CHANGED! " + newVal);
         animator.SetInteger("weapon_animation_class", getWeaponClassForAnimator(equipped_weapons[newVal]));
-        if (combat_mode == 0) return;
+        //if (combat_mode == 0) return;  ??
         if (networkObject.IsOwner)
         {
             this.weapon_slot.GetChild(equipped_weapons[previous_weapon]).gameObject.SetActive(false);
@@ -161,7 +160,7 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
     private void Update()
     {
         if (networkObject == null) {
-            Debug.LogError("networkObject is null.");
+            Debug.LogError("networkObject is null. - najbrz zato ker se se connecta gor.");
             return; }
         if (!networkObject.IsOwner)
         {
@@ -281,7 +280,7 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
         this.equipped_weapons[4] = networkPlayerInventory.GetRanged();
 
         int prev_shield = this.currently_equipped_shield;
-        this.currently_equipped_shield=networkPlayerInventory.GetShield();
+        this.currently_equipped_shield = networkPlayerInventory.GetShield();
 
         if (prev_shield != this.currently_equipped_shield) {//prslo je do spremembe shielda
             disable_all_shields();
@@ -289,7 +288,7 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
             {
                 foreach (Transform c in shield_slot)
                 {
-                    
+
                     if (c.GetComponent<identifier_helper>().id == this.currently_equipped_shield)
                     {
                         c.gameObject.SetActive(true);
@@ -320,6 +319,16 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
             networkObject.SendRpc(RPC_CHANGE_CURRENT_WEAPON, Receivers.OthersProximity, this.equipped_weapons[index_of_currently_selected_weapon_from_equipped_weapons], -1);
         }
     }
+
+    public void send_network_update_weapons()
+    {
+        //shield
+        networkObject.SendRpc(RPC_CHANGE_CURRENT_SHIELD, Receivers.OthersProximity, this.currently_equipped_shield);
+
+        //weapon - samo tist k je u roki equipan - potencialna izboljjšava da damo to vseskup v sendnetwokupdate (obleke, weapone in shield)
+        networkObject.SendRpc(RPC_CHANGE_CURRENT_WEAPON, Receivers.OthersProximity, equipped_weapons[index_of_currently_selected_weapon_from_equipped_weapons], equipped_weapons[this.previous_weapon]);
+    }
+
 
     private int getSiblingIndexOfFirstActiveChild_Weapon()
     {
