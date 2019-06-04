@@ -164,12 +164,22 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
             return; }
         if (!networkObject.IsOwner)
         {
+
             //Debug.Log("Got combat mode " + networkObject.combatmode);
             this.combat_mode = networkObject.combatmode;//to bo dat v rpc
 
             handle_animations_from_rpcs();
             return;
         }
+
+        if (stats.downed)
+        {
+            networkObject.combatmode = 0;
+            this.combat_mode = 0;
+            return; //Ce je downan da nemora vec napadat pa take fore. to je precej loše ker je na clientu. ksnej bo treba prenest to logiko na server ker tole zjebe ze cheatengine
+
+        }
+
         if (networkPlayerInventory.panel_inventory.activeSelf) return;
 
         check_and_handle_combat();//keyboard input glede combata

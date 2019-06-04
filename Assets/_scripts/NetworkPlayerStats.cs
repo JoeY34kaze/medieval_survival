@@ -7,6 +7,9 @@ using BeardedManStudios.Forge.Networking.Unity;
 
 public class NetworkPlayerStats : NetworkPlayerStatsBehavior
 {
+    public bool test = false;
+
+    public bool downed = false;
     private float max_health = 255;
     public float health = 255;//for debug purposes, its not being called from any other script that i made, its public just so that i can see it easier in inspector
     public Image healthBar;
@@ -101,6 +104,7 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
             //-------------------------------------------------------------------------------------------------------------
             float final_damage_taken = dmg * all_modifiers;
             this.health -= final_damage_taken;
+            if (this.health < 0) this.health = 0;
             healthBar.fillAmount = (float)this.health / (float)this.max_health;
 
             lock (myNetWorker.Players)
@@ -163,11 +167,26 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
             }
         }
 
-        if (!networkObject.IsServer)
-        {
-            return;
+        if (this.test) {
+            this.health = 0;
+            handle_0_hp();
         }
         
+    }
+
+
+    private void handle_0_hp() {//sprozi tko na ownerju, kot na clientih
+        this.downed = true;
+        GetComponent<NetworkPlayerAnimationLogic>().handle_downed_start();
+
+
+
+    }
+
+    private void handle_player_pickup() {
+        this.downed = true;
+        GetComponent<NetworkPlayerAnimationLogic>().handle_downed_end(true);
+
     }
 
 
@@ -217,7 +236,15 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
         //{            //if its the owner change the value on other clients
         //Debug.Log("Changing Health from server's RPC");
         
-        this.health = args.GetNext<float>();
+
+        float h = args.GetNext<float>();
+        float prev_hp = this.health;
+        this.health = h;
+        
+        if (!this.downed && h==0 ) {// client check, server check ker server bo ze prej nastavu
+            handle_0_hp();
+        }
+        
         string tag = args.GetNext<string>();
         if (!tag.Equals("block_player")) GameObject.Instantiate(this.sound_effects_on_player[0]);
         this.healthBar.fillAmount = this.health / (this.max_health);
@@ -228,7 +255,13 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
     public override void setHealthOnOthers(RpcArgs args)
     {
         //Debug.Log("Changing Health from victim's RPC");
-        this.health = args.GetNext<float>();
+        float h = args.GetNext<float>();
+        this.health = h;
+        if ((!this.downed && h == 0))
+        {
+            handle_0_hp();
+        }
+        
         this.healthBar.fillAmount =this.health / (this.max_health);
     }
 

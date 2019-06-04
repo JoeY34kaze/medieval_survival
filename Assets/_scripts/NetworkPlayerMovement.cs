@@ -39,6 +39,9 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
     private NetworkPlayerAnimationLogic animation_handler_script;
     private NetworkPlayerCombatHandler combat_handler_script;
     private NetworkPlayerInventory networkPlayerInventory;
+    private NetworkPlayerStats stats;
+
+    Vector3 next_position;
     //--------------------------------RAGDOLL --------------- tutorial v=RrWrnp2DLD8 ------------------------
 
 
@@ -49,6 +52,7 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
         rigidbody = GetComponent<Rigidbody>();
         combat_handler_script = GetComponent<NetworkPlayerCombatHandler>();
         networkPlayerInventory = GetComponent<NetworkPlayerInventory>();
+        stats = GetComponent<NetworkPlayerStats>();
     }
 
 
@@ -75,7 +79,7 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
         }
         if (animation_handler_script == null) { animation_handler_script = GetComponent<NetworkPlayerAnimationLogic>(); }
 
-        if (do_ragdoll)
+        if (do_ragdoll)//ko bo dejanska smrt
         {
 
             GetComponent<UMA.Dynamics.UMAPhysicsAvatar>().ragdolled = true;
@@ -85,53 +89,59 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
         }
 
 
-        crouched = anim.GetBool("crouched");
-        speed = normal_speed;
 
-        if (crouched) speed = speed * crouched_modifier;
-
-
-        //---------------------------------------------------DA TE MAL POSLOWA K NAPADAS Z WEAPONOM----------------------------------------------
-        if (combat_handler_script.in_attack_animation) {
-            if (combat_handler_script.index_of_currently_selected_weapon_from_equipped_weapons == 2) speed *= light_weapon_speed_modifier;
-        }
-        //----------------------------------------------------------------------------------------------------------------------------------------
-
-        Vector3 next_position = transform.position;
-
-        Vector3 dirVector = (transform.forward * Input.GetAxis("Vertical") +transform.right * Input.GetAxis("Horizontal")).normalized * speed * Time.fixedDeltaTime;
-        if (Input.GetButton("Sprint") && Input.GetAxis("Vertical") > 0)
-            dirVector *= sprint_modifier;
-
-        next_position +=dirVector ;
-
-        if (!networkPlayerInventory.panel_inventory.activeSelf)//ce nimamo odprt inventorij - to je samo za horizontalno premikanje miske. vertikalno je nekje drugje
+        if (!stats.downed)//dvakrat je tale check. zato da ce je downan v zraku se zmer pade na tla in ne lebdi v zrak
         {
-            Quaternion turnAngle = Quaternion.AngleAxis(Input.GetAxis("Mouse X") * GetComponent<player_camera_handler>().mouse_sensitivity_multiplier, Vector3.up);
-            transform.eulerAngles = transform.eulerAngles + turnAngle.eulerAngles;
+            crouched = anim.GetBool("crouched");
+            speed = normal_speed;
+
+            if (crouched) speed = speed * crouched_modifier;
+
+
+            //---------------------------------------------------DA TE MAL POSLOWA K NAPADAS Z WEAPONOM----------------------------------------------
+            if (combat_handler_script.in_attack_animation)
+            {
+                if (combat_handler_script.index_of_currently_selected_weapon_from_equipped_weapons == 2) speed *= light_weapon_speed_modifier;
+            }
+            //----------------------------------------------------------------------------------------------------------------------------------------
+
+            next_position = transform.position;
+
+            Vector3 dirVector = (transform.forward * Input.GetAxis("Vertical") + transform.right * Input.GetAxis("Horizontal")).normalized * speed * Time.fixedDeltaTime;
+            if (Input.GetButton("Sprint") && Input.GetAxis("Vertical") > 0)
+                dirVector *= sprint_modifier;
+
+            next_position += dirVector;
+
+            if (!networkPlayerInventory.panel_inventory.activeSelf)//ce nimamo odprt inventorij - to je samo za horizontalno premikanje miske. vertikalno je nekje drugje
+            {
+                Quaternion turnAngle = Quaternion.AngleAxis(Input.GetAxis("Mouse X") * GetComponent<player_camera_handler>().mouse_sensitivity_multiplier, Vector3.up);
+                transform.eulerAngles = transform.eulerAngles + turnAngle.eulerAngles;
+            }
+
+            check_ground_raycast(distance_from_center_raycast);
         }
-
-        check_ground_raycast(distance_from_center_raycast);
-
         //gravity
         //if(!isGrounded)
         rigidbody.AddForce(Vector3.up * Physics.gravity.y*2, ForceMode.Acceleration);
-        
 
-        if (Input.GetAxis("Jump")>0.01f && isGrounded && !in_a_jump) // && isGrounded??? isGrounded je trenutno se mal buggy
+
+        if (!stats.downed)
         {
-            //jump();
-            Debug.Log(Vector3.up * 6.3f);
+            if (Input.GetAxis("Jump") > 0.01f && isGrounded && !in_a_jump) // && isGrounded??? isGrounded je trenutno se mal buggy
+            {
+                //jump();
+                Debug.Log(Vector3.up * 6.3f);
 
-            rigidbody.AddForce(Vector3.up * visina_skoka*2, ForceMode.VelocityChange);
-            StartCoroutine(lock_jumping(1));
+                rigidbody.AddForce(Vector3.up * visina_skoka * 2, ForceMode.VelocityChange);
+                StartCoroutine(lock_jumping(1));
+            }
+            /*
+            Vector3 point_on_ground = get_capsulecasted_position_downward_from_chest();
+            int state_of_vertical=check_ground(point_on_ground);
+            next_position=apply_gravity(next_position,point_on_ground,state_of_vertical);
+            */
         }
-        /*
-        Vector3 point_on_ground = get_capsulecasted_position_downward_from_chest();
-        int state_of_vertical=check_ground(point_on_ground);
-        next_position=apply_gravity(next_position,point_on_ground,state_of_vertical);
-        */
-
         rigidbody.MovePosition(next_position);
         //transform.position = next_position;
         networkObject.position = transform.position;

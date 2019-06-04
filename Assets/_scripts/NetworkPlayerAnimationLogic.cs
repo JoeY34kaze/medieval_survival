@@ -172,4 +172,25 @@ public class NetworkPlayerAnimationLogic : NetworkPlayerAnimationBehavior
         anim.SetTrigger("land");
     }
 
+    internal void handle_downed_start()
+    {
+        
+        Debug.Log("downed!");
+        anim.SetTrigger("downed");
+        anim.SetLayerWeight(1, 0);
+    }
+
+    internal void handle_downed_end(bool revived)
+    {
+        if (revived)
+        {
+            anim.SetTrigger("downed");
+           Debug.Log("revived!");
+        }
+        else {
+            GetComponent<NetworkPlayerMovement>().do_ragdoll = true;
+            Debug.Log("dead!");
+        }
+        anim.SetLayerWeight(1, 1);
+    }
 }
