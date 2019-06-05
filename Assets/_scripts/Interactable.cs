@@ -23,7 +23,7 @@ public class Interactable : Interactable_objectBehavior
         local_lock = GetComponent<InteractableLocalLock>();
         //Debug.Log("found lock");
     }
-    private void Update()
+    private void Update()//ce item slucajn ni od serverja
     {
         if (networkObject == null) return;
         if (networkObject.IsServer && !networkObject.IsOwner) {
@@ -71,6 +71,26 @@ public class Interactable : Interactable_objectBehavior
     }
 
     public virtual void setForce(Vector3 pos, Vector3 dir)
+    {
+        throw new NotImplementedException();
+    }
+
+    internal virtual bool isPlayerDowned()
+    {
+        throw new NotImplementedException();
+    }
+
+    internal virtual void send_player_pickup_request_to_server(uint server_id)
+    {
+        throw new NotImplementedException();
+    }
+
+    public override void ReviveDownedPlayerRequest(RpcArgs args)
+    {
+        throw new NotImplementedException();
+    }
+
+    public override void ReviveDownedPlayerResponse(RpcArgs args)
     {
         throw new NotImplementedException();
     }

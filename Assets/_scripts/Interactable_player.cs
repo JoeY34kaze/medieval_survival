@@ -1,0 +1,53 @@
+﻿using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using BeardedManStudios.Forge.Networking.Generated;
+using BeardedManStudios.Forge.Networking;
+using BeardedManStudios.Forge.Networking.Unity;
+
+public class Interactable_player : Interactable
+{
+    internal override bool isPlayerDowned()
+    {
+        return GetComponent<NetworkPlayerStats>().downed;
+    }
+
+    internal override void send_player_pickup_request_to_server(uint healthy_player_server_id) {
+
+        //tle lahko ze mal antihacka nrdimo drgac ceprov je client side ?
+
+
+        networkObject.SendRpc(RPC_REVIVE_DOWNED_PLAYER_REQUEST, Receivers.Server, healthy_player_server_id);
+        
+    }
+
+    public override void ReviveDownedPlayerRequest(RpcArgs args)
+    {
+        if (!networkObject.IsServer) return;
+
+        uint reviver = args.GetNext<uint>();
+        uint downed_server_id = GetComponent<NetworkPlayerStats>().server_id;
+        Debug.Log("Server: ReviveDownedPlayerRequest :" + reviver + " -> (" + downed_server_id);
+
+        //-----------------antihack checks  (distance, raycast za fov, take stvari)
+        float max_distance = 6f;
+        Transform a = FindByid(reviver).transform;
+        Transform d = GetComponent<Transform>();
+        if (Vector3.Distance(a.position, d.position) > max_distance)
+        {
+            Debug.LogError("ANTIHACK! : Reviving. Players:" + reviver + " -> (" + downed_server_id + " | " + GetComponent<NetworkPlayerStats>().server_id + ")");
+            return;
+        }
+        //------------------------
+
+        networkObject.SendRpc(RPC_REVIVE_DOWNED_PLAYER_RESPONSE, Receivers.All);
+        //set health and other shit
+        FindByid(args.Info.SendingPlayer.NetworkId).GetComponent<NetworkPlayerStats>().set_player_health(25,downed_server_id);
+    }
+
+    public override void ReviveDownedPlayerResponse(RpcArgs args)
+    {
+        Debug.Log("Server: ReviveDownedPlayersponse : (" + args.Info.SendingPlayer.NetworkId + " | " + GetComponent<NetworkPlayerStats>().server_id + ")");
+        GetComponent<NetworkPlayerStats>().handle_player_pickup();
+    }
+}

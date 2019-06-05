@@ -74,11 +74,26 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
                         {
                             Debug.Log("Interacting with " + hit.collider.name + " with distance of " + hit.distance);
 
+                            // -----------------------------------------    Inventory item / weapon /gear ---------------------------------------------------
                             if (interactable is ItemPickup)
                                 if (networkPlayerInventory.hasInventorySpace())
                                     interactable.interact(stats.server_id);
                                 else
                                     handleInventoryFull();
+
+                            //-------------------------------------------  player (inv u guild / interakcija ko je downan )---------------------------------------------------------------
+                            if (interactable is Interactable_player) {
+                                interactable = (Interactable_player)interactable;
+                                if (interactable.isPlayerDowned()) {//interakcija samo za pobrat ali pa execution
+                                    Debug.Log("interacting with downed player");
+                                    interactable.send_player_pickup_request_to_server(GetComponent<NetworkPlayerStats>().server_id);
+                                }
+                                else//invajt u guild?
+                                {
+                                    Debug.Log("Interacting with healthy player.");
+                                }
+
+                            }
                         }
                     }
                 }

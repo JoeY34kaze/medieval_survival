@@ -174,6 +174,21 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
         
     }
 
+    public void set_player_health(float amount,uint id) {
+        lock (myNetWorker.Players)
+        {
+            myNetWorker.IteratePlayers((player) =>
+            {
+                if (player.NetworkId == id) //passive target
+                {
+                    networkObject.SendRpc(player, RPC_SET_HEALTH_PASSIVE_TARGET, amount, "revive");
+                }
+            });
+
+        }
+        //networkObject.SendRpc(player, RPC_SET_HEALTH_PASSIVE_TARGET, this.health, tag_passive);
+    }
+
 
     private void handle_0_hp() {//sprozi tko na ownerju, kot na clientih
         this.downed = true;
@@ -183,9 +198,9 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
 
     }
 
-    private void handle_player_pickup() {
-        this.downed = true;
-        GetComponent<NetworkPlayerAnimationLogic>().handle_downed_end(true);
+    public void handle_player_pickup() {
+        this.downed = false;
+        GetComponent<NetworkPlayerAnimationLogic>().handle_downed_end(true);// z tlele k smo smo dobil lahko samo pobiranje igralca. execution bomo klical z drugje in takrat damo na false
 
     }
 

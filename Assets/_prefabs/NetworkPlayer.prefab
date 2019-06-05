@@ -3296,6 +3296,7 @@ GameObject:
   - component: {fileID: 5542566147419541656}
   - component: {fileID: 3674254602760150681}
   - component: {fileID: 7040696969213881553}
+  - component: {fileID: 709254120835692662}
   m_Layer: 9
   m_Name: NetworkPlayer
   m_TagString: Player
@@ -3473,6 +3474,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c89146a43f8bd3d4cad93b4e428133e2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  test: 0
+  downed: 0
   health: 255
   healthBar: {fileID: 1869159245663992739}
   server_id: 5
@@ -3522,7 +3525,6 @@ MonoBehaviour:
   inverse_vertical: 0
   freeLook: 0
   _camera_framework: {fileID: 6878084338605114859}
-  point_to_look_at_on_player: {fileID: 7270387366539822506}
   mouse_sensitivity_multiplier: 1
   player_cam: {fileID: 0}
 --- !u!114 &723099925318411826
@@ -3645,6 +3647,18 @@ MonoBehaviour:
   loadout_weapon_0: {fileID: 885586017782772687}
   loadout_weapon_1: {fileID: 4752314656491686501}
   loadout_shield: {fileID: 889531187746997609}
+--- !u!114 &709254120835692662
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4050820139605508289}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 149ff4bb66969a44bbdaff00a4559c82, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &4071417591800162448
 GameObject:
   m_ObjectHideFlags: 0
@@ -9021,12 +9035,12 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 5759659610163901986, guid: fda6cff1de33cde4d9d5d49932bd66ad,
+    - target: {fileID: 4011201782879775749, guid: fda6cff1de33cde4d9d5d49932bd66ad,
         type: 3}
       propertyPath: m_Enabled
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 4011201782879775749, guid: fda6cff1de33cde4d9d5d49932bd66ad,
+    - target: {fileID: 5759659610163901986, guid: fda6cff1de33cde4d9d5d49932bd66ad,
         type: 3}
       propertyPath: m_Enabled
       value: 0
@@ -9200,12 +9214,12 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 5759659610163901986, guid: fda6cff1de33cde4d9d5d49932bd66ad,
+    - target: {fileID: 4011201782879775749, guid: fda6cff1de33cde4d9d5d49932bd66ad,
         type: 3}
       propertyPath: m_Enabled
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 4011201782879775749, guid: fda6cff1de33cde4d9d5d49932bd66ad,
+    - target: {fileID: 5759659610163901986, guid: fda6cff1de33cde4d9d5d49932bd66ad,
         type: 3}
       propertyPath: m_Enabled
       value: 0
@@ -9609,6 +9623,11 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 70
       objectReference: {fileID: 0}
+    - target: {fileID: 6696883169253367297, guid: 3c2716ed3cde66140a5524e6840f82f5,
+        type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 6871145231695526815, guid: 3c2716ed3cde66140a5524e6840f82f5,
         type: 3}
       propertyPath: m_Enabled
@@ -9638,11 +9657,6 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Height
       value: 2.4016154
-      objectReference: {fileID: 0}
-    - target: {fileID: 6696883169253367297, guid: 3c2716ed3cde66140a5524e6840f82f5,
-        type: 3}
-      propertyPath: m_Enabled
-      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 3c2716ed3cde66140a5524e6840f82f5, type: 3}
@@ -10715,12 +10729,12 @@ PrefabInstance:
       propertyPath: m_LocalScale.z
       value: 0.18772984
       objectReference: {fileID: 0}
-    - target: {fileID: 6871145231695526815, guid: 3c2716ed3cde66140a5524e6840f82f5,
+    - target: {fileID: 6696883169253367297, guid: 3c2716ed3cde66140a5524e6840f82f5,
         type: 3}
       propertyPath: m_Enabled
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 6696883169253367297, guid: 3c2716ed3cde66140a5524e6840f82f5,
+    - target: {fileID: 6871145231695526815, guid: 3c2716ed3cde66140a5524e6840f82f5,
         type: 3}
       propertyPath: m_Enabled
       value: 0

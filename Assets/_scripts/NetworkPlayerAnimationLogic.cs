@@ -186,7 +186,7 @@ public class NetworkPlayerAnimationLogic : NetworkPlayerAnimationBehavior
     {
         if (revived)
         {
-            anim.SetTrigger("downed");
+            anim.SetTrigger("revived");
            Debug.Log("revived!");
         }
         else {
