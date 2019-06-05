@@ -21,7 +21,7 @@ TagManager:
   - 
   - PostProcessing
   - player
-  - walkable
+  - player_container_collider
   - 
   - 
   - 
