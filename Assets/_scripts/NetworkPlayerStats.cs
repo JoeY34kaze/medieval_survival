@@ -175,17 +175,22 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
     }
 
     public void set_player_health(float amount,uint id) {
+        if (!networkObject.IsServer) return;
+        Debug.Log("server :set player health");
         lock (myNetWorker.Players)
         {
             myNetWorker.IteratePlayers((player) =>
             {
                 if (player.NetworkId == id) //passive target
                 {
+                    Debug.Log("server :set player health - player found");
                     networkObject.SendRpc(player, RPC_SET_HEALTH_PASSIVE_TARGET, amount, "revive");
+                    return;
                 }
             });
 
         }
+        Debug.Log("server :set player health - player not found");
         //networkObject.SendRpc(player, RPC_SET_HEALTH_PASSIVE_TARGET, this.health, tag_passive);
     }
 
@@ -244,7 +249,7 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
     public override void setHealthPassiveTarget(RpcArgs args)
     {
         if (!networkObject.IsOwner) {
-            Debug.Log("server ga retardira");
+            Debug.LogError("Server sent request for health change to wrong client. client that received it : "+this.server_id);
             return;
         }
        // if (networkObject.IsOwner)
@@ -261,9 +266,9 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
         }
         
         string tag = args.GetNext<string>();
-        if (!tag.Equals("block_player")) GameObject.Instantiate(this.sound_effects_on_player[0]);
+        if (!tag.Equals("block_player") && !tag.Equals("revive")) GameObject.Instantiate(this.sound_effects_on_player[0]);
         this.healthBar.fillAmount = this.health / (this.max_health);
-            networkObject.SendRpc(RPC_SET_HEALTH_ON_OTHERS,Receivers.Others, this.health);
+            networkObject.SendRpc(RPC_SET_HEALTH_ON_OTHERS,Receivers.Others, this.health, tag);
         //}
     }
 
@@ -277,6 +282,11 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
             handle_0_hp();
         }
         
+         string tag = args.GetNext<string>();
+        if (!tag.Equals("block_player") && !tag.Equals("revive")) GameObject.Instantiate(this.sound_effects_on_player[0]);
+         
+
+
         this.healthBar.fillAmount =this.health / (this.max_health);
     }
 

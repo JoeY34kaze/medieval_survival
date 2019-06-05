@@ -42,12 +42,12 @@ public class Interactable_player : Interactable
 
         networkObject.SendRpc(RPC_REVIVE_DOWNED_PLAYER_RESPONSE, Receivers.All);
         //set health and other shit
-        FindByid(args.Info.SendingPlayer.NetworkId).GetComponent<NetworkPlayerStats>().set_player_health(25,downed_server_id);
+        FindByid(downed_server_id).GetComponent<NetworkPlayerStats>().set_player_health(25,downed_server_id);
     }
 
     public override void ReviveDownedPlayerResponse(RpcArgs args)
     {
-        Debug.Log("Server: ReviveDownedPlayersponse : (" + args.Info.SendingPlayer.NetworkId + " | " + GetComponent<NetworkPlayerStats>().server_id + ")");
+        Debug.Log(" ReviveDownedPlayersponse : (" + args.Info.SendingPlayer.NetworkId + " | " + GetComponent<NetworkPlayerStats>().server_id + ")");
         GetComponent<NetworkPlayerStats>().handle_player_pickup();
     }
 }
