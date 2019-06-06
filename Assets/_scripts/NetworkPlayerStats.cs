@@ -9,7 +9,9 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
 {
     public bool test = false;
 
+
     public bool downed = false;
+    private bool dead = false;
     private float max_health = 255;
     public float health = 255;//for debug purposes, its not being called from any other script that i made, its public just so that i can see it easier in inspector
     public Image healthBar;
@@ -42,8 +44,9 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
         networkObject.SendRpc(RPC_UPDATE_ALL_PLAYER_ID, Receivers.Server);
         if (networkObject.IsServer)
         {
+            if (this.dead) return;
             if (npi == null) npi = GetComponent<NetworkPlayerInventory>();
-
+            float prev_hp = this.health;
             float dmg;
             if (weapon == null)
             {//unarmed combat. posebej napisat vrednosti. enakob o za block
@@ -118,7 +121,10 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
                         networkObject.SendRpc(player, RPC_SET_HEALTH_PASSIVE_TARGET, this.health, tag_passive);
                         count++;
 
-
+                        if (prev_hp == 0 && final_damage_taken > 0) {
+                            //death
+                            handle_death_player(passive_player_server_network_id);
+                        }
                     }
 
                     //agressor za izrisanje damage-a
@@ -134,6 +140,15 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
 
             }
         }
+    }
+
+    private void handle_death_player(uint player_id)
+    {
+        this.downed = false;
+        this.dead = true;
+       // Debug.Log("Spawning body");
+        spawn_UMA_body(transform.position, get_UMA_to_string(), player_id);//poslje rpc da nrdi uma body in disabla renderer za playerja v enem
+
     }
 
     protected override void NetworkStart()
@@ -158,7 +173,7 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
     {
         if (networkObject == null)
         {
-            Debug.LogError("networkObject is null.");
+           // Debug.LogError("networkObject is null.");
             return;
         }
         if (myNetWorker == null)
@@ -168,13 +183,14 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
                 myNetWorker = GameObject.Find("NetworkManager(Clone)").GetComponent<NetworkManager>().Networker;
             }
         }
-
+        
             if (networkObject.IsServer && Input.GetKeyDown(KeyCode.X))
             {
-                Debug.Log("Spawning uma");
-                spawn_UMA_body(transform.position,get_UMA_to_string());
+               // Debug.Log("Spawning uma");
+                spawn_UMA_body(transform.position,get_UMA_to_string(),0);
             
-        }
+            }
+        
 
 
 
@@ -185,36 +201,36 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
 
     }
 
-    private void spawn_UMA_body(Vector3 pos, string data)//nevem kam nj bi drgac dau. lh bi naredu svojo skripto ampak je tud to mal retardiran ker rabs pol networking zrihtat...
+    private void spawn_UMA_body(Vector3 pos, string data, uint player_id)//nevem kam nj bi drgac dau. lh bi naredu svojo skripto ampak je tud to mal retardiran ker rabs pol networking zrihtat...
     {
         if (!networkObject.IsServer) return;
         Network_bodyBehavior b = NetworkManager.Instance.InstantiateNetwork_body(0, pos);
-        b.gameObject.GetComponent<Network_body>().update_UMA_body(data);
+        b.gameObject.GetComponent<Network_body>().set_data_for_init(data, player_id);
     }
 
     private string get_UMA_to_string()
     {
-        Debug.Log("not implemented yet");
+       // Debug.Log("not implemented yet");
         return "empty so far";
     }
 
     public void set_player_health(float amount,uint id) {
         if (!networkObject.IsServer) return;
-        Debug.Log("server :set player health");
+       // Debug.Log("server :set player health");
         lock (myNetWorker.Players)
         {
             myNetWorker.IteratePlayers((player) =>
             {
                 if (player.NetworkId == id) //passive target
                 {
-                    Debug.Log("server :set player health - player found");
+                   // Debug.Log("server :set player health - player found");
                     networkObject.SendRpc(player, RPC_SET_HEALTH_PASSIVE_TARGET, amount, "revive");
                     return;
                 }
             });
 
         }
-        Debug.Log("server :set player health - player not found");
+        //Debug.Log("server :set player health - player not found");
         //networkObject.SendRpc(player, RPC_SET_HEALTH_PASSIVE_TARGET, this.health, tag_passive);
     }
 

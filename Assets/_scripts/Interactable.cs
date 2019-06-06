@@ -50,7 +50,7 @@ public class Interactable : Interactable_objectBehavior
 
     }
 
-    public GameObject FindByid(uint targetNetworkId)
+    public GameObject FindByid(uint targetNetworkId) //koda kopširana v network_body.cs
     {
         Debug.Log("interactable.findplayerById");
         Debug.Log(targetNetworkId);

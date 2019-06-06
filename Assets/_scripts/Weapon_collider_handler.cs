@@ -8,7 +8,7 @@ public class Weapon_collider_handler : MonoBehaviour
     public Item item;
     void OnTriggerEnter(Collider other)//nima networkobjekta. ce je server se preverja v stats.
     {
-        Debug.Log("HIT - " + other.gameObject.name);
+       // Debug.Log("HIT - " + other.gameObject.name);
        // if (this.player == null || this.player_stats == null) {
            // Debug.Log("player or player_stats is null");
         //    return; }
@@ -28,7 +28,7 @@ public class Weapon_collider_handler : MonoBehaviour
             }
             else
             {
-                Debug.Log("Hit another player in the " + other.name + " | " + other.tag);
+               // Debug.Log("Hit another player in the " + other.name + " | " + other.tag);
 
                 other.transform.root.gameObject.GetComponent<NetworkPlayerStats>().take_weapon_damage_server_authority(this.item,other.tag, gameObject.tag, other.transform.root.gameObject.GetComponent<NetworkPlayerStats>().server_id, transform.root.gameObject.GetComponent<NetworkPlayerStats>().server_id);
                 if (gameObject.tag.Equals("weapon_player")) this.set_offensive_colliders(false);
@@ -38,7 +38,7 @@ public class Weapon_collider_handler : MonoBehaviour
     }
 
     public void set_offensive_colliders(bool b) { //BUG NETWORKOBJECT JE NULL
-        Debug.Log("--------->" + b);
+       // Debug.Log("--------->" + b);
         GetComponent<Collider>().enabled = b;
     }
 
