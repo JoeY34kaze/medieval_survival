@@ -3,7 +3,7 @@ using UnityEngine.UI;
 using BeardedManStudios.Forge.Networking.Generated;
 using BeardedManStudios.Forge.Networking;
 using BeardedManStudios.Forge.Networking.Unity;
-
+using System;
 
 public class NetworkPlayerStats : NetworkPlayerStatsBehavior
 {
@@ -117,6 +117,8 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
                         //Debug.Log("Victim found! "+ passive_player_server_network_id);
                         networkObject.SendRpc(player, RPC_SET_HEALTH_PASSIVE_TARGET, this.health, tag_passive);
                         count++;
+
+
                     }
 
                     //agressor za izrisanje damage-a
@@ -167,11 +169,33 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
             }
         }
 
-        if (this.test) {
-            this.health = 0;
-            handle_0_hp();
+            if (networkObject.IsServer && Input.GetKeyDown(KeyCode.X))
+            {
+                Debug.Log("Spawning uma");
+                spawn_UMA_body(transform.position,get_UMA_to_string());
+            
         }
-        
+
+
+
+        /*  if (this.test) {
+              this.health = 0;
+              handle_0_hp();
+          }*/
+
+    }
+
+    private void spawn_UMA_body(Vector3 pos, string data)//nevem kam nj bi drgac dau. lh bi naredu svojo skripto ampak je tud to mal retardiran ker rabs pol networking zrihtat...
+    {
+        if (!networkObject.IsServer) return;
+        Network_bodyBehavior b = NetworkManager.Instance.InstantiateNetwork_body(0, pos);
+        b.gameObject.GetComponent<Network_body>().update_UMA_body(data);
+    }
+
+    private string get_UMA_to_string()
+    {
+        Debug.Log("not implemented yet");
+        return "empty so far";
     }
 
     public void set_player_health(float amount,uint id) {
