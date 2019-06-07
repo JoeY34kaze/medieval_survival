@@ -29,8 +29,7 @@ public class Network_body : Network_bodyBehavior
         //Debug.Log("received UMA data : " + data+"za playerja+"+id);
         //------------- setup appearence
         //------------- setup gear
-        //------------- disable player renderer
-        FindByid(id).transform.Find("UMARenderer").gameObject.SetActive(false);
+        //------------- player renderer se disabla drugje. v player stats
     }
 
     private void LateUpdate()

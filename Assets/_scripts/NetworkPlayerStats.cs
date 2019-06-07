@@ -142,13 +142,32 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
         }
     }
 
-    private void handle_death_player(uint player_id)
+    private void handle_death_player(uint player_id)//samo na serverju
     {
+        if (!networkObject.IsServer) return;
+
         this.downed = false;
         this.dead = true;
        // Debug.Log("Spawning body");
         spawn_UMA_body(transform.position, get_UMA_to_string(), player_id);//poslje rpc da nrdi uma body in disabla renderer za playerja v enem
+                                                                           // server mora vsem sporocit da nj nehajo renderat playerja k je lihkar umru ker ga je vizualno zamenjov ragdoll
+        networkObject.SendRpc(RPC_SET_DRAWING_PLAYER, Receivers.All, false);
+    }
 
+    private void handle_respawn_player() {
+        if (!networkObject.IsServer) return;
+        if(check_for_validity_of_respawn_request())
+            networkObject.SendRpc(RPC_RESPAWN_SIGNAL, Receivers.All, transform.position);
+
+    }
+
+    private bool check_for_validity_of_respawn_request()
+    {
+        //tle bo kao za prevert ce se player sme respawnat al je slucajn kej pohackov da se prej respawna, recimo da pohacka timer al pa kej.
+        if (!this.dead)
+            return false;
+
+        return true;
     }
 
     protected override void NetworkStart()
@@ -183,13 +202,16 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
                 myNetWorker = GameObject.Find("NetworkManager(Clone)").GetComponent<NetworkManager>().Networker;
             }
         }
-        
-            if (networkObject.IsServer && Input.GetKeyDown(KeyCode.X))
-            {
-               // Debug.Log("Spawning uma");
-                spawn_UMA_body(transform.position,get_UMA_to_string(),0);
-            
-            }
+
+        if (networkObject.IsServer && Input.GetKeyDown(KeyCode.X))
+        {
+            // Debug.Log("Spawning uma");
+            spawn_UMA_body(transform.position, get_UMA_to_string(), 0);
+
+        }
+        else if (Input.GetButtonDown("Interact") && this.dead && networkObject.IsOwner) {
+            networkObject.SendRpc(RPC_RESPAWN_REQUEST, Receivers.Server);
+        }
         
 
 
@@ -342,6 +364,42 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
         reticle_hit_controller.CreateReticleHit(tag); //cod2 reticle hit style like
     }
 
+    public override void respawnRequest(RpcArgs args)//poslje client serverju
+    {
+        if (!networkObject.IsServer) return;
+        handle_respawn_player();
+    }
+
+    public override void respawnSignal(RpcArgs args)//poslje server vsem, tud sebi
+    {
+        //nastav spremenljivke povsod
+        this.downed = false;
+        this.dead = false;
+
+        if (networkObject.IsServer)//server nastima vsem health
+            set_player_health(max_health/2, this.server_id);
+
+        //izrise nazaj body
+        local_setDrawingPlayer(true);
+
+    }
+
+    public override void setDrawingPlayer(RpcArgs args)
+    {
+        bool draw_uma = args.GetNext<bool>();
+        local_setDrawingPlayer(draw_uma);//v drugi metodi zato ker se klice se z vsaj ene druge metode
+
+        //ce "umre" mormo tud resetirat za animacijo da ne lezi vec na tleh. to se izvede na vseh clientih in serverju
+        GetComponent<NetworkPlayerAnimationLogic>().handle_downed_end(false);
+        
+
+
+    }
+
+    private void local_setDrawingPlayer(bool b) {
+        transform.Find("UMARenderer").gameObject.SetActive(b);
+        //izris prica al karkoli bo ze letel po zraku do tvojga otroka da ga possessa(!b)
+    }
 
 
 

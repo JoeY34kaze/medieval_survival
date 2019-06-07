@@ -182,7 +182,7 @@ public class NetworkPlayerAnimationLogic : NetworkPlayerAnimationBehavior
         anim.SetLayerWeight(1, 0);
     }
 
-    internal void handle_downed_end(bool revived)
+    internal void handle_downed_end(bool revived)//i guess nerab zdej vec if statementa.
     {
         if (revived)
         {
@@ -190,9 +190,9 @@ public class NetworkPlayerAnimationLogic : NetworkPlayerAnimationBehavior
            Debug.Log("revived!");
         }
         else {
-            GetComponent<NetworkPlayerMovement>().do_ragdoll = true;
+            anim.SetTrigger("revived");
             Debug.Log("dead!");
-        }
+        } 
         anim.SetLayerWeight(anim.GetLayerIndex("combat_layer"), 1);
     }
 }
