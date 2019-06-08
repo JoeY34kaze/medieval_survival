@@ -9,7 +9,7 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
 {
     public bool test = false;
 
-
+    public bool inDodge = false;
     public bool downed = false;
     public bool dead = false;
     private float max_health = 255;

@@ -12,7 +12,7 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
     /// Horizontal or Vertical mapped key
     /// </summary>
     public float normal_speed = 1.0f;
-
+    private int dodge_direction = 0;
 
     public float sprint_modifier = 2.0f;
     public float crouched_modifier = 0.25f;
@@ -92,55 +92,68 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
 
         if (!stats.downed)//dvakrat je tale check. zato da ce je downan v zraku se zmer pade na tla in ne lebdi v zrak
         {
-            crouched = anim.GetBool("crouched");
-            speed = normal_speed;
-
-            if (crouched) speed = speed * crouched_modifier;
-
-
-            //---------------------------------------------------DA TE MAL POSLOWA K NAPADAS Z WEAPONOM----------------------------------------------
-            if (combat_handler_script.in_attack_animation)
+            if (Input.GetButtonDown("Dodge") && !stats.inDodge)
             {
-                if (combat_handler_script.index_of_currently_selected_weapon_from_equipped_weapons == 2) speed *= light_weapon_speed_modifier;
+                Debug.Log("Dodge started");
+                handle_dodge_start();
             }
-            //----------------------------------------------------------------------------------------------------------------------------------------
-
-            next_position = transform.position;
-
-            Vector3 dirVector = (transform.forward * Input.GetAxis("Vertical") + transform.right * Input.GetAxis("Horizontal")).normalized * speed * Time.fixedDeltaTime;
-            if (Input.GetButton("Sprint") && Input.GetAxis("Vertical") > 0)
-                dirVector *= sprint_modifier;
-
-            next_position += dirVector;
-
-            if (!networkPlayerInventory.panel_inventory.activeSelf)//ce nimamo odprt inventorij - to je samo za horizontalno premikanje miske. vertikalno je nekje drugje
+            else if (stats.inDodge)
             {
-                Quaternion turnAngle = Quaternion.AngleAxis(Input.GetAxis("Mouse X") * GetComponent<player_camera_handler>().mouse_sensitivity_multiplier, Vector3.up);
-                transform.eulerAngles = transform.eulerAngles + turnAngle.eulerAngles;
+                //Debug.Log("dodging");
             }
-
-            check_ground_raycast(distance_from_center_raycast);
-        }
-        //gravity
-        //if(!isGrounded)
-        rigidbody.AddForce(Vector3.up * Physics.gravity.y*2, ForceMode.Acceleration);
-
-
-        if (!stats.downed)
-        {
-            if (Input.GetAxis("Jump") > 0.01f && isGrounded && !in_a_jump) // && isGrounded??? isGrounded je trenutno se mal buggy
+            else
             {
-                //jump();
-                Debug.Log(Vector3.up * 6.3f);
 
-                rigidbody.AddForce(Vector3.up * visina_skoka * 2, ForceMode.VelocityChange);
-                StartCoroutine(lock_jumping(1));
+                crouched = anim.GetBool("crouched");
+                speed = normal_speed;
+
+                if (crouched) speed = speed * crouched_modifier;
+
+
+                //---------------------------------------------------DA TE MAL POSLOWA K NAPADAS Z WEAPONOM----------------------------------------------
+                if (combat_handler_script.in_attack_animation)
+                {
+                    if (combat_handler_script.index_of_currently_selected_weapon_from_equipped_weapons == 2) speed *= light_weapon_speed_modifier;
+                }
+                //----------------------------------------------------------------------------------------------------------------------------------------
+
+                next_position = transform.position;
+
+                Vector3 dirVector = (transform.forward * Input.GetAxis("Vertical") + transform.right * Input.GetAxis("Horizontal")).normalized * speed * Time.fixedDeltaTime;
+                if (Input.GetButton("Sprint") && Input.GetAxis("Vertical") > 0)
+                    dirVector *= sprint_modifier;
+
+                next_position += dirVector;
+
+                if (!networkPlayerInventory.panel_inventory.activeSelf)//ce nimamo odprt inventorij - to je samo za horizontalno premikanje miske. vertikalno je nekje drugje
+                {
+                    Quaternion turnAngle = Quaternion.AngleAxis(Input.GetAxis("Mouse X") * GetComponent<player_camera_handler>().mouse_sensitivity_multiplier, Vector3.up);
+                    transform.eulerAngles = transform.eulerAngles + turnAngle.eulerAngles;
+                }
+
+                check_ground_raycast(distance_from_center_raycast);
             }
-            /*
-            Vector3 point_on_ground = get_capsulecasted_position_downward_from_chest();
-            int state_of_vertical=check_ground(point_on_ground);
-            next_position=apply_gravity(next_position,point_on_ground,state_of_vertical);
-            */
+            //gravity
+            //if(!isGrounded)
+            rigidbody.AddForce(Vector3.up * Physics.gravity.y * 2, ForceMode.Acceleration);
+
+
+            if (!stats.downed)
+            {
+                if (Input.GetAxis("Jump") > 0.01f && isGrounded && !in_a_jump) // && isGrounded??? isGrounded je trenutno se mal buggy
+                {
+                    //jump();
+                    Debug.Log(Vector3.up * 6.3f);
+
+                    rigidbody.AddForce(Vector3.up * visina_skoka * 2, ForceMode.VelocityChange);
+                    StartCoroutine(lock_jumping(1));
+                }
+                /*
+                Vector3 point_on_ground = get_capsulecasted_position_downward_from_chest();
+                int state_of_vertical=check_ground(point_on_ground);
+                next_position=apply_gravity(next_position,point_on_ground,state_of_vertical);
+                */
+            }
         }
         rigidbody.MovePosition(next_position);
         //transform.position = next_position;
@@ -176,6 +189,25 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
     {
         GetComponent<UMA.Dynamics.UMAPhysicsAvatar>().ragdolled = true;
     }
+
+    private void handle_dodge_start()
+    {
+        stats.inDodge = true;
+
+        this.dodge_direction = 0;
+        if (Input.GetAxis("Horizontal") < 0) this.dodge_direction = 1;
+        else if (Input.GetAxis("Horizontal") > 0) this.dodge_direction = 2;
+        else if (Input.GetAxis("Vertical") < 0) this.dodge_direction = 3;
+
+
+        GetComponent<NetworkPlayerAnimationLogic>().handle_dodge_start(this.dodge_direction);
+    }
+
+    public void handleDodgeEnd() {//animacija poklice tole metodo na vsah clientih da resetirajo vse kar je povezano z dodganjem
+        stats.inDodge = false;
+        Debug.Log("dodge parameters cleared");
+    }
+
 
     /* void OnCollisionEnter(Collision collision)
      {

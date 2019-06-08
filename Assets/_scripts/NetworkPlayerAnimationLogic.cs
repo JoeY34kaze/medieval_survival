@@ -198,4 +198,10 @@ public class NetworkPlayerAnimationLogic : NetworkPlayerAnimationBehavior
         anim.SetLayerWeight(anim.GetLayerIndex("combat_layer"), 1);
         anim.SetInteger("combat_mode", 0);//duplicated
     }
+
+    internal void handle_dodge_start(int direction)
+    {
+        anim.SetTrigger("dodge");
+        anim.SetInteger("dodge_direction",direction);
+    }
 }
