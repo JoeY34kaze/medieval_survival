@@ -12,6 +12,13 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
     private NetworkPlayerInventory networkPlayerInventory;
 
     private NetWorker myNetWorker;
+
+    private void Start()
+    {
+        stats = GetComponent<NetworkPlayerStats>();
+        networkPlayerInventory = GetComponent<NetworkPlayerInventory>();
+    }
+
     protected override void NetworkStart()
     {
         base.NetworkStart();
@@ -24,6 +31,7 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
     {
         if (networkObject == null) { Debug.LogError("networkObject is null."); return; }
         if (!networkObject.IsOwner) return;
+        if (stats.downed || stats.dead) return;
         if (stats == null) stats = GetComponent<NetworkPlayerStats>();
         if (networkPlayerInventory == null) networkPlayerInventory = GetComponent<NetworkPlayerInventory>();
         //if(mapper==null)mapper = GameObject.Find("Mapper").GetComponent<Mapper>();
@@ -31,7 +39,7 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
         {
             setup_player_cam();
         }
-        else {
+        else{
             //check what we are looking at with camera.
             Ray ray = new Ray(player_cam.position, player_cam.forward);
 

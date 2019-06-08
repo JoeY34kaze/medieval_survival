@@ -172,10 +172,11 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
             return;
         }
 
-        if (stats.downed)
+        if (stats.downed || stats.dead)
         {
             networkObject.combatmode = 0;
             this.combat_mode = 0;
+            animator.SetInteger("combat_mode", 0);
             return; //Ce je downan da nemora vec napadat pa take fore. to je precej loše ker je na clientu. ksnej bo treba prenest to logiko na server ker tole zjebe ze cheatengine
 
         }
@@ -278,6 +279,17 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
             }
 
             this.index_of_currently_selected_weapon_from_equipped_weapons = next_index;
+        }
+    }
+
+    public void handle_player_death() {
+        disable_all_possible_equipped_weapons();
+        disable_all_shields();
+        if (networkObject.IsOwner)
+        {
+            this.combat_mode = 0;
+            networkObject.combatmode = 0;
+            animator.SetBool("combat_mode", false);
         }
     }
 

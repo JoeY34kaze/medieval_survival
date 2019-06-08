@@ -179,20 +179,23 @@ public class NetworkPlayerAnimationLogic : NetworkPlayerAnimationBehavior
         
         Debug.Log("downed!");
         anim.SetTrigger("downed");
-        anim.SetLayerWeight(1, 0);
+        anim.SetInteger("combat_mode", 0);//duplicated
+        anim.SetLayerWeight(1, 0);//combat layer
     }
 
-    internal void handle_downed_end(bool revived)//i guess nerab zdej vec if statementa.
+    internal void handle_player_revived()//i guess nerab zdej vec if statementa.
     {
-        if (revived)
-        {
-            anim.SetTrigger("revived");
-           Debug.Log("revived!");
-        }
-        else {
-            anim.SetTrigger("revived");
-            Debug.Log("dead!");
-        } 
+
+        anim.SetTrigger("revived");
+        Debug.Log("revived!");
+
         anim.SetLayerWeight(anim.GetLayerIndex("combat_layer"), 1);
+        anim.SetInteger("combat_mode", 0);//duplicated
+    }
+
+    public void handle_player_death() {
+        anim.SetTrigger("revived");
+        anim.SetLayerWeight(anim.GetLayerIndex("combat_layer"), 1);
+        anim.SetInteger("combat_mode", 0);//duplicated
     }
 }

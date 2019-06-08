@@ -28,7 +28,7 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
     private Animator anim;
     //public CapsuleCollider movement_collider_checker;
 
-    public bool do_ragdoll = false;
+    //public bool do_ragdoll = false;
     public float dolzina_za_ground_check_raycast = 0.4f;
     public float distance_from_center_raycast = 0.2f;
     private bool isGrounded = true;
@@ -78,7 +78,7 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
             return;
         }
         if (animation_handler_script == null) { animation_handler_script = GetComponent<NetworkPlayerAnimationLogic>(); }
-
+        /*
         if (do_ragdoll)//ko bo dejanska smrt
         {
 
@@ -88,7 +88,7 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
             return;//najbrz spawnat box z playerjevimi itemi pa mrde kamero okol vrtet kej tazga
         }
 
-
+        */
 
         if (!stats.downed)//dvakrat je tale check. zato da ce je downan v zraku se zmer pade na tla in ne lebdi v zrak
         {

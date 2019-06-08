@@ -15,8 +15,10 @@ MonoBehaviour:
   Display_name: Iron sword
   type: 6
   icon: {fileID: 21300000, guid: aaf0ffac735cfaf48b1499a0440f7a65, type: 3}
-  damage: 20
+  damage: 300
+  damage_reduction: 0
   id: 2
   prefab_pickup: {fileID: 1566654935662004460, guid: 7d09e4243d4bf0e4197bce45a4178b1b,
     type: 3}
   weapon_animation_class: 2
+  recipeName: 

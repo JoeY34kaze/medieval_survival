@@ -11,7 +11,7 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
 
 
     public bool downed = false;
-    private bool dead = false;
+    public bool dead = false;
     private float max_health = 255;
     public float health = 255;//for debug purposes, its not being called from any other script that i made, its public just so that i can see it easier in inspector
     public Image healthBar;
@@ -146,12 +146,10 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
     {
         if (!networkObject.IsServer) return;
 
-        this.downed = false;
-        this.dead = true;
        // Debug.Log("Spawning body");
         spawn_UMA_body(transform.position, get_UMA_to_string(), player_id);//poslje rpc da nrdi uma body in disabla renderer za playerja v enem
                                                                            // server mora vsem sporocit da nj nehajo renderat playerja k je lihkar umru ker ga je vizualno zamenjov ragdoll
-        networkObject.SendRpc(RPC_SET_DRAWING_PLAYER, Receivers.All, false);
+        networkObject.SendRpc(RPC_ON_PLAYER_DEATH, Receivers.All);
     }
 
     private void handle_respawn_player() {
@@ -209,11 +207,14 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
             spawn_UMA_body(transform.position, get_UMA_to_string(), 0);
 
         }
-        else if (Input.GetButtonDown("Interact") && this.dead && networkObject.IsOwner) {
+
+        if (Input.GetButtonDown("Interact") && this.dead && networkObject.IsOwner) {
             networkObject.SendRpc(RPC_RESPAWN_REQUEST, Receivers.Server);
         }
-        
 
+        if (Input.GetButtonDown("Interact") && networkObject.IsOwner) {
+            Debug.Log(this.dead);
+        }
 
 
         /*  if (this.test) {
@@ -267,7 +268,7 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
 
     public void handle_player_pickup() {
         this.downed = false;
-        GetComponent<NetworkPlayerAnimationLogic>().handle_downed_end(true);// z tlele k smo smo dobil lahko samo pobiranje igralca. execution bomo klical z drugje in takrat damo na false
+        GetComponent<NetworkPlayerAnimationLogic>().handle_player_revived();// z tlele k smo smo dobil lahko samo pobiranje igralca. execution bomo klical z drugje in takrat damo na false
 
     }
 
@@ -384,15 +385,15 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
 
     }
 
-    public override void setDrawingPlayer(RpcArgs args)
+    public override void OnPlayerDeath(RpcArgs args)//vsi dobijo
     {
-        bool draw_uma = args.GetNext<bool>();
-        local_setDrawingPlayer(draw_uma);//v drugi metodi zato ker se klice se z vsaj ene druge metode
+        local_setDrawingPlayer(false);//v drugi metodi zato ker se klice se z vsaj ene druge metode
 
         //ce "umre" mormo tud resetirat za animacijo da ne lezi vec na tleh. to se izvede na vseh clientih in serverju
-        GetComponent<NetworkPlayerAnimationLogic>().handle_downed_end(false);
-        
-
+        this.downed = false;
+        this.dead = true; //to bi moral lockat combat pa tak
+        GetComponent<NetworkPlayerCombatHandler>().handle_player_death();//disabla shield pa weapon
+        GetComponent<NetworkPlayerAnimationLogic>().handle_player_death();
 
     }
 
