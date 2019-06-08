@@ -25,6 +25,7 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
     public float heavy_weapon_speed_modifier = 0.6f;
 
     private float speed = 1.0f;
+    private float dodge_speed_modifier = 4f;
     private Animator anim;
     //public CapsuleCollider movement_collider_checker;
 
@@ -99,7 +100,35 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
             }
             else if (stats.inDodge)
             {
-                //Debug.Log("dodging");
+                Debug.Log("dodging "+this.dodge_direction);
+
+                next_position = transform.position;
+
+                speed = normal_speed;
+                speed = speed * dodge_speed_modifier;
+
+                Vector3 dirVector = (transform.forward).normalized * speed * Time.fixedDeltaTime;
+
+                if(dodge_direction == 1)
+                    dirVector = (transform.right * (-1)).normalized * speed * Time.fixedDeltaTime;
+                else if (dodge_direction == 2)
+                    dirVector = (transform.right * 1).normalized * speed * Time.fixedDeltaTime;
+                else if(dodge_direction == 3)
+                    dirVector = (transform.forward *(-1)).normalized * speed * Time.fixedDeltaTime;
+
+                next_position += dirVector;
+
+
+                if (!networkPlayerInventory.panel_inventory.activeSelf)//ce nimamo odprt inventorij - to je samo za horizontalno premikanje miske. vertikalno je nekje drugje
+                {
+                    Quaternion turnAngle = Quaternion.AngleAxis(Input.GetAxis("Mouse X") * GetComponent<player_camera_handler>().mouse_sensitivity_multiplier, Vector3.up);
+                    transform.eulerAngles = transform.eulerAngles + turnAngle.eulerAngles;
+                }
+
+
+
+
+
             }
             else
             {
@@ -138,23 +167,22 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
             rigidbody.AddForce(Vector3.up * Physics.gravity.y * 2, ForceMode.Acceleration);
 
 
-            if (!stats.downed)
+            if (Input.GetAxis("Jump") > 0.01f && isGrounded && !in_a_jump) // && isGrounded??? isGrounded je trenutno se mal buggy
             {
-                if (Input.GetAxis("Jump") > 0.01f && isGrounded && !in_a_jump) // && isGrounded??? isGrounded je trenutno se mal buggy
-                {
-                    //jump();
-                    Debug.Log(Vector3.up * 6.3f);
+                //jump();
+                Debug.Log(Vector3.up * 6.3f);
 
-                    rigidbody.AddForce(Vector3.up * visina_skoka * 2, ForceMode.VelocityChange);
-                    StartCoroutine(lock_jumping(1));
-                }
-                /*
-                Vector3 point_on_ground = get_capsulecasted_position_downward_from_chest();
-                int state_of_vertical=check_ground(point_on_ground);
-                next_position=apply_gravity(next_position,point_on_ground,state_of_vertical);
-                */
+                rigidbody.AddForce(Vector3.up * visina_skoka * 2, ForceMode.VelocityChange);
+                StartCoroutine(lock_jumping(1));
             }
+            /*
+            Vector3 point_on_ground = get_capsulecasted_position_downward_from_chest();
+            int state_of_vertical=check_ground(point_on_ground);
+            next_position=apply_gravity(next_position,point_on_ground,state_of_vertical);
+            */
+
         }
+
         rigidbody.MovePosition(next_position);
         //transform.position = next_position;
         networkObject.position = transform.position;
@@ -198,8 +226,6 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
         if (Input.GetAxis("Horizontal") < 0) this.dodge_direction = 1;
         else if (Input.GetAxis("Horizontal") > 0) this.dodge_direction = 2;
         else if (Input.GetAxis("Vertical") < 0) this.dodge_direction = 3;
-
-
         GetComponent<NetworkPlayerAnimationLogic>().handle_dodge_start(this.dodge_direction);
     }
 

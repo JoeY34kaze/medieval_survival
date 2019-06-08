@@ -1652,7 +1652,7 @@ AnimatorState:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: dodge_backward
-  m_Speed: 1
+  m_Speed: 2
   m_CycleOffset: 0
   m_Transitions:
   - {fileID: 1101444779402368818}
@@ -1680,7 +1680,7 @@ AnimatorState:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: dodge_left
-  m_Speed: 1
+  m_Speed: 2
   m_CycleOffset: 0
   m_Transitions:
   - {fileID: 1101923561786280286}
@@ -1766,7 +1766,7 @@ AnimatorState:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: dodge_forward
-  m_Speed: 1
+  m_Speed: 2
   m_CycleOffset: 0
   m_Transitions:
   - {fileID: 1101598781816786384}
@@ -1854,7 +1854,7 @@ AnimatorState:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: dodge_right
-  m_Speed: 1
+  m_Speed: 2
   m_CycleOffset: 0
   m_Transitions:
   - {fileID: 1101081789991481778}
@@ -2184,7 +2184,7 @@ AnimatorStateMachine:
     m_Position: {x: 84, y: 168, z: 0}
   - serializedVersion: 1
     m_State: {fileID: 1102232645151731952}
-    m_Position: {x: 84, y: 336, z: 0}
+    m_Position: {x: 156, y: 432, z: 0}
   - serializedVersion: 1
     m_State: {fileID: 1102247178607717144}
     m_Position: {x: 564, y: 252, z: 0}
@@ -2208,16 +2208,16 @@ AnimatorStateMachine:
     m_Position: {x: 492, y: 12, z: 0}
   - serializedVersion: 1
     m_State: {fileID: 1102169375343898414}
-    m_Position: {x: -396, y: 264, z: 0}
+    m_Position: {x: -408, y: 372, z: 0}
   - serializedVersion: 1
     m_State: {fileID: 1102333637606582862}
     m_Position: {x: -396, y: 216, z: 0}
   - serializedVersion: 1
     m_State: {fileID: 1102226937981685350}
-    m_Position: {x: -612, y: 240, z: 0}
+    m_Position: {x: -528, y: 288, z: 0}
   - serializedVersion: 1
     m_State: {fileID: 1102485733487281864}
-    m_Position: {x: -192, y: 240, z: 0}
+    m_Position: {x: -300, y: 288, z: 0}
   m_ChildStateMachines: []
   m_AnyStateTransitions:
   - {fileID: 1101310394021104886}
