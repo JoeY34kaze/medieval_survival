@@ -92,7 +92,12 @@ public class NetworkPlayerAnimationLogic : NetworkPlayerAnimationBehavior
 
     }
 
-
+    internal bool isDodgeAllowed()
+    {
+        if (anim.GetCurrentAnimatorStateInfo(0).IsName("movement") || anim.GetCurrentAnimatorStateInfo(0).IsName("crouched_movement"))
+            return true;
+        return false;
+    }
 
     private void LateUpdate()
     {

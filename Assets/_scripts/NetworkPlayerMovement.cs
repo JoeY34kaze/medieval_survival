@@ -56,6 +56,22 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
         stats = GetComponent<NetworkPlayerStats>();
     }
 
+    private void Update()
+    {
+        if (networkObject == null) return;
+        if (!networkObject.IsOwner) return;
+        if (!stats.downed)//dvakrat je tale check. zato da ce je downan v zraku se zmer pade na tla in ne lebdi v zrak
+        {
+            if (Input.GetButtonDown("Dodge") && !stats.inDodge)
+            {
+                if (GetComponent<NetworkPlayerAnimationLogic>().isDodgeAllowed())
+                {
+                    Debug.Log("Dodge started");
+                    handle_dodge_start();
+                }
+            }
+        }
+    }
 
     private void FixedUpdate()
     { //CE DELAMO KAKSNE EMOTE MORAMO ZAKLENT OPCIJO DA SE LAHKO PLAYER PREMIKA!!! SICER SE ZJEBE GROUND DETECTION
@@ -93,12 +109,7 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
 
         if (!stats.downed)//dvakrat je tale check. zato da ce je downan v zraku se zmer pade na tla in ne lebdi v zrak
         {
-            if (Input.GetButtonDown("Dodge") && !stats.inDodge)
-            {
-                Debug.Log("Dodge started");
-                handle_dodge_start();
-            }
-            else if (stats.inDodge)
+            if (stats.inDodge)
             {
                 Debug.Log("dodging "+this.dodge_direction);
 
@@ -213,9 +224,20 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
 
     }
 
-    public override void ragdoll(RpcArgs args)//mrde preimenovat v player death pa izpisat ksno stvar playerjim. mogoce gor desno kdo je koga ubiu alk pa kej dunno.
+    public override void setDodge(RpcArgs args)//mrde preimenovat v player death pa izpisat ksno stvar playerjim. mogoce gor desno kdo je koga ubiu alk pa kej dunno.
     {
-        GetComponent<UMA.Dynamics.UMAPhysicsAvatar>().ragdolled = true;
+        int smer = args.GetNext<int>();
+
+        /*
+         if(networkObject.isServer){
+        //anticheat al pa kej. glede na visino od tal pa take fore 
+        }
+         */
+
+
+        stats.inDodge = true;
+        this.dodge_direction = smer;
+        GetComponent<NetworkPlayerAnimationLogic>().handle_dodge_start(this.dodge_direction);
     }
 
     private void handle_dodge_start()
@@ -227,11 +249,13 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
         else if (Input.GetAxis("Horizontal") > 0) this.dodge_direction = 2;
         else if (Input.GetAxis("Vertical") < 0) this.dodge_direction = 3;
         GetComponent<NetworkPlayerAnimationLogic>().handle_dodge_start(this.dodge_direction);
+
+        networkObject.SendRpc(RPC_SET_DODGE, Receivers.OthersProximity, this.dodge_direction);
     }
 
     public void handleDodgeEnd() {//animacija poklice tole metodo na vsah clientih da resetirajo vse kar je povezano z dodganjem
         stats.inDodge = false;
-        Debug.Log("dodge parameters cleared");
+        //Debug.Log("dodge parameters cleared");
     }
 
 
