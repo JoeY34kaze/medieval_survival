@@ -227,8 +227,8 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
 
             NetworkPlayerCombatHandler n = GetComponent<NetworkPlayerCombatHandler>();
             //za weapone treba ksnej poskrbet da je server authoritative. rework pending
-            n.update_equipped_weapons();//tole nerab bit server authoritative? ker tud ce client zamenja weapon z chetom se na serverju nebo zamenjal in glavno je to kar je na serverju equippan za combat. recimo ce ma na clientu spear na serverju sword in attacka se bo upostevala animacija in collider serverja in ne clienta. client sam sebe zajebe ker drugi clienti vidjo to kar vid server..
-            n.setCurrentWeaponToFirstNotEmpty();
+            n.update_equipped_weapons();
+            n.setCurrentWeaponToFirstNotEmpty();//poslat rpc ?yes
 
             sendNetworkUpdate(true, true);//posljemo obojeee ker itak nevemo kaj smo pobral. optimizacija later
         }
@@ -798,15 +798,15 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
             if (this.hands != null) l2 = (short)this.hands.id;
             if (this.legs != null) l3 = (short)this.legs.id;
             if (this.feet != null) l4 = (short)this.feet.id;
-            /*
+            
             if (this.ranged != null) l5 = (short)this.ranged.id;//NE DELA - BO TREBA UPDEJTAT. ZAENKRAT SE UPORABLA GetComponent<NetworkPlayerCombatHandler>().update_equipped_weapons();   KER JE BLO ZE PREJ IMPLEMENTIRAN!!
             if (this.weapon_0 != null) l6 = (short)this.weapon_0.id;//NE DELA - BO TREBA UPDEJTAT. ZAENKRAT SE UPORABLA GetComponent<NetworkPlayerCombatHandler>().update_equipped_weapons();   KER JE BLO ZE PREJ IMPLEMENTIRAN!!
             if (this.weapon_1 != null) l7 = (short)this.weapon_1.id;//NE DELA - BO TREBA UPDEJTAT. ZAENKRAT SE UPORABLA GetComponent<NetworkPlayerCombatHandler>().update_equipped_weapons();   KER JE BLO ZE PREJ IMPLEMENTIRAN!!
             if (this.shield != null) l8 = (short)this.shield.id;//NE DELA - BO TREBA UPDEJTAT. ZAENKRAT SE UPORABLA GetComponent<NetworkPlayerCombatHandler>().update_equipped_weapons();   KER JE BLO ZE PREJ IMPLEMENTIRAN!!
-            */
+            
 
 
-            GetComponent<NetworkPlayerCombatHandler>().send_network_update_weapons();//weapon trenutno equipan pa shield
+           // GetComponent<NetworkPlayerCombatHandler>().send_network_update_weapons();//weapon trenutno equipan pa shield
 
             //mogoce zamenjat z proximity. nevem ce sicer ker gear morjo vidt vsi da nebo prletu lokalno en nagex k je u resnic do konca pogearan
             networkObject.SendRpc(RPC_SEND_LOADOUT_UPDATE, Receivers.Others,
@@ -903,7 +903,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
     {//nc zrihtan za kolicino
         //to bi mogu dobit samo owner in NOBEN drug, sicer je nrdit ESP hack najbolj trivialna stvar na planetu
 
-        if (args.Info.SendingPlayer.NetworkId!=0 || !networkObject.IsOwner) return;//ce ni poslov server al pa ce je prejeu en drug k owner(kar s eneb smel nrdit sploh!)
+        if (args.Info.SendingPlayer.NetworkId!=0) return;//ce ni poslov server al pa ce je prejeu en drug k owner(kar s eneb smel nrdit sploh!)
 
         
 
@@ -944,7 +944,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         if (i >= 0) this.feet = Mapper.instance.getItemById(i);
         else this.feet = null;
 
-        /*
+        
         i = (int)args.GetNext<short>();
         if (i >= 0) this.ranged = Mapper.instance.getItemById(i);//NE DELA - BO TREBA UPDEJTAT. ZAENKRAT SE UPORABLA GetComponent<NetworkPlayerCombatHandler>().update_equipped_weapons();   KER JE BLO ZE PREJ IMPLEMENTIRAN!!
         else this.ranged = null;
@@ -960,14 +960,15 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         i = (int)args.GetNext<short>();
         if (i >= 0) this.shield = Mapper.instance.getItemById(i);//NE DELA - BO TREBA UPDEJTAT. ZAENKRAT SE UPORABLA GetComponent<NetworkPlayerCombatHandler>().update_equipped_weapons();   KER JE BLO ZE PREJ IMPLEMENTIRAN!!
         else this.shield = null;
-        */
+        
 
         GetComponent<NetworkPlayerCombatHandler>().update_equipped_weapons();
 
 
         if (onLoadoutChangedCallback != null)
             onLoadoutChangedCallback.Invoke();
-
+        if (onItemChangedCallback != null)//najbrz nepotrebno ker je serverj in ne owner ampak ne skodi. optimizacija ksnej..
+            onItemChangedCallback.Invoke();//najbrz nepotrebno ker se itak klice senkat v rpcju. optimizacija ksnej
 
     }
 
