@@ -249,6 +249,9 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
 
     public bool SetLoadoutItem(Item i, int index)
     {//vrne item s katermu smo ga zamenjal al pa null ce je biu prej prazn slot
+        if (!networkObject.IsServer) { Debug.LogError("client dela stvar od serevrja!"); return false;}
+
+
         Item r = i;
         switch (i.type)
         {
@@ -395,6 +398,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
     }
 
     public void addToPersonalInventory(Item item, int quantity, int index) {
+        if (!networkObject.IsServer) return;
         if (index < 0)
         {//dodaj na prvo mesto ki je null
             addToPersonalInventoryFirstEmpty(item);
@@ -407,6 +411,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
 
     private void addToPersonalInventoryFirstEmpty(Item item)
     {
+        if (!networkObject.IsServer) return;
         for (int i = 0; i < items.Length; i++) {
             if (items[i] == null) {
                 items[i] = item;
@@ -417,11 +422,13 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
 
     private void removePersonalInventoryItem(int index)
     {
+        if (!networkObject.IsServer) return;
         if (index > -1 || index < items.Length)
             items[index] = null;
     }
 
     private void removePersonalInventoryItem(Item i, int index) {
+        if (!networkObject.IsServer) return;
         if (index == -1)
         {
             removePersonalInventoryItemFirstMatch(i);
@@ -433,6 +440,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
 
     private void removePersonalInventoryItemFirstMatch(Item it)
     {
+        if (!networkObject.IsServer) return;
         for (int i = 0; i < items.Length; i++) {
             if (items[i].Equals(it)) {
                 items[i] = null;
@@ -466,6 +474,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
     }
 
     public void DropItemFromPersonalInventory(int inventory_slot) {//isto k remove item samo da vrze item v svet.
+        if (!networkObject.IsOwner) return;
         Camera c = Camera.main;
         
         networkObject.SendRpc(RPC_DROP_ITEM_FROM_PERSONAL_INVENTORY_REQUEST, Receivers.Server, inventory_slot, c.transform.position + (c.transform.forward * 3),c.transform.forward);
@@ -475,8 +484,8 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
 
     internal void DropItemFromLoadout(Item.Type type, int index)
     {
-        Camera c = Camera.main;
         if (!networkObject.IsOwner) return;
+        Camera c = Camera.main;
         networkObject.SendRpc(RPC_DROP_ITEM_FROM_LOADOUT_REQUEST, Receivers.Server, type.ToString(), index, c.transform.position + (c.transform.forward * 3),c.transform.forward);
     }
 
@@ -561,7 +570,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
     /// <param name="targetParent"></param>
     private void InventoryToLoadout(RectTransform loa, bool rightClick)//
     {
-
+        if (!networkObject.IsOwner) return;
         int loadout_index = 0;
         if (!rightClick)
         {
@@ -570,21 +579,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         else {//right click- loa je null
             if (weapon_0 != null) loadout_index = 1;
         }
-
-
-        Item loadout_item = null;
-        loadout_item = PopLoadoutItem(this.draggedItemParent.GetComponent<InventorySlotPersonal>().GetItem().type, loadout_index);
-
-        int inv_index = getIndexFromName(this.draggedItemParent.name);
-        Item inventory_item = this.items[inv_index];//poisce item glede na id-ju slota. id dobi iz imena tega starsa.
-
-
-        if (SetLoadoutItem(inventory_item, loadout_index))//to bo zmer slo cez ker je slot ze prazen. smo ga izpraznli z popom. vrne true ce je item biu valid za nek loadout slot.
-            Remove(inv_index);
-        if (loadout_item != null)
-        {//loadout ni bil prazen prej tko da rabmo item dat v inventorij
-            Add(loadout_item, 1, inv_index);
-        }
+        networkObject.SendRpc(RPC_INVENTORY_TO_LOADOUT_REQUEST, Receivers.Server, loadout_index, this.draggedItemParent.GetComponent<InventorySlotPersonal>().GetItem().type.ToString(), getIndexFromName(this.draggedItemParent.name));
 
 
     }
@@ -649,6 +644,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
     /// <param name="invSlot"></param>
     internal void handleInventorySlotOnDragDropEvent(RectTransform invSlot, Transform parent, bool rightClick)
     {
+        if (!networkObject.IsOwner) return;
         if (parent == null)
             parent = this.draggedItemParent;
         this.draggedItemParent = parent.GetComponent<RectTransform>();
@@ -694,16 +690,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         }
         this.draggedItemParent = null;//tole nastavmo tud na drag handlerju just in case
 
-        GetComponent<NetworkPlayerCombatHandler>().update_equipped_weapons();//tole bo treba v delegata
-
-        if (onItemChangedCallback != null)
-            onItemChangedCallback.Invoke();
-
-
-
-
-        sendNetworkUpdate(true,true);
-
+        //GetComponent<NetworkPlayerCombatHandler>().update_equipped_weapons();// je tole client side?? bomo spoznal pr reworku combata..
 
     }
 
@@ -837,11 +824,12 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
     /// <param name="invSlot"></param>
     private void InventoryToInventory(RectTransform invSlot)
     {
+        if (!networkObject.IsOwner) return;
         int index1 = getIndexFromName(invSlot.name);
         int index2 = getIndexFromName(this.draggedItemParent.name);
-        Item temp = items[index1];
-        this.items[index1] = this.items[index2];
-        this.items[index2] = temp;
+
+        networkObject.SendRpc(RPC_INVENTORY_TO_INVENTORY_REQUEST, Receivers.Server, index1, index2);
+
     }
 
     /// <summary>
@@ -850,67 +838,24 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
     /// <param name="invSlot"></param>
     private void LoadoutToLoadout(RectTransform invSlot)
     {
-            Item temp = weapon_1;
-            weapon_1 = weapon_0;
-            weapon_0 = temp;
+        if (!networkObject.IsOwner) return;
+
+        networkObject.SendRpc(RPC_LOADOUT_TO_LOADOUT_REQUEST, Receivers.Server);
+
     }
 
     private void LoadoutToInventory(RectTransform invSlot, bool rightClick)
     {
+        if (!networkObject.IsOwner) return;
         int index = -1;
 
         if (!rightClick) index = getIndexFromName(invSlot.name);
-        Item.Type t = this.draggedItemParent.GetComponent<InventorySlotLoadout>().type;
+        string type_s = this.draggedItemParent.GetComponent<InventorySlotLoadout>().type.ToString();
 
-        Item loadout_item = null;
         int loadout_index = getIndexFromName(this.draggedItemParent.name);
-        loadout_item = PopLoadoutItem(t, loadout_index);
-        if (loadout_item == null) {
-            Debug.LogError("dragged loadout item is null. this is not possible.");
-            return;
-        }
 
-        if (index != -1) {//za right click
-            if (this.items[index] != null)//ce smo potegnil na item k ze obstaja.
-            {
-                if (t == this.items[index].type)//ce se item ujema naj se zamenja
-                {
+        networkObject.SendRpc(RPC_LOADOUT_TO_INVENTORY_REQUEST, Receivers.Server, index, type_s, loadout_index);
 
-                    Item inventory_item = this.items[index];
-                    if (loadout_item != null)
-                    {
-                        Add(loadout_item, 1, index);
-                        SetLoadoutItem(inventory_item, loadout_index);
-                    }
-                }
-                else if (hasInventorySpace()) //ce se ne ujema ga mormo dodat na prvo prazno mesto v inventoriju
-                {
-                    //da rabmo item dat v inventorij
-                    AddFirst(loadout_item, 1);
-                }
-                else
-                {
-                    Debug.Log("No Space in inventory and cannot switch!");
-                }
-            }
-            else {//dodaj na ta slot.
-                Add(loadout_item, 1, index);
-            }
-        }
-        else if (hasInventorySpace())
-        {
-            //da rabmo item dat v inventorij
-            if (!rightClick)
-                if (this.items[index] == null)
-                    Add(loadout_item, 1, index);
-                else
-                    AddFirst(loadout_item, 1);
-            else AddFirst(loadout_item, 1);
-        }
-        else
-        {
-            Debug.Log("No Space in inventory and cannot switch!");
-        }
     }
 
 
@@ -1016,8 +961,14 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         if (i >= 0) this.shield = Mapper.instance.getItemById(i);//NE DELA - BO TREBA UPDEJTAT. ZAENKRAT SE UPORABLA GetComponent<NetworkPlayerCombatHandler>().update_equipped_weapons();   KER JE BLO ZE PREJ IMPLEMENTIRAN!!
         else this.shield = null;
         */
+
+        GetComponent<NetworkPlayerCombatHandler>().update_equipped_weapons();
+
+
         if (onLoadoutChangedCallback != null)
             onLoadoutChangedCallback.Invoke();
+
+
     }
 
     public override void RequestLoadoutOnConnect(RpcArgs args)
@@ -1053,6 +1004,8 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
 
         //rpc update
         sendNetworkUpdate(true, false);
+        if (onItemChangedCallback != null)//najbrz nepotrebno ker je serverj in ne owner ampak ne skodi. optimizacija ksnej..
+            onItemChangedCallback.Invoke();//najbrz nepotrebno ker se itak klice senkat v rpcju. optimizacija ksnej
     }
 
     public override void DropItemFromLoadoutRequest(RpcArgs args)
@@ -1070,7 +1023,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         sendNetworkUpdate(false, true);
 
         if (onItemChangedCallback != null)//najbrz nepotrebno ker je serverj in ne owner ampak ne skodi. optimizacija ksnej..
-            onItemChangedCallback.Invoke();
+            onItemChangedCallback.Invoke();//najbrz nepotrebno ker se itak klice senkat v rpcju. optimizacija ksnej
     }
 
     internal Item.Type getItemTypefromString(string s) {
@@ -1079,5 +1032,131 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         }
         Debug.LogError("Item.Type mismatch! fix this shit");
         return Item.Type.resource;
+    }
+
+    public override void InventoryToLoadoutRequest(RpcArgs args)
+    {
+        if (!networkObject.IsServer || args.Info.SendingPlayer.NetworkId != networkObject.Owner.NetworkId) { Debug.LogError("client dela nekej kar mora server"); return; }
+
+        int loadout_index = args.GetNext<int>();
+        string type_s = args.GetNext<string>();
+        Item.Type type = getItemTypefromString(type_s);
+        Item loadout_item = null;
+        loadout_item = PopLoadoutItem(type, loadout_index);
+
+        int inv_index = args.GetNext<int>();
+        Item inventory_item = this.items[inv_index];//poisce item glede na id-ju slota. id dobi z rpc k ga poda z imena tega starsa
+
+
+        if (SetLoadoutItem(inventory_item, loadout_index))//to bo zmer slo cez ker je slot ze prazen. smo ga izpraznli z popom. vrne true ce je item biu valid za nek loadout slot.
+            Remove(inv_index);
+        if (loadout_item != null)
+        {//loadout ni bil prazen prej tko da rabmo item dat v inventorij
+            Add(loadout_item, 1, inv_index);
+        }
+
+        //rpc update
+        sendNetworkUpdate(true, true);
+
+        if (onItemChangedCallback != null)//najbrz nepotrebno ker je serverj in ne owner ampak ne skodi. optimizacija ksnej..//najbrz nepotrebno ker se itak klice senkat v rpcju. optimizacija ksnej
+            onItemChangedCallback.Invoke();
+        if (onLoadoutChangedCallback != null)//najbrz nepotrebno ker se itak klice senkat v rpcju. optimizacija ksnej
+            onLoadoutChangedCallback.Invoke();
+    }
+
+    public override void LoadoutToInventoryRequest(RpcArgs args)
+    {
+        if (!networkObject.IsServer || args.Info.SendingPlayer.NetworkId != networkObject.Owner.NetworkId) { Debug.LogError("client dela nekej kar mora server"); return; }
+
+        int index = args.GetNext<int>();
+        Item.Type t = getItemTypefromString(args.GetNext<string>());
+        int loadout_index = args.GetNext<int>();
+
+        Item loadout_item = null;
+        loadout_item = PopLoadoutItem(t, loadout_index);
+        if (loadout_item == null)
+        {
+            Debug.LogError("dragged loadout item is null. this is not possible.");
+            return;
+        }
+
+        if (index != -1)
+        {//za right click
+            if (this.items[index] != null)//ce smo potegnil na item k ze obstaja.
+            {
+                if (t == this.items[index].type)//ce se item ujema naj se zamenja
+                {
+
+                    Item inventory_item = this.items[index];
+                    if (loadout_item != null)
+                    {
+                        Add(loadout_item, 1, index);
+                        SetLoadoutItem(inventory_item, loadout_index);
+                    }
+                }
+                else if (hasInventorySpace()) //ce se ne ujema ga mormo dodat na prvo prazno mesto v inventoriju
+                {
+                    //da rabmo item dat v inventorij
+                    AddFirst(loadout_item, 1);
+                }
+                else
+                {
+                    Debug.Log("No Space in inventory and cannot switch!");
+                }
+            }
+            else
+            {//dodaj na ta slot.
+                Add(loadout_item, 1, index);
+            }
+        }
+        else if (hasInventorySpace())
+        {
+            //da rabmo item dat v inventorij
+            AddFirst(loadout_item, 1);
+        }
+        else
+        {
+            Debug.Log("No Space in inventory and cannot place in inventory!");
+        }
+
+        //rpc update
+        sendNetworkUpdate(true, true);
+
+        if (onItemChangedCallback != null)//najbrz nepotrebno ker je serverj in ne owner ampak ne skodi. optimizacija ksnej..//najbrz nepotrebno ker se itak klice senkat v rpcju. optimizacija ksnej
+            onItemChangedCallback.Invoke();
+        if (onLoadoutChangedCallback != null)//najbrz nepotrebno ker se itak klice senkat v rpcju. optimizacija ksnej
+            onLoadoutChangedCallback.Invoke();
+
+    }
+
+    public override void InventoryToInventoryRequest(RpcArgs args)
+    {
+        if (!networkObject.IsServer || args.Info.SendingPlayer.NetworkId != networkObject.Owner.NetworkId) { Debug.LogError("client dela nekej kar mora server"); return; }
+        int index1 = args.GetNext<int>();
+        int index2 = args.GetNext<int>();
+        Item temp = items[index1];
+        this.items[index1] = this.items[index2];
+        this.items[index2] = temp;
+
+        //rpc update
+        sendNetworkUpdate(true, false);
+
+        if (onItemChangedCallback != null)//najbrz nepotrebno ker je serverj in ne owner ampak ne skodi. optimizacija ksnej..
+            onItemChangedCallback.Invoke();//najbrz nepotrebno ker se itak klice senkat v rpcju. optimizacija ksnej
+    }
+
+    public override void LoadoutToLoadoutRequest(RpcArgs args)
+    {
+        if (!networkObject.IsServer || args.Info.SendingPlayer.NetworkId != networkObject.Owner.NetworkId) { Debug.LogError("client dela nekej kar mora server"); return; }
+
+        Item temp = weapon_1;
+        weapon_1 = weapon_0;
+        weapon_0 = temp;
+
+        //rpc update
+        sendNetworkUpdate(false, true);
+
+        if (onLoadoutChangedCallback != null)//najbrz nepotrebno ker se itak klice senkat v rpcju. optimizacija ksnej
+            onLoadoutChangedCallback.Invoke();
     }
 }
