@@ -809,7 +809,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
            // GetComponent<NetworkPlayerCombatHandler>().send_network_update_weapons();//weapon trenutno equipan pa shield
 
             //mogoce zamenjat z proximity. nevem ce sicer ker gear morjo vidt vsi da nebo prletu lokalno en nagex k je u resnic do konca pogearan
-            networkObject.SendRpc(RPC_SEND_LOADOUT_UPDATE, Receivers.Others,
+            networkObject.SendRpc(RPC_SEND_LOADOUT_UPDATE, Receivers.All,
                 l0, l1, l2, l3, l4, l5, l6, l7, l8
                 );
 
@@ -920,7 +920,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
 
     }
 
-    public override void SendLoadoutUpdate(RpcArgs args)
+    public override void SendLoadoutUpdate(RpcArgs args)//ce je host se tole senkrat prepece cez, i dont give a fuck honestly..
     {
         if (args.Info.SendingPlayer.NetworkId != 0) return;
 

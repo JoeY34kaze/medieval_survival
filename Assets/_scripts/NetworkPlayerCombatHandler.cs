@@ -56,7 +56,7 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
     private void On_Current_weapon_changed(int newVal)
     {
         Debug.Log(this.index_of_currently_selected_weapon_from_equipped_weapons +" - > WEAPON HAS BEEN CHANGED! index is now :" + newVal);
-        animator.SetInteger("weapon_animation_class", getWeaponClassForAnimator(equipped_weapons[newVal]));
+        animator.SetInteger("weapon_animation_class", getWeaponClassForAnimator(equipped_weapons[newVal])); //tole je podvojen pri refreshu weaponov ker ce poberes al pa dropas item zaobide tega delegata. optimizacija strukture kode ksnej ce se bo dalo
         refresh_weapon(newVal);
     }
 
@@ -240,7 +240,8 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
     private void refresh_weapon(int newVal) {
         disable_all_possible_equipped_weapons();
 
-        this.weapon_slot.GetChild(newVal).gameObject.SetActive(true);//enabla weapon.
+        this.weapon_slot.GetChild(equipped_weapons[newVal]).gameObject.SetActive(true);//enabla weapon.
+        animator.SetInteger("weapon_animation_class", getWeaponClassForAnimator(equipped_weapons[newVal]));
 
     }
     private void refresh_shield(int shield_id) {
@@ -337,8 +338,9 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
 
     private void disable_all_possible_equipped_weapons()
     {
-        foreach (Transform c in weapon_slot)
-            c.gameObject.SetActive(false);
+        for(int i=0;i<weapon_slot.childCount;i++)
+            weapon_slot.GetChild(i).gameObject.SetActive(false);
+        
     }
 
     /// <summary>
