@@ -34,7 +34,7 @@ public class ItemDropHandler : MonoBehaviour, IDropHandler , IPointerClickHandle
             else if (inventorySlot is InventorySlotLoadout) {
                 InventorySlotLoadout ldslt = (InventorySlotLoadout)inventorySlot;
                 networkPlayerInventory.DropItemFromLoadout(ldslt.type, ldslt.index);
-                transform.root.GetComponent<NetworkPlayerCombatHandler>().update_equipped_weapons();
+                //transform.root.GetComponent<NetworkPlayerCombatHandler>().update_equipped_weapons(); - to se mora klicat ko server sporoci novo stanje
 
             }
         }

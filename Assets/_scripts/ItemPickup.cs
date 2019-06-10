@@ -67,7 +67,7 @@ public class ItemPickup : Interactable {
 
         int item_id = args.GetNext<int>();
         int quantity = args.GetNext<int>();
-        uint player_id = args.GetNext<uint>();
+        uint player_id = args.GetNext<uint>();//tole lahko zvohamo tud iz args.info.sendingplayer
 
 
 
@@ -75,7 +75,10 @@ public class ItemPickup : Interactable {
         //check players inventory and other shit if he can pick the item up.
         //destroy item if player can carry all or split it if player cant carry all
 
-        handle_response_from_server(item_id,quantity,args.Info.SendingPlayer);//args.Info is a godsend
+        //handle_response_from_server(item_id,quantity,args.Info.SendingPlayer);//args.Info is a godsend
+
+        FindByid(player_id).GetComponent <NetworkPlayerInventory>().handleItemPickup(Mapper.instance.getItemById(item_id), quantity);
+        handle_network_destruction_server();
         return;
 
         
@@ -83,7 +86,7 @@ public class ItemPickup : Interactable {
 
     private void handle_response_from_server(int item_id, int quantity, NetworkingPlayer player)
     {
-        
+      /*  
         //send response to NetworkPlayerInteraction to handle getting it into inventory
         GameObject player_obj = FindByid(player.NetworkId);
         Debug.Log("sending pickup response signal to player");
@@ -92,7 +95,7 @@ public class ItemPickup : Interactable {
         Debug.Log("sending kill signal the object");
         
 
-        handle_network_destruction_server();
+        handle_network_destruction_server();*/
     }
 
     private void handle_network_destruction_server()

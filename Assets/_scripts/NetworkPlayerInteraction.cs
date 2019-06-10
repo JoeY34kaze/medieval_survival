@@ -123,7 +123,7 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
     }
 
          
-    public override void ItemPickupResponse(RpcArgs args)
+  /*  public override void ItemPickupResponse(RpcArgs args)
     {
         if (!networkObject.IsOwner) return;
 
@@ -142,14 +142,14 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
         networkPlayerInventory.handleItemPickup(Mapper.instance.getItemById(item_id), quantity);
         
         Debug.Log("Inventory aprooval received on client.");
-    }
+    }*/
     
-
+        /*
     public void call_owner_rpc_item_pickup_response(int item_id, int quantity) {
         Debug.Log("sending response to owner of player");
 
         networkObject.SendRpc(RPC_ITEM_PICKUP_RESPONSE, Receivers.Owner, item_id, quantity);
-    }
+    }*/
 
     public override void ItemPickupRequest(RpcArgs args)
     {

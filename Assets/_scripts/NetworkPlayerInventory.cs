@@ -74,11 +74,9 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
             onItemChangedCallback += UpdateUI;    // Subscribe to the onItemChanged callback
         }
 
-        onLoadoutChangedCallback += refresh_UMA_equipped_gear;
+        onLoadoutChangedCallback += refresh_UMA_equipped_gear;//vsi rabjo vidt loadout
 
-
-        //request update from all close clients to synchronize their gear - mrde se nrdi da en client k je kr nekje pa ne zamenja weapona prleti do njega in ga ubije z neviodnimn weaponom.
-        networkObject.SendRpc(RPC_REQUEST_LOADOUT_ON_CONNECT, Receivers.OthersProximity);
+        networkObject.SendRpc(RPC_REQUEST_LOADOUT_ON_CONNECT, Receivers.Server);//owner poslje na server. server poslje vsem networkUpdate. pomoje lahko ponucamo samo en rpc za to ker so razlicni naslovniki
     }
 
 
@@ -120,6 +118,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
     /// <param name="i"></param>
     /// <returns></returns>
     public Item try_to_upgrade_loadout(Item i) {//vrne item s katermu smo ga zamenjal al pa null ce je biu prej prazn slot
+        if (!networkObject.IsServer) { Debug.LogError("client se ukvarja z metodo k je server designated.."); return null; }
         Item r = i;
         switch (i.type) {
             case Item.Type.head:
@@ -186,7 +185,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
                 r = null;
                 break;
         }
-        if (onItemChangedCallback != null)
+        if (onItemChangedCallback != null  && networkObject.IsServer)//ker se nkol ne izvede na clientu ta metoda in server itak nebo nkol vidu inventorija od drugih na ekranu.. probably
             onItemChangedCallback.Invoke();
         return r;
     }
@@ -214,6 +213,11 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
 
     internal void handleItemPickup(Item item, int quantity)
     {
+        if (!networkObject.IsServer) {
+            Debug.LogError("client se ukvarja z inventorijem, to se mora samo server.");
+            return;
+        }
+
         Item resp = try_to_upgrade_loadout(item);
         if (resp != null)
             AddFirst(resp, quantity);
@@ -222,10 +226,11 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
 
 
             NetworkPlayerCombatHandler n = GetComponent<NetworkPlayerCombatHandler>();
-            n.update_equipped_weapons();//tole bo treba v delegata
+            //za weapone treba ksnej poskrbet da je server authoritative. rework pending
+            n.update_equipped_weapons();//tole nerab bit server authoritative? ker tud ce client zamenja weapon z chetom se na serverju nebo zamenjal in glavno je to kar je na serverju equippan za combat. recimo ce ma na clientu spear na serverju sword in attacka se bo upostevala animacija in collider serverja in ne clienta. client sam sebe zajebe ker drugi clienti vidjo to kar vid server..
             n.setCurrentWeaponToFirstNotEmpty();
 
-            sendNetworkUpdate(false, true);//samo loadout poslemo
+            sendNetworkUpdate(true, true);//posljemo obojeee ker itak nevemo kaj smo pobral. optimizacija later
         }
     }
 
@@ -438,59 +443,41 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
 
     public void Add(Item item, int quantity, int index)
     {
-        if (!networkObject.IsOwner) return;
+        if (!networkObject.IsServer) return;
         addToPersonalInventory(item,quantity,index);//nekej bo treba nrdit za hranjenje kolicine. recimo kamen pa take fore
-        if (onItemChangedCallback != null)
-            onItemChangedCallback.Invoke();
     }
 
     public void AddFirst(Item item, int quantity)
     {
-        if (!networkObject.IsOwner) return;
+        if (!networkObject.IsServer) return;
         addToPersonalInventory(item, quantity, -1);//nekej bo treba nrdit za hranjenje kolicine. recimo kamen pa take fore
-        if (onItemChangedCallback != null)
-            onItemChangedCallback.Invoke();
     }
     public void RemoveFirst(Item item)
     {
-        if (!networkObject.IsOwner) return;
+        if (!networkObject.IsServer) return;
         removePersonalInventoryItem(item, -1);
-        if (onItemChangedCallback != null)
-            onItemChangedCallback.Invoke();
+
     }
 
     public void Remove(int inventory_slot) // to se klice z slota na OnDrop eventu ko vrzemo item iz inventorija
     {
-        if (!networkObject.IsOwner) return;
+        if (!networkObject.IsServer) return;
         removePersonalInventoryItem(inventory_slot);
-        if (onItemChangedCallback != null)
-            onItemChangedCallback.Invoke();
     }
 
     public void DropItemFromPersonalInventory(int inventory_slot) {//isto k remove item samo da vrze item v svet.
-        if (!networkObject.IsOwner) return;
-        Item i = slots[inventory_slot].GetItem();
-        removePersonalInventoryItem(inventory_slot);
-        instantiateDroppedItem(i,1);
+        Camera c = Camera.main;
+        
+        networkObject.SendRpc(RPC_DROP_ITEM_FROM_PERSONAL_INVENTORY_REQUEST, Receivers.Server, inventory_slot, c.transform.position + (c.transform.forward * 3),c.transform.forward);
 
-        //rpc update
-        sendNetworkUpdate(true, false);
 
-        if (onItemChangedCallback != null)
-            onItemChangedCallback.Invoke();
     }
 
     internal void DropItemFromLoadout(Item.Type type, int index)
     {
+        Camera c = Camera.main;
         if (!networkObject.IsOwner) return;
-        Item i = PopLoadoutItem(type, index);
-        instantiateDroppedItem(i,1);
-
-        //rpc update
-        sendNetworkUpdate(false, true);
-
-        if (onItemChangedCallback != null)
-            onItemChangedCallback.Invoke();
+        networkObject.SendRpc(RPC_DROP_ITEM_FROM_LOADOUT_REQUEST, Receivers.Server, type.ToString(), index, c.transform.position + (c.transform.forward * 3),c.transform.forward);
     }
 
     // Update the inventory UI by:
@@ -604,6 +591,8 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
 
     private Item PopLoadoutItem(Item.Type t,int index)
     {
+        if (!networkObject.IsServer) { Debug.LogError("client probava delat stvar k je sam na serverju.."); return null; }
+
         Item i = null;
         switch (t)
         {
@@ -720,7 +709,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
 
     private void sendNetworkUpdate(bool inv, bool loadout) //LOADOUT JE SAMO ZA UMA OBLEKE!!!!!!
     {
-        
+        if (!networkObject.IsServer) { Debug.LogError("client poskusa posiljat networkupdate k je samo od serverja.."); return; }
         if (inv)
         {
             short i0, i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, i14, i15, i16, i17, i18, i19;
@@ -787,7 +776,10 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
             if (this.items[19] == null) i19 = -1;
             else i19 = (short)this.items[19].id;
 
-            networkObject.SendRpc(RPC_SEND_PERSONAL_INVENTORY_UPDATE, Receivers.Server,
+            //poslat ownerju
+            
+
+            networkObject.SendRpc(RPC_SEND_PERSONAL_INVENTORY_UPDATE,Receivers.Owner,
                 i0,
                 i1,
                 i2,
@@ -829,7 +821,8 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
 
             GetComponent<NetworkPlayerCombatHandler>().send_network_update_weapons();//weapon trenutno equipan pa shield
 
-            networkObject.SendRpc(RPC_SEND_LOADOUT_UPDATE, Receivers.OthersProximity,
+            //mogoce zamenjat z proximity. nevem ce sicer ker gear morjo vidt vsi da nebo prletu lokalno en nagex k je u resnic do konca pogearan
+            networkObject.SendRpc(RPC_SEND_LOADOUT_UPDATE, Receivers.Others,
                 l0, l1, l2, l3, l4, l5, l6, l7, l8
                 );
 
@@ -930,13 +923,12 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         return cunt;
     }
 
-    internal void instantiateDroppedItem(Item item, int quantity) // instantiate it when dropped - zapakiral v rpc da se poslje vseskup na server
+    internal void instantiateDroppedItem(Item item, int quantity, Vector3 camera_vector, Vector3 camera_forward) // instantiate it when dropped - zapakiral v rpc da se poslje vseskup na server
     {
-        if (!networkObject.IsOwner) return;
+        if (!networkObject.IsServer) { Debug.LogError("instanciacija objekta k smo ga dropal ni na serverjvu!");  return; }
 
-        if(c==null)c=GetComponentInChildren<Camera>();
 
-        networkObject.SendRpc(RPC_NETWORK_INSTANTIATION_SERVER_REQUEST, Receivers.Server, getNetworkIdFromItem(item), c.transform.position + (c.transform.forward * 3), c.transform.forward);
+        networkObject.SendRpc(RPC_NETWORK_INSTANTIATION_SERVER_REQUEST, Receivers.Server, getNetworkIdFromItem(item), camera_vector, camera_forward);
     }
 
     private int getNetworkIdFromItem(Item item)
@@ -964,9 +956,11 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
 
     public override void SendPersonalInventoryUpdate(RpcArgs args)
     {//nc zrihtan za kolicino
-        if (!networkObject.IsServer) return;
+        //to bi mogu dobit samo owner in NOBEN drug, sicer je nrdit ESP hack najbolj trivialna stvar na planetu
 
-        //server side checks for anticheat
+        if (args.Info.SendingPlayer.NetworkId!=0 || !networkObject.IsOwner) return;//ce ni poslov server al pa ce je prejeu en drug k owner(kar s eneb smel nrdit sploh!)
+
+        
 
 
         for (int i = 0; i < 20; i++)
@@ -974,12 +968,16 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
             short item_id = args.GetNext<short>();
             if(item_id>0)this.items[i] = Mapper.instance.getItemById((int)item_id);
         }
-
+        if (onLoadoutChangedCallback != null)
+            onLoadoutChangedCallback.Invoke();
+        if (onItemChangedCallback != null)
+            onItemChangedCallback.Invoke();
 
     }
 
     public override void SendLoadoutUpdate(RpcArgs args)
     {
+        if (args.Info.SendingPlayer.NetworkId != 0) return;
 
         int i = (int)args.GetNext<short>();
         if (i >= 0) this.head = Mapper.instance.getItemById(i);
@@ -1024,12 +1022,14 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
 
     public override void RequestLoadoutOnConnect(RpcArgs args)
     {
-        //obleke
-        sendNetworkUpdate(false, true);//tole poslje vsem okol sebe, ne samo temu k ga rab. optimiziacija ksnej.
+        //obleke - weapone bo treba dodat
+        if(networkObject.IsServer)
+            sendNetworkUpdate(false, true);//tole poslje vsem, ne samo temu k ga rab. optimiziacija ksnej.
     }
 
     public override void NetworkInstantiationServerRequest(RpcArgs args)
     {
+        if (!networkObject.IsServer) { Debug.LogError("instanciacija na clientu ne na serverju!");  return; }
         int net_id = args.GetNext<int>();
         Vector3 pos = args.GetNext<Vector3>();
         Vector3 dir = args.GetNext<Vector3>();
@@ -1040,4 +1040,44 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
 
     }
 
+    public override void DropItemFromPersonalInventoryRequest(RpcArgs args)
+    {
+
+        if (!networkObject.IsServer || args.Info.SendingPlayer.NetworkId != networkObject.Owner.NetworkId) { Debug.LogError("client probava dropat item, to mora met server cez.. al pa request ni od ownerja");  return; }
+        int inventory_slot = args.GetNext<int>();
+        Vector3 camera_vector = args.GetNext<Vector3>();
+        Vector3 camera_forward = args.GetNext<Vector3>();
+        Item i = slots[inventory_slot].GetItem();//mogoce nerabmo sploh slotov za server. sj rab vidt samo array itemov. sloti so bl k ne samo za ownerja da vidi inventorij graficno. optimizacija ksnej
+        removePersonalInventoryItem(inventory_slot);
+        instantiateDroppedItem(i, 1, camera_vector, camera_forward);
+
+        //rpc update
+        sendNetworkUpdate(true, false);
+    }
+
+    public override void DropItemFromLoadoutRequest(RpcArgs args)
+    {
+        if (!networkObject.IsServer || args.Info.SendingPlayer.NetworkId != networkObject.Owner.NetworkId) { Debug.LogError("client probava dropat item, to mora met server cez.. al pa request ni od ownerja"); return; }
+        string type_s = args.GetNext<string>();
+        Item.Type type = getItemTypefromString(type_s);
+        int index = args.GetNext<int>();
+        Vector3 camera_vector = args.GetNext<Vector3>();
+        Vector3 camera_forward = args.GetNext<Vector3>();
+        Item i = PopLoadoutItem(type, index);
+        instantiateDroppedItem(i, 1, camera_vector, camera_forward);
+
+        //rpc update
+        sendNetworkUpdate(false, true);
+
+        if (onItemChangedCallback != null)//najbrz nepotrebno ker je serverj in ne owner ampak ne skodi. optimizacija ksnej..
+            onItemChangedCallback.Invoke();
+    }
+
+    internal Item.Type getItemTypefromString(string s) {
+        foreach (Item.Type itemType in Enum.GetValues(typeof(Item.Type))) {
+            if (itemType.ToString().Equals(s)) { return itemType; }
+        }
+        Debug.LogError("Item.Type mismatch! fix this shit");
+        return Item.Type.resource;
+    }
 }
