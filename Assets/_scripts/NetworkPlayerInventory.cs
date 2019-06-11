@@ -211,6 +211,24 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         return this.feet;
     }
 
+    internal Item getWeapon_0Item()
+    {
+        return this.weapon_0;
+    }
+
+    internal Item getWeapon_1Item()
+    {
+        return this.weapon_1;
+    }
+    internal Item getShieldItem()
+    {
+        return this.shield;
+    }
+    internal Item getRangedItem()
+    {
+        return this.ranged;
+    }
+
     internal void handleItemPickup(Item item, int quantity)
     {
         if (!networkObject.IsServer) {
