@@ -229,9 +229,8 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
             //za weapone treba ksnej poskrbet da je server authoritative. rework pending
             n.update_equipped_weapons();
             n.setCurrentWeaponToFirstNotEmpty();//poslat rpc ?yes
-
-            sendNetworkUpdate(true, true);//posljemo obojeee ker itak nevemo kaj smo pobral. optimizacija later
         }
+        sendNetworkUpdate(true, true);//posljemo obojeee optimizacija later
     }
 
     internal void OnRightClick(GameObject g)//tole lahko potem pri ciscenju kode z malo preurejanja damo v uno tavelko metodo
@@ -764,8 +763,8 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
             else i19 = (short)this.items[19].id;
 
             //poslat ownerju
-            
 
+            Debug.Log(" personal inventory rpc SEND: owner server id: " + GetComponent<NetworkPlayerStats>().server_id + " | networkId : " + networkObject.Owner.NetworkId);
             networkObject.SendRpc(RPC_SEND_PERSONAL_INVENTORY_UPDATE,Receivers.Owner,
                 i0,
                 i1,
@@ -816,6 +815,79 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
             if (onLoadoutChangedCallback != null)
                 onLoadoutChangedCallback.Invoke();
         }
+    }
+
+    public override void SendPersonalInventoryUpdate(RpcArgs args)
+    {//nc zrihtan za kolicino
+        //to bi mogu dobit samo owner in NOBEN drug, sicer je nrdit ESP hack najbolj trivialna stvar na planetu
+        Debug.Log(" personal inventory rpc receive: owner server id: " + GetComponent<NetworkPlayerStats>().server_id + " | networkId : " + networkObject.Owner.NetworkId);
+        if (args.Info.SendingPlayer.NetworkId != 0) return;//ce ni poslov server al pa ce je prejeu en drug k owner(kar s eneb smel nrdit sploh!)
+
+
+
+
+        for (int i = 0; i < 20; i++)
+        {
+            short item_id = args.GetNext<short>();
+            if (item_id > 0) this.items[i] = Mapper.instance.getItemById((int)item_id);
+        }
+        if (onLoadoutChangedCallback != null)
+            onLoadoutChangedCallback.Invoke();
+        if (onItemChangedCallback != null)
+            onItemChangedCallback.Invoke();
+
+    }
+
+    public override void SendLoadoutUpdate(RpcArgs args)//ce je host se tole senkrat prepece cez, i dont give a fuck honestly..
+    {
+        if (args.Info.SendingPlayer.NetworkId != 0) return;
+
+        int i = (int)args.GetNext<short>();
+        if (i >= 0) this.head = Mapper.instance.getItemById(i);
+        else this.head = null;
+
+        i = (int)args.GetNext<short>();
+        if (i >= 0) this.chest = Mapper.instance.getItemById(i);
+        else this.chest = null;
+
+        i = (int)args.GetNext<short>();
+        if (i >= 0) this.hands = Mapper.instance.getItemById(i);
+        else this.hands = null;
+
+        i = (int)args.GetNext<short>();
+        if (i >= 0) this.legs = Mapper.instance.getItemById(i);
+        else this.legs = null;
+
+        i = (int)args.GetNext<short>();
+        if (i >= 0) this.feet = Mapper.instance.getItemById(i);
+        else this.feet = null;
+
+
+        i = (int)args.GetNext<short>();
+        if (i >= 0) this.ranged = Mapper.instance.getItemById(i);//NE DELA - BO TREBA UPDEJTAT. ZAENKRAT SE UPORABLA GetComponent<NetworkPlayerCombatHandler>().update_equipped_weapons();   KER JE BLO ZE PREJ IMPLEMENTIRAN!!
+        else this.ranged = null;
+
+        i = (int)args.GetNext<short>();
+        if (i >= 0) this.weapon_0 = Mapper.instance.getItemById(i);//NE DELA - BO TREBA UPDEJTAT. ZAENKRAT SE UPORABLA GetComponent<NetworkPlayerCombatHandler>().update_equipped_weapons();   KER JE BLO ZE PREJ IMPLEMENTIRAN!!
+        else this.weapon_0 = null;
+
+        i = (int)args.GetNext<short>();
+        if (i >= 0) this.weapon_1 = Mapper.instance.getItemById(i);//NE DELA - BO TREBA UPDEJTAT. ZAENKRAT SE UPORABLA GetComponent<NetworkPlayerCombatHandler>().update_equipped_weapons();   KER JE BLO ZE PREJ IMPLEMENTIRAN!!
+        else this.weapon_1 = null;
+
+        i = (int)args.GetNext<short>();
+        if (i >= 0) this.shield = Mapper.instance.getItemById(i);//NE DELA - BO TREBA UPDEJTAT. ZAENKRAT SE UPORABLA GetComponent<NetworkPlayerCombatHandler>().update_equipped_weapons();   KER JE BLO ZE PREJ IMPLEMENTIRAN!!
+        else this.shield = null;
+
+
+        GetComponent<NetworkPlayerCombatHandler>().update_equipped_weapons();
+
+
+        if (onLoadoutChangedCallback != null)
+            onLoadoutChangedCallback.Invoke();
+        if (onItemChangedCallback != null)//najbrz nepotrebno ker je serverj in ne owner ampak ne skodi. optimizacija ksnej..
+            onItemChangedCallback.Invoke();//najbrz nepotrebno ker se itak klice senkat v rpcju. optimizacija ksnej
+
     }
 
     /// <summary>
@@ -899,78 +971,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         return -1;
     }
 
-    public override void SendPersonalInventoryUpdate(RpcArgs args)
-    {//nc zrihtan za kolicino
-        //to bi mogu dobit samo owner in NOBEN drug, sicer je nrdit ESP hack najbolj trivialna stvar na planetu
-
-        if (args.Info.SendingPlayer.NetworkId!=0) return;//ce ni poslov server al pa ce je prejeu en drug k owner(kar s eneb smel nrdit sploh!)
-
-        
-
-
-        for (int i = 0; i < 20; i++)
-        {
-            short item_id = args.GetNext<short>();
-            if(item_id>0)this.items[i] = Mapper.instance.getItemById((int)item_id);
-        }
-        if (onLoadoutChangedCallback != null)
-            onLoadoutChangedCallback.Invoke();
-        if (onItemChangedCallback != null)
-            onItemChangedCallback.Invoke();
-
-    }
-
-    public override void SendLoadoutUpdate(RpcArgs args)//ce je host se tole senkrat prepece cez, i dont give a fuck honestly..
-    {
-        if (args.Info.SendingPlayer.NetworkId != 0) return;
-
-        int i = (int)args.GetNext<short>();
-        if (i >= 0) this.head = Mapper.instance.getItemById(i);
-        else this.head = null;
-
-         i = (int)args.GetNext<short>();
-        if (i >= 0) this.chest = Mapper.instance.getItemById(i);
-        else this.chest = null;
-
-        i = (int)args.GetNext<short>();
-        if (i >= 0) this.hands = Mapper.instance.getItemById(i);
-        else this.hands = null;
-
-        i = (int)args.GetNext<short>();
-        if (i >= 0) this.legs = Mapper.instance.getItemById(i);
-        else this.legs = null;
-
-        i = (int)args.GetNext<short>();
-        if (i >= 0) this.feet = Mapper.instance.getItemById(i);
-        else this.feet = null;
-
-        
-        i = (int)args.GetNext<short>();
-        if (i >= 0) this.ranged = Mapper.instance.getItemById(i);//NE DELA - BO TREBA UPDEJTAT. ZAENKRAT SE UPORABLA GetComponent<NetworkPlayerCombatHandler>().update_equipped_weapons();   KER JE BLO ZE PREJ IMPLEMENTIRAN!!
-        else this.ranged = null;
-
-        i = (int)args.GetNext<short>();
-        if (i >= 0) this.weapon_0 = Mapper.instance.getItemById(i);//NE DELA - BO TREBA UPDEJTAT. ZAENKRAT SE UPORABLA GetComponent<NetworkPlayerCombatHandler>().update_equipped_weapons();   KER JE BLO ZE PREJ IMPLEMENTIRAN!!
-        else this.weapon_0 = null;
-
-        i = (int)args.GetNext<short>();
-        if (i >= 0) this.weapon_1 = Mapper.instance.getItemById(i);//NE DELA - BO TREBA UPDEJTAT. ZAENKRAT SE UPORABLA GetComponent<NetworkPlayerCombatHandler>().update_equipped_weapons();   KER JE BLO ZE PREJ IMPLEMENTIRAN!!
-        else this.weapon_1 = null;
-
-        i = (int)args.GetNext<short>();
-        if (i >= 0) this.shield = Mapper.instance.getItemById(i);//NE DELA - BO TREBA UPDEJTAT. ZAENKRAT SE UPORABLA GetComponent<NetworkPlayerCombatHandler>().update_equipped_weapons();   KER JE BLO ZE PREJ IMPLEMENTIRAN!!
-        else this.shield = null;
-        
-
-        GetComponent<NetworkPlayerCombatHandler>().update_equipped_weapons();
-
-
-        if (onLoadoutChangedCallback != null)
-            onLoadoutChangedCallback.Invoke();
-        if (onItemChangedCallback != null)//najbrz nepotrebno ker je serverj in ne owner ampak ne skodi. optimizacija ksnej..
-            onItemChangedCallback.Invoke();//najbrz nepotrebno ker se itak klice senkat v rpcju. optimizacija ksnej
-
-    }
+    
 
     public override void RequestLoadoutOnConnect(RpcArgs args)
     {
