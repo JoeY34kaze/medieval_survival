@@ -137,26 +137,112 @@ public class NetworkArmorStand : NetworkArmorStandBehavior
     public override void ArmorStandInteractionRequest(RpcArgs args)
     {
         if (!networkObject.IsServer) return;
-        NetworkPlayerInventory player_npi = FindByid(args.GetNext<uint>()).GetComponent<NetworkPlayerInventory>();//bols bi blo zvohat objekt prek args.info.sendingplayer ampak to mi ne ratuje sploh nekej..
+        NetworkPlayerInventory npi = FindByid(args.GetNext<uint>()).GetComponent<NetworkPlayerInventory>();//bols bi blo zvohat objekt prek args.info.sendingplayer ampak to mi ne ratuje sploh nekej..
         int collider_index = args.GetNext<int>();
 
+        //tle je najbol pomembna stvar
+        switch (collider_index)
+        {
+            case 0:
+                if (this.head != -1)
+                {
+                    if (npi.getHeadItem() != null)
+                    {
+                        //perform swap
+                        Item loadout_item = npi.PopItemLoadout(Item.Type.head,0);
+                        Item onStand = Mapper.instance.getItemById(this.head);
+                        this.head = loadout_item.id;
+                        npi.SetLoadoutItem(onStand,0);
+                    }
+                    else {
+                        //equip item from stand
+                        Item onStand = Mapper.instance.getItemById(this.head);
+                        npi.SetLoadoutItem(onStand, 0);
+                        this.head = -1;
+                    }
+                }
+                else {
+                    if (npi.getHeadItem() != null)
+                    {
+                        //place equipped item on stand
+                        Item loadout_item = npi.PopItemLoadout(Item.Type.head, 0);//pohendla tud removanje itema
+                        this.head = loadout_item.id;
+                    }
+                    else
+                    {
+                        //return because nothing can happen
+
+                    }
+                }
+                break;
+            default:
+                Debug.LogError("collider_index doesnt match anything!");
+                break;
+        }
+        npi.sendNetworkUpdate(false, true);
+        networkObject.SendRpc(RPC_ARMOR_STAND_REFRESH, Receivers.All, this.head, this.chest, this.hands, this.legs, this.feet, this.weapon_0, this.weapon_1, this.shield, this.ranged);
     }
 
-    public override void ArmorStandRefresh(RpcArgs args)
+    public override void ArmorStandRefresh(RpcArgs args)//pri dodajanju dobi tud server
     {
         if (args.Info.SendingPlayer.NetworkId != 0) return; //ni poslov player ampak nas edn hacka
 
-        this.head = args.GetNext<int>();
-        this.chest = args.GetNext<int>();
-        this.hands = args.GetNext<int>();
-        this.legs = args.GetNext<int>();
-        this.feet = args.GetNext<int>();
-        this.weapon_0 = args.GetNext<int>();
-        this.weapon_1 = args.GetNext<int>();
-        this.shield = args.GetNext<int>();
-        this.ranged = args.GetNext<int>();
+        if (!networkObject.IsServer)
+        {
+            this.head = args.GetNext<int>();
+            this.chest = args.GetNext<int>();
+            this.hands = args.GetNext<int>();
+            this.legs = args.GetNext<int>();
+            this.feet = args.GetNext<int>();
+            this.weapon_0 = args.GetNext<int>();
+            this.weapon_1 = args.GetNext<int>();
+            this.shield = args.GetNext<int>();
+            this.ranged = args.GetNext<int>();
+        }
+
+        redraw_armor_stand();
 
     }
+
+    private void redraw_armor_stand()//izrise stvari k so na uma
+    {
+        Debug.Log("Redrawing");
+
+        /*
+             void refresh_UMA_equipped_gear()
+    {
+        avatar.ClearSlots();
+
+        if (this.head != null)
+        {
+            avatar.SetSlot("Helmet", this.head.recipeName);
+        }
+
+        if (this.chest != null)
+        {
+            avatar.SetSlot("Chest", this.chest.recipeName);
+        }
+
+        if (this.hands != null)
+        {
+            avatar.SetSlot("Hands", this.hands.recipeName);
+        }
+
+        if (this.legs != null)
+        {
+            avatar.SetSlot("Legs", this.legs.recipeName);
+        }
+
+        if (this.feet != null)
+        {
+            avatar.SetSlot("Feet", this.feet.recipeName);
+        }
+
+        avatar.BuildCharacter();
+    }
+         */
+    }
+
     /// <summary>
     /// poslje client serverju ko se connecta gor. kot response pricakuje rpc armorStandRefresh
     /// </summary>
