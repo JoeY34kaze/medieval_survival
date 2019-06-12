@@ -383,11 +383,15 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
                 break;
             case Item.Type.weapon://tole se nobe zmer zamenjal ker tega nocmo. equipa nj se samo ce je slot prazen
                 if (index == 0)
+                {
                     ret = weapon_0;
                     weapon_0 = null;
+                }
                 else
-                ret = weapon_1;
+                {
+                    ret = weapon_1;
                     weapon_1 = null;
+                }
                 break;
             case Item.Type.shield:
                 ret = shield;

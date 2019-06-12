@@ -5,12 +5,13 @@ using BeardedManStudios.Forge.Networking.Generated;
 using BeardedManStudios.Forge.Networking;
 using BeardedManStudios.Forge.Networking.Unity;
 using System;
+using UMA.CharacterSystem;
 
 public class NetworkArmorStand : NetworkArmorStandBehavior
 {
 
 
-
+    private DynamicCharacterAvatar avatar;
 
     public Collider collider_head;
     public Collider collider_chest;
@@ -24,18 +25,22 @@ public class NetworkArmorStand : NetworkArmorStandBehavior
     public Collider collider_ranged; //empty ker nimamo ranged weaponov
 
 
-    private int head=-1;
-    private int chest = -1;
-    private int hands = -1;
-    private int legs = -1;
-    private int feet = -1;
+    public int head=-1;
+    public int chest = -1;
+    public int hands = -1;
+    public int legs = -1;
+    public int feet = -1;
 
-    private int weapon_0 = -1;
-    private int weapon_1 = -1;
-    private int shield = -1;
-    private int ranged = -1; //empty ker nimamo ranged weaponov
+    public int weapon_0 = -1;
+    public int weapon_1 = -1;
+    public int shield = -1;
+    public int ranged = -1; //empty ker nimamo ranged weaponov
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+    private void Start()
+    {
+        this.avatar = GetComponent<DynamicCharacterAvatar>();
+    }
 
     protected override void NetworkStart()
     {
@@ -137,9 +142,11 @@ public class NetworkArmorStand : NetworkArmorStandBehavior
     public override void ArmorStandInteractionRequest(RpcArgs args)
     {
         if (!networkObject.IsServer) return;
-        NetworkPlayerInventory npi = FindByid(args.GetNext<uint>()).GetComponent<NetworkPlayerInventory>();//bols bi blo zvohat objekt prek args.info.sendingplayer ampak to mi ne ratuje sploh nekej..
+        uint server_id = args.GetNext<uint>();
+        NetworkPlayerInventory npi = FindByid(server_id).GetComponent<NetworkPlayerInventory>();//bols bi blo zvohat objekt prek args.info.sendingplayer ampak to mi ne ratuje sploh nekej..
         int collider_index = args.GetNext<int>();
 
+        if (!Is_sending_request_valid(collider_index, server_id)) return;
         //tle je najbol pomembna stvar
         switch (collider_index)
         {
@@ -208,39 +215,43 @@ public class NetworkArmorStand : NetworkArmorStandBehavior
     {
         Debug.Log("Redrawing");
 
-        /*
-             void refresh_UMA_equipped_gear()
-    {
+        //--------------------------------------CLOTHING-----------------------------------------
+
         avatar.ClearSlots();
 
-        if (this.head != null)
+        if (this.head != -1)
         {
-            avatar.SetSlot("Helmet", this.head.recipeName);
+            avatar.SetSlot("Helmet", Mapper.instance.getItemById(this.head).recipeName);
         }
 
-        if (this.chest != null)
+        if (this.chest != -1)
         {
-            avatar.SetSlot("Chest", this.chest.recipeName);
+            avatar.SetSlot("Chest", Mapper.instance.getItemById(this.chest).recipeName);
         }
 
-        if (this.hands != null)
+        if (this.hands != -1)
         {
-            avatar.SetSlot("Hands", this.hands.recipeName);
+            avatar.SetSlot("Hands", Mapper.instance.getItemById(this.hands).recipeName);
         }
 
-        if (this.legs != null)
+        if (this.legs != -1)
         {
-            avatar.SetSlot("Legs", this.legs.recipeName);
+            avatar.SetSlot("Legs",Mapper.instance.getItemById(this.legs).recipeName);
         }
 
-        if (this.feet != null)
+        if (this.feet != -1)
         {
-            avatar.SetSlot("Feet", this.feet.recipeName);
+            avatar.SetSlot("Feet", Mapper.instance.getItemById(this.feet).recipeName);
         }
 
         avatar.BuildCharacter();
-    }
-         */
+
+        //--------------------------------------WEAPONS AND SHIELD-----------------------------------------
+
+
+
+
+
     }
 
     /// <summary>
