@@ -12,7 +12,7 @@ public class NetworkArmorStand : NetworkArmorStandBehavior
 
 
     private DynamicCharacterAvatar avatar;
-
+    /*
     public Collider collider_head;
     public Collider collider_chest;
     public Collider collider_hands;
@@ -23,6 +23,7 @@ public class NetworkArmorStand : NetworkArmorStandBehavior
     public Collider collider_weapon_1;
     public Collider collider_shield;
     public Collider collider_ranged; //empty ker nimamo ranged weaponov
+    */
 
 
     public int head=-1;
@@ -174,6 +175,143 @@ public class NetworkArmorStand : NetworkArmorStandBehavior
                         //place equipped item on stand
                         Item loadout_item = npi.PopItemLoadout(Item.Type.head, 0);//pohendla tud removanje itema
                         this.head = loadout_item.id;
+                    }
+                    else
+                    {
+                        //return because nothing can happen
+
+                    }
+                }
+                break;
+            case 1:
+
+                if (this.chest != -1)
+                {
+                    if (npi.getChestItem() != null)
+                    {
+                        //perform swap
+                        Item loadout_item = npi.PopItemLoadout(Item.Type.chest, 0);
+                        Item onStand = Mapper.instance.getItemById(this.chest);
+                        this.chest = loadout_item.id;
+                        npi.SetLoadoutItem(onStand, 0);
+                    }
+                    else
+                    {
+                        //equip item from stand
+                        Item onStand = Mapper.instance.getItemById(this.chest);
+                        npi.SetLoadoutItem(onStand, 0);
+                        this.chest = -1;
+                    }
+                }
+                else
+                {
+                    if (npi.getChestItem() != null)
+                    {
+                        //place equipped item on stand
+                        Item loadout_item = npi.PopItemLoadout(Item.Type.chest, 0);//pohendla tud removanje itema
+                        this.chest = loadout_item.id;
+                    }
+                    else
+                    {
+                        //return because nothing can happen
+
+                    }
+                }
+                break;
+            case 2:
+                if (this.hands != -1)
+                {
+                    if (npi.getHandsItem() != null)
+                    {
+                        //perform swap
+                        Item loadout_item = npi.PopItemLoadout(Item.Type.hands, 0);
+                        Item onStand = Mapper.instance.getItemById(this.hands);
+                        this.hands = loadout_item.id;
+                        npi.SetLoadoutItem(onStand, 0);
+                    }
+                    else
+                    {
+                        //equip item from stand
+                        Item onStand = Mapper.instance.getItemById(this.hands);
+                        npi.SetLoadoutItem(onStand, 0);
+                        this.hands = -1;
+                    }
+                }
+                else
+                {
+                    if (npi.getHandsItem() != null)
+                    {
+                        //place equipped item on stand
+                        Item loadout_item = npi.PopItemLoadout(Item.Type.hands, 0);//pohendla tud removanje itema
+                        this.hands = loadout_item.id;
+                    }
+                    else
+                    {
+                        //return because nothing can happen
+
+                    }
+                }
+                break;
+            case 3:
+                if (this.legs != -1)
+                {
+                    if (npi.getLegsItem() != null)
+                    {
+                        //perform swap
+                        Item loadout_item = npi.PopItemLoadout(Item.Type.legs, 0);
+                        Item onStand = Mapper.instance.getItemById(this.legs);
+                        this.legs = loadout_item.id;
+                        npi.SetLoadoutItem(onStand, 0);
+                    }
+                    else
+                    {
+                        //equip item from stand
+                        Item onStand = Mapper.instance.getItemById(this.legs);
+                        npi.SetLoadoutItem(onStand, 0);
+                        this.legs = -1;
+                    }
+                }
+                else
+                {
+                    if (npi.getLegsItem() != null)
+                    {
+                        //place equipped item on stand
+                        Item loadout_item = npi.PopItemLoadout(Item.Type.legs, 0);//pohendla tud removanje itema
+                        this.legs = loadout_item.id;
+                    }
+                    else
+                    {
+                        //return because nothing can happen
+
+                    }
+                }
+                break;
+            case 4:
+                if (this.feet != -1)
+                {
+                    if (npi.getFeetItem() != null)
+                    {
+                        //perform swap
+                        Item loadout_item = npi.PopItemLoadout(Item.Type.feet, 0);
+                        Item onStand = Mapper.instance.getItemById(this.feet);
+                        this.feet = loadout_item.id;
+                        npi.SetLoadoutItem(onStand, 0);
+                    }
+                    else
+                    {
+                        //equip item from stand
+                        Item onStand = Mapper.instance.getItemById(this.feet);
+                        npi.SetLoadoutItem(onStand, 0);
+                        this.feet = -1;
+                    }
+                }
+                else
+                {
+                    if (npi.getFeetItem() != null)
+                    {
+                        //place equipped item on stand
+                        Item loadout_item = npi.PopItemLoadout(Item.Type.feet, 0);//pohendla tud removanje itema
+                        this.feet = loadout_item.id;
                     }
                     else
                     {
