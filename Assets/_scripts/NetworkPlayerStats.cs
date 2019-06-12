@@ -167,6 +167,7 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
 
         return true;
     }
+
     protected override void NetworkStart()
     {
         base.NetworkStart();

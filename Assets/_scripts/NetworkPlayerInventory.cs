@@ -211,24 +211,6 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         return this.feet;
     }
 
-    internal Item getWeapon_0Item()
-    {
-        return this.weapon_0;
-    }
-
-    internal Item getWeapon_1Item()
-    {
-        return this.weapon_1;
-    }
-    internal Item getShieldItem()
-    {
-        return this.shield;
-    }
-    internal Item getRangedItem()
-    {
-        return this.ranged;
-    }
-
     internal void handleItemPickup(Item item, int quantity)
     {
         if (!networkObject.IsServer) {
@@ -352,57 +334,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         }
     }
 
-    public Item PopItemLoadout(Item.Type t, int index)
-    {
-        Item ret = null;
-        switch (t)
-        {
-            case Item.Type.head:
-                ret = head;
-                head = null;
-                break;
-            case Item.Type.chest:
-                ret = chest;
-                chest = null;
-                break;
-            case Item.Type.hands:
-                ret = hands;
-                hands = null;
-                break;
-            case Item.Type.legs:
-                ret = legs;
-                legs = null;
-                break;
-            case Item.Type.feet:
-                ret = feet;
-                feet = null;
-                break;
-            case Item.Type.ranged:
-                ret = ranged;
-                ranged = null;
-                break;
-            case Item.Type.weapon://tole se nobe zmer zamenjal ker tega nocmo. equipa nj se samo ce je slot prazen
-                if (index == 0)
-                {
-                    ret = weapon_0;
-                    weapon_0 = null;
-                }
-                else
-                {
-                    ret = weapon_1;
-                    weapon_1 = null;
-                }
-                break;
-            case Item.Type.shield:
-                ret = shield;
-                shield = null;
-                break;
-            default:
-                Debug.LogError("Item type doesnt match anything. shits fucked yo");
-                break;
-        }
-        return ret;
-    }
+
 
 
 
@@ -761,7 +693,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
 
     }
 
-    public void sendNetworkUpdate(bool inv, bool loadout) //LOADOUT JE SAMO ZA UMA OBLEKE!!!!!!
+    private void sendNetworkUpdate(bool inv, bool loadout) //LOADOUT JE SAMO ZA UMA OBLEKE!!!!!!
     {
         if (!networkObject.IsServer) { Debug.LogError("client poskusa posiljat networkupdate k je samo od serverja.."); return; }
         if (inv)
