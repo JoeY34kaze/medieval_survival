@@ -2060,8 +2060,8 @@ SphereCollider:
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Radius: 0.13
-  m_Center: {x: 0, y: 0, z: 0}
+  m_Radius: 0.127
+  m_Center: {x: -0.11, y: 0, z: 0.04}
 --- !u!1 &4325287984577193593
 GameObject:
   m_ObjectHideFlags: 0
@@ -3375,6 +3375,7 @@ GameObject:
   - component: {fileID: 7045125355175562654}
   - component: {fileID: 5430088370503077318}
   - component: {fileID: 925516205726404621}
+  - component: {fileID: 5413285687535106429}
   m_Layer: 0
   m_Name: armor_stand
   m_TagString: Untagged
@@ -3513,6 +3514,15 @@ MonoBehaviour:
   collider_weapon_1: {fileID: 0}
   collider_shield: {fileID: 0}
   collider_ranged: {fileID: 0}
+  head: -1
+  chest: -1
+  hands: -1
+  legs: -1
+  feet: -1
+  weapon_0: -1
+  weapon_1: -1
+  shield: -1
+  ranged: -1
 --- !u!95 &925516205726404621
 Animator:
   serializedVersion: 3
@@ -3532,6 +3542,23 @@ Animator:
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorControllerStateOnDisable: 0
+--- !u!114 &5413285687535106429
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7045125355175562652}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1b919db827b6a584a810dd3052866214, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  rootNode: {fileID: 4492993834667277552}
+  DrawAsBones: 0
+  DrawAdjustBones: 0
+  BoneMesh: {fileID: 4300000, guid: e4d8ea710507f2b40b99b122b39885a3, type: 3}
+  Filter: 
 --- !u!1 &7071064765653542904
 GameObject:
   m_ObjectHideFlags: 0
