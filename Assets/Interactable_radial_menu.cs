@@ -12,13 +12,14 @@ public class Interactable_radial_menu : MonoBehaviour
 
     private GameObject radialMenu;
     private GameObject player;
+    private NetworkPlayerInteraction interaction;
     private RMF_RadialMenu menu;
 
     public Transform elements;
 
     private string[] button_title;
 
-    private GameObject other;
+    private GameObject target;
 
     public Text center_label;
 
@@ -32,18 +33,31 @@ public class Interactable_radial_menu : MonoBehaviour
     public Sprite i9;
     public Sprite i10;
 
+    private int number_of_elements = 0;
+
     private void Start()
     {
         this.player = transform.root.gameObject;
         this.radialMenu = transform.GetChild(0).gameObject;
         this.menu = this.radialMenu.GetComponent<RMF_RadialMenu>();
+        this.interaction = transform.root.GetComponent<NetworkPlayerInteraction>();
     }
 
     private void show_menu(GameObject target) {
-        Debug.Log("Opening menu! - interaction with a player");
-        Clear_current_elements_of_menu();
+
+        //pobris od prejsnjega za vsak slucaj ceprav bi moral bit ze prazno
+        menu.elements.Clear();
+        foreach (Transform child in elements)
+        {
+            GameObject.Destroy(child.gameObject);
+        }
+        center_label.text = "";
+
+
+
+        //Debug.Log("Opening menu! - interaction with a player");
         radialMenu.SetActive(true);
-        this.other = target;
+        this.target = target;
         Cursor.visible = true;
         Cursor.lockState = CursorLockMode.None;
     }
@@ -57,6 +71,8 @@ public class Interactable_radial_menu : MonoBehaviour
 
         if (target_stats.downed)
         {
+            this.number_of_elements = 5;
+            menu.angleOffset = (360f / this.number_of_elements);
             center_label.text = "Downed Player";
 
             GameObject btn_0_r = Resources.Load<GameObject>("radial_menu_elements/interaction_player_execution");
@@ -73,11 +89,11 @@ public class Interactable_radial_menu : MonoBehaviour
 
             menu.elements.Clear();
 
-            setup_button(btn_0, 5);
-            setup_button(btn_1, 5);
-            setup_button(btn_2, 5);
-            setup_button(btn_3, 5);
-            setup_button(btn_4, 5);
+            setup_button(btn_0, menu.angleOffset*0);
+            setup_button(btn_1, menu.angleOffset*1);
+            setup_button(btn_2, menu.angleOffset*2);
+            setup_button(btn_3, menu.angleOffset*3);
+            setup_button(btn_4, menu.angleOffset*4);
 
 
 
@@ -105,20 +121,47 @@ public class Interactable_radial_menu : MonoBehaviour
 
 
 
-            menu.reDraw();
+            
         }
         else {
 
+
+
+            //interaction_player_guild_invite
+            //interaction_player_team_invite
+            this.number_of_elements = 2;
+            menu.angleOffset = (360f / this.number_of_elements);
+            center_label.text = "Player";
+
+            GameObject btn_0_r = Resources.Load<GameObject>("radial_menu_elements/interaction_player_guild_invite");
+            GameObject btn_1_r = Resources.Load<GameObject>("radial_menu_elements/interaction_player_team_invite");
+            GameObject btn_0 = GameObject.Instantiate(btn_0_r);
+            GameObject btn_1 = GameObject.Instantiate(btn_1_r);
+            menu.elements.Clear();
+            setup_button(btn_0, menu.angleOffset*0);
+            setup_button(btn_1, menu.angleOffset*1);
+            //menu.textLabel.text = "Downed Player";
+
+            Button button = btn_0.transform.GetComponentInChildren<Button>();
+            button.onClick.RemoveAllListeners();
+            button.onClick.AddListener(delegate { player_interaction_button_guild_invite(); });
+
+            button = btn_1.transform.GetComponentInChildren<Button>();
+            button.onClick.RemoveAllListeners();
+            button.onClick.AddListener(delegate { player_interaction_button_team_invite(); });
         }
-    
+        menu.reDraw();
+
     }
 
-    private void setup_button(GameObject btn,int index) {
+    private void setup_button(GameObject btn,float offset) {
         btn.transform.SetParent(this.elements);
         btn.transform.localPosition = Vector3.zero;
         btn.transform.localRotation = Quaternion.identity;
-        btn.transform.GetChild(0).GetComponent<Button>().GetComponent<Image>().sprite = getBtnSpriteFromIndex(index);
+        btn.transform.GetChild(0).GetComponent<Button>().GetComponent<Image>().sprite = getBtnSpriteFromIndex(this.number_of_elements);
         RMF_RadialMenuElement r = btn.GetComponent<RMF_RadialMenuElement>();
+        r.angleOffset= offset;
+        
         menu.elements.Add(r);
         r.init();
         r.setup();
@@ -175,7 +218,7 @@ public class Interactable_radial_menu : MonoBehaviour
 
 
     public void hide_radial_menu() {//pobrise vse kar smo dodal pa take fore
-        Debug.Log("Hiding radial menu.");
+       // Debug.Log("Hiding radial menu.");
         menu.elements.Clear();
         foreach (Transform child in elements)
         {
@@ -190,24 +233,41 @@ public class Interactable_radial_menu : MonoBehaviour
     public void player_interaction_button_execution()
     {
         //Debug.Log("button - execution - " + this.other.name);
+        interaction.local_player_interaction_execution_request(this.target);
     }
 
     public void player_interaction_button_tieUp()
     {
+        interaction.local_player_interaction_tieup_request(this.target);
         //Debug.Log("button - tieUp - " + this.other.name);
     }
 
     public void player_interaction_button_steal() {
         //Debug.Log("button - steal - " + this.other.name);
+        interaction.local_player_interaction_steal_request(this.target);
     }
 
     public void player_interaction_button_pickup()
     {
         //Debug.Log("button - pickUp - " + this.other.name);
+        interaction.local_player_interaction_pickup_request(this.target);
     }
 
     public void player_interaction_button_mock()
     {
         //Debug.Log("button - mock - " + this.other.name);
+        interaction.local_player_interaction_guild_invite_request(this.target);
+    }
+
+    public void player_interaction_button_guild_invite()
+    {
+        //Debug.Log("button - mock - " + this.other.name);
+        interaction.local_player_interaction_guild_invite_request(this.target);
+    }
+
+    public void player_interaction_button_team_invite()
+    {
+        //Debug.Log("button - mock - " + this.other.name);
+        interaction.local_player_interaction_team_invite_request(this.target);
     }
 }

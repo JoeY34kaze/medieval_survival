@@ -47,7 +47,7 @@ public class RMF_RadialMenu : MonoBehaviour {
 
     private int elementCount;
 
-    private float angleOffset; //The base offset. For example, if there are 4 elements, then our offset is 360/4 = 90
+    public float angleOffset; //The base offset. For example, if there are 4 elements, then our offset is 360/4 = 90
 
     private int previousActiveIndex = 0; //Used to determine which buttons to unhighlight in lazy selection.
 

@@ -64,27 +64,17 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
 
                 if (interactable != null)
                 {
-                    //izriši eno obrobo al pa nekej samo tolk da player vidi je stvari lezijo na tleh
+                    //izriši eno obrobo al pa nekej samo tolk da player vidi da lahko z stvarjo eventualno interacta?
                     /*
-                     
-                 
-                 
-                 
-                 
-                 
+
                  
                  */
-
                     if (hit.distance <= radius)
                     {
                         /*
-                         Izsis se kaj dodatnega da bo vedu da lohko direkt pobere
-
-
+                         Izsis se kaj dodatnega da bo vedu da lohko direkt pobere - glow?
 
                          */
-
-
                         if (Input.GetButtonDown("Interact"))
                         {
                             Debug.Log("Interacting with " + hit.collider.name + " with distance of " + hit.distance);
@@ -92,40 +82,18 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
                             {
                                 // -----------------------------------------    Inventory item / weapon /gear ---------------------------------------------------
                                 if (interactable is ItemPickup)
-                                    if (networkPlayerInventory.hasInventorySpace())
-                                        interactable.interact(stats.server_id);
-                                    else
-                                        handleInventoryFull();
+                                    interactable.interact(stats.server_id);//full inventory se mora handlat drugje
 
-                                //-------------------------------------------  player (inv u guild / interakcija ko je downan )---------------------------------------------------------------
+
+                                //-------------------------------------------  player ---------------------------------------------------------------
                                 if (interactable is Interactable_player)
                                 {
-
                                     this.menu.show_player_interaction_menu(interactable.gameObject);
-                                    /*
-                                    //---------------------------------
-                                    interactable = (Interactable_player)interactable;
-                                    if (interactable.isPlayerDowned())
-                                    {//interakcija samo za pobrat ali pa execution
-                                        Debug.Log("interacting with downed player");
-                                        interactable.send_player_pickup_request_to_server(GetComponent<NetworkPlayerStats>().server_id);
-                                    }
-                                    else//invajt u guild?
-                                    {
-                                        Debug.Log("Interacting with healthy player.");
-                                    }
-                                    //---------------------------------
-                                    */
-
-
                                 }
                                 //-----------------------------------------------------ARMOR STAND-------------------------------
                                 if (interactable is Interactible_ArmorStand)
                                 {
                                     this.menu.show_ArmorStand_interaction_menu(interactable.gameObject);
-                                    // interactable = (Interactible_ArmorStand)interactable;
-                                    // if (networkPlayerInventory.hasInventorySpace())
-                                    //     interactable.interact(stats.server_id);
                                 }
 
                             }
@@ -143,44 +111,44 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
         }
     }
 
-    internal void handleInventoryFull()
-    {
-
-    }
 
     private void setup_player_cam()
     {
         this.player_cam = GetComponent<player_camera_handler>().player_cam.transform;
     }
 
-         
-  /*  public override void ItemPickupResponse(RpcArgs args)
+    internal void local_player_interaction_execution_request(GameObject target)
     {
-        if (!networkObject.IsOwner) return;
+        target.GetComponent<Interactable_player>().local_player_execution_request(stats.server_id);
+    }
 
-        int item_id = args.GetNext<int>();
-        int quantity = args.GetNext<int>();
+    internal void local_player_interaction_tieup_request(GameObject target)
+    {
+        target.GetComponent<Interactable_player>().local_player_tieup_request(stats.server_id);
+    }
 
-        if (!networkPlayerInventory.hasInventorySpace())
-        {
-            Debug.Log("Inventory Full!");
-            handleInventoryFull();
-            networkPlayerInventory.instantiateDroppedItem(Mapper.instance.getItemById(item_id), quantity);
-        }
-        //add into inventory since all was aprooved
-        //za nahrbtnike bi mrde pustu ks u inventory skripti da se ukvarja z tem najbrz
-        Debug.Log("adding into npInventory");
-        networkPlayerInventory.handleItemPickup(Mapper.instance.getItemById(item_id), quantity);
-        
-        Debug.Log("Inventory aprooval received on client.");
-    }*/
+    internal void local_player_interaction_steal_request(GameObject target)
+    {
+        target.GetComponent<Interactable_player>().local_player_steal_request(stats.server_id);
+    }
+
+    internal void local_player_interaction_pickup_request(GameObject target)
+    {
+        //klice downan player, poda id of playerja kter ga pobira
+        target.GetComponent<Interactable_player>().local_player_pickup_request(stats.server_id);
+    }
+
+    internal void local_player_interaction_guild_invite_request(GameObject target)
+    { 
+        target.GetComponent<Interactable_player>().local_player_guild_invite_request(stats.server_id);
+    }
+
+    internal void local_player_interaction_team_invite_request(GameObject target)
+    {
+        target.GetComponent<Interactable_player>().local_player_team_invite_request(stats.server_id);
+    }
+
     
-        /*
-    public void call_owner_rpc_item_pickup_response(int item_id, int quantity) {
-        Debug.Log("sending response to owner of player");
-
-        networkObject.SendRpc(RPC_ITEM_PICKUP_RESPONSE, Receivers.Owner, item_id, quantity);
-    }*/
 
     public override void ItemPickupRequest(RpcArgs args)
     {

@@ -80,7 +80,7 @@ public class Interactable : Interactable_objectBehavior
         throw new NotImplementedException();
     }
 
-    internal virtual void send_player_pickup_request_to_server(uint server_id)
+    internal virtual void local_player_pickup_request(uint server_id)
     {
         throw new NotImplementedException();
     }

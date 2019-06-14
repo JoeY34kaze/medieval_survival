@@ -4,6 +4,7 @@ using UnityEngine;
 using BeardedManStudios.Forge.Networking.Generated;
 using BeardedManStudios.Forge.Networking;
 using BeardedManStudios.Forge.Networking.Unity;
+using System;
 
 public class Interactable_player : Interactable
 {
@@ -12,7 +13,7 @@ public class Interactable_player : Interactable
         return GetComponent<NetworkPlayerStats>().downed;
     }
 
-    internal override void send_player_pickup_request_to_server(uint healthy_player_server_id) {
+    internal override void local_player_pickup_request(uint healthy_player_server_id) {
 
         //tle lahko ze mal antihacka nrdimo drgac ceprov je client side ?
 
@@ -49,5 +50,30 @@ public class Interactable_player : Interactable
     {
         Debug.Log(" ReviveDownedPlayersponse : (" + args.Info.SendingPlayer.NetworkId + " | " + GetComponent<NetworkPlayerStats>().server_id + ")");
         GetComponent<NetworkPlayerStats>().handle_player_pickup();
+    }
+
+    internal void local_player_team_invite_request(uint server_id)
+    {
+        throw new NotImplementedException();
+    }
+
+    internal void local_player_guild_invite_request(uint server_id)
+    {
+        throw new NotImplementedException();
+    }
+
+    internal void local_player_steal_request(uint server_id)
+    {
+        throw new NotImplementedException();
+    }
+
+    internal void local_player_tieup_request(uint server_id)
+    {
+        throw new NotImplementedException();
+    }
+
+    internal void local_player_execution_request(uint server_id)
+    {
+        throw new NotImplementedException();
     }
 }
