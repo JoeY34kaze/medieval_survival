@@ -189,7 +189,7 @@ public class Interactable_radial_menu : MonoBehaviour
             case 10:
                 return this.i10;
             default:
-                return null;
+                return this.i10;
         }
     }
 
@@ -197,39 +197,40 @@ public class Interactable_radial_menu : MonoBehaviour
     {
         show_menu(stand);
         /*
-        this.button_title[0] = "Take All";
-        this.button_title[1] = "Give All";
-        this.button_title[2] = "Helmet";
-        this.button_title[3] = "Chest";
-        this.button_title[4] = "Gloves";
-        this.button_title[5] = "Greaves";
-        this.button_title[6] = "Boots";
-        this.button_title[7] = "Main Weapon";
-        this.button_title[8] = "Secondary Weapon";
-        this.button_title[9] = "Shield";
-        this.button_title[10] = "Ranged Weapon";
+        this.button_title[1] = "Swap";
+        this.button_title[1] = "Take All";
+        this.button_title[2] = "Give All";
+        this.button_title[3] = "Helmet";
+        this.button_title[4] = "Chest";
+        this.button_title[5] = "Gloves";
+        this.button_title[6] = "Greaves";
+        this.button_title[7] = "Boots";
+        this.button_title[8] = "Main Weapon";
+        this.button_title[9] = "Secondary Weapon";
+        this.button_title[10] = "Shield";
+        this.button_title[11] = "Ranged Weapon";
         */
 
         show_menu(stand);
 
-        this.number_of_elements = 10;
+        this.number_of_elements = 12;
         menu.angleOffset = (360f / this.number_of_elements);
         center_label.text = "Armor Stand";
 
 
+        GameObject btn_0 = GameObject.Instantiate(Resources.Load<GameObject>("radial_menu_elements/interaction_armor_stand_swap"));
+        GameObject btn_1 = GameObject.Instantiate(Resources.Load<GameObject>("radial_menu_elements/interaction_armor_stand_take_all"));
+        GameObject btn_2 = GameObject.Instantiate(Resources.Load<GameObject>("radial_menu_elements/interaction_armor_stand_give_all"));
+        GameObject btn_3 = GameObject.Instantiate(Resources.Load<GameObject>("radial_menu_elements/interaction_armor_stand_helmet"));
+        GameObject btn_4 = GameObject.Instantiate(Resources.Load<GameObject>("radial_menu_elements/interaction_armor_stand_chest"));
+        GameObject btn_5 = GameObject.Instantiate(Resources.Load<GameObject>("radial_menu_elements/interaction_armor_stand_hands"));
+        GameObject btn_6 = GameObject.Instantiate(Resources.Load<GameObject>("radial_menu_elements/interaction_armor_stand_legs"));
+        GameObject btn_7 = GameObject.Instantiate(Resources.Load<GameObject>("radial_menu_elements/interaction_armor_stand_feet"));
 
-        GameObject btn_0 = GameObject.Instantiate(Resources.Load<GameObject>("radial_menu_elements/interaction_armor_stand_take_all"));
-        GameObject btn_1 = GameObject.Instantiate(Resources.Load<GameObject>("radial_menu_elements/interaction_armor_stand_give_all"));
-        GameObject btn_2 = GameObject.Instantiate(Resources.Load<GameObject>("radial_menu_elements/interaction_armor_stand_helmet"));
-        GameObject btn_3 = GameObject.Instantiate(Resources.Load<GameObject>("radial_menu_elements/interaction_armor_stand_chest"));
-        GameObject btn_4 = GameObject.Instantiate(Resources.Load<GameObject>("radial_menu_elements/interaction_armor_stand_hands"));
-        GameObject btn_5 = GameObject.Instantiate(Resources.Load<GameObject>("radial_menu_elements/interaction_armor_stand_legs"));
-        GameObject btn_6 = GameObject.Instantiate(Resources.Load<GameObject>("radial_menu_elements/interaction_armor_stand_feet"));
-
-        GameObject btn_7 = GameObject.Instantiate(Resources.Load<GameObject>("radial_menu_elements/interaction_armor_stand_weapon0"));
-        GameObject btn_8 = GameObject.Instantiate(Resources.Load<GameObject>("radial_menu_elements/interaction_armor_stand_weapon1"));
-        GameObject btn_9 = GameObject.Instantiate(Resources.Load<GameObject>("radial_menu_elements/interaction_armor_stand_shield"));
-        GameObject btn_10 = GameObject.Instantiate(Resources.Load<GameObject>("radial_menu_elements/interaction_armor_stand_ranged"));
+        GameObject btn_8 = GameObject.Instantiate(Resources.Load<GameObject>("radial_menu_elements/interaction_armor_stand_weapon0"));
+        GameObject btn_9 = GameObject.Instantiate(Resources.Load<GameObject>("radial_menu_elements/interaction_armor_stand_weapon1"));
+        GameObject btn_10 = GameObject.Instantiate(Resources.Load<GameObject>("radial_menu_elements/interaction_armor_stand_shield"));
+        GameObject btn_11 = GameObject.Instantiate(Resources.Load<GameObject>("radial_menu_elements/interaction_armor_stand_ranged"));
 
         menu.elements.Clear();
 
@@ -244,56 +245,60 @@ public class Interactable_radial_menu : MonoBehaviour
         setup_button(btn_8, menu.angleOffset * 8);
         setup_button(btn_9, menu.angleOffset * 9);
         setup_button(btn_10, menu.angleOffset * 10);
-
-
+        setup_button(btn_11, menu.angleOffset * 11);
 
         Button button = btn_0.transform.GetComponentInChildren<Button>();
         button.onClick.RemoveAllListeners();
-        button.onClick.AddListener(delegate { armor_stand_interaction_button_take_all(); });
+        button.onClick.AddListener(delegate { armor_stand_interaction_button_swap(); });
 
         button = btn_1.transform.GetComponentInChildren<Button>();
         button.onClick.RemoveAllListeners();
-        button.onClick.AddListener(delegate { armor_stand_interaction_button_give_all(); });
+        button.onClick.AddListener(delegate { armor_stand_interaction_button_take_all(); });
 
         button = btn_2.transform.GetComponentInChildren<Button>();
         button.onClick.RemoveAllListeners();
-        button.onClick.AddListener(delegate { armor_stand_interaction_button_helmet(); });
+        button.onClick.AddListener(delegate { armor_stand_interaction_button_give_all(); });
 
         button = btn_3.transform.GetComponentInChildren<Button>();
         button.onClick.RemoveAllListeners();
-        button.onClick.AddListener(delegate { armor_stand_interaction_button_chest(); });
+        button.onClick.AddListener(delegate { armor_stand_interaction_button_helmet(); });
 
         button = btn_4.transform.GetComponentInChildren<Button>();
         button.onClick.RemoveAllListeners();
-        button.onClick.AddListener(delegate { armor_stand_interaction_button_hands(); });
+        button.onClick.AddListener(delegate { armor_stand_interaction_button_chest(); });
 
         button = btn_5.transform.GetComponentInChildren<Button>();
         button.onClick.RemoveAllListeners();
-        button.onClick.AddListener(delegate { armor_stand_interaction_button_legs(); });
+        button.onClick.AddListener(delegate { armor_stand_interaction_button_hands(); });
 
         button = btn_6.transform.GetComponentInChildren<Button>();
         button.onClick.RemoveAllListeners();
-        button.onClick.AddListener(delegate { armor_stand_interaction_button_feet(); });
+        button.onClick.AddListener(delegate { armor_stand_interaction_button_legs(); });
 
         button = btn_7.transform.GetComponentInChildren<Button>();
         button.onClick.RemoveAllListeners();
-        button.onClick.AddListener(delegate { armor_stand_interaction_button_weapon0(); });
+        button.onClick.AddListener(delegate { armor_stand_interaction_button_feet(); });
 
         button = btn_8.transform.GetComponentInChildren<Button>();
         button.onClick.RemoveAllListeners();
-        button.onClick.AddListener(delegate { armor_stand_interaction_button_weapon1(); });
+        button.onClick.AddListener(delegate { armor_stand_interaction_button_weapon0(); });
 
         button = btn_9.transform.GetComponentInChildren<Button>();
         button.onClick.RemoveAllListeners();
-        button.onClick.AddListener(delegate { armor_stand_interaction_button_shield(); });
+        button.onClick.AddListener(delegate { armor_stand_interaction_button_weapon1(); });
 
         button = btn_10.transform.GetComponentInChildren<Button>();
+        button.onClick.RemoveAllListeners();
+        button.onClick.AddListener(delegate { armor_stand_interaction_button_shield(); });
+
+        button = btn_11.transform.GetComponentInChildren<Button>();
         button.onClick.RemoveAllListeners();
         button.onClick.AddListener(delegate { armor_stand_interaction_button_ranged(); });
 
 
         menu.reDraw();
     }
+
 
 
     public void hide_radial_menu() {//pobrise vse kar smo dodal pa take fore
@@ -410,5 +415,10 @@ public class Interactable_radial_menu : MonoBehaviour
     {
         interaction.local_armor_stand_interaction_take_all_request(this.target);
 
+    }
+
+    private void armor_stand_interaction_button_swap()
+    {
+        interaction.local_armor_stand_interaction_swap_request(this.target);
     }
 }

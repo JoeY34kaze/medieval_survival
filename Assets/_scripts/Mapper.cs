@@ -25,6 +25,8 @@ public class Mapper : MonoBehaviour
 
 
     public Item getItemById(int id) {
+        if (id == -1) return null;
+
         foreach (Item i in items)
             if (i.id == id)
                 return i;

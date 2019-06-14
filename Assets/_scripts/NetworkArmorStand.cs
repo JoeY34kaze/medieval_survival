@@ -96,6 +96,29 @@ public class NetworkArmorStand : NetworkArmorStandBehavior
         return true;
     }
 
+    internal void local_interaction_swap_request(uint server_id)
+    {
+        networkObject.SendRpc(RPC_ARMOR_STAND_BULK_INTERACTION_REQUEST, Receivers.Server, server_id, (byte)0);
+    }
+
+    /// <summary>
+    /// tle spisat metodo k poslje rpcje za iteme, ktere player se nima equipane.
+    /// </summary>
+    /// <param name="server_id"></param>
+    internal void local_interaction_get_all_request(uint server_id)
+    {
+        networkObject.SendRpc(RPC_ARMOR_STAND_BULK_INTERACTION_REQUEST, Receivers.Server,server_id, (byte)2);
+    }
+
+    /// <summary>
+    /// tle spisat metodo da posle rpcje za slote k jih mannequin se nima equipanih
+    /// </summary>
+    /// <param name="server_id"></param>
+    internal void local_interaction_give_all_request(uint server_id)
+    {
+        networkObject.SendRpc(RPC_ARMOR_STAND_BULK_INTERACTION_REQUEST, Receivers.Server, server_id, (byte)1);
+    }
+
     internal Item.Type getItemTypeFromColliderIndex(int i) {
         switch (i)
         {
@@ -401,5 +424,209 @@ public class NetworkArmorStand : NetworkArmorStandBehavior
         if (!networkObject.IsServer) return;
 
         networkObject.SendRpc(args.Info.SendingPlayer, RPC_ARMOR_STAND_REFRESH, this.head, this.chest, this.hands, this.legs, this.feet, this.weapon_0, this.weapon_1, this.shield, this.ranged);
+    }
+
+    /// <summary>
+    /// dobi server. parameter je int. 0-swap, 1-give all, 2-take all missing
+    /// </summary>
+    /// <param name="args"></param>
+    public override void ArmorStandBulkInteractionRequest(RpcArgs args)
+    {
+        if (!networkObject.IsServer) return;
+        uint server_id = args.GetNext<uint>();
+        byte tip = args.GetNext<byte>();
+        NetworkPlayerInventory npi = FindByid(server_id).GetComponent<NetworkPlayerInventory>();
+        switch (tip) {
+            case 0://swap
+                swap_in_full(server_id,npi);
+                break;
+            case 1://give
+                give_all_missing(server_id,npi);
+                break;
+            case 2://take
+                take_all_missing(server_id,npi);
+                break;
+            default:
+                //throw new NotImplementedException; ?
+                break;
+        }
+
+        npi.sendNetworkUpdate(false, true);
+        networkObject.SendRpc(RPC_ARMOR_STAND_REFRESH, Receivers.All, this.head, this.chest, this.hands, this.legs, this.feet, this.weapon_0, this.weapon_1, this.shield, this.ranged);
+    }
+
+    private void take_all_missing(uint server_id,NetworkPlayerInventory npi)
+    {
+
+        if (npi.getHeadItem() == null) {
+            if (this.head != -1)
+                npi.SetLoadoutItem(Mapper.instance.getItemById(this.head), 0);
+        }
+
+
+        if (npi.getChestItem() == null)
+        {
+            if (this.chest != -1)
+                npi.SetLoadoutItem(Mapper.instance.getItemById(this.chest), 0);
+        }
+
+
+        if (npi.getHandsItem() == null)
+        {
+            if (this.hands != -1)
+                npi.SetLoadoutItem(Mapper.instance.getItemById(this.hands), 0);
+        }
+
+
+        if (npi.getLegsItem() == null)
+        {
+            if (this.legs != -1)
+                npi.SetLoadoutItem(Mapper.instance.getItemById(this.legs), 0);
+        }
+
+        if (npi.getFeetItem() == null)
+        {
+            if (this.feet != -1)
+                npi.SetLoadoutItem(Mapper.instance.getItemById(this.feet), 0);
+        }
+
+
+        if (npi.getWeapon_0Item() == null)
+        {
+            if (this.weapon_0 != -1)
+                npi.SetLoadoutItem(Mapper.instance.getItemById(this.weapon_0), 0);
+        }
+
+        if (npi.getWeapon_1Item() == null)
+        {
+            if (this.weapon_1 != -1)
+                npi.SetLoadoutItem(Mapper.instance.getItemById(this.weapon_1), 0);
+        }
+
+
+        if (npi.getShieldItem() == null)
+        {
+            if (this.shield != -1)
+                npi.SetLoadoutItem(Mapper.instance.getItemById(this.shield), 0);
+        }
+
+
+        if (npi.getRangedItem() == null)
+        {
+            if (this.ranged != -1)
+                npi.SetLoadoutItem(Mapper.instance.getItemById(this.ranged), 0);
+        }
+    }
+
+    private void give_all_missing(uint server_id, NetworkPlayerInventory npi)
+    {
+        Item loadout_item;
+        //head
+
+        if (this.head != -1) {//samo pogleda, nc ne spremeni
+            loadout_item = npi.PopItemLoadout(Item.Type.head, 0);//lahko vrne null
+            if(loadout_item!=null)this.hands = loadout_item.id;
+        }
+
+        //chest
+        if (this.chest !=-1)
+        {//samo pogleda, nc ne spremeni
+            loadout_item = npi.PopItemLoadout(Item.Type.chest, 0);//lahko vrne null
+            if (loadout_item != null) this.chest = loadout_item.id;
+        }
+        //hands
+        if (this.hands != -1)
+        {//samo pogleda, nc ne spremeni
+            loadout_item = npi.PopItemLoadout(Item.Type.hands, 0);//lahko vrne null
+            if (loadout_item != null) this.hands = loadout_item.id;
+        }
+        //legs
+        if (this.legs != -1)
+        {//samo pogleda, nc ne spremeni
+            loadout_item = npi.PopItemLoadout(Item.Type.legs, 0);//lahko vrne null
+            if (loadout_item != null) this.legs = loadout_item.id;
+        }
+        //feet
+        if (this.feet != -1)
+        {//samo pogleda, nc ne spremeni
+            loadout_item = npi.PopItemLoadout(Item.Type.feet, 0);//lahko vrne null
+            if (loadout_item != null) this.feet = loadout_item.id;
+        }
+        //wep0
+        if (this.weapon_0 != -1)
+        {//samo pogleda, nc ne spremeni
+            loadout_item = npi.PopItemLoadout(Item.Type.weapon, 0);//lahko vrne null
+            if (loadout_item != null) this.weapon_0 = loadout_item.id;
+        }
+        //wep1
+        if (this.weapon_1 != -1)
+        {//samo pogleda, nc ne spremeni
+            loadout_item = npi.PopItemLoadout(Item.Type.weapon, 1);//lahko vrne null
+            if (loadout_item != null) this.weapon_1 = loadout_item.id;
+        }
+        //shield
+        if (this.shield != -1)
+        {//samo pogleda, nc ne spremeni
+            loadout_item = npi.PopItemLoadout(Item.Type.shield, 0);//lahko vrne null
+            if (loadout_item != null) this.shield = loadout_item.id;
+        }
+        //ranged
+        if (this.ranged != -1)
+        {//samo pogleda, nc ne spremeni
+            loadout_item = npi.PopItemLoadout(Item.Type.ranged, 0);//lahko vrne null
+            if (loadout_item != null) this.ranged = loadout_item.id;
+        }
+    }
+
+    private void swap_in_full(uint server_id, NetworkPlayerInventory npi)
+    {
+
+        //head
+        Item loadout_item = npi.PopItemLoadout(Item.Type.head, 0);//lahko vrne null
+        Item onStand = Mapper.instance.getItemById(this.head); //lahko vrne null
+        if(loadout_item!=null)this.hands = loadout_item.id;
+        if(onStand!=null) npi.SetLoadoutItem(onStand, 0);
+
+        //chest
+        loadout_item = npi.PopItemLoadout(Item.Type.chest, 0);//lahko vrne null
+        onStand = Mapper.instance.getItemById(this.chest); //lahko vrne null
+        if (loadout_item != null) this.hands = loadout_item.id;
+        if (onStand != null) npi.SetLoadoutItem(onStand, 0);
+        //hands
+        loadout_item = npi.PopItemLoadout(Item.Type.hands, 0);//lahko vrne null
+        onStand = Mapper.instance.getItemById(this.hands); //lahko vrne null
+        if (loadout_item != null) this.hands = loadout_item.id;
+        if (onStand != null) npi.SetLoadoutItem(onStand, 0);
+        //legs
+        loadout_item = npi.PopItemLoadout(Item.Type.legs, 0);//lahko vrne null
+        onStand = Mapper.instance.getItemById(this.legs); //lahko vrne null
+        if (loadout_item != null) this.hands = loadout_item.id;
+        if (onStand != null) npi.SetLoadoutItem(onStand, 0);
+        //feet
+        loadout_item = npi.PopItemLoadout(Item.Type.feet, 0);//lahko vrne null
+        onStand = Mapper.instance.getItemById(this.feet); //lahko vrne null
+        if (loadout_item != null) this.hands = loadout_item.id;
+        if (onStand != null) npi.SetLoadoutItem(onStand, 0);
+        //wep0
+        loadout_item = npi.PopItemLoadout(Item.Type.weapon, 0);//lahko vrne null
+        onStand = Mapper.instance.getItemById(this.weapon_0); //lahko vrne null
+        if (loadout_item != null) this.hands = loadout_item.id;
+        if (onStand != null) npi.SetLoadoutItem(onStand, 0);
+        //wep1
+        loadout_item = npi.PopItemLoadout(Item.Type.weapon, 1);//lahko vrne null
+        onStand = Mapper.instance.getItemById(this.weapon_1); //lahko vrne null
+        if (loadout_item != null) this.hands = loadout_item.id;
+        if (onStand != null) npi.SetLoadoutItem(onStand, 1);
+        //shield
+        loadout_item = npi.PopItemLoadout(Item.Type.shield, 0);//lahko vrne null
+        onStand = Mapper.instance.getItemById(this.shield); //lahko vrne null
+        if (loadout_item != null) this.hands = loadout_item.id;
+        if (onStand != null) npi.SetLoadoutItem(onStand, 0);
+        //ranged
+        loadout_item = npi.PopItemLoadout(Item.Type.ranged, 0);//lahko vrne null
+        onStand = Mapper.instance.getItemById(this.ranged); //lahko vrne null
+        if (loadout_item != null) this.hands = loadout_item.id;
+        if (onStand != null) npi.SetLoadoutItem(onStand, 0);
+
     }
 }

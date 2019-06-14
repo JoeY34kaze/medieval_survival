@@ -265,9 +265,9 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
     }
 
     public bool SetLoadoutItem(Item i, int index)
-    {//vrne item s katermu smo ga zamenjal al pa null ce je biu prej prazn slot
+    {//nevem zakaj vrne bool
         if (!networkObject.IsServer) { Debug.LogError("client dela stvar od serevrja!"); return false;}
-
+        if (i == null) return false;
 
         Item r = i;
         switch (i.type)

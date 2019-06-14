@@ -116,7 +116,7 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
     {
         this.player_cam = GetComponent<player_camera_handler>().player_cam.transform;
     }
-
+    //                                                                                       -----------------Player interactions--------------------
     internal void local_player_interaction_execution_request(GameObject target)
     {
         target.GetComponent<Interactable_player>().local_player_execution_request(stats.server_id);
@@ -148,64 +148,72 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
         target.GetComponent<Interactable_player>().local_player_team_invite_request(stats.server_id);
     }
 
+    //                                                                                       -----------------ARMOR STAND---------------------
 
     internal void local_armor_stand_interaction_ranged_request(GameObject target)
     {
-        throw new NotImplementedException();
+        target.GetComponent<Interactible_ArmorStand>().local_player_interaction_ranged_request(stats.server_id);
     }
 
     internal void local_armor_stand_interaction_shield_request(GameObject target)
     {
-        throw new NotImplementedException();
+        target.GetComponent<Interactible_ArmorStand>().local_player_interaction_shield_request(stats.server_id);
     }
 
     internal void local_armor_stand_interaction_weapon1_request(GameObject target)
     {
-        throw new NotImplementedException();
+        target.GetComponent<Interactible_ArmorStand>().local_player_interaction_weapon1_request(stats.server_id);
     }
 
     internal void local_armor_stand_interaction_weapon0_request(GameObject target)
     {
-        throw new NotImplementedException();
+        target.GetComponent<Interactible_ArmorStand>().local_player_interaction_weapon0_request(stats.server_id);
     }
 
     internal void local_armor_stand_interaction_feet_request(GameObject target)
     {
-        throw new NotImplementedException();
+        target.GetComponent<Interactible_ArmorStand>().local_player_interaction_feet_request(stats.server_id);
     }
 
     internal void local_armor_stand_interaction_legs_request(GameObject target)
     {
-        throw new NotImplementedException();
+        target.GetComponent<Interactible_ArmorStand>().local_player_interaction_legs_request(stats.server_id);
     }
 
     internal void local_armor_stand_interaction_hands_request(GameObject target)
     {
-        throw new NotImplementedException();
+        target.GetComponent<Interactible_ArmorStand>().local_player_interaction_hands_request(stats.server_id);
     }
 
     internal void local_armor_stand_interaction_chest_request(GameObject target)
     {
-        throw new NotImplementedException();
+        target.GetComponent<Interactible_ArmorStand>().local_player_interaction_chest_request(stats.server_id);
     }
 
     internal void local_armor_stand_interaction_helmet_request(GameObject target)
     {
-        throw new NotImplementedException();
+        target.GetComponent<Interactible_ArmorStand>().local_player_interaction_helmet_request(stats.server_id);
     }
 
     internal void local_armor_stand_interaction_give_all_request(GameObject target)
     {
-        throw new NotImplementedException();
+        target.GetComponent<Interactible_ArmorStand>().local_player_interaction_give_all_request(stats.server_id, networkPlayerInventory);
     }
 
     internal void local_armor_stand_interaction_take_all_request(GameObject target)
     {
-        throw new NotImplementedException();
+        target.GetComponent<Interactible_ArmorStand>().local_player_interaction_get_all_request(stats.server_id, networkPlayerInventory);
+    }
+
+    internal void local_armor_stand_interaction_swap_request(GameObject target)
+    {
+        target.GetComponent<Interactible_ArmorStand>().local_player_interaction_swap_request(stats.server_id);
     }
 
     public override void ItemPickupRequest(RpcArgs args)//ne nrdi nc
     {
         throw new NotImplementedException();
     }
+
+
 }

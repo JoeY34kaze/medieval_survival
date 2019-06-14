@@ -3997,6 +3997,7 @@ MonoBehaviour:
   combat_mode: 0
   blocking: 0
   in_attack_animation: 0
+  radial_menu: {fileID: 3446218632124719356}
   combat_sound_effects:
   - {fileID: 5834470938225872258, guid: 75fae846ed60a9344b8226a84c76a726, type: 3}
   weapon_slot: {fileID: 2048528667891861577}

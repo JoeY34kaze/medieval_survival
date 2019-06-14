@@ -22,7 +22,7 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
     private NetworkPlayerStats stats;
 
     private NetworkPlayerInventory networkPlayerInventory;
-    //private Mapper mapper;
+    public GameObject radial_menu;
     public GameObject[] combat_sound_effects;
 
     public Transform weapon_slot;
@@ -68,8 +68,26 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
 
     //------------------------------------------------------------------------------------------NETWORKING-----------------------------------------------------------
 
-    private void Start()
+    private void Awake()
     {
+        animator = GetComponent<Animator>();
+        player_local_locks = GetComponent<player_local_locks>();
+        stats = GetComponent<NetworkPlayerStats>();
+        networkPlayerInventory = GetComponent<NetworkPlayerInventory>();
+        //this.radial_menu = transform.GetComponentInChildren<RMF_RadialMenu>().gameObject; -treba dat v start ker sicer crkne k ni se vse nrjen
+
+        initialize_weapons();
+    }
+
+    protected override void NetworkStart()
+    {
+        base.NetworkStart();
+        this.Current_weapon_change_event += On_Current_weapon_changed; //registriramo delegata ceprav ga ubistvu nerabmo vec ker koda ni vec tolk zapletena
+
+        //poslji request da nj updejta characterja tko kot je na serverju
+    }
+
+    private void initialize_weapons() {
         this.equipped_weapons = new int[5];//unarmed,unarmed block,wep0,wep1,ranged
         this.equipped_weapons[0] = 0;
         this.equipped_weapons[1] = 1;
@@ -78,19 +96,16 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
         this.currently_equipped_shield = 1;
     }
 
-    private void Awake()
-    {
-        animator = GetComponent<Animator>();
-        player_local_locks = GetComponent<player_local_locks>();
-        stats = GetComponent<NetworkPlayerStats>();
-        networkPlayerInventory = GetComponent<NetworkPlayerInventory>();
-    }
-    protected override void NetworkStart()
-    {
-        base.NetworkStart();
-        this.Current_weapon_change_event += On_Current_weapon_changed; //registriramo delegata ceprav ga ubistvu nerabmo vec ker koda ni vec tolk zapletena
+    private bool is_allowed_to_attack_local() {
+        if (stats.downed || stats.dead)
+        {
+            return false; //Ce je downan da nemora vec napadat pa take fore. to je precej loše ker je na clientu. ksnej bo treba prenest to logiko na server ker tole zjebe ze cheatengine
+        }
 
-        //poslji request da nj updejta characterja tko kot je na serverju
+        if (networkPlayerInventory.panel_inventory.activeSelf) return false; //odprt inventorij
+        if (this.radial_menu.activeSelf) return false;
+
+        return true;
     }
 
     private void Update()
@@ -104,12 +119,7 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
             return;
         }
 
-        if (stats.downed || stats.dead)
-        {
-            return; //Ce je downan da nemora vec napadat pa take fore. to je precej loše ker je na clientu. ksnej bo treba prenest to logiko na server ker tole zjebe ze cheatengine
-        }
-
-        if (networkPlayerInventory.panel_inventory.activeSelf) return;
+        if (!is_allowed_to_attack_local()) return;
 
         check_and_handle_combat();//keyboard input glede combata
     }
@@ -219,9 +229,13 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
 
     public void update_equipped_weapons()//tole se klice takoj ko se zgodi networkUpdate za loadout na others, ter pred networkUpdate na serverju
     {
+        if (this.equipped_weapons.Length == 0)
+            initialize_weapons();
+
         Debug.Log("updating equipped weapons");
         // this.equipped_weapons[0] = 0;//unarmed
         // this.equipped_weapons[1] = 1;//unarmed block
+        Debug.Log("kojikurac: " + this.equipped_weapons.Length);
         this.equipped_weapons[2] = networkPlayerInventory.GetWeapon0();
         this.equipped_weapons[3] = networkPlayerInventory.GetWeapon1();
         this.equipped_weapons[4] = networkPlayerInventory.GetRanged();
