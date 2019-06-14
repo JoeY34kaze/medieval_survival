@@ -3168,6 +3168,7 @@ MonoBehaviour:
   globalOffset: 0
   currentAngle: 0
   index: 0
+  angleOffset: 0
 --- !u!225 &3446218632147069868
 CanvasGroup:
   m_ObjectHideFlags: 0

@@ -160,7 +160,7 @@ public class Interactable_radial_menu : MonoBehaviour
         btn.transform.localRotation = Quaternion.identity;
         btn.transform.GetChild(0).GetComponent<Button>().GetComponent<Image>().sprite = getBtnSpriteFromIndex(this.number_of_elements);
         RMF_RadialMenuElement r = btn.GetComponent<RMF_RadialMenuElement>();
-        r.angleOffset= offset;
+        r.angleOffset= offset - menu.angleOffset/2;
         
         menu.elements.Add(r);
         r.init();
@@ -210,10 +210,89 @@ public class Interactable_radial_menu : MonoBehaviour
         this.button_title[10] = "Ranged Weapon";
         */
 
+        show_menu(stand);
 
-        //--------------------------TEST
-        
-        
+        this.number_of_elements = 10;
+        menu.angleOffset = (360f / this.number_of_elements);
+        center_label.text = "Armor Stand";
+
+
+
+        GameObject btn_0 = GameObject.Instantiate(Resources.Load<GameObject>("radial_menu_elements/interaction_armor_stand_take_all"));
+        GameObject btn_1 = GameObject.Instantiate(Resources.Load<GameObject>("radial_menu_elements/interaction_armor_stand_give_all"));
+        GameObject btn_2 = GameObject.Instantiate(Resources.Load<GameObject>("radial_menu_elements/interaction_armor_stand_helmet"));
+        GameObject btn_3 = GameObject.Instantiate(Resources.Load<GameObject>("radial_menu_elements/interaction_armor_stand_chest"));
+        GameObject btn_4 = GameObject.Instantiate(Resources.Load<GameObject>("radial_menu_elements/interaction_armor_stand_hands"));
+        GameObject btn_5 = GameObject.Instantiate(Resources.Load<GameObject>("radial_menu_elements/interaction_armor_stand_legs"));
+        GameObject btn_6 = GameObject.Instantiate(Resources.Load<GameObject>("radial_menu_elements/interaction_armor_stand_feet"));
+
+        GameObject btn_7 = GameObject.Instantiate(Resources.Load<GameObject>("radial_menu_elements/interaction_armor_stand_weapon0"));
+        GameObject btn_8 = GameObject.Instantiate(Resources.Load<GameObject>("radial_menu_elements/interaction_armor_stand_weapon1"));
+        GameObject btn_9 = GameObject.Instantiate(Resources.Load<GameObject>("radial_menu_elements/interaction_armor_stand_shield"));
+        GameObject btn_10 = GameObject.Instantiate(Resources.Load<GameObject>("radial_menu_elements/interaction_armor_stand_ranged"));
+
+        menu.elements.Clear();
+
+        setup_button(btn_0, menu.angleOffset * 0);
+        setup_button(btn_1, menu.angleOffset * 1);
+        setup_button(btn_2, menu.angleOffset * 2);
+        setup_button(btn_3, menu.angleOffset * 3);
+        setup_button(btn_4, menu.angleOffset * 4);
+        setup_button(btn_5, menu.angleOffset * 5);
+        setup_button(btn_6, menu.angleOffset * 6);
+        setup_button(btn_7, menu.angleOffset * 7);
+        setup_button(btn_8, menu.angleOffset * 8);
+        setup_button(btn_9, menu.angleOffset * 9);
+        setup_button(btn_10, menu.angleOffset * 10);
+
+
+
+        Button button = btn_0.transform.GetComponentInChildren<Button>();
+        button.onClick.RemoveAllListeners();
+        button.onClick.AddListener(delegate { armor_stand_interaction_button_take_all(); });
+
+        button = btn_1.transform.GetComponentInChildren<Button>();
+        button.onClick.RemoveAllListeners();
+        button.onClick.AddListener(delegate { armor_stand_interaction_button_give_all(); });
+
+        button = btn_2.transform.GetComponentInChildren<Button>();
+        button.onClick.RemoveAllListeners();
+        button.onClick.AddListener(delegate { armor_stand_interaction_button_helmet(); });
+
+        button = btn_3.transform.GetComponentInChildren<Button>();
+        button.onClick.RemoveAllListeners();
+        button.onClick.AddListener(delegate { armor_stand_interaction_button_chest(); });
+
+        button = btn_4.transform.GetComponentInChildren<Button>();
+        button.onClick.RemoveAllListeners();
+        button.onClick.AddListener(delegate { armor_stand_interaction_button_hands(); });
+
+        button = btn_5.transform.GetComponentInChildren<Button>();
+        button.onClick.RemoveAllListeners();
+        button.onClick.AddListener(delegate { armor_stand_interaction_button_legs(); });
+
+        button = btn_6.transform.GetComponentInChildren<Button>();
+        button.onClick.RemoveAllListeners();
+        button.onClick.AddListener(delegate { armor_stand_interaction_button_feet(); });
+
+        button = btn_7.transform.GetComponentInChildren<Button>();
+        button.onClick.RemoveAllListeners();
+        button.onClick.AddListener(delegate { armor_stand_interaction_button_weapon0(); });
+
+        button = btn_8.transform.GetComponentInChildren<Button>();
+        button.onClick.RemoveAllListeners();
+        button.onClick.AddListener(delegate { armor_stand_interaction_button_weapon1(); });
+
+        button = btn_9.transform.GetComponentInChildren<Button>();
+        button.onClick.RemoveAllListeners();
+        button.onClick.AddListener(delegate { armor_stand_interaction_button_shield(); });
+
+        button = btn_10.transform.GetComponentInChildren<Button>();
+        button.onClick.RemoveAllListeners();
+        button.onClick.AddListener(delegate { armor_stand_interaction_button_ranged(); });
+
+
+        menu.reDraw();
     }
 
 
@@ -269,5 +348,67 @@ public class Interactable_radial_menu : MonoBehaviour
     {
         //Debug.Log("button - mock - " + this.other.name);
         interaction.local_player_interaction_team_invite_request(this.target);
+    }
+
+    private void armor_stand_interaction_button_ranged()
+    {
+        interaction.local_armor_stand_interaction_ranged_request(this.target);
+    }
+
+    private void armor_stand_interaction_button_shield()
+    {
+        interaction.local_armor_stand_interaction_shield_request(this.target);
+    }
+
+    private void armor_stand_interaction_button_weapon1()
+    {
+        interaction.local_armor_stand_interaction_weapon1_request(this.target);
+    }
+
+    private void armor_stand_interaction_button_weapon0()
+    {
+        interaction.local_armor_stand_interaction_weapon0_request(this.target);
+    }
+
+    private void armor_stand_interaction_button_feet()
+    {
+        interaction.local_armor_stand_interaction_feet_request(this.target);
+
+    }
+
+    private void armor_stand_interaction_button_legs()
+    {
+        interaction.local_armor_stand_interaction_legs_request(this.target);
+
+    }
+
+    private void armor_stand_interaction_button_hands()
+    {
+        interaction.local_armor_stand_interaction_hands_request(this.target);
+
+    }
+
+    private void armor_stand_interaction_button_chest()
+    {
+        interaction.local_armor_stand_interaction_chest_request(this.target);
+
+    }
+
+    private void armor_stand_interaction_button_helmet()
+    {
+        interaction.local_armor_stand_interaction_helmet_request(this.target);
+
+    }
+
+    private void armor_stand_interaction_button_give_all()
+    {
+        interaction.local_armor_stand_interaction_give_all_request(this.target);
+
+    }
+
+    private void armor_stand_interaction_button_take_all()
+    {
+        interaction.local_armor_stand_interaction_take_all_request(this.target);
+
     }
 }

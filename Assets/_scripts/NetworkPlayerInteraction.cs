@@ -148,11 +148,64 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
         target.GetComponent<Interactable_player>().local_player_team_invite_request(stats.server_id);
     }
 
-    
 
-    public override void ItemPickupRequest(RpcArgs args)
+    internal void local_armor_stand_interaction_ranged_request(GameObject target)
     {
         throw new NotImplementedException();
     }
 
+    internal void local_armor_stand_interaction_shield_request(GameObject target)
+    {
+        throw new NotImplementedException();
+    }
+
+    internal void local_armor_stand_interaction_weapon1_request(GameObject target)
+    {
+        throw new NotImplementedException();
+    }
+
+    internal void local_armor_stand_interaction_weapon0_request(GameObject target)
+    {
+        throw new NotImplementedException();
+    }
+
+    internal void local_armor_stand_interaction_feet_request(GameObject target)
+    {
+        throw new NotImplementedException();
+    }
+
+    internal void local_armor_stand_interaction_legs_request(GameObject target)
+    {
+        throw new NotImplementedException();
+    }
+
+    internal void local_armor_stand_interaction_hands_request(GameObject target)
+    {
+        throw new NotImplementedException();
+    }
+
+    internal void local_armor_stand_interaction_chest_request(GameObject target)
+    {
+        throw new NotImplementedException();
+    }
+
+    internal void local_armor_stand_interaction_helmet_request(GameObject target)
+    {
+        throw new NotImplementedException();
+    }
+
+    internal void local_armor_stand_interaction_give_all_request(GameObject target)
+    {
+        throw new NotImplementedException();
+    }
+
+    internal void local_armor_stand_interaction_take_all_request(GameObject target)
+    {
+        throw new NotImplementedException();
+    }
+
+    public override void ItemPickupRequest(RpcArgs args)//ne nrdi nc
+    {
+        throw new NotImplementedException();
+    }
 }
