@@ -16,10 +16,11 @@ public class Interactable_radial_menu : MonoBehaviour
 
     public Transform elements;
 
-    private int button_count = 4;
     private string[] button_title;
 
     private GameObject other;
+
+    public Text center_label;
 
     public Sprite i2;
     public Sprite i3;
@@ -56,25 +57,7 @@ public class Interactable_radial_menu : MonoBehaviour
 
         if (target_stats.downed)
         {
-            //vse mozne interakcije ko je downan
-            /*
-            "Pick Up";
-           "Steal";
-            "Mock";
-             "Execute";
-            "Tie Up";
-            
-
-            this.button_count = 5;
-            this.button_title = new string[this.button_count];
-            this.button_title[0] = "Pick Up";
-            this.button_title[1] = "Steal";
-            this.button_title[2] = "Mock";
-            this.button_title[3] = "Execute";
-            this.button_title[4] = "Tie Up";
-            */
-
-            //preber vse objekte
+            center_label.text = "Downed Player";
 
             GameObject btn_0_r = Resources.Load<GameObject>("radial_menu_elements/interaction_player_execution");
             GameObject btn_1_r = Resources.Load<GameObject>("radial_menu_elements/interaction_player_mock");
@@ -90,7 +73,7 @@ public class Interactable_radial_menu : MonoBehaviour
 
             menu.elements.Clear();
 
-            setup_button(btn_0,5);
+            setup_button(btn_0, 5);
             setup_button(btn_1, 5);
             setup_button(btn_2, 5);
             setup_button(btn_3, 5);
@@ -98,11 +81,31 @@ public class Interactable_radial_menu : MonoBehaviour
 
 
 
+            //menu.textLabel.text = "Downed Player";
+
             Button button = btn_0.transform.GetComponentInChildren<Button>();
             button.onClick.RemoveAllListeners();
-            button.onClick.AddListener(delegate { Debug.Log("EXECUTION!"); });
+            button.onClick.AddListener(delegate { player_interaction_button_execution(); });
+
+            button = btn_1.transform.GetComponentInChildren<Button>();
+            button.onClick.RemoveAllListeners();
+            button.onClick.AddListener(delegate { player_interaction_button_mock(); });
+
+            button = btn_2.transform.GetComponentInChildren<Button>();
+            button.onClick.RemoveAllListeners();
+            button.onClick.AddListener(delegate { player_interaction_button_pickup(); });
+
+            button = btn_3.transform.GetComponentInChildren<Button>();
+            button.onClick.RemoveAllListeners();
+            button.onClick.AddListener(delegate { player_interaction_button_steal(); });
+
+            button = btn_4.transform.GetComponentInChildren<Button>();
+            button.onClick.RemoveAllListeners();
+            button.onClick.AddListener(delegate { player_interaction_button_tieUp(); });
 
 
+
+            menu.reDraw();
         }
         else {
 
@@ -166,106 +169,45 @@ public class Interactable_radial_menu : MonoBehaviour
 
 
         //--------------------------TEST
-
-        GameObject btn_0_r = Resources.Load<GameObject>("radial_menu_elements/interaction_player_execution");
-        GameObject btn_1_r = Resources.Load<GameObject>("radial_menu_elements/interaction_player_mock");
-        GameObject btn_2_r = Resources.Load<GameObject>("radial_menu_elements/interaction_player_pickup");
-        GameObject btn_3_r = Resources.Load<GameObject>("radial_menu_elements/interaction_player_steal");
-        GameObject btn_4_r = Resources.Load<GameObject>("radial_menu_elements/interaction_player_tieUp");
-
-        GameObject btn_0 = GameObject.Instantiate(btn_0_r);
-        GameObject btn_1 = GameObject.Instantiate(btn_1_r);
-        GameObject btn_2 = GameObject.Instantiate(btn_2_r);
-        GameObject btn_3 = GameObject.Instantiate(btn_3_r);
-        GameObject btn_4 = GameObject.Instantiate(btn_4_r);
-
-        menu.elements.Clear();
-
-        setup_button(btn_0,5);
-        setup_button(btn_1, 5);
-        setup_button(btn_2, 5);
-        setup_button(btn_3, 5);
-        setup_button(btn_4, 5);
-
         
-
-        //menu.textLabel.text = "Downed Player";
-
-        Button button = btn_0.transform.GetComponentInChildren<Button>();
-        button.onClick.RemoveAllListeners();
-        button.onClick.AddListener(delegate { player_interaction_button_execution(); });
-
-        button = btn_1.transform.GetComponentInChildren<Button>();
-        button.onClick.RemoveAllListeners();
-        button.onClick.AddListener(delegate { player_interaction_button_mock(); });
-
-        button = btn_0.transform.GetComponentInChildren<Button>();
-        button.onClick.RemoveAllListeners();
-        button.onClick.AddListener(delegate { player_interaction_button_pickup(); });
-
-        button = btn_0.transform.GetComponentInChildren<Button>();
-        button.onClick.RemoveAllListeners();
-        button.onClick.AddListener(delegate { player_interaction_button_steal(); });
-
-        button = btn_0.transform.GetComponentInChildren<Button>();
-        button.onClick.RemoveAllListeners();
-        button.onClick.AddListener(delegate { player_interaction_button_tieUp(); });
-
-
-
-        menu.reDraw();
+        
     }
 
 
-    public void hide_radial_menu() {
+    public void hide_radial_menu() {//pobrise vse kar smo dodal pa take fore
         Debug.Log("Hiding radial menu.");
-        Clear_current_elements_of_menu();
+        menu.elements.Clear();
+        foreach (Transform child in elements)
+        {
+            GameObject.Destroy(child.gameObject);
+        }
+        center_label.text = "";
         this.radialMenu.SetActive(false);
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
     }
 
-
-    /// <summary>
-    /// za radial menu pobrise vse elemente, tko da je prazen.
-    /// </summary>
-    private void Clear_current_elements_of_menu()
-    {
-        //throw new NotImplementedException();
-    }
-
-    /// <summary>
-    /// predpostavlja da je radial menu prazen in da samo gor namecemo stvari.
-    /// </summary>
-    private void Update_radial_menu_elements() {
-
-
-    }
-    public void radial_menu_button_pressed() {//rabmo zvohat kter button
-
-    }
-
     public void player_interaction_button_execution()
     {
-        Debug.Log("button - execution - " + this.other.name);
+        //Debug.Log("button - execution - " + this.other.name);
     }
 
     public void player_interaction_button_tieUp()
     {
-        Debug.Log("button - tieUp - " + this.other.name);
+        //Debug.Log("button - tieUp - " + this.other.name);
     }
 
     public void player_interaction_button_steal() {
-        Debug.Log("button - steal - " + this.other.name);
+        //Debug.Log("button - steal - " + this.other.name);
     }
 
     public void player_interaction_button_pickup()
     {
-        Debug.Log("button - pickUp - " + this.other.name);
+        //Debug.Log("button - pickUp - " + this.other.name);
     }
 
     public void player_interaction_button_mock()
     {
-        Debug.Log("button - mock - " + this.other.name);
+        //Debug.Log("button - mock - " + this.other.name);
     }
 }

@@ -6160,6 +6160,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   elements: {fileID: 3446218632147094922}
+  center_label: {fileID: 3446218632131824718}
   i2: {fileID: 21300000, guid: 9934a0b79f4f53f46a56c2de9a5feeaa, type: 3}
   i3: {fileID: 21300000, guid: 131e262cb64d941408fb46fe1d040e16, type: 3}
   i4: {fileID: 21300000, guid: 1a581bbb342e537489ccc4d31d0c1fb5, type: 3}

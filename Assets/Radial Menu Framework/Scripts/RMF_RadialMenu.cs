@@ -128,7 +128,7 @@ public class RMF_RadialMenu : MonoBehaviour {
 
             //Current element index we're pointing at.
             index = (int)(currentAngle / angleOffset);
-            Debug.Log(rawAngle + " - " + currentAngle +" - "+index);
+            //Debug.Log(rawAngle + " - " + currentAngle +" - "+index);
             if (elements[index] != null) {
 
                 //Select it.
