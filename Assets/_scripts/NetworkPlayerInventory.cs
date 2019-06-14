@@ -426,7 +426,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
             else
                 Debug.LogError("onItemChangedCallback je null.");
 
-            //onItemChangedCallback.Invoke();
+            onItemChangedCallback.Invoke();
             if (panel_inventory.activeSelf)
             {
                 Cursor.lockState = CursorLockMode.None;
@@ -434,9 +434,9 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
             }
             else
             {
-                Cursor.lockState = CursorLockMode.Locked;
+               Cursor.lockState = CursorLockMode.Locked;
                 Cursor.visible = false;
-            }
+           }
         }
     }
 

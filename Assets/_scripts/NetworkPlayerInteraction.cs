@@ -13,6 +13,9 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
 
     private NetWorker myNetWorker;
 
+    public Interactable_radial_menu menu;
+    private bool interacting = false;
+
     private void Start()
     {
         stats = GetComponent<NetworkPlayerStats>();
@@ -34,12 +37,15 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
         if (stats.downed || stats.dead) return;
         if (stats == null) stats = GetComponent<NetworkPlayerStats>();
         if (networkPlayerInventory == null) networkPlayerInventory = GetComponent<NetworkPlayerInventory>();
+        //if (Input.GetButton("Interact")) return;
         //if(mapper==null)mapper = GameObject.Find("Mapper").GetComponent<Mapper>();
+
         if (player_cam == null)
         {
             setup_player_cam();
         }
         else{
+            
             //check what we are looking at with camera.
             Ray ray = new Ray(player_cam.position, player_cam.forward);
 
@@ -82,7 +88,8 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
                         if (Input.GetButtonDown("Interact"))
                         {
                             Debug.Log("Interacting with " + hit.collider.name + " with distance of " + hit.distance);
-                            if (!stats.downed && !stats.dead) { 
+                            if (!stats.downed && !stats.dead)//ce je prayer ziv
+                            {
                                 // -----------------------------------------    Inventory item / weapon /gear ---------------------------------------------------
                                 if (interactable is ItemPickup)
                                     if (networkPlayerInventory.hasInventorySpace())
@@ -93,6 +100,10 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
                                 //-------------------------------------------  player (inv u guild / interakcija ko je downan )---------------------------------------------------------------
                                 if (interactable is Interactable_player)
                                 {
+
+                                    this.menu.show_player_interaction_menu(interactable.gameObject);
+                                    /*
+                                    //---------------------------------
                                     interactable = (Interactable_player)interactable;
                                     if (interactable.isPlayerDowned())
                                     {//interakcija samo za pobrat ali pa execution
@@ -103,14 +114,18 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
                                     {
                                         Debug.Log("Interacting with healthy player.");
                                     }
+                                    //---------------------------------
+                                    */
+
 
                                 }
                                 //-----------------------------------------------------ARMOR STAND-------------------------------
                                 if (interactable is Interactible_ArmorStand)
                                 {
-                                    interactable = (Interactible_ArmorStand)interactable;
-                                    if (networkPlayerInventory.hasInventorySpace())
-                                        interactable.interact(stats.server_id);
+                                    this.menu.show_ArmorStand_interaction_menu(interactable.gameObject);
+                                    // interactable = (Interactible_ArmorStand)interactable;
+                                    // if (networkPlayerInventory.hasInventorySpace())
+                                    //     interactable.interact(stats.server_id);
                                 }
 
                             }
@@ -121,6 +136,10 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
                    // Debug.Log("Looking at not interactable " + hit.collider.name + " with distance of " + hit.distance);
                 }
             }
+        }
+        if (Input.GetButtonUp("Interact"))
+        {
+            this.menu.hide_radial_menu();
         }
     }
 
@@ -167,4 +186,5 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
     {
         throw new NotImplementedException();
     }
+
 }
