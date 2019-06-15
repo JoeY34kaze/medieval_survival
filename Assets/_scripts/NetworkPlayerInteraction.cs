@@ -13,6 +13,9 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
 
     private NetWorker myNetWorker;
 
+    public Interactable_radial_menu menu;
+    private bool interacting = false;
+
     private void Start()
     {
         stats = GetComponent<NetworkPlayerStats>();
@@ -34,12 +37,15 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
         if (stats.downed || stats.dead) return;
         if (stats == null) stats = GetComponent<NetworkPlayerStats>();
         if (networkPlayerInventory == null) networkPlayerInventory = GetComponent<NetworkPlayerInventory>();
+        //if (Input.GetButton("Interact")) return;
         //if(mapper==null)mapper = GameObject.Find("Mapper").GetComponent<Mapper>();
+
         if (player_cam == null)
         {
             setup_player_cam();
         }
         else{
+            
             //check what we are looking at with camera.
             Ray ray = new Ray(player_cam.position, player_cam.forward);
 
@@ -58,47 +64,36 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
 
                 if (interactable != null)
                 {
-                    //izriši eno obrobo al pa nekej samo tolk da player vidi je stvari lezijo na tleh
+                    //izriši eno obrobo al pa nekej samo tolk da player vidi da lahko z stvarjo eventualno interacta?
                     /*
-                     
-                 
-                 
-                 
-                 
-                 
+
                  
                  */
-
-                    if (hit.distance <= radius) { 
+                    if (hit.distance <= radius)
+                    {
                         /*
-                         Izsis se kaj dodatnega da bo vedu da lohko direkt pobere
-
-
+                         Izsis se kaj dodatnega da bo vedu da lohko direkt pobere - glow?
 
                          */
-                        
-
                         if (Input.GetButtonDown("Interact"))
                         {
                             Debug.Log("Interacting with " + hit.collider.name + " with distance of " + hit.distance);
+                            if (!stats.downed && !stats.dead)//ce je prayer ziv
+                            {
+                                // -----------------------------------------    Inventory item / weapon /gear ---------------------------------------------------
+                                if (interactable is ItemPickup)
+                                    interactable.interact(stats.server_id);//full inventory se mora handlat drugje
 
-                            // -----------------------------------------    Inventory item / weapon /gear ---------------------------------------------------
-                            if (interactable is ItemPickup)
-                                if (networkPlayerInventory.hasInventorySpace())
-                                    interactable.interact(stats.server_id);
-                                else
-                                    handleInventoryFull();
 
-                            //-------------------------------------------  player (inv u guild / interakcija ko je downan )---------------------------------------------------------------
-                            if (interactable is Interactable_player) {
-                                interactable = (Interactable_player)interactable;
-                                if (interactable.isPlayerDowned()) {//interakcija samo za pobrat ali pa execution
-                                    Debug.Log("interacting with downed player");
-                                    interactable.send_player_pickup_request_to_server(GetComponent<NetworkPlayerStats>().server_id);
-                                }
-                                else//invajt u guild?
+                                //-------------------------------------------  player ---------------------------------------------------------------
+                                if (interactable is Interactable_player)
                                 {
-                                    Debug.Log("Interacting with healthy player.");
+                                    this.menu.show_player_interaction_menu(interactable.gameObject);
+                                }
+                                //-----------------------------------------------------ARMOR STAND-------------------------------
+                                if (interactable is Interactible_ArmorStand)
+                                {
+                                    this.menu.show_ArmorStand_interaction_menu(interactable.gameObject);
                                 }
 
                             }
@@ -110,49 +105,115 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
                 }
             }
         }
+        if (Input.GetButtonUp("Interact"))
+        {
+            this.menu.hide_radial_menu();
+        }
     }
 
-    internal void handleInventoryFull()
-    {
-
-    }
 
     private void setup_player_cam()
     {
         this.player_cam = GetComponent<player_camera_handler>().player_cam.transform;
     }
-
-         
-  /*  public override void ItemPickupResponse(RpcArgs args)
+    //                                                                                       -----------------Player interactions--------------------
+    internal void local_player_interaction_execution_request(GameObject target)
     {
-        if (!networkObject.IsOwner) return;
+        target.GetComponent<Interactable_player>().local_player_execution_request(stats.server_id);
+    }
 
-        int item_id = args.GetNext<int>();
-        int quantity = args.GetNext<int>();
+    internal void local_player_interaction_tieup_request(GameObject target)
+    {
+        target.GetComponent<Interactable_player>().local_player_tieup_request(stats.server_id);
+    }
 
-        if (!networkPlayerInventory.hasInventorySpace())
-        {
-            Debug.Log("Inventory Full!");
-            handleInventoryFull();
-            networkPlayerInventory.instantiateDroppedItem(Mapper.instance.getItemById(item_id), quantity);
-        }
-        //add into inventory since all was aprooved
-        //za nahrbtnike bi mrde pustu ks u inventory skripti da se ukvarja z tem najbrz
-        Debug.Log("adding into npInventory");
-        networkPlayerInventory.handleItemPickup(Mapper.instance.getItemById(item_id), quantity);
-        
-        Debug.Log("Inventory aprooval received on client.");
-    }*/
-    
-        /*
-    public void call_owner_rpc_item_pickup_response(int item_id, int quantity) {
-        Debug.Log("sending response to owner of player");
+    internal void local_player_interaction_steal_request(GameObject target)
+    {
+        target.GetComponent<Interactable_player>().local_player_steal_request(stats.server_id);
+    }
 
-        networkObject.SendRpc(RPC_ITEM_PICKUP_RESPONSE, Receivers.Owner, item_id, quantity);
-    }*/
+    internal void local_player_interaction_pickup_request(GameObject target)
+    {
+        //klice downan player, poda id of playerja kter ga pobira
+        target.GetComponent<Interactable_player>().local_player_pickup_request(stats.server_id);
+    }
 
-    public override void ItemPickupRequest(RpcArgs args)
+    internal void local_player_interaction_guild_invite_request(GameObject target)
+    { 
+        target.GetComponent<Interactable_player>().local_player_guild_invite_request(stats.server_id);
+    }
+
+    internal void local_player_interaction_team_invite_request(GameObject target)
+    {
+        target.GetComponent<Interactable_player>().local_player_team_invite_request(stats.server_id);
+    }
+
+    //                                                                                       -----------------ARMOR STAND---------------------
+
+    internal void local_armor_stand_interaction_ranged_request(GameObject target)
+    {
+        target.GetComponent<Interactible_ArmorStand>().local_player_interaction_ranged_request(stats.server_id);
+    }
+
+    internal void local_armor_stand_interaction_shield_request(GameObject target)
+    {
+        target.GetComponent<Interactible_ArmorStand>().local_player_interaction_shield_request(stats.server_id);
+    }
+
+    internal void local_armor_stand_interaction_weapon1_request(GameObject target)
+    {
+        target.GetComponent<Interactible_ArmorStand>().local_player_interaction_weapon1_request(stats.server_id);
+    }
+
+    internal void local_armor_stand_interaction_weapon0_request(GameObject target)
+    {
+        target.GetComponent<Interactible_ArmorStand>().local_player_interaction_weapon0_request(stats.server_id);
+    }
+
+    internal void local_armor_stand_interaction_feet_request(GameObject target)
+    {
+        target.GetComponent<Interactible_ArmorStand>().local_player_interaction_feet_request(stats.server_id);
+    }
+
+    internal void local_armor_stand_interaction_legs_request(GameObject target)
+    {
+        target.GetComponent<Interactible_ArmorStand>().local_player_interaction_legs_request(stats.server_id);
+    }
+
+    internal void local_armor_stand_interaction_hands_request(GameObject target)
+    {
+        target.GetComponent<Interactible_ArmorStand>().local_player_interaction_hands_request(stats.server_id);
+    }
+
+    internal void local_armor_stand_interaction_chest_request(GameObject target)
+    {
+        target.GetComponent<Interactible_ArmorStand>().local_player_interaction_chest_request(stats.server_id);
+    }
+
+    internal void local_armor_stand_interaction_helmet_request(GameObject target)
+    {
+        target.GetComponent<Interactible_ArmorStand>().local_player_interaction_helmet_request(stats.server_id);
+    }
+
+    internal void local_armor_stand_interaction_give_all_request(GameObject target)
+    {
+        target.GetComponent<Interactible_ArmorStand>().local_player_interaction_give_all_request(stats.server_id, networkPlayerInventory);
+    }
+
+    internal void local_armor_stand_interaction_take_all_request(GameObject target)
+    {
+        target.GetComponent<Interactible_ArmorStand>().local_player_interaction_get_all_request(stats.server_id, networkPlayerInventory);
+    }
+
+    internal void local_armor_stand_interaction_swap_request(GameObject target)
+    {
+        target.GetComponent<Interactible_ArmorStand>().local_player_interaction_swap_request(stats.server_id);
+    }
+
+    public override void ItemPickupRequest(RpcArgs args)//ne nrdi nc
     {
         throw new NotImplementedException();
     }
+
+
 }
