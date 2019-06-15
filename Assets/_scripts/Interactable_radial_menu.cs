@@ -160,7 +160,7 @@ public class Interactable_radial_menu : MonoBehaviour
         btn.transform.localRotation = Quaternion.identity;
         btn.transform.GetChild(0).GetComponent<Button>().GetComponent<Image>().sprite = getBtnSpriteFromIndex(this.number_of_elements);
         RMF_RadialMenuElement r = btn.GetComponent<RMF_RadialMenuElement>();
-        r.angleOffset= offset - menu.angleOffset/2;
+        r.angleOffset = offset;// - menu.angleOffset/2;
         
         menu.elements.Add(r);
         r.init();
