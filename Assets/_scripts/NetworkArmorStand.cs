@@ -460,61 +460,88 @@ public class NetworkArmorStand : NetworkArmorStandBehavior
 
         if (npi.getHeadItem() == null) {
             if (this.head != -1)
+            {
                 npi.SetLoadoutItem(Mapper.instance.getItemById(this.head), 0);
+                this.head = -1;
+            }
         }
 
 
         if (npi.getChestItem() == null)
         {
             if (this.chest != -1)
+            {
                 npi.SetLoadoutItem(Mapper.instance.getItemById(this.chest), 0);
+                this.chest = -1;
+            }
         }
 
 
         if (npi.getHandsItem() == null)
         {
             if (this.hands != -1)
+            {
                 npi.SetLoadoutItem(Mapper.instance.getItemById(this.hands), 0);
+                this.hands = -1;
+            }
         }
 
 
         if (npi.getLegsItem() == null)
         {
             if (this.legs != -1)
+            {
                 npi.SetLoadoutItem(Mapper.instance.getItemById(this.legs), 0);
+                this.legs = -1;
+            }
         }
 
         if (npi.getFeetItem() == null)
         {
             if (this.feet != -1)
+            {
                 npi.SetLoadoutItem(Mapper.instance.getItemById(this.feet), 0);
+                this.feet = -1;
+            }
         }
 
 
         if (npi.getWeapon_0Item() == null)
         {
             if (this.weapon_0 != -1)
+            {
                 npi.SetLoadoutItem(Mapper.instance.getItemById(this.weapon_0), 0);
+                this.weapon_0 = -1;
+            }
         }
 
         if (npi.getWeapon_1Item() == null)
         {
             if (this.weapon_1 != -1)
+            {
                 npi.SetLoadoutItem(Mapper.instance.getItemById(this.weapon_1), 0);
+                this.weapon_1 = -1;
+            }
         }
 
 
         if (npi.getShieldItem() == null)
         {
             if (this.shield != -1)
+            {
                 npi.SetLoadoutItem(Mapper.instance.getItemById(this.shield), 0);
+                this.shield = -1;
+            }
         }
 
 
         if (npi.getRangedItem() == null)
         {
             if (this.ranged != -1)
+            {
                 npi.SetLoadoutItem(Mapper.instance.getItemById(this.ranged), 0);
+                this.ranged = -1;
+            }
         }
     }
 
@@ -523,55 +550,55 @@ public class NetworkArmorStand : NetworkArmorStandBehavior
         Item loadout_item;
         //head
 
-        if (this.head != -1) {//samo pogleda, nc ne spremeni
+        if (this.head == -1) {//samo pogleda, nc ne spremeni
             loadout_item = npi.PopItemLoadout(Item.Type.head, 0);//lahko vrne null
-            if(loadout_item!=null)this.hands = loadout_item.id;
+            if(loadout_item!=null)this.head = loadout_item.id;
         }
 
         //chest
-        if (this.chest !=-1)
+        if (this.chest ==-1)
         {//samo pogleda, nc ne spremeni
             loadout_item = npi.PopItemLoadout(Item.Type.chest, 0);//lahko vrne null
             if (loadout_item != null) this.chest = loadout_item.id;
         }
         //hands
-        if (this.hands != -1)
+        if (this.hands == -1)
         {//samo pogleda, nc ne spremeni
             loadout_item = npi.PopItemLoadout(Item.Type.hands, 0);//lahko vrne null
             if (loadout_item != null) this.hands = loadout_item.id;
         }
         //legs
-        if (this.legs != -1)
+        if (this.legs == -1)
         {//samo pogleda, nc ne spremeni
             loadout_item = npi.PopItemLoadout(Item.Type.legs, 0);//lahko vrne null
             if (loadout_item != null) this.legs = loadout_item.id;
         }
         //feet
-        if (this.feet != -1)
+        if (this.feet == -1)
         {//samo pogleda, nc ne spremeni
             loadout_item = npi.PopItemLoadout(Item.Type.feet, 0);//lahko vrne null
             if (loadout_item != null) this.feet = loadout_item.id;
         }
         //wep0
-        if (this.weapon_0 != -1)
+        if (this.weapon_0 == -1)
         {//samo pogleda, nc ne spremeni
             loadout_item = npi.PopItemLoadout(Item.Type.weapon, 0);//lahko vrne null
             if (loadout_item != null) this.weapon_0 = loadout_item.id;
         }
         //wep1
-        if (this.weapon_1 != -1)
+        if (this.weapon_1 == -1)
         {//samo pogleda, nc ne spremeni
             loadout_item = npi.PopItemLoadout(Item.Type.weapon, 1);//lahko vrne null
             if (loadout_item != null) this.weapon_1 = loadout_item.id;
         }
         //shield
-        if (this.shield != -1)
+        if (this.shield == -1)
         {//samo pogleda, nc ne spremeni
             loadout_item = npi.PopItemLoadout(Item.Type.shield, 0);//lahko vrne null
             if (loadout_item != null) this.shield = loadout_item.id;
         }
         //ranged
-        if (this.ranged != -1)
+        if (this.ranged == -1)
         {//samo pogleda, nc ne spremeni
             loadout_item = npi.PopItemLoadout(Item.Type.ranged, 0);//lahko vrne null
             if (loadout_item != null) this.ranged = loadout_item.id;
@@ -584,49 +611,82 @@ public class NetworkArmorStand : NetworkArmorStandBehavior
         //head
         Item loadout_item = npi.PopItemLoadout(Item.Type.head, 0);//lahko vrne null
         Item onStand = Mapper.instance.getItemById(this.head); //lahko vrne null
-        if(loadout_item!=null)this.hands = loadout_item.id;
-        if(onStand!=null) npi.SetLoadoutItem(onStand, 0);
+        if(loadout_item!=null)this.head = loadout_item.id;
+        if (onStand != null) {
+            npi.SetLoadoutItem(onStand, 0);
+            this.head = -1;
+        }
 
         //chest
         loadout_item = npi.PopItemLoadout(Item.Type.chest, 0);//lahko vrne null
         onStand = Mapper.instance.getItemById(this.chest); //lahko vrne null
-        if (loadout_item != null) this.hands = loadout_item.id;
-        if (onStand != null) npi.SetLoadoutItem(onStand, 0);
+        if (loadout_item != null) this.chest = loadout_item.id;
+        if (onStand != null)
+        {
+            npi.SetLoadoutItem(onStand, 0);
+            this.chest = -1;
+        }
         //hands
         loadout_item = npi.PopItemLoadout(Item.Type.hands, 0);//lahko vrne null
         onStand = Mapper.instance.getItemById(this.hands); //lahko vrne null
         if (loadout_item != null) this.hands = loadout_item.id;
-        if (onStand != null) npi.SetLoadoutItem(onStand, 0);
+        if (onStand != null) { npi.SetLoadoutItem(onStand, 0);
+            this.hands = -1;
+        }
         //legs
         loadout_item = npi.PopItemLoadout(Item.Type.legs, 0);//lahko vrne null
         onStand = Mapper.instance.getItemById(this.legs); //lahko vrne null
-        if (loadout_item != null) this.hands = loadout_item.id;
-        if (onStand != null) npi.SetLoadoutItem(onStand, 0);
+        if (loadout_item != null) this.legs = loadout_item.id;
+        if (onStand != null)
+        {
+            npi.SetLoadoutItem(onStand, 0);
+            this.legs = -1;
+        }
         //feet
         loadout_item = npi.PopItemLoadout(Item.Type.feet, 0);//lahko vrne null
         onStand = Mapper.instance.getItemById(this.feet); //lahko vrne null
-        if (loadout_item != null) this.hands = loadout_item.id;
-        if (onStand != null) npi.SetLoadoutItem(onStand, 0);
+        if (loadout_item != null) this.feet = loadout_item.id;
+        if (onStand != null)
+        {
+            npi.SetLoadoutItem(onStand, 0);
+            this.feet = -1;
+        }
         //wep0
         loadout_item = npi.PopItemLoadout(Item.Type.weapon, 0);//lahko vrne null
         onStand = Mapper.instance.getItemById(this.weapon_0); //lahko vrne null
-        if (loadout_item != null) this.hands = loadout_item.id;
-        if (onStand != null) npi.SetLoadoutItem(onStand, 0);
+        if (loadout_item != null) this.weapon_0 = loadout_item.id;
+        if (onStand != null)
+        {
+            npi.SetLoadoutItem(onStand, 0);
+            this.weapon_0 = -1;
+        }
         //wep1
         loadout_item = npi.PopItemLoadout(Item.Type.weapon, 1);//lahko vrne null
         onStand = Mapper.instance.getItemById(this.weapon_1); //lahko vrne null
-        if (loadout_item != null) this.hands = loadout_item.id;
-        if (onStand != null) npi.SetLoadoutItem(onStand, 1);
+        if (loadout_item != null) this.weapon_1 = loadout_item.id;
+        if (onStand != null)
+        {
+            npi.SetLoadoutItem(onStand, 1);
+            this.weapon_1 = -1;
+        }
         //shield
         loadout_item = npi.PopItemLoadout(Item.Type.shield, 0);//lahko vrne null
         onStand = Mapper.instance.getItemById(this.shield); //lahko vrne null
-        if (loadout_item != null) this.hands = loadout_item.id;
-        if (onStand != null) npi.SetLoadoutItem(onStand, 0);
+        if (loadout_item != null) this.shield = loadout_item.id;
+        if (onStand != null)
+        {
+            npi.SetLoadoutItem(onStand, 0);
+            this.shield = -1;
+        }
         //ranged
         loadout_item = npi.PopItemLoadout(Item.Type.ranged, 0);//lahko vrne null
         onStand = Mapper.instance.getItemById(this.ranged); //lahko vrne null
-        if (loadout_item != null) this.hands = loadout_item.id;
-        if (onStand != null) npi.SetLoadoutItem(onStand, 0);
+        if (loadout_item != null) this.ranged = loadout_item.id;
+        if (onStand != null)
+        {
+            npi.SetLoadoutItem(onStand, 0);
+            this.ranged = -1;
+        }
 
     }
 }
