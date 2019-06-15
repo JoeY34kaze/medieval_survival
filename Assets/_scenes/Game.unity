@@ -1886,48 +1886,6 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 73dfb6e1389a7594387f9a4412916950, type: 3}
---- !u!1 &1967775956 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 5554106161126003651, guid: 73dfb6e1389a7594387f9a4412916950,
-    type: 3}
-  m_PrefabInstance: {fileID: 1967775955}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &1967775957
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1967775956}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 970e18190dd2d7a478ed58fe458652b8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
---- !u!114 &1967775958
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1967775956}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: dc118b185e0d27743b73b4f40448c254, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
---- !u!114 &1967775959
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1967775956}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 948e1c3dd20ddb64ba5cb7a4274cc5d3, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1001 &1999600879
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -3021,7 +2979,7 @@ PrefabInstance:
     - target: {fileID: 5856741248266011951, guid: 8b9d0b0219e11584187901f5e41279e8,
         type: 3}
       propertyPath: items.Array.size
-      value: 9
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 5856741248266011951, guid: 8b9d0b0219e11584187901f5e41279e8,
         type: 3}
@@ -3075,7 +3033,7 @@ PrefabInstance:
         type: 3}
       propertyPath: items.Array.data[9]
       value: 
-      objectReference: {fileID: 11400000, guid: 96a3aa864f4799640a0c386af1d54947,
+      objectReference: {fileID: 11400000, guid: 580be1632ef5df84fac3b6cf3e9c75c9,
         type: 2}
     - target: {fileID: 5856741248266011951, guid: 8b9d0b0219e11584187901f5e41279e8,
         type: 3}

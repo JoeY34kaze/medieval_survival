@@ -12,12 +12,13 @@ public class NetworkBackpack : NetworkBackpackBehavior
     private int owner_id = -1;
     private GameObject owning_player = null;
     private NetworkPlayerInventory npi = null;
-
+    private Rigidbody r;
     void Start()
     {
         nci = GetComponent<NetworkContainer_items>();
         if (networkObject.IsServer)
             nci.init(20);
+        r = GetComponent<Rigidbody>();
     }
 
 
@@ -39,12 +40,16 @@ public class NetworkBackpack : NetworkBackpackBehavior
     //------------------------------LOKALNI KLICI ZA INTERAKCIJO------------------
     internal void local_player_equip_request(uint server_id)
     {
-        networkObject.SendRpc(RPC_BACKPACK_INTERACTION_REQUEST, Receivers.Server, 0, server_id);
+        networkObject.SendRpc(RPC_BACKPACK_INTERACTION_REQUEST, Receivers.Server, (byte)0, server_id);
     }
 
     internal void local_player_look_request(uint server_id)
     {
-        networkObject.SendRpc(RPC_BACKPACK_INTERACTION_REQUEST, Receivers.Server, 1,server_id);
+        networkObject.SendRpc(RPC_BACKPACK_INTERACTION_REQUEST, Receivers.Server, (byte)1,server_id);
+    }
+
+    public void local_player_unequip_request() {
+        networkObject.SendRpc(RPC_BACKPACK_UNEQUIP_REQUEST,Receivers.Server);
     }
 
     //----------------------------RPC's----------------------------------------
@@ -128,10 +133,17 @@ public class NetworkBackpack : NetworkBackpackBehavior
         this.owner_id = (int)player_id;
         this.owning_player = FindByid(player_id);
         //poisc playerja in se mu prlimej na hrbet
-        Transform transformForBackpack = this.owning_player.GetComponent<NetworkPlayerInventory>().backpackSpot;
+        this.npi = this.owning_player.GetComponent<NetworkPlayerInventory>();
+        this.npi.SetLoadoutItem(Mapper.instance.getItemById(GetComponent<identifier_helper>().id),0);
+        Transform transformForBackpack = this.npi.backpackSpot;
+
+        if (!r.isKinematic) r.isKinematic = true;
+        if (r.detectCollisions) r.detectCollisions = false;
+
         this.transform.SetParent(transformForBackpack);
         this.transform.localPosition = Vector3.zero;
         this.transform.localRotation = Quaternion.identity;
+        npi.requestUiUpdate();//najbrz overkill k itak posle redraw zmer k odpres inventorij ampak za zacetk je ok
     }
 
     public override void BackpackUnequipRequest(RpcArgs args)
@@ -150,9 +162,12 @@ public class NetworkBackpack : NetworkBackpackBehavior
             transform.SetParent(null);
             this.owner_id = -1;
             this.owning_player = null;
-
+            this.npi.RemoveItemLoadout(Item.Type.backpack, 0);
             //nastimat nek force da ga nekam vrze? mybe. kodo ze mamo u instantiationu itemov
-
+            if (r.isKinematic) r.isKinematic = false;
+            if (!r.detectCollisions) r.detectCollisions = true;
+            npi.requestUiUpdate();//najbrz overkill k itak posle redraw zmer k odpres inventorij ampak za zacetk je ok
+            this.npi = null;
         }
     }
 }

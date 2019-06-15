@@ -36,6 +36,8 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
     public InventorySlotLoadout loadout_weapon_1;
     public InventorySlotLoadout loadout_shield;
 
+    public InventorySlotLoadout loadout_backpack;//ni loadout item ubistvu. logika je cist locena ker je prioriteta da se backpack lahko cimlazje fukne dol. tle ga mam samo za izrisovanje v inventorij panel
+
     private Item head;
     private Item chest;
     private Item hands;
@@ -51,9 +53,9 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
     private Item weapon_1;
     private Item shield;
 
-
+    public Item backpack;
     private Camera c;
-    public Transform backpackSpot;
+    public Transform backpackSpot; //tukaj se parenta backpack
 
     private void Start()
     {
@@ -190,6 +192,12 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         return r;
     }
 
+    internal void requestUiUpdate()
+    {
+        if (onItemChangedCallback != null )//za backpack ker se ne steje v dejanski loadout ampak je svoja stvar
+            onItemChangedCallback.Invoke();
+    }
+
     internal Item getHeadItem()
     {
         return this.head;
@@ -227,6 +235,9 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
     internal Item getRangedItem()
     {
         return this.ranged;
+    }
+    internal Item getBackpack() {
+        return this.backpack;
     }
 
     internal void handleItemPickup(Item item, int quantity)
@@ -299,6 +310,9 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
             case Item.Type.shield:
                 shield = i;
                 break;
+            case Item.Type.backpack:
+                backpack = i;
+                break;
             default:
                 return false;
         }
@@ -345,6 +359,9 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
                 break;
             case Item.Type.shield:
                 shield = null;
+                break;
+            case Item.Type.backpack:
+                this.backpack = null;
                 break;
             default:
                 Debug.LogError("Item type doesnt match anything. shits fucked yo");
@@ -396,6 +413,10 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
             case Item.Type.shield:
                 ret = shield;
                 shield = null;
+                break;
+            case Item.Type.backpack:
+                ret = backpack;
+                backpack = null;
                 break;
             default:
                 Debug.LogError("Item type doesnt match anything. shits fucked yo");
@@ -624,6 +645,11 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
             loadout_shield.AddItem(this.shield);
         else
             loadout_shield.ClearSlot();
+
+        if (this.backpack != null)
+            loadout_backpack.AddItem(this.backpack);
+        else
+            loadout_backpack.ClearSlot();
     }
 
 

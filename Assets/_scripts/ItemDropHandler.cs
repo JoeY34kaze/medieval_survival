@@ -19,25 +19,30 @@ public class ItemDropHandler : MonoBehaviour, IDropHandler , IPointerClickHandle
     {
         RectTransform invSlot = transform as RectTransform;
 
-        if (RectTransformUtility.RectangleContainsScreenPoint(invSlot, Input.mousePosition))//smo dropal nekam na valid inventorij plac
-        {
-            //Debug.Log(networkPlayerInventory.draggedItemParent.name+"'s child was dropped on " + invSlot.name+" ");
+        if (GetComponent<InventorySlotLoadout>().type != Item.Type.backpack)
+            if (RectTransformUtility.RectangleContainsScreenPoint(invSlot, Input.mousePosition))//smo dropal nekam na valid inventorij plac
+            {
+                //Debug.Log(networkPlayerInventory.draggedItemParent.name+"'s child was dropped on " + invSlot.name+" ");
 
-            //koda se bo malo podvajala ker bi sicer biu prevelik clusterfuck od metode
+                //koda se bo malo podvajala ker bi sicer biu prevelik clusterfuck od metode
 
-            networkPlayerInventory.handleInventorySlotOnDragDropEvent(invSlot,null,false);
-        }
-        else {//smo dropal nekam tko da mora past na tla. gremo prevert s kje smo potegnil
-            InventorySlot inventorySlot = networkPlayerInventory.draggedItemParent.GetComponent<InventorySlot>();
-            //Debug.Log("Called on " + gameObject.name);
-            if (inventorySlot is InventorySlotPersonal) networkPlayerInventory.DropItemFromPersonalInventory(getIndexFromName(invSlot.name));
-            else if (inventorySlot is InventorySlotLoadout) {
-                InventorySlotLoadout ldslt = (InventorySlotLoadout)inventorySlot;
-                networkPlayerInventory.DropItemFromLoadout(ldslt.type, ldslt.index);
-                //transform.root.GetComponent<NetworkPlayerCombatHandler>().update_equipped_weapons(); - to se mora klicat ko server sporoci novo stanje
-
+                networkPlayerInventory.handleInventorySlotOnDragDropEvent(invSlot, null, false);
             }
-        }
+            else
+            {//smo dropal nekam tko da mora past na tla. gremo prevert s kje smo potegnil
+                InventorySlot inventorySlot = networkPlayerInventory.draggedItemParent.GetComponent<InventorySlot>();
+                //Debug.Log("Called on " + gameObject.name);
+                if (inventorySlot is InventorySlotPersonal) networkPlayerInventory.DropItemFromPersonalInventory(getIndexFromName(invSlot.name));
+                else if (inventorySlot is InventorySlotLoadout)
+                {
+                    InventorySlotLoadout ldslt = (InventorySlotLoadout)inventorySlot;
+                    networkPlayerInventory.DropItemFromLoadout(ldslt.type, ldslt.index);
+                    //transform.root.GetComponent<NetworkPlayerCombatHandler>().update_equipped_weapons(); - to se mora klicat ko server sporoci novo stanje
+
+                }
+            }
+        else//potegnil smo backpack nekam. drop that shit
+        { networkPlayerInventory.backpackSpot.GetComponentInChildren<NetworkBackpack>().local_player_unequip_request(); }
     }
 
 

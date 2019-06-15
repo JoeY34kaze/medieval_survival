@@ -13,6 +13,10 @@ GameObject:
   - component: {fileID: 5554106161126003648}
   - component: {fileID: 5554106161126003649}
   - component: {fileID: 5554106161126003650}
+  - component: {fileID: 1967775957}
+  - component: {fileID: 1967775958}
+  - component: {fileID: 1967775959}
+  - component: {fileID: 3072579460640918665}
   m_Layer: 0
   m_Name: Backpack
   m_TagString: Untagged
@@ -108,3 +112,52 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 2
+--- !u!114 &1967775957
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5554106161126003651}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 970e18190dd2d7a478ed58fe458652b8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &1967775958
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5554106161126003651}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dc118b185e0d27743b73b4f40448c254, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &1967775959
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5554106161126003651}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 948e1c3dd20ddb64ba5cb7a4274cc5d3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &3072579460640918665
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5554106161126003651}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 31c814aa3875a7d469422ddb57e87dad, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  id: 21
