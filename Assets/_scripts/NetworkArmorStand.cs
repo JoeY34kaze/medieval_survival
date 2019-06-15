@@ -37,6 +37,12 @@ public class NetworkArmorStand : NetworkArmorStandBehavior
     public int shield = -1;
     public int ranged = -1; //empty ker nimamo ranged weaponov
 
+    public Transform w0;
+    public Transform w1;
+    public Transform sh;
+    public Transform ra;
+
+    public List<GameObject> instantiatable_weapons_for_armor_stand; //tle samo nameces iteme k so v /resources/weapons
     //---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
     private void Start()
     {
@@ -343,6 +349,142 @@ public class NetworkArmorStand : NetworkArmorStandBehavior
                     }
                 }
                 break;
+            case 5:
+                if (this.weapon_0 != -1)
+                {
+                    if (npi.getWeapon_0Item() != null)
+                    {
+                        //perform swap
+                        Item loadout_item = npi.PopItemLoadout(Item.Type.weapon, 0);
+                        Item onStand = Mapper.instance.getItemById(this.weapon_0);
+                        this.weapon_0 = loadout_item.id;
+                        npi.SetLoadoutItem(onStand, 0);
+                    }
+                    else
+                    {
+                        //equip item from stand
+                        Item onStand = Mapper.instance.getItemById(this.weapon_0);
+                        npi.SetLoadoutItem(onStand, 0);
+                        this.weapon_0 = -1;
+                    }
+                }
+                else
+                {
+                    if (npi.getWeapon_0Item() != null)
+                    {
+                        //place equipped item on stand
+                        Item loadout_item = npi.PopItemLoadout(Item.Type.weapon, 0);//pohendla tud removanje itema
+                        this.weapon_0 = loadout_item.id;
+                    }
+                    else
+                    {
+                        //return because nothing can happen
+
+                    }
+                }
+                break;
+            case 6:
+                if (this.weapon_1 != -1)
+                {
+                    if (npi.getWeapon_1Item() != null)
+                    {
+                        //perform swap
+                        Item loadout_item = npi.PopItemLoadout(Item.Type.weapon, 1);
+                        Item onStand = Mapper.instance.getItemById(this.weapon_1);
+                        this.weapon_1 = loadout_item.id;
+                        npi.SetLoadoutItem(onStand, 1);
+                    }
+                    else
+                    {
+                        //equip item from stand
+                        Item onStand = Mapper.instance.getItemById(this.weapon_1);
+                        npi.SetLoadoutItem(onStand, 1);
+                        this.weapon_1 = -1;
+                    }
+                }
+                else
+                {
+                    if (npi.getWeapon_1Item() != null)
+                    {
+                        //place equipped item on stand
+                        Item loadout_item = npi.PopItemLoadout(Item.Type.weapon, 1);//pohendla tud removanje itema
+                        this.weapon_1 = loadout_item.id;
+                    }
+                    else
+                    {
+                        //return because nothing can happen
+
+                    }
+                }
+                break;
+            case 7:
+                if (this.shield != -1)
+                {
+                    if (npi.getShieldItem() != null)
+                    {
+                        //perform swap
+                        Item loadout_item = npi.PopItemLoadout(Item.Type.shield, 0);
+                        Item onStand = Mapper.instance.getItemById(this.shield);
+                        this.shield = loadout_item.id;
+                        npi.SetLoadoutItem(onStand, 0);
+                    }
+                    else
+                    {
+                        //equip item from stand
+                        Item onStand = Mapper.instance.getItemById(this.shield);
+                        npi.SetLoadoutItem(onStand, 0);
+                        this.shield = -1;
+                    }
+                }
+                else
+                {
+                    if (npi.getShieldItem() != null)
+                    {
+                        //place equipped item on stand
+                        Item loadout_item = npi.PopItemLoadout(Item.Type.shield, 0);//pohendla tud removanje itema
+                        this.shield = loadout_item.id;
+                    }
+                    else
+                    {
+                        //return because nothing can happen
+
+                    }
+                }
+                break;
+            case 8:
+                if (this.ranged != -1)
+                {
+                    if (npi.getRangedItem() != null)
+                    {
+                        //perform swap
+                        Item loadout_item = npi.PopItemLoadout(Item.Type.ranged, 0);
+                        Item onStand = Mapper.instance.getItemById(this.ranged);
+                        this.ranged = loadout_item.id;
+                        npi.SetLoadoutItem(onStand, 0);
+                    }
+                    else
+                    {
+                        //equip item from stand
+                        Item onStand = Mapper.instance.getItemById(this.ranged);
+                        npi.SetLoadoutItem(onStand, 0);
+                        this.ranged = -1;
+                    }
+                }
+                else
+                {
+                    if (npi.getRangedItem() != null)
+                    {
+                        //place equipped item on stand
+                        Item loadout_item = npi.PopItemLoadout(Item.Type.ranged, 0);//pohendla tud removanje itema
+                        this.ranged = loadout_item.id;
+                    }
+                    else
+                    {
+                        //return because nothing can happen
+
+                    }
+                }
+                break;
             default:
                 Debug.LogError("collider_index doesnt match anything!");
                 break;
@@ -351,69 +493,7 @@ public class NetworkArmorStand : NetworkArmorStandBehavior
         networkObject.SendRpc(RPC_ARMOR_STAND_REFRESH, Receivers.All, this.head, this.chest, this.hands, this.legs, this.feet, this.weapon_0, this.weapon_1, this.shield, this.ranged);
     }
 
-    public override void ArmorStandRefresh(RpcArgs args)//pri dodajanju dobi tud server
-    {
-        if (args.Info.SendingPlayer.NetworkId != 0) return; //ni poslov player ampak nas edn hacka
-
-        if (!networkObject.IsServer)
-        {
-            this.head = args.GetNext<int>();
-            this.chest = args.GetNext<int>();
-            this.hands = args.GetNext<int>();
-            this.legs = args.GetNext<int>();
-            this.feet = args.GetNext<int>();
-            this.weapon_0 = args.GetNext<int>();
-            this.weapon_1 = args.GetNext<int>();
-            this.shield = args.GetNext<int>();
-            this.ranged = args.GetNext<int>();
-        }
-
-        redraw_armor_stand();
-
-    }
-
-    private void redraw_armor_stand()//izrise stvari k so na uma
-    {
-        Debug.Log("Redrawing");
-
-        //--------------------------------------CLOTHING-----------------------------------------
-
-        avatar.ClearSlots();
-
-        if (this.head != -1)
-        {
-            avatar.SetSlot("Helmet", Mapper.instance.getItemById(this.head).recipeName);
-        }
-
-        if (this.chest != -1)
-        {
-            avatar.SetSlot("Chest", Mapper.instance.getItemById(this.chest).recipeName);
-        }
-
-        if (this.hands != -1)
-        {
-            avatar.SetSlot("Hands", Mapper.instance.getItemById(this.hands).recipeName);
-        }
-
-        if (this.legs != -1)
-        {
-            avatar.SetSlot("Legs",Mapper.instance.getItemById(this.legs).recipeName);
-        }
-
-        if (this.feet != -1)
-        {
-            avatar.SetSlot("Feet", Mapper.instance.getItemById(this.feet).recipeName);
-        }
-
-        avatar.BuildCharacter();
-
-        //--------------------------------------WEAPONS AND SHIELD-----------------------------------------
-
-
-
-
-
-    }
+    
 
     /// <summary>
     /// poslje client serverju ko se connecta gor. kot response pricakuje rpc armorStandRefresh
@@ -687,6 +767,103 @@ public class NetworkArmorStand : NetworkArmorStandBehavior
             npi.SetLoadoutItem(onStand, 0);
             this.ranged = -1;
         }
+
+    }
+
+    public override void ArmorStandRefresh(RpcArgs args)//pri dodajanju dobi tud server
+    {
+        if (args.Info.SendingPlayer.NetworkId != 0) return; //ni poslov player ampak nas edn hacka
+
+        if (!networkObject.IsServer)//server ze ima podatke, jih nerab povozt z potencialno napacnimi..
+        {
+            this.head = args.GetNext<int>();
+            this.chest = args.GetNext<int>();
+            this.hands = args.GetNext<int>();
+            this.legs = args.GetNext<int>();
+            this.feet = args.GetNext<int>();
+            this.weapon_0 = args.GetNext<int>();
+            this.weapon_1 = args.GetNext<int>();
+            this.shield = args.GetNext<int>();
+            this.ranged = args.GetNext<int>();
+        }
+
+        redraw_armor_stand();
+
+    }
+
+    private void redraw_armor_stand()//izrise stvari k so na uma
+    {
+        Debug.Log("Redrawing");
+
+        //--------------------------------------CLOTHING-----------------------------------------
+
+        avatar.ClearSlots();
+
+        if (this.head != -1)
+        {
+            avatar.SetSlot("Helmet", Mapper.instance.getItemById(this.head).recipeName);
+        }
+
+        if (this.chest != -1)
+        {
+            avatar.SetSlot("Chest", Mapper.instance.getItemById(this.chest).recipeName);
+        }
+
+        if (this.hands != -1)
+        {
+            avatar.SetSlot("Hands", Mapper.instance.getItemById(this.hands).recipeName);
+        }
+
+        if (this.legs != -1)
+        {
+            avatar.SetSlot("Legs", Mapper.instance.getItemById(this.legs).recipeName);
+        }
+
+        if (this.feet != -1)
+        {
+            avatar.SetSlot("Feet", Mapper.instance.getItemById(this.feet).recipeName);
+        }
+
+        avatar.BuildCharacter();
+
+        //--------------------------------------WEAPONS AND SHIELD-----------------------------------------
+
+
+            show_weapon(this.weapon_0, w0);
+
+            show_weapon(this.weapon_1, w1);
+
+            show_weapon(this.shield, sh);
+
+            show_weapon(this.ranged, ra);
+
+
+
+    }
+
+    private void show_weapon(int i, Transform sh)//prikaze weapon k pripada id-ju na pozicijo kot child transforma.
+    {
+        if (i == -1)
+        {
+            for (int k = 0; k < sh.childCount; k++)
+                GameObject.Destroy(sh.GetChild(0));
+            return;
+        }
+
+        GameObject w = null;
+        foreach (GameObject g in this.instantiatable_weapons_for_armor_stand) {
+            if (g.GetComponent<identifier_helper>().id == i)
+            {
+                w = GameObject.Instantiate(g);
+                break;
+            }
+        }
+        if (w == null)
+            throw new Exception("shits fucked yo");
+
+        w.transform.SetParent(sh);
+        w.transform.localPosition = Vector3.zero;
+        w.transform.localRotation = Quaternion.identity;
 
     }
 }
