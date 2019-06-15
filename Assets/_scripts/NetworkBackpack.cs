@@ -13,6 +13,7 @@ public class NetworkBackpack : NetworkBackpackBehavior
     private GameObject owning_player = null;
     private NetworkPlayerInventory npi = null;
     private Rigidbody r;
+    private backpack_local_panel_handler panel_handler;
     void Start()
     {
         nci = GetComponent<NetworkContainer_items>();
@@ -104,9 +105,9 @@ public class NetworkBackpack : NetworkBackpackBehavior
         //odpret panel ce nima se odprtga
 
         Item[] serverjevi_itemi = nci.parseItemsNetworkFormat(args.GetNext<string>());
-
+        nci.setAll(serverjevi_itemi);
         //izrisat iteme k jih mamo tle u arrayu na panele.
-        throw new NotImplementedException();
+        this.panel_handler.updateUI();
 
     }
 
@@ -136,7 +137,7 @@ public class NetworkBackpack : NetworkBackpackBehavior
         this.npi = this.owning_player.GetComponent<NetworkPlayerInventory>();
         this.npi.SetLoadoutItem(Mapper.instance.getItemById(GetComponent<identifier_helper>().id),0);
         Transform transformForBackpack = this.npi.backpackSpot;
-
+        this.panel_handler = this.owning_player.GetComponentInChildren<backpack_local_panel_handler>();
         if (!r.isKinematic) r.isKinematic = true;
         if (r.detectCollisions) r.detectCollisions = false;
 
@@ -168,6 +169,7 @@ public class NetworkBackpack : NetworkBackpackBehavior
             if (!r.detectCollisions) r.detectCollisions = true;
             npi.requestUiUpdate();//najbrz overkill k itak posle redraw zmer k odpres inventorij ampak za zacetk je ok
             this.npi = null;
+            this.panel_handler = null;
         }
     }
 }

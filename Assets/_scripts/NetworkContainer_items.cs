@@ -7,7 +7,7 @@ using UnityEngine;
 /// <summary>
 /// superclass k deluje kot modul k ga loh nalimas na druge objekte k rabjo networkStorage. recimo crafting tables, backpack, un stockpile al kva..
 /// RPCJEV NEBO MEL, RPCJE SPISAT V RAZREDIH, KI TA CLASS UPORABLAJO
-/// Z tem clasom interacta samo server.
+/// 
 /// </summary>
 public class NetworkContainer_items : NetworkContainerBehavior
 {
@@ -33,9 +33,9 @@ public class NetworkContainer_items : NetworkContainerBehavior
     }
 
     public Item getItem(int index) {
-        if (networkObject.IsServer)
+        //if (networkObject.IsServer || networkObject.IsOwner)
             return this.items[index];
-        return null;
+        //return null;
     }
 
     public void setItem(int index, Item i) {
@@ -98,6 +98,16 @@ public class NetworkContainer_items : NetworkContainerBehavior
 
     }
 
+    public void setAll(Item[] all) {
+        this.items = all;
+    }
+
+    public Item[] getAll()
+    {
+        return this.items;
+    }
+
+
     /// <summary>
     /// zapise nekak v nek network format da pol plunes u rpc. magar csv al pa nekej
     /// </summary>
@@ -111,14 +121,16 @@ public class NetworkContainer_items : NetworkContainerBehavior
             else
                 s = s + "|-1";
         }
+        Debug.Log(s);
         return s;
     }
 
     internal Item[] parseItemsNetworkFormat(string s) {
         string[] ss = s.Split('|');
         Item[] rez = new Item[ss.Length];
-        for (int i = 0; i < ss.Length; i++) {
-            int k = Int32.Parse(ss[i]);
+        for (int i = 1; i < ss.Length; i++) {//zacne z 1 ker je ss[0] = ""
+            int k=-1;
+             Int32.TryParse(ss[i],out k);
             rez[i] = Mapper.instance.getItemById(k);
         }
         return rez;
