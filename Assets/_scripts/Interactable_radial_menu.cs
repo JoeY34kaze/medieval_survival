@@ -193,6 +193,36 @@ public class Interactable_radial_menu : MonoBehaviour
         }
     }
 
+    internal void show_backpack_interaction_menu(GameObject backpack)
+    {
+        show_menu(backpack);
+
+        this.number_of_elements = 2;
+        menu.angleOffset = (360f / this.number_of_elements);
+        center_label.text = "Armor Stand";
+
+
+        GameObject btn_0 = GameObject.Instantiate(Resources.Load<GameObject>("radial_menu_elements/interaction_backpack_look"));
+        GameObject btn_1 = GameObject.Instantiate(Resources.Load<GameObject>("radial_menu_elements/interaction_backpack_equip"));
+
+
+        menu.elements.Clear();
+
+        setup_button(btn_0, menu.angleOffset * 0);
+        setup_button(btn_1, menu.angleOffset * 1);
+
+        Button button = btn_0.transform.GetComponentInChildren<Button>();
+        button.onClick.RemoveAllListeners();
+        button.onClick.AddListener(delegate { backpack_interaction_look(); });
+
+        button = btn_1.transform.GetComponentInChildren<Button>();
+        button.onClick.RemoveAllListeners();
+        button.onClick.AddListener(delegate { backpack_interaction_equip(); });
+
+
+        menu.reDraw();
+    }
+
     internal void show_ArmorStand_interaction_menu(GameObject stand)
     {
         show_menu(stand);
@@ -421,4 +451,16 @@ public class Interactable_radial_menu : MonoBehaviour
     {
         interaction.local_armor_stand_interaction_swap_request(this.target);
     }
+
+
+    private void backpack_interaction_equip()
+    {
+        interaction.local_backpack_interaction_equip_request(this.target);
+    }
+
+    private void backpack_interaction_look()
+    {
+        interaction.local_backpack_interaction_look_request(this.target);
+    }
+
 }

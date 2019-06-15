@@ -96,6 +96,9 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
                                     this.menu.show_ArmorStand_interaction_menu(interactable.gameObject);
                                 }
 
+                                if(interactable is Interactable_Backpack)
+                                    this.menu.show_backpack_interaction_menu(interactable.gameObject);
+
                             }
                         }
                     }
@@ -210,10 +213,19 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
         target.GetComponent<Interactible_ArmorStand>().local_player_interaction_swap_request(stats.server_id);
     }
 
+    internal void local_backpack_interaction_equip_request(GameObject target)
+    {
+        target.GetComponent<NetworkBackpack>().local_player_equip_request(stats.server_id);
+    }
+
+    internal void local_backpack_interaction_look_request(GameObject target)
+    {
+        target.GetComponent<NetworkBackpack>().local_player_look_request(stats.server_id);
+    }
+
+
     public override void ItemPickupRequest(RpcArgs args)//ne nrdi nc
     {
         throw new NotImplementedException();
     }
-
-
 }

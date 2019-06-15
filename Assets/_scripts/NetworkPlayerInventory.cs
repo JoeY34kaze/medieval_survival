@@ -53,7 +53,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
 
 
     private Camera c;
-
+    public Transform backpackSpot;
 
     private void Start()
     {
