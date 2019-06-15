@@ -62,7 +62,7 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
         if (!networkObject.IsOwner) return;
         if (!stats.downed)//dvakrat je tale check. zato da ce je downan v zraku se zmer pade na tla in ne lebdi v zrak
         {
-            if (Input.GetButtonDown("Dodge") && !stats.inDodge)
+            if (Input.GetButtonDown("Dodge") && !stats.inDodge && this.isGrounded && !in_a_jump)
             {
                 if (GetComponent<NetworkPlayerAnimationLogic>().isDodgeAllowed())
                 {
@@ -178,13 +178,13 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
             rigidbody.AddForce(Vector3.up * Physics.gravity.y * 2, ForceMode.Acceleration);
 
 
-            if (Input.GetAxis("Jump") > 0.01f && isGrounded && !in_a_jump) // && isGrounded??? isGrounded je trenutno se mal buggy
+            if (Input.GetAxis("Jump") > 0.01f && isGrounded && !in_a_jump && !stats.inDodge) // && isGrounded??? isGrounded je trenutno se mal buggy
             {
                 //jump();
-                Debug.Log(Vector3.up * 6.3f);
+                //Debug.Log(Vector3.up * 6.3f);
 
                 rigidbody.AddForce(Vector3.up * visina_skoka * 2, ForceMode.VelocityChange);
-                StartCoroutine(lock_jumping(1));
+                StartCoroutine(lock_jumping(0.7f));
             }
             /*
             Vector3 point_on_ground = get_capsulecasted_position_downward_from_chest();
