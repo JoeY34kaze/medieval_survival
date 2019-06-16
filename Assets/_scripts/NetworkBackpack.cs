@@ -17,8 +17,10 @@ public class NetworkBackpack : NetworkBackpackBehavior
     void Start()
     {
         nci = GetComponent<NetworkContainer_items>();
-        if (networkObject.IsServer)
-            nci.init(20);
+        if (networkObject.IsServer) {
+            nci.init(Mapper.instance.getItemById(GetComponent<identifier_helper>().id).size);
+        }
+            
         r = GetComponent<Rigidbody>();
     }
 
@@ -41,6 +43,12 @@ public class NetworkBackpack : NetworkBackpackBehavior
 
 
         return null;
+    }
+
+    public void sendItemsUpdate() {
+        if (networkObject.IsServer) {
+            networkObject.SendRpc(networkObject.Owner, RPC_BACKPACK_ITEMS_OWNER_RESPONSE, nci.getItemsNetwork());
+        }
     }
 
     //------------------------------LOKALNI KLICI ZA INTERAKCIJO------------------
@@ -107,10 +115,20 @@ public class NetworkBackpack : NetworkBackpackBehavior
     {
 
     }
+    public override void BackpackItemsOwnerResponse(RpcArgs args)//tole dobi owner, ponavad ko odpre inventorij al pa kj tazga
+    {
+        if (args.Info.SendingPlayer.NetworkId != 0) return;
+
+        Item[] serverjevi_itemi = nci.parseItemsNetworkFormat(args.GetNext<string>());
+        nci.setAll(serverjevi_itemi);
+        //izrisat iteme k jih mamo tle u arrayu na panele.
+
+        this.panel_handler.updateUI();//tole je za tvoj inventorij ko imas equippan
+    }
 
     public override void BackpackItemsOtherResponse(RpcArgs args)//odpre backpack da ga lahko gleda kot nek chest in pobira iteme vn
     {
-else        if (args.Info.SendingPlayer.NetworkId != 0) return;
+         if (args.Info.SendingPlayer.NetworkId != 0) return;
 
         //odpret panel ce nima se odprtga
 
@@ -193,21 +211,11 @@ else        if (args.Info.SendingPlayer.NetworkId != 0) return;
         }
     }
 
-    public override void BackpackItemsOwnerResponse(RpcArgs args)//tole dobi owner, ponavad ko odpre inventorij al pa kj tazga
-    {
-        if (args.Info.SendingPlayer.NetworkId != 0) return;
 
-        //odpret panel ce nima se odprtga
-
-        Item[] serverjevi_itemi = nci.parseItemsNetworkFormat(args.GetNext<string>());
-        nci.setAll(serverjevi_itemi);
-        //izrisat iteme k jih mamo tle u arrayu na panele.
-
-        this.panel_handler.updateUI();//tole je za tvoj inventorij ko imas equippan
-    }
 
     internal void putFirst(Item resp, int quantity)
     {
         this.nci.putFirst(resp,quantity);
+
     }
 }

@@ -263,7 +263,10 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
             else if (this.backpack != null)
             {//ce ima backpack
                 if (this.backpack_inventory.hasSpace())
+                {
                     this.backpack_inventory.putFirst(resp, quantity);
+                    this.backpack_inventory.sendItemsUpdate();
+                }
                 else return false;
             }
             else {//nikjer ni blo placa. rust u tem primeru spawna item nazaj, ampak mi lahko recemo simpl da ga ne pobere.

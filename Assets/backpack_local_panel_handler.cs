@@ -27,7 +27,7 @@ public class backpack_local_panel_handler : MonoBehaviour
 
     }
 
-    internal void init(int size,NetworkContainer_items nci)
+    internal void init(int size,NetworkContainer_items nci)//size dobi z item.size
     {
         this.nci = nci;//nci je najprej prazn. po tej metodi dobi sele updejt o itemih
         this.size = size;
