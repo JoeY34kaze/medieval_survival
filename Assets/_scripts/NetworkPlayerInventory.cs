@@ -56,6 +56,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
     public Item backpack;
     private Camera c;
     public Transform backpackSpot; //tukaj se parenta backpack
+    public backpack_local_panel_handler backpackPanel;
 
     private void Start()
     {

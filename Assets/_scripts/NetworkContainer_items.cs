@@ -14,7 +14,10 @@ public class NetworkContainer_items : NetworkContainerBehavior
     private int size;
     private Item[] items;//samo id ni zadost ker v prihodnosti bo treba hrant tud kolicino in ali durability itemov.
 
-
+    internal int Getsize()
+    {
+        return this.size;
+    }
 
     public void Start()
     {

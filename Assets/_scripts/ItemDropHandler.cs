@@ -57,7 +57,9 @@ public class ItemDropHandler : MonoBehaviour, IDropHandler , IPointerClickHandle
 
     public void OnPointerClick(PointerEventData eventData)
     {
-        if (eventData.button == PointerEventData.InputButton.Right && GetComponent<InventorySlot>().GetItem()!=null)
+        if((eventData.button == PointerEventData.InputButton.Right) && (GetComponent<InventorySlot>() is InventorySlotBackpack))
+            networkPlayerInventory.backpackSpot.GetComponentInChildren<NetworkBackpack>().local_player_unequip_request();
+        else if (eventData.button == PointerEventData.InputButton.Right && GetComponent<InventorySlot>().GetItem()!=null)
             networkPlayerInventory.OnRightClick(gameObject);
     }
 }
