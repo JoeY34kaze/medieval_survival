@@ -77,8 +77,8 @@ public class ItemPickup : Interactable {
 
         //handle_response_from_server(item_id,quantity,args.Info.SendingPlayer);//args.Info is a godsend
 
-        FindByid(player_id).GetComponent <NetworkPlayerInventory>().handleItemPickup(Mapper.instance.getItemById(item_id), quantity);
-        handle_network_destruction_server();
+        if(FindByid(player_id).GetComponent <NetworkPlayerInventory>().handleItemPickup(Mapper.instance.getItemById(item_id), quantity))//ce mu uspe pobrat -> unic item
+            handle_network_destruction_server();
         return;
 
         

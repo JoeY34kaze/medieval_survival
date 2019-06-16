@@ -12,7 +12,7 @@ using UnityEngine;
 public class NetworkContainer_items : NetworkContainerBehavior
 {
     private int size;
-    private Item[] items;//samo id ni zadost ker v prihodnosti bo treba hrant tud kolicino in ali durability itemov.
+    public Item[] items;//samo id ni zadost ker v prihodnosti bo treba hrant tud kolicino in ali durability itemov.
 
     internal int Getsize()
     {
@@ -101,7 +101,7 @@ public class NetworkContainer_items : NetworkContainerBehavior
 
     }
 
-    public void setAll(Item[] all) {
+    public void setAll(Item[] all) {//tle se nekje zabugga in jih posle 21!
         this.items = all;
     }
 
@@ -128,9 +128,9 @@ public class NetworkContainer_items : NetworkContainerBehavior
         return s;
     }
 
-    internal Item[] parseItemsNetworkFormat(string s) {
+    internal Item[] parseItemsNetworkFormat(string s) {//implementacija te metode je garbage ker bo itak zamenjan ksnej z kšnmu serialized byte array al pa kej namest stringa. optimizacija ksnej
         string[] ss = s.Split('|');
-        Item[] rez = new Item[ss.Length];
+        Item[] rez = new Item[ss.Length -1];//zacne se z "" zato en slot sfali
         for (int i = 1; i < ss.Length; i++) {//zacne z 1 ker je ss[0] = ""
             int k=-1;
              Int32.TryParse(ss[i],out k);
@@ -139,7 +139,7 @@ public class NetworkContainer_items : NetworkContainerBehavior
         return rez;
     }
 
-    public void putFirst(Item item) {
+    public void putFirst(Item item, int q) {
         if (!networkObject.IsServer) return;
         for (int i = 0; i < this.size; i++) {
             if (this.items[i] == null)
@@ -149,4 +149,5 @@ public class NetworkContainer_items : NetworkContainerBehavior
             }
         }
     }
+
 }

@@ -22,6 +22,11 @@ public class NetworkBackpack : NetworkBackpackBehavior
         r = GetComponent<Rigidbody>();
     }
 
+    public bool hasSpace() {
+        if (this.nci.getEmptySpace() > 0)
+            return true;
+        else return false;
+    }
 
     public GameObject FindByid(uint targetNetworkId) //koda kopširana v network_body.cs in Interactable.cs
     {
@@ -105,7 +110,7 @@ public class NetworkBackpack : NetworkBackpackBehavior
 
     public override void BackpackItemsOtherResponse(RpcArgs args)//odpre backpack da ga lahko gleda kot nek chest in pobira iteme vn
     {
-        if (args.Info.SendingPlayer.NetworkId != 0) return;
+else        if (args.Info.SendingPlayer.NetworkId != 0) return;
 
         //odpret panel ce nima se odprtga
 
@@ -140,6 +145,7 @@ public class NetworkBackpack : NetworkBackpackBehavior
         this.owning_player = FindByid(player_id);
         //poisc playerja in se mu prlimej na hrbet
         this.npi = this.owning_player.GetComponent<NetworkPlayerInventory>();
+        this.npi.backpack_inventory = this;
         Item item =Mapper.instance.getItemById(GetComponent<identifier_helper>().id);
         this.npi.SetLoadoutItem(item,0);
         Transform transformForBackpack = this.npi.backpackSpot;
@@ -181,6 +187,7 @@ public class NetworkBackpack : NetworkBackpackBehavior
             if (!r.detectCollisions) r.detectCollisions = true;
             this.panel_handler.clear();
             npi.requestUiUpdate();//najbrz overkill k itak posle redraw zmer k odpres inventorij ampak za zacetk je ok
+            this.npi.backpack_inventory = null;
             this.npi = null;
             this.panel_handler = null;
         }
@@ -197,5 +204,10 @@ public class NetworkBackpack : NetworkBackpackBehavior
         //izrisat iteme k jih mamo tle u arrayu na panele.
 
         this.panel_handler.updateUI();//tole je za tvoj inventorij ko imas equippan
+    }
+
+    internal void putFirst(Item resp, int quantity)
+    {
+        this.nci.putFirst(resp,quantity);
     }
 }

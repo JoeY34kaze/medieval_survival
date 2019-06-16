@@ -11,6 +11,7 @@ using UMA.CharacterSystem;
 public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
 {
     public Transform draggedItemParent = null;//mrde bolsa resitev obstaja ker nemaram statikov uporablat ampak lej. dela
+    internal NetworkBackpack backpack_inventory;
     public int draggedParent_sibling_index = -1;
 
     public int space = 20; // kao space inventorija
@@ -241,16 +242,35 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         return this.backpack;
     }
 
-    internal void handleItemPickup(Item item, int quantity)
+    /// <summary>
+    /// vrne true ce smo pobral item, vrne false ce faila oziroma ce ni nikjer placa
+    /// </summary>
+    /// <param name="item"></param>
+    /// <param name="quantity"></param>
+    /// <returns></returns>
+    internal bool handleItemPickup(Item item, int quantity)
     {
         if (!networkObject.IsServer) {
             Debug.LogError("client se ukvarja z inventorijem, to se mora samo server.");
-            return;
+            return false;
         }
 
         Item resp = try_to_upgrade_loadout(item);
         if (resp != null)
-            AddFirst(resp, quantity);
+        {
+            if (hasInventorySpace())
+                AddFirst(resp, quantity);
+            else if (this.backpack != null)
+            {//ce ima backpack
+                if (this.backpack_inventory.hasSpace())
+                    this.backpack_inventory.putFirst(resp, quantity);
+                else return false;
+            }
+            else {//nikjer ni blo placa. rust u tem primeru spawna item nazaj, ampak mi lahko recemo simpl da ga ne pobere.
+                return false;
+            }
+        }
+
         else
         {//vse updejtat ker ta funkcija negre cez uno tavelko...
 
@@ -261,6 +281,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
             n.setCurrentWeaponToFirstNotEmpty();//poslat rpc ?yes
         }
         sendNetworkUpdate(true, true);//posljemo obojeee optimizacija later
+        return true;
     }
 
     internal void OnRightClick(GameObject g)//tole lahko potem pri ciscenju kode z malo preurejanja damo v uno tavelko metodo

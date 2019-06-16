@@ -41,7 +41,7 @@ public class ItemDropHandler : MonoBehaviour, IDropHandler , IPointerClickHandle
 
                 }
             }
-        else//potegnil smo backpack nekam. drop that shit
+        else// backpack. drop that shit
         { networkPlayerInventory.backpackSpot.GetComponentInChildren<NetworkBackpack>().local_player_unequip_request(); }
     }
 
@@ -57,9 +57,13 @@ public class ItemDropHandler : MonoBehaviour, IDropHandler , IPointerClickHandle
 
     public void OnPointerClick(PointerEventData eventData)
     {
-        if((eventData.button == PointerEventData.InputButton.Right) && (GetComponent<InventorySlot>() is InventorySlotBackpack))
-            networkPlayerInventory.backpackSpot.GetComponentInChildren<NetworkBackpack>().local_player_unequip_request();
-        else if (eventData.button == PointerEventData.InputButton.Right && GetComponent<InventorySlot>().GetItem()!=null)
-            networkPlayerInventory.OnRightClick(gameObject);
+        InventorySlot iss= GetComponent<InventorySlot>();
+        if (eventData.button == PointerEventData.InputButton.Right && iss.GetItem() != null)
+        {
+            if(iss.GetItem().type==Item.Type.backpack)
+                networkPlayerInventory.backpackSpot.GetComponentInChildren<NetworkBackpack>().local_player_unequip_request();
+            else
+                networkPlayerInventory.OnRightClick(gameObject);
+        }
     }
 }
