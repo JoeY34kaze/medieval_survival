@@ -1224,7 +1224,10 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         if (onLoadoutChangedCallback != null)//najbrz nepotrebno ker se itak klice senkat v rpcju. optimizacija ksnej
             onLoadoutChangedCallback.Invoke();
     }
-
+    /// <summary>
+    /// z loadouta da na inventorij ce ima podan index, brez indexa (right click) ga da na prvi mozni slot u inventoriju ce ni poln, ce je poln pogleda ce ima backapack pa da na prvi mest v backpacku, sicer ga vrze na tla
+    /// </summary>
+    /// <param name="args"></param>
     public override void LoadoutToInventoryRequest(RpcArgs args)
     {
         if (!networkObject.IsServer || args.Info.SendingPlayer.NetworkId != networkObject.Owner.NetworkId) { Debug.LogError("client dela nekej kar mora server"); return; }
@@ -1275,10 +1278,14 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
             //da rabmo item dat v inventorij
             AddFirst(loadout_item, 1);
         }
+        else if (backpackHasSpace()) {//ce ma plac u backpacku ga dodaj pa sinhronizirej
+            this.backpack_inventory.putFirst(loadout_item, 1);
+            this.backpack_inventory.sendItemsUpdate();
+        }
         else
         {
             Debug.Log("No Space in inventory and cannot place in inventory! Dropping item instead. we have no camera data though");
-            instantiateDroppedItem(loadout_item, 1, transform.position+new Vector3(0,1,0), transform.forward);
+            instantiateDroppedItem(loadout_item, 1, transform.position + new Vector3(0, 1, 0), transform.forward);
         }
 
         //rpc update
@@ -1289,6 +1296,13 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         if (onLoadoutChangedCallback != null)//najbrz nepotrebno ker se itak klice senkat v rpcju. optimizacija ksnej
             onLoadoutChangedCallback.Invoke();
 
+    }
+
+    private bool backpackHasSpace() {
+        if (this.backpack_inventory != null)
+            if (this.backpack_inventory.hasSpace())
+                return true;
+        return false;
     }
 
     public override void InventoryToInventoryRequest(RpcArgs args)

@@ -70,7 +70,7 @@ public class ItemDropHandler : MonoBehaviour, IDropHandler , IPointerClickHandle
         {
             if(iss.GetItem().type==Item.Type.backpack)//ce je backpack ga dropa
                 networkPlayerInventory.backpackSpot.GetComponentInChildren<NetworkBackpack>().local_player_backpack_unequip_request();
-            else if(iss is InventorySlotPersonal)//ce je personal inventorij
+            else if(iss is InventorySlotPersonal || iss is InventorySlotLoadout)//ce je personal inventorij al pa loadout k je blo to spisan ze prej
                 networkPlayerInventory.OnRightClick(gameObject);
             else if(iss is InventorySlotBackpack)
                 networkPlayerInventory.OnRightClickBackpack(gameObject);
