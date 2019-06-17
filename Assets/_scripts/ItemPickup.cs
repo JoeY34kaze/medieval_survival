@@ -45,7 +45,7 @@ public class ItemPickup : Interactable {
 
     public override void DestroyWrapper(RpcArgs args)
     {
-        Debug.Log("Item is scheduled for destruction. disallowing interaction and adding effects signaling that it not interactable any longer.");
+//Debug.Log("Item is scheduled for destruction. disallowing interaction and adding effects signaling that it not interactable any longer.");
         local_lock.item_allows_interaction = false;
         local_lock.item_waiting_for_destruction = true;
        //handle_destroy_animation();

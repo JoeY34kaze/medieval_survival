@@ -230,4 +230,43 @@ public class NetworkBackpack : NetworkBackpackBehavior
         this.nci.putFirst(resp,quantity);
 
     }
+
+    public override void BackpackToLoadoutRequest(RpcArgs args)
+    {
+        if (networkObject.IsServer && (args.Info.SendingPlayer.NetworkId == networkObject.Owner.NetworkId)) {//ce je server in ce je poslov owner
+            //dob backapack item
+            int backpack_index = args.GetNext<int>();
+            Item i = nci.getItem(backpack_index);
+            //dob laodout item
+            Item load;
+            int weaponIndex = 0;
+            if (i.type == Item.Type.weapon)
+            {
+                if (npi.GetWeapon0() != 0 && npi.GetWeapon1() == 0)//ce ima weapon u main handu pa nima u off handu ga damo v offhand
+                    weaponIndex = 1;
+            }
+            
+                load = this.npi.PopItemLoadout(i.type,weaponIndex);
+
+
+            //nared swap
+
+            if (this.npi.try_to_upgrade_loadout(i) != null) Debug.LogError("pri backapck swapu ni null, to ni mogoce. fix it");
+
+            this.nci.setItem(backpack_index, load);
+
+
+
+            //poslat loadout. loadout u celotiu pohandla networkPlayerInventory, medtem ko backapack pohendlamo tle.
+            this.npi.sendNetworkUpdate(false, true);
+            networkObject.SendRpc(networkObject.Owner, RPC_BACKPACK_ITEMS_OWNER_RESPONSE, nci.getItemsNetwork());
+        }
+    }
+
+    internal void localPlayerRequestBackpackToLoadout(int index_backpack)//za obratno vbom naredu nov rpc ker bom poslov string k j eitem type
+    {
+        if (networkObject.IsOwner) {
+            networkObject.SendRpc(RPC_BACKPACK_TO_LOADOUT_REQUEST, Receivers.Server, index_backpack);
+        }
+    }
 }

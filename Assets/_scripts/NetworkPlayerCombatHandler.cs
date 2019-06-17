@@ -232,10 +232,10 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
         if (this.equipped_weapons.Length == 0)
             initialize_weapons();
 
-        Debug.Log("updating equipped weapons");
+        //Debug.Log("updating equipped weapons");
         // this.equipped_weapons[0] = 0;//unarmed
         // this.equipped_weapons[1] = 1;//unarmed block
-        Debug.Log("kojikurac: " + this.equipped_weapons.Length);
+
         this.equipped_weapons[2] = networkPlayerInventory.GetWeapon0();
         this.equipped_weapons[3] = networkPlayerInventory.GetWeapon1();
         this.equipped_weapons[4] = networkPlayerInventory.GetRanged();

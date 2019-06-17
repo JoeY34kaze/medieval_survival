@@ -41,6 +41,8 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
 
     private Item head;
     private Item chest;
+
+
     private Item hands;
     private Item legs;
     private Item feet;
@@ -115,6 +117,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
 
         avatar.BuildCharacter();
     }
+
 
     /// <summary>
     /// proba upgrejdat loadout z itemom i. vrne item i ce ni upgrade. vrne item s katermu ga je zamenov ce je upgrade bil, vrne null ce je biu prazn slot prej
@@ -290,6 +293,15 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
     internal void OnRightClick(GameObject g)//tole lahko potem pri ciscenju kode z malo preurejanja damo v uno tavelko metodo
     {
         handleInventorySlotOnDragDropEvent(null, g.transform, true);
+    }
+
+    internal void OnRightClickBackpack(GameObject gameObject)//ce smo kliknli z desno na backpack. proba dat na loadout, ce ni prazn nrdi swap
+    {
+        if (networkObject.IsOwner)
+        {
+            int index_backpack = getIndexFromName(gameObject.name);
+            this.backpack_inventory.localPlayerRequestBackpackToLoadout(index_backpack);
+        }
     }
 
     internal bool hasInventorySpace()
@@ -812,6 +824,49 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
 
     }
 
+    internal void handleBackpackSlotOnDragDropEvent(RectTransform invSlot, Transform parent)//sprozi se ko potegnemo backpackslot nekam legit
+    {
+        if (!networkObject.IsOwner) return;
+        if (parent == null)
+            parent = this.draggedItemParent;
+        this.draggedItemParent = parent.GetComponent<RectTransform>();
+
+        InventorySlot from = parent.GetComponent<InventorySlot>();
+
+            InventorySlot to = invSlot.GetComponent<InventorySlot>();
+
+        if (!to.Equals(from))
+        {
+            if (to is InventorySlotLoadout)//premikamo iz backpacka na loadout
+            {
+               
+                BackpackToLoadout(getIndexFromName(from.name));//id zvohamo naprej
+            }
+            else if (to is InventorySlotPersonal)//iz backpacka v inventorij
+            {
+               BackpackToInventory(invSlot);
+               
+            }
+            else if (to is InventorySlotBackpack)//premikamo znotraj backpacka
+            {
+               
+                InventoryToInventory(invSlot);
+            }
+        }
+        
+
+    }
+
+    private void BackpackToInventory(RectTransform invSlot)
+    {
+        throw new NotImplementedException();
+    }
+
+    private void BackpackToLoadout(int index)
+    {
+        this.backpack_inventory.localPlayerRequestBackpackToLoadout(index);
+    }
+
     public void sendNetworkUpdate(bool inv, bool loadout) //LOADOUT JE SAMO ZA UMA OBLEKE!!!!!!
     {
         if (!networkObject.IsServer) { Debug.LogError("client poskusa posiljat networkupdate k je samo od serverja.."); return; }
@@ -883,7 +938,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
 
             //poslat ownerju
 
-            Debug.Log(" personal inventory rpc SEND: owner server id: " + GetComponent<NetworkPlayerStats>().server_id + " | networkId : " + networkObject.Owner.NetworkId);
+            //Debug.Log(" personal inventory rpc SEND: owner server id: " + GetComponent<NetworkPlayerStats>().server_id + " | networkId : " + networkObject.Owner.NetworkId);
             networkObject.SendRpc(RPC_SEND_PERSONAL_INVENTORY_UPDATE,Receivers.Owner,
                 i0,
                 i1,
@@ -939,7 +994,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
     public override void SendPersonalInventoryUpdate(RpcArgs args)
     {//nc zrihtan za kolicino
         //to bi mogu dobit samo owner in NOBEN drug, sicer je nrdit ESP hack najbolj trivialna stvar na planetu
-        Debug.Log(" personal inventory rpc receive: owner server id: " + GetComponent<NetworkPlayerStats>().server_id + " | networkId : " + networkObject.Owner.NetworkId);
+        //Debug.Log(" personal inventory rpc receive: owner server id: " + GetComponent<NetworkPlayerStats>().server_id + " | networkId : " + networkObject.Owner.NetworkId);
         if (args.Info.SendingPlayer.NetworkId != 0) return;//ce ni poslov server al pa ce je prejeu en drug k owner(kar s eneb smel nrdit sploh!)
 
 

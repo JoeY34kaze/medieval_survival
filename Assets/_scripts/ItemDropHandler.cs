@@ -32,8 +32,11 @@ public class ItemDropHandler : MonoBehaviour, IDropHandler , IPointerClickHandle
             //Debug.Log(networkPlayerInventory.draggedItemParent.name+"'s child was dropped on " + invSlot.name+" ");
 
             //koda se bo malo podvajala ker bi sicer biu prevelik clusterfuck od metode
-
-            networkPlayerInventory.handleInventorySlotOnDragDropEvent(invSlot, null, false);
+            InventorySlot inventorySlot = networkPlayerInventory.draggedItemParent.GetComponent<InventorySlot>();
+            if (inventorySlot is InventorySlotPersonal || inventorySlot is InventorySlotLoadout)
+                networkPlayerInventory.handleInventorySlotOnDragDropEvent(invSlot, null, false);
+            else if (inventorySlot is InventorySlotBackpack)
+                networkPlayerInventory.handleBackpackSlotOnDragDropEvent(invSlot, null);
         }
         else
         {//smo dropal nekam tko da mora past na tla. gremo prevert s kje smo potegnil
@@ -65,10 +68,12 @@ public class ItemDropHandler : MonoBehaviour, IDropHandler , IPointerClickHandle
         InventorySlot iss= GetComponent<InventorySlot>();
         if (eventData.button == PointerEventData.InputButton.Right && iss.GetItem() != null)
         {
-            if(iss.GetItem().type==Item.Type.backpack)
+            if(iss.GetItem().type==Item.Type.backpack)//ce je backpack ga dropa
                 networkPlayerInventory.backpackSpot.GetComponentInChildren<NetworkBackpack>().local_player_backpack_unequip_request();
-            else
+            else if(iss is InventorySlotPersonal)//ce je personal inventorij
                 networkPlayerInventory.OnRightClick(gameObject);
+            else if(iss is InventorySlotBackpack)
+                networkPlayerInventory.OnRightClickBackpack(gameObject);
         }
     }
 }
