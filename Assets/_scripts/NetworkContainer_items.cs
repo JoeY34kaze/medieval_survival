@@ -102,7 +102,7 @@ public class NetworkContainer_items : NetworkContainerBehavior
     }
 
     public void setAll(Item[] all) {//tle se nekje zabugga in jih posle 21!
-        if (this.items.Length == all.Length)
+        if (this.items.Length == all.Length || !networkObject.IsServer)
             this.items = all;
         else
             Debug.LogError("Trying to set array when sizes mismatch..");

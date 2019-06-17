@@ -909,7 +909,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
 
         if (loadout)
         {
-            short l0 = -1, l1 = -1, l2 = -1, l3 = -1, l4 = -1, l5 = -1, l6 = -1, l7 = -1, l8 = -1;
+            short l0 = -1, l1 = -1, l2 = -1, l3 = -1, l4 = -1, l5 = -1, l6 = -1, l7 = -1, l8 = -1, l9=-1;
 
             if (this.head != null) l0 = (short)this.head.id;
             if (this.chest != null) l1 = (short)this.chest.id;
@@ -921,14 +921,14 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
             if (this.weapon_0 != null) l6 = (short)this.weapon_0.id;//NE DELA - BO TREBA UPDEJTAT. ZAENKRAT SE UPORABLA GetComponent<NetworkPlayerCombatHandler>().update_equipped_weapons();   KER JE BLO ZE PREJ IMPLEMENTIRAN!!
             if (this.weapon_1 != null) l7 = (short)this.weapon_1.id;//NE DELA - BO TREBA UPDEJTAT. ZAENKRAT SE UPORABLA GetComponent<NetworkPlayerCombatHandler>().update_equipped_weapons();   KER JE BLO ZE PREJ IMPLEMENTIRAN!!
             if (this.shield != null) l8 = (short)this.shield.id;//NE DELA - BO TREBA UPDEJTAT. ZAENKRAT SE UPORABLA GetComponent<NetworkPlayerCombatHandler>().update_equipped_weapons();   KER JE BLO ZE PREJ IMPLEMENTIRAN!!
-            
 
+            if (this.backpack != null) l9 = (short)this.backpack.id;
 
            // GetComponent<NetworkPlayerCombatHandler>().send_network_update_weapons();//weapon trenutno equipan pa shield
 
             //mogoce zamenjat z proximity. nevem ce sicer ker gear morjo vidt vsi da nebo prletu lokalno en nagex k je u resnic do konca pogearan
             networkObject.SendRpc(RPC_SEND_LOADOUT_UPDATE, Receivers.All,
-                l0, l1, l2, l3, l4, l5, l6, l7, l8
+                l0, l1, l2, l3, l4, l5, l6, l7, l8, l9
                 );
 
             if (onLoadoutChangedCallback != null)
@@ -998,6 +998,9 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         if (i >= 0) this.shield = Mapper.instance.getItemById(i);//NE DELA - BO TREBA UPDEJTAT. ZAENKRAT SE UPORABLA GetComponent<NetworkPlayerCombatHandler>().update_equipped_weapons();   KER JE BLO ZE PREJ IMPLEMENTIRAN!!
         else this.shield = null;
 
+        i = (int)args.GetNext<short>();
+        if (i >= 0) this.backpack = Mapper.instance.getItemById(i);
+        else this.backpack = null;
 
         GetComponent<NetworkPlayerCombatHandler>().update_equipped_weapons();
 

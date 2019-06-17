@@ -85,6 +85,9 @@ public class NetworkBackpack : NetworkBackpackBehavior
             {
                 //lahko pobere
                 networkObject.AssignOwnership(args.Info.SendingPlayer);
+                NetworkPlayerInventory n = player.GetComponent<NetworkPlayerInventory>();
+                n.SetLoadoutItem(Mapper.instance.getItemById(GetComponent<identifier_helper>().id), 0);//to nrdi samo server..
+                n.sendNetworkUpdate(false, true);
                 sendOwnershipResponse(args.Info.SendingPlayer);
             }
         }
@@ -166,9 +169,10 @@ public class NetworkBackpack : NetworkBackpackBehavior
         this.npi = this.owning_player.GetComponent<NetworkPlayerInventory>();
         this.npi.backpack_inventory = this;
         Item item =Mapper.instance.getItemById(GetComponent<identifier_helper>().id);
-        this.npi.SetLoadoutItem(item,0);
+        
         Transform transformForBackpack = this.npi.backpackSpot;
         this.panel_handler = this.npi.backpackPanel;
+        if(r==null) r = GetComponent<Rigidbody>();
         if (!r.isKinematic) r.isKinematic = true;
         if (r.detectCollisions) r.detectCollisions = false;
 
