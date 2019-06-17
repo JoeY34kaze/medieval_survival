@@ -30,11 +30,19 @@ public class ItemDropHandler : MonoBehaviour, IDropHandler , IPointerClickHandle
         if (RectTransformUtility.RectangleContainsScreenPoint(invSlot, Input.mousePosition))//smo dropal nekam na valid inventorij plac
         {
             //Debug.Log(networkPlayerInventory.draggedItemParent.name+"'s child was dropped on " + invSlot.name+" ");
-
+            InventorySlot to = invSlot.GetComponent<InventorySlot>();
             //koda se bo malo podvajala ker bi sicer biu prevelik clusterfuck od metode
             InventorySlot inventorySlot = networkPlayerInventory.draggedItemParent.GetComponent<InventorySlot>();
-            if (inventorySlot is InventorySlotPersonal || inventorySlot is InventorySlotLoadout)
+            if ((inventorySlot is InventorySlotPersonal || inventorySlot is InventorySlotLoadout) && !(to is InventorySlotBackpack))
                 networkPlayerInventory.handleInventorySlotOnDragDropEvent(invSlot, null, false);
+            else if (inventorySlot is InventorySlotLoadout && to is InventorySlotBackpack)
+                networkPlayerInventory.handleLoadoutToBackpackDrag(invSlot);
+            else if (inventorySlot is InventorySlotPersonal && to is InventorySlotBackpack)
+                networkPlayerInventory.handlePersonalToBackpackDrag(invSlot);
+            else if (inventorySlot is InventorySlotBackpack && to is InventorySlotPersonal)
+                networkPlayerInventory.handleBackpackToPersonalDrag(invSlot);
+            else if (inventorySlot is InventorySlotBackpack && to is InventorySlotBackpack)
+                networkPlayerInventory.handleBackpackToBackpack(invSlot);
             else if (inventorySlot is InventorySlotBackpack)
                 networkPlayerInventory.handleBackpackSlotOnDragDropEvent(invSlot, null);
         }
@@ -50,6 +58,8 @@ public class ItemDropHandler : MonoBehaviour, IDropHandler , IPointerClickHandle
                 //transform.root.GetComponent<NetworkPlayerCombatHandler>().update_equipped_weapons(); - to se mora klicat ko server sporoci novo stanje
 
             }
+            else if (inventorySlot is InventorySlotBackpack)
+                this.networkPlayerInventory.backpack_inventory.localPlayerdropItemFromBackpackRequest(this.networkPlayerInventory.getIndexFromName(networkPlayerInventory.draggedItemParent.name));
         }
     }
 

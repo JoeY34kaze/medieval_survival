@@ -52,6 +52,8 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
 
 
     private Item ranged;
+
+
     private Item weapon_0;
     private Item weapon_1;
     private Item shield;
@@ -70,6 +72,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
             slots[i] = panel_personalInventorySlots[i].GetComponent<InventorySlotPersonal>();
         items = new Item[slots.Length];
     }
+
 
     protected override void NetworkStart()
     {
@@ -195,6 +198,26 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         if (onItemChangedCallback != null  && networkObject.IsServer)//ker se nkol ne izvede na clientu ta metoda in server itak nebo nkol vidu inventorija od drugih na ekranu.. probably
             onItemChangedCallback.Invoke();
         return r;
+    }
+
+    internal Item popPersonalItem(int inv_index)
+    {
+        Item i=null;
+        if (networkObject.IsServer) {
+            i = this.items[inv_index];
+            this.items[inv_index] = null;
+        }
+        return i;
+    }
+
+    internal void setPersonalItem(Item b, int inv_index)
+    {
+        if (networkObject.IsServer) {
+            if (this.items[inv_index] != null) {
+                Debug.LogError("Overriding an item in personal inventory. i hope its intentional brah.");
+            }
+            this.items[inv_index] = b;
+        }
     }
 
     internal void requestUiUpdate()
@@ -462,7 +485,51 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         return ret;
     }
 
-
+    public Item GetItemLoadout(Item.Type t, int index)
+    {
+        Item ret = null;
+        switch (t)
+        {
+            case Item.Type.head:
+                ret = head;
+                break;
+            case Item.Type.chest:
+                ret = chest;
+                break;
+            case Item.Type.hands:
+                ret = hands;
+                break;
+            case Item.Type.legs:
+                ret = legs;
+                break;
+            case Item.Type.feet:
+                ret = feet;
+                break;
+            case Item.Type.ranged:
+                ret = ranged;
+                break;
+            case Item.Type.weapon://tole se nobe zmer zamenjal ker tega nocmo. equipa nj se samo ce je slot prazen
+                if (index == 0)
+                {
+                    ret = weapon_0;
+                }
+                else
+                {
+                    ret = weapon_1;
+                }
+                break;
+            case Item.Type.shield:
+                ret = shield;
+                break;
+            case Item.Type.backpack:
+                ret = backpack;
+                break;
+            default:
+                Debug.LogError("Item type doesnt match anything. shits fucked yo");
+                break;
+        }
+        return ret;
+    }
 
     void Update()
     {
@@ -861,10 +928,66 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
     {
         throw new NotImplementedException();
     }
+    internal void handleLoadoutToBackpackDrag(RectTransform invSlot)
+    {
+        if (networkObject.IsOwner)
+        {
+            int index = getIndexFromName(invSlot.name);
 
+            InventorySlotLoadout from = this.draggedItemParent.GetComponent<InventorySlotLoadout>();
+            string type = from.type.ToString();
+            int weap = from.index;
+
+            InventorySlot to = invSlot.GetComponent<InventorySlot>();
+            int backpack_index = getIndexFromName(to.name);
+            /*
+             string item type
+             int weapon index
+             int backpackIndex
+             */
+            this.backpack_inventory.localPlayerLoadoutToBackpackRequest(type, weap, backpack_index);
+        }
+    }
+
+    internal void handlePersonalToBackpackDrag(RectTransform invSlot)
+    {
+        if (networkObject.IsOwner)
+        {
+            InventorySlot from = this.draggedItemParent.GetComponent<InventorySlot>();
+
+            int inv_index = getIndexFromName(from.name);
+            InventorySlot to = invSlot.GetComponent<InventorySlot>();
+            int backpack_index = getIndexFromName(to.name);
+            this.backpack_inventory.localPlayerInventorySwapRequest(backpack_index, inv_index);
+        }
+    }
+
+    internal void handleBackpackToPersonalDrag(RectTransform invSlot)
+    {
+        if (networkObject.IsOwner)
+        {
+            InventorySlot from = this.draggedItemParent.GetComponent<InventorySlot>();
+
+            int backpack_index = getIndexFromName(from.name);
+            InventorySlot to = invSlot.GetComponent<InventorySlot>();
+            int inv_index = getIndexFromName(to.name);
+            this.backpack_inventory.localPlayerInventorySwapRequest(backpack_index, inv_index);
+        }
+    }
     private void BackpackToLoadout(int index)
     {
         this.backpack_inventory.localPlayerRequestBackpackToLoadout(index);
+    }
+
+
+    internal void handleBackpackToBackpack(RectTransform invSlot)
+    {
+        InventorySlot from = this.draggedItemParent.GetComponent<InventorySlot>();
+
+        int index1 = getIndexFromName(from.name);
+        InventorySlot to = invSlot.GetComponent<InventorySlot>();
+        int index2 = getIndexFromName(to.name);
+        this.backpack_inventory.localPlayerBackpackToBackpackRequest(index1, index2);
     }
 
     public void sendNetworkUpdate(bool inv, bool loadout) //LOADOUT JE SAMO ZA UMA OBLEKE!!!!!!
@@ -1119,7 +1242,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         
     }
 
-    private int getIndexFromName(string name)
+    internal int getIndexFromName(string name)
     {
         string[] a = name.Split('(');
         string[] b = a[a.Length - 1].Split(')');

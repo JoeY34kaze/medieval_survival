@@ -26,6 +26,7 @@ public class NetworkArmorStand : NetworkArmorStandBehavior
     */
 
 
+
     public int head=-1;
     public int chest = -1;
     public int hands = -1;
@@ -61,6 +62,22 @@ public class NetworkArmorStand : NetworkArmorStandBehavior
         if (Is_sending_request_valid(collider_index, server_id)) {
             networkObject.SendRpc(RPC_ARMOR_STAND_INTERACTION_REQUEST, Receivers.Server, server_id, collider_index);
         }
+    }
+
+    private void Update()
+    {
+        if (item_mismatch()) {//looks reatrded, but it fixes a bug which i believe it's from unity. redraw_armor_stand doesnt destroy child objects even though Destroy() is called correctly.
+            redraw_armor_stand();
+        }
+    }
+
+    private bool item_mismatch()
+    {
+        if (this.weapon_0 == -1 && this.w0.childCount > 0) return true;
+        if (this.weapon_1 == -1 && this.w1.childCount > 0) return true;
+        if (this.shield == -1 && this.sh.childCount > 0) return true;
+        if (this.ranged == -1 && this.ra.childCount > 0) return true;
+        return false;
     }
 
     private bool Is_sending_request_valid(int collider_index,uint server_id)
@@ -840,30 +857,40 @@ public class NetworkArmorStand : NetworkArmorStandBehavior
 
 
     }
+    //private void Update()
+    //{
+    //    redraw_armor_stand();
+    //}
 
-    private void show_weapon(int i, Transform sh)//prikaze weapon k pripada id-ju na pozicijo kot child transforma.
+    private void show_weapon(int i, Transform retard)//prikaze weapon k pripada id-ju na pozicijo kot child transforma.
     {
         if (i == -1)
         {
-            for (int k = 0; k < sh.childCount; k++)
-                GameObject.Destroy(sh.GetChild(0));
+            for (int k = 0; k < retard.childCount; k++)//ce dam tle samo destroy ucas kr faila. nimam pojma zakaj. ce dam destroy u update ga ubije, sicer g apa ne. no fucking clue. to sm skor prepičan da je unity bug
+            {
+                Destroy(retard.GetChild(0).gameObject);
+            }
             return;
         }
+        else
+        {
 
-        GameObject w = null;
-        foreach (GameObject g in this.instantiatable_weapons_for_armor_stand) {
-            if (g.GetComponent<identifier_helper>().id == i)
+            GameObject w = null;
+            foreach (GameObject g in this.instantiatable_weapons_for_armor_stand)
             {
-                w = GameObject.Instantiate(g);
-                break;
+                if (g.GetComponent<identifier_helper>().id == i)
+                {
+                    w = GameObject.Instantiate(g);
+                    break;
+                }
             }
-        }
-        if (w == null)
-            throw new Exception("shits fucked yo");
+            if (w == null)
+                throw new Exception("shits fucked yo");
 
-        w.transform.SetParent(sh);
-        w.transform.localPosition = Vector3.zero;
-        w.transform.localRotation = Quaternion.identity;
+            w.transform.SetParent(retard);
+            w.transform.localPosition = Vector3.zero;
+            w.transform.localRotation = Quaternion.identity;
+        }
 
     }
 }

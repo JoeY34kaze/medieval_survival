@@ -48,6 +48,7 @@ public class NetworkContainer_items : NetworkContainerBehavior
             this.items[index] = i;
         }
     }
+
     public Item popItem(int index) {
         if (networkObject.IsServer)
         {
@@ -153,4 +154,13 @@ public class NetworkContainer_items : NetworkContainerBehavior
         }
     }
 
+    internal void swap(int p, int v)
+    {
+        if(networkObject.IsServer)
+            if (p < this.size && v < this.size) {
+                Item temp = this.items[p];
+                this.items[p] = this.items[v];
+                this.items[v] = temp;
+            }
+    }
 }

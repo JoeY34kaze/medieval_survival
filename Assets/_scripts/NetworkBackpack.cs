@@ -65,6 +65,12 @@ public class NetworkBackpack : NetworkBackpackBehavior
     public void local_player_backpack_unequip_request() {
         networkObject.SendRpc(RPC_BACKPACK_UNEQUIP_REQUEST,Receivers.Server);
     }
+    internal void localPlayerdropItemFromBackpackRequest(int v)
+    {
+        Camera c = Camera.main;
+        if (networkObject.IsOwner)
+            networkObject.SendRpc(RPC_BACKPACK_DROP_ITEM_REQUEST, Receivers.Server, v, c.transform.position + (c.transform.forward * 3), c.transform.forward);
+    }
 
     //----------------------------RPC's----------------------------------------
 
@@ -101,15 +107,21 @@ public class NetworkBackpack : NetworkBackpackBehavior
         }
     }
 
+
+
     private void sendItemsResponse(NetworkingPlayer sendingPlayer)
     {
-        networkObject.SendRpc(sendingPlayer, RPC_BACKPACK_ITEMS_OTHER_RESPONSE, this.nci.getItemsNetwork());
+        if(networkObject.IsServer)
+            networkObject.SendRpc(sendingPlayer, RPC_BACKPACK_ITEMS_OTHER_RESPONSE, this.nci.getItemsNetwork());
     }
 
     private void sendOwnershipResponse(NetworkingPlayer sendingPlayer)
     {
-        networkObject.AssignOwnership(sendingPlayer);
-        networkObject.SendRpc(RPC_OWNERSHIP_CHANGE_RESPONSE, Receivers.All, sendingPlayer.NetworkId);
+        if (networkObject.IsServer)
+        {
+            networkObject.AssignOwnership(sendingPlayer);
+            networkObject.SendRpc(RPC_OWNERSHIP_CHANGE_RESPONSE, Receivers.All, sendingPlayer.NetworkId);
+        }
     }
     /// <summary>
     /// poslje client, any client lahko ma na hrbtu ali pa gleda ko je na tleh, dobi server, server vrne novo stanje itemov
@@ -117,6 +129,13 @@ public class NetworkBackpack : NetworkBackpackBehavior
     /// <param name="args"></param>
     public override void BackpackDropItemRequest(RpcArgs args)
     {
+        //poslat kamero!
+        if (networkObject.IsServer && args.Info.SendingPlayer.NetworkId == networkObject.Owner.NetworkId)
+        {
+            Item i = this.nci.popItem(args.GetNext<int>());
+            this.npi.instantiateDroppedItem(i, 1, args.GetNext<Vector3>(), args.GetNext<Vector3>());
+            sendItemsUpdate();
+        }
 
     }
     public override void BackpackItemsOwnerResponse(RpcArgs args)//tole dobi owner, ponavad ko odpre inventorij al pa kj tazga
@@ -143,19 +162,71 @@ public class NetworkBackpack : NetworkBackpackBehavior
 
     }
 
+    /// <summary>
+    /// zamenja pozicije itemov znotraj inventorija
+    /// </summary>
+    /// <param name="args"></param>
     public override void BackpackSwapItemsRequest(RpcArgs args)
     {
-        throw new System.NotImplementedException();
+        if (networkObject.IsServer && args.Info.SendingPlayer.NetworkId == networkObject.Owner.NetworkId) {
+            this.nci.swap(args.GetNext<int>(),args.GetNext<int>());
+            sendItemsUpdate();
+        }
     }
-
+    /// <summary>
+    /// inv->back & back -> inv
+    /// </summary>
+    /// <param name="args"></param>
     public override void InventoryToBackpackSwapRequest(RpcArgs args)
     {
-        throw new System.NotImplementedException();
+        if (networkObject.IsServer && args.Info.SendingPlayer.NetworkId == networkObject.Owner.NetworkId)
+        {
+            int back_index = args.GetNext<int>();
+            int inv_index = args.GetNext<int>();
+
+            Item b = this.nci.popItem(back_index);
+            Item i = this.npi.popPersonalItem(inv_index);
+
+            this.npi.setPersonalItem(b, inv_index);
+            this.nci.setItem(back_index, i);
+
+            sendItemsUpdate();
+            this.npi.sendNetworkUpdate(true, false);
+        }
     }
 
-    public override void LoadoutToBackpackSwapRequest(RpcArgs args)
+    public override void LoadoutToBackpackRequest(RpcArgs args)
     {
-        throw new System.NotImplementedException();
+        if (networkObject.IsServer && args.Info.SendingPlayer.NetworkId == networkObject.Owner.NetworkId)
+        {
+            bool changed = false;
+            string type = args.GetNext<string>();
+            int wepindex = args.GetNext<int>();
+            int back_index = args.GetNext<int>();
+
+            //ce je backpack null ga samo not dej, ce je occupied probej nrdit swap, sicer nared nč
+            if (this.nci.getItem(back_index) != null)
+            {//swap
+                if (this.npi.GetItemLoadout(this.npi.getItemTypefromString(type), wepindex).type == this.nci.getItem(back_index).type)
+                {//ce se itema ujemata, sicer nima smisla
+                    Item l = this.npi.PopItemLoadout(this.npi.getItemTypefromString(type), wepindex);
+                    Item b = this.nci.popItem(back_index);
+                    this.nci.setItem(back_index, l);
+                    this.npi.SetLoadoutItem(b, wepindex);
+                    changed = true;
+                }
+            }
+            else
+            {
+                this.nci.setItem(back_index, this.npi.PopItemLoadout(this.npi.getItemTypefromString(type), wepindex));//backpack slot je null tko da je vse kul.
+                changed = true;
+            }
+
+            if (changed) {//ker smo stvari spremenil rabmo sinhronizirat loadout in backpack.
+                this.sendItemsUpdate();
+                this.npi.sendNetworkUpdate(false, true);
+            }
+        }
     }
 
     public override void OwnershipChangeResponse(RpcArgs args)
@@ -267,6 +338,27 @@ public class NetworkBackpack : NetworkBackpackBehavior
     {
         if (networkObject.IsOwner) {
             networkObject.SendRpc(RPC_BACKPACK_TO_LOADOUT_REQUEST, Receivers.Server, index_backpack);
+        }
+    }
+
+    internal void localPlayerLoadoutToBackpackRequest(string loadout_type, int weapon_index, int backpack_index)
+    {
+        if (networkObject.IsOwner) {
+            networkObject.SendRpc(RPC_LOADOUT_TO_BACKPACK_REQUEST, Receivers.Server, loadout_type,weapon_index,backpack_index);
+        }
+    }
+
+    internal void localPlayerInventorySwapRequest(int backpack_index, int inv_index)
+    {
+        if (networkObject.IsOwner) {
+            networkObject.SendRpc(RPC_INVENTORY_TO_BACKPACK_SWAP_REQUEST, Receivers.Server, backpack_index, inv_index);
+        }
+    }
+
+    internal void localPlayerBackpackToBackpackRequest(int index1, int index2)
+    {
+        if (networkObject.IsOwner) {
+            networkObject.SendRpc(RPC_BACKPACK_SWAP_ITEMS_REQUEST, Receivers.Server, index1, index2);
         }
     }
 }
