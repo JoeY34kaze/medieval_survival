@@ -948,7 +948,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         for (int i = 0; i < 20; i++)
         {
             short item_id = args.GetNext<short>();
-            if (item_id > 0) this.items[i] = Mapper.instance.getItemById((int)item_id);
+            this.items[i] = Mapper.instance.getItemById((int)item_id);
         }
         if (onLoadoutChangedCallback != null)
             onLoadoutChangedCallback.Invoke();
@@ -961,46 +961,27 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
     {
         if (args.Info.SendingPlayer.NetworkId != 0) return;
 
-        int i = (int)args.GetNext<short>();
-        if (i >= 0) this.head = Mapper.instance.getItemById(i);
-        else this.head = null;
 
-        i = (int)args.GetNext<short>();
-        if (i >= 0) this.chest = Mapper.instance.getItemById(i);
-        else this.chest = null;
-
-        i = (int)args.GetNext<short>();
-        if (i >= 0) this.hands = Mapper.instance.getItemById(i);
-        else this.hands = null;
-
-        i = (int)args.GetNext<short>();
-        if (i >= 0) this.legs = Mapper.instance.getItemById(i);
-        else this.legs = null;
-
-        i = (int)args.GetNext<short>();
-        if (i >= 0) this.feet = Mapper.instance.getItemById(i);
-        else this.feet = null;
+        this.head = Mapper.instance.getItemById((int)args.GetNext<short>());
 
 
-        i = (int)args.GetNext<short>();
-        if (i >= 0) this.ranged = Mapper.instance.getItemById(i);//NE DELA - BO TREBA UPDEJTAT. ZAENKRAT SE UPORABLA GetComponent<NetworkPlayerCombatHandler>().update_equipped_weapons();   KER JE BLO ZE PREJ IMPLEMENTIRAN!!
-        else this.ranged = null;
+        this.chest = Mapper.instance.getItemById((int)args.GetNext<short>());
 
-        i = (int)args.GetNext<short>();
-        if (i >= 0) this.weapon_0 = Mapper.instance.getItemById(i);//NE DELA - BO TREBA UPDEJTAT. ZAENKRAT SE UPORABLA GetComponent<NetworkPlayerCombatHandler>().update_equipped_weapons();   KER JE BLO ZE PREJ IMPLEMENTIRAN!!
-        else this.weapon_0 = null;
+        this.hands = Mapper.instance.getItemById((int)args.GetNext<short>());
+        this.legs = Mapper.instance.getItemById((int)args.GetNext<short>());
 
-        i = (int)args.GetNext<short>();
-        if (i >= 0) this.weapon_1 = Mapper.instance.getItemById(i);//NE DELA - BO TREBA UPDEJTAT. ZAENKRAT SE UPORABLA GetComponent<NetworkPlayerCombatHandler>().update_equipped_weapons();   KER JE BLO ZE PREJ IMPLEMENTIRAN!!
-        else this.weapon_1 = null;
+        this.feet = Mapper.instance.getItemById((int)args.GetNext<short>());
 
-        i = (int)args.GetNext<short>();
-        if (i >= 0) this.shield = Mapper.instance.getItemById(i);//NE DELA - BO TREBA UPDEJTAT. ZAENKRAT SE UPORABLA GetComponent<NetworkPlayerCombatHandler>().update_equipped_weapons();   KER JE BLO ZE PREJ IMPLEMENTIRAN!!
-        else this.shield = null;
 
-        i = (int)args.GetNext<short>();
-        if (i >= 0) this.backpack = Mapper.instance.getItemById(i);
-        else this.backpack = null;
+        this.ranged = Mapper.instance.getItemById((int)args.GetNext<short>());
+
+        this.weapon_0 = Mapper.instance.getItemById((int)args.GetNext<short>());
+
+        this.weapon_1 = Mapper.instance.getItemById((int)args.GetNext<short>());
+
+        this.shield = Mapper.instance.getItemById((int)args.GetNext<short>());
+
+        this.backpack = Mapper.instance.getItemById((int)args.GetNext<short>());
 
         GetComponent<NetworkPlayerCombatHandler>().update_equipped_weapons();
 
@@ -1122,7 +1103,8 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         int inventory_slot = args.GetNext<int>();
         Vector3 camera_vector = args.GetNext<Vector3>();
         Vector3 camera_forward = args.GetNext<Vector3>();
-        Item i = slots[inventory_slot].GetItem();//mogoce nerabmo sploh slotov za server. sj rab vidt samo array itemov. sloti so bl k ne samo za ownerja da vidi inventorij graficno. optimizacija ksnej
+        //Item i = slots[inventory_slot].GetItem();//mogoce nerabmo sploh slotov za server. sj rab vidt samo array itemov. sloti so bl k ne samo za ownerja da vidi inventorij graficno. optimizacija ksnej
+        Item i = this.items[inventory_slot];
         removePersonalInventoryItem(inventory_slot);
         instantiateDroppedItem(i, 1, camera_vector, camera_forward);
 

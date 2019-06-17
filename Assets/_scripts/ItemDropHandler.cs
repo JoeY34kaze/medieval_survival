@@ -19,30 +19,35 @@ public class ItemDropHandler : MonoBehaviour, IDropHandler , IPointerClickHandle
     {
         RectTransform invSlot = transform as RectTransform;
 
-        if (GetComponent<InventorySlotLoadout>().type != Item.Type.backpack)
-            if (RectTransformUtility.RectangleContainsScreenPoint(invSlot, Input.mousePosition))//smo dropal nekam na valid inventorij plac
+        if (GetComponent<InventorySlot>().GetItem() != null) {//ce smo potegnil backpack loh sam vrzemo na tla. nemors ga dat u inventorij k ni tak item
+            if (GetComponent<InventorySlot>().GetItem().type == Item.Type.backpack)
             {
-                //Debug.Log(networkPlayerInventory.draggedItemParent.name+"'s child was dropped on " + invSlot.name+" ");
-
-                //koda se bo malo podvajala ker bi sicer biu prevelik clusterfuck od metode
-
-                networkPlayerInventory.handleInventorySlotOnDragDropEvent(invSlot, null, false);
+                networkPlayerInventory.backpackSpot.GetComponentInChildren<NetworkBackpack>().local_player_backpack_unequip_request();
+                return;
             }
-            else
-            {//smo dropal nekam tko da mora past na tla. gremo prevert s kje smo potegnil
-                InventorySlot inventorySlot = networkPlayerInventory.draggedItemParent.GetComponent<InventorySlot>();
-                //Debug.Log("Called on " + gameObject.name);
-                if (inventorySlot is InventorySlotPersonal) networkPlayerInventory.DropItemFromPersonalInventory(getIndexFromName(invSlot.name));
-                else if (inventorySlot is InventorySlotLoadout)
-                {
-                    InventorySlotLoadout ldslt = (InventorySlotLoadout)inventorySlot;
-                    networkPlayerInventory.DropItemFromLoadout(ldslt.type, ldslt.index);
-                    //transform.root.GetComponent<NetworkPlayerCombatHandler>().update_equipped_weapons(); - to se mora klicat ko server sporoci novo stanje
+        }
 
-                }
+        if (RectTransformUtility.RectangleContainsScreenPoint(invSlot, Input.mousePosition))//smo dropal nekam na valid inventorij plac
+        {
+            //Debug.Log(networkPlayerInventory.draggedItemParent.name+"'s child was dropped on " + invSlot.name+" ");
+
+            //koda se bo malo podvajala ker bi sicer biu prevelik clusterfuck od metode
+
+            networkPlayerInventory.handleInventorySlotOnDragDropEvent(invSlot, null, false);
+        }
+        else
+        {//smo dropal nekam tko da mora past na tla. gremo prevert s kje smo potegnil
+            InventorySlot inventorySlot = networkPlayerInventory.draggedItemParent.GetComponent<InventorySlot>();
+            //Debug.Log("Called on " + gameObject.name);
+            if (inventorySlot is InventorySlotPersonal) networkPlayerInventory.DropItemFromPersonalInventory(getIndexFromName(invSlot.name));
+            else if (inventorySlot is InventorySlotLoadout)
+            {
+                InventorySlotLoadout ldslt = (InventorySlotLoadout)inventorySlot;
+                networkPlayerInventory.DropItemFromLoadout(ldslt.type, ldslt.index);
+                //transform.root.GetComponent<NetworkPlayerCombatHandler>().update_equipped_weapons(); - to se mora klicat ko server sporoci novo stanje
+
             }
-        else// backpack. drop that shit
-        { networkPlayerInventory.backpackSpot.GetComponentInChildren<NetworkBackpack>().local_player_unequip_request(); }
+        }
     }
 
 
@@ -61,7 +66,7 @@ public class ItemDropHandler : MonoBehaviour, IDropHandler , IPointerClickHandle
         if (eventData.button == PointerEventData.InputButton.Right && iss.GetItem() != null)
         {
             if(iss.GetItem().type==Item.Type.backpack)
-                networkPlayerInventory.backpackSpot.GetComponentInChildren<NetworkBackpack>().local_player_unequip_request();
+                networkPlayerInventory.backpackSpot.GetComponentInChildren<NetworkBackpack>().local_player_backpack_unequip_request();
             else
                 networkPlayerInventory.OnRightClick(gameObject);
         }

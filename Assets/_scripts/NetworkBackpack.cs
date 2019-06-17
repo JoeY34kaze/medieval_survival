@@ -62,7 +62,7 @@ public class NetworkBackpack : NetworkBackpackBehavior
         networkObject.SendRpc(RPC_BACKPACK_INTERACTION_REQUEST, Receivers.Server, (byte)1,server_id);
     }
 
-    public void local_player_unequip_request() {
+    public void local_player_backpack_unequip_request() {
         networkObject.SendRpc(RPC_BACKPACK_UNEQUIP_REQUEST,Receivers.Server);
     }
 
