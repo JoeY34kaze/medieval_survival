@@ -84,10 +84,11 @@ public class NetworkBackpack : NetworkBackpackBehavior
             if (player.GetComponentInChildren<NetworkBackpack>() == null)
             {
                 //lahko pobere
+                networkObject.AssignOwnership(args.Info.SendingPlayer);
                 sendOwnershipResponse(args.Info.SendingPlayer);
             }
         }
-        else if (tip == 1 && (networkObject.IsOwner))
+        else if (tip == 1 && (networkObject.IsOwner) &&(this.owner_id!=0))
         { //look request. ce je od serverja
             //lahko pogleda i guess.
             networkObject.SendRpc(args.Info.SendingPlayer, RPC_BACKPACK_ITEMS_OTHER_RESPONSE, nci.getItemsNetwork());

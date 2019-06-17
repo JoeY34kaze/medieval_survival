@@ -219,7 +219,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fb9b47c3a2127bb4fb5fa30f3d663362, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  icon: {fileID: 0}
+  icon: {fileID: 7934522589448827181}
   index: 0
 --- !u!114 &6316133624032957186
 MonoBehaviour:

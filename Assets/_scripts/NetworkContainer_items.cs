@@ -137,7 +137,7 @@ public class NetworkContainer_items : NetworkContainerBehavior
         for (int i = 1; i < ss.Length; i++) {//zacne z 1 ker je ss[0] = ""
             int k=-1;
              Int32.TryParse(ss[i],out k);
-            rez[i] = Mapper.instance.getItemById(k);
+            rez[i-1] = Mapper.instance.getItemById(k);
         }
         return rez;
     }
