@@ -190,10 +190,17 @@ public class NetworkBackpack : NetworkBackpackBehavior
 
     public override void BackpackUnequipRequest(RpcArgs args)
     {
-        if (networkObject.IsServer && args.Info.SendingPlayer.NetworkId == networkObject.Owner.NetworkId) {//ce je server in ce je poslov owner
+        if (networkObject.IsServer && (args.Info.SendingPlayer.NetworkId == networkObject.Owner.NetworkId )) {//ce je server in ce je poslov owner
             networkObject.TakeOwnership();//server vzame ownership
             networkObject.SendRpc(RPC_BACKPACK_UNEQUIP_RESPONSE, Receivers.All);
 
+        }
+    }
+    //klice server
+    public void local_server_BackpackUnequip() {
+        if (networkObject.IsServer) {
+            networkObject.TakeOwnership();//server vzame ownership
+            networkObject.SendRpc(RPC_BACKPACK_UNEQUIP_RESPONSE, Receivers.All);
         }
     }
 

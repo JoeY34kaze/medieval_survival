@@ -146,7 +146,10 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
     {
         if (!networkObject.IsServer) return;
 
-       // Debug.Log("Spawning body");
+        // Debug.Log("Spawning body");
+
+        GetComponent<NetworkPlayerInventory>().backpackSpot.GetComponentInChildren<NetworkBackpack>().local_server_BackpackUnequip();
+
         spawn_UMA_body(transform.position, get_UMA_to_string(), player_id);//poslje rpc da nrdi uma body in disabla renderer za playerja v enem
                                                                            // server mora vsem sporocit da nj nehajo renderat playerja k je lihkar umru ker ga je vizualno zamenjov ragdoll
         networkObject.SendRpc(RPC_ON_PLAYER_DEATH, Receivers.All);
@@ -260,7 +263,7 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
     private void handle_0_hp() {//sprozi tko na ownerju, kot na clientih
         this.downed = true;
         GetComponent<NetworkPlayerAnimationLogic>().handle_downed_start();
-
+        GetComponent<NetworkPlayerInventory>().backpackSpot.GetComponentInChildren<NetworkBackpack>().local_server_BackpackUnequip();
 
 
     }
@@ -384,6 +387,10 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
 
     }
 
+    /// <summary>
+    /// metoda k jo dobijo vsi
+    /// </summary>
+    /// <param name="args"></param>
     public override void OnPlayerDeath(RpcArgs args)//vsi dobijo
     {
         local_setDrawingPlayer(false);//v drugi metodi zato ker se klice se z vsaj ene druge metode

@@ -1222,7 +1222,8 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         }
         else
         {
-            Debug.Log("No Space in inventory and cannot place in inventory!");
+            Debug.Log("No Space in inventory and cannot place in inventory! Dropping item instead. we have no camera data though");
+            instantiateDroppedItem(loadout_item, 1, transform.position+new Vector3(0,1,0), transform.forward);
         }
 
         //rpc update
