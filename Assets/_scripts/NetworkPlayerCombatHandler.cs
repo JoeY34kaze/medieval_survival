@@ -60,10 +60,10 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
         refresh_weapon(newVal);
     }
 
-    private int getWeaponClassForAnimator(int v)//tole bo treba updejtat i guess.
+    private int getWeaponClassForAnimator(int weapon_id)//tole bo treba updejtat i guess.
     {
-        if (this.equipped_weapons[v] < 2) return 0;
-        return Mapper.instance.getItemById(this.equipped_weapons[v]).weapon_animation_class;
+        if (weapon_id < 2) return 0;
+        return Mapper.instance.getItemById(weapon_id).weapon_animation_class;
     }
 
     //------------------------------------------------------------------------------------------NETWORKING-----------------------------------------------------------
@@ -188,7 +188,7 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
     private void check_for_weapon_switch()
     {
         if (!networkObject.IsOwner) return;
-        if (Input.GetAxis("Mouse ScrollWheel") > 0f && !this.blocking) // forward - menja weapone. unarmed fist - unarmed block se skippa vmes - weapon0 - weapon1 - ranged
+        if (Input.GetAxis("Mouse ScrollWheel") > 0f && !this.blocking && !this.in_attack_animation) // forward - menja weapone. unarmed fist - unarmed block se skippa vmes - weapon0 - weapon1 - ranged
         {
             Debug.Log("client : sending weapon change request");
             networkObject.SendRpc(RPC_CHANGE_CURRENT_WEAPON_REQUEST, Receivers.Server);
@@ -215,6 +215,8 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
 
     internal void setCurrentWeaponToFirstNotEmpty()
     {
+        update_equipped_weapons();
+
         Debug.Log("server: checking to see it player is unarmed");
         if (this.equipped_weapons[index_of_currently_selected_weapon_from_equipped_weapons] > 1) return;
         Debug.Log("server: player is unarmed. setting current weapon to first not empty");
@@ -224,6 +226,7 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
         else if(this.equipped_weapons[3] != 0) { first = 3; }
         else if(this.equipped_weapons[4] != 0) { first = 4; }
         //posl rpc clientu kaj je njegov nov index
+        this.index_of_currently_selected_weapon_from_equipped_weapons = first;
         networkObject.SendRpc(RPC_CHANGE_CURRENT_WEAPON_RESPONSE, Receivers.All, first);
     }
 
@@ -254,10 +257,22 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
     private void refresh_weapon(int newVal) {
         disable_all_possible_equipped_weapons();
 
-        this.weapon_slot.GetChild(equipped_weapons[newVal]).gameObject.SetActive(true);//enabla weapon.
+        getChildWeaponById(equipped_weapons[newVal]).SetActive(true);
+       
+
         animator.SetInteger("weapon_animation_class", getWeaponClassForAnimator(equipped_weapons[newVal]));
 
     }
+
+    private GameObject getChildWeaponById(int weap_id)
+    {
+        for (int i = 0; i < this.weapon_slot.childCount; i++) {
+            if (this.weapon_slot.GetChild(i).GetComponent<identifier_helper>().id == weap_id)
+                return this.weapon_slot.GetChild(i).gameObject;
+        }
+        return null;
+    }
+
     private void refresh_shield(int shield_id) {
 
         disable_all_shields();
@@ -481,18 +496,23 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
 
     public override void NetworkFire1(RpcArgs args)
     {
-        execute_main_attack_from_remote();
+        if(args.Info.SendingPlayer.NetworkId == networkObject.Owner.NetworkId)
+            execute_main_attack_from_remote();
     }
 
     public override void NetworkFire2(RpcArgs args)
     {
-        bool blocking = args.GetNext<bool>();
-        this.blocking = blocking;
+        if (args.Info.SendingPlayer.NetworkId == networkObject.Owner.NetworkId)
+        {
+            bool blocking = args.GetNext<bool>();
+            this.blocking = blocking;
+        }
     }
 
     public override void NetworkFeign(RpcArgs args)
     {
-        animator.SetTrigger("feign");
+        if (args.Info.SendingPlayer.NetworkId == networkObject.Owner.NetworkId)
+            animator.SetTrigger("feign");
     }
 
     /// <summary>
@@ -506,10 +526,12 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
     public override void ChangeCurrentWeaponRequest(RpcArgs args)
     {
         if (!networkObject.IsServer || args.Info.SendingPlayer.NetworkId != networkObject.Owner.NetworkId) return;
-        Debug.Log("server: got weapon change request. sending response");
+        Debug.Log("server: got weapon change request. sending response IF all is legit");
 
         //djmo scrollat samo prek weaponov k niso unarmed. nocmo trikat misko premaknt ker je povsod unarmed
-        if (this.equipped_weapons[this.index_of_currently_selected_weapon_from_equipped_weapons] == 0) this.index_of_currently_selected_weapon_from_equipped_weapons = 0;
+        if (this.blocking || this.in_attack_animation) return;
+
+        if (this.equipped_weapons[this.index_of_currently_selected_weapon_from_equipped_weapons] == 0) this.index_of_currently_selected_weapon_from_equipped_weapons = 0;//ce je kterkoli drug indeks kot 0 enak 0 ga nastav na 0
         int next_index = (this.index_of_currently_selected_weapon_from_equipped_weapons + 1) % 5;
         if (this.index_of_currently_selected_weapon_from_equipped_weapons == 0)
         {
@@ -525,15 +547,19 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
             }
         }
 
-        this.index_of_currently_selected_weapon_from_equipped_weapons = next_index;//tole rabmo sporocit vsem ostalim.
-        networkObject.SendRpc(RPC_CHANGE_CURRENT_WEAPON_RESPONSE, Receivers.Others, this.index_of_currently_selected_weapon_from_equipped_weapons);
+        this.index_of_currently_selected_weapon_from_equipped_weapons = next_index;//tole rabmo sporocit vsem, tud serverju ker je server tud player lahko
+        networkObject.SendRpc(RPC_CHANGE_CURRENT_WEAPON_RESPONSE, Receivers.All, this.index_of_currently_selected_weapon_from_equipped_weapons);
     }
 
     public override void ChangeCurrentWeaponResponse(RpcArgs args)
     {
-        Debug.Log("Client : got weapon change response.");
-        this.index_of_currently_selected_weapon_from_equipped_weapons = args.GetNext<int>(); // event pohendla vse kar se rab nrdit ob spremembi
-        draw_current_weapon();
+        if (args.Info.SendingPlayer.NetworkId == 0)
+        {
+            Debug.Log("Client & server : got weapon change response.");
+            if(!networkObject.IsServer)this.index_of_currently_selected_weapon_from_equipped_weapons = args.GetNext<int>(); // event pohendla vse kar se rab nrdit ob spremembi
+            animator.SetInteger("weapon_animation_class", getWeaponClassForAnimator(equipped_weapons[this.index_of_currently_selected_weapon_from_equipped_weapons]));
+            draw_current_weapon();
+        }
     }
 
 
@@ -541,11 +567,13 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
     {
         if (!networkObject.IsServer || args.Info.SendingPlayer.NetworkId != networkObject.Owner.NetworkId) return;
         Debug.Log("server : got change combat mode request");
-        int prev = this.combat_mode;
-        int next = 0;
-        if (prev == 0) next = 1;
+        if (!this.in_attack_animation) {
+            int prev = this.combat_mode;
+            int next = 0;
+            if (prev == 0) next = 1;
 
-        networkObject.SendRpc(RPC_CHANGE_COMBAT_MODE_RESPONSE, Receivers.All, next);
+            networkObject.SendRpc(RPC_CHANGE_COMBAT_MODE_RESPONSE, Receivers.All, next);
+        }
     }
 
     public override void ChangeCombatModeResponse(RpcArgs args)//ALL GET IT, EVEN SERVER
@@ -562,7 +590,7 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
 
             reset_all_combat_related_animator_parameters();//legacy
             place_shield_on_back();
-            disable_all_possible_equipped_weapons();
+            //disable_all_possible_equipped_weapons();
         }
         else {
             this.combat_mode = 1;

@@ -201,28 +201,36 @@ public class NetworkBackpack : NetworkBackpackBehavior
         {
             bool changed = false;
             string type = args.GetNext<string>();
-            int wepindex = args.GetNext<int>();
+            Item.Type t = this.npi.getItemTypefromString(type);
+            int loadout_index = args.GetNext<int>();
             int back_index = args.GetNext<int>();
 
             //ce je backpack null ga samo not dej, ce je occupied probej nrdit swap, sicer nared nč
             if (this.nci.getItem(back_index) != null)
             {//swap
-                if (this.npi.GetItemLoadout(this.npi.getItemTypefromString(type), wepindex).type == this.nci.getItem(back_index).type)
+                if (this.npi.GetItemLoadout(this.npi.getItemTypefromString(type), loadout_index).type == this.nci.getItem(back_index).type)
                 {//ce se itema ujemata, sicer nima smisla
-                    Item l = this.npi.PopItemLoadout(this.npi.getItemTypefromString(type), wepindex);
+                    Item l = this.npi.PopItemLoadout(t, loadout_index);
                     Item b = this.nci.popItem(back_index);
                     this.nci.setItem(back_index, l);
-                    this.npi.SetLoadoutItem(b, wepindex);
+                    this.npi.SetLoadoutItem(b, loadout_index);
                     changed = true;
                 }
             }
             else
             {
-                this.nci.setItem(back_index, this.npi.PopItemLoadout(this.npi.getItemTypefromString(type), wepindex));//backpack slot je null tko da je vse kul.
+                this.nci.setItem(back_index, this.npi.PopItemLoadout(this.npi.getItemTypefromString(type), loadout_index));//backpack slot je null tko da je vse kul.
                 changed = true;
             }
 
             if (changed) {//ker smo stvari spremenil rabmo sinhronizirat loadout in backpack.
+
+                if (this.npi.current_equipped_weapon_was_removed(t, loadout_index))
+                {
+                    //set current weapon to first non empty.
+                    this.npi.combatHandler.setCurrentWeaponToFirstNotEmpty();
+                }
+
                 this.sendItemsUpdate();
                 this.npi.sendNetworkUpdate(false, true);
             }

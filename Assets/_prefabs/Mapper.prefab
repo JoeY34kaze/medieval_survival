@@ -133,10 +133,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   items:
   - {fileID: 11400000, guid: 9ea50a24d9d17144bb80ab09ea82d8f0, type: 2}
-  equippable_weapons:
-  - {fileID: 153643981316704341, guid: fda6cff1de33cde4d9d5d49932bd66ad, type: 3}
-  - {fileID: 2014122048747877151, guid: 3c2716ed3cde66140a5524e6840f82f5, type: 3}
-  passthrough_tags: []
+  - {fileID: 11400000, guid: 83169d4d528f372429129bc6e7f237ea, type: 2}
+  - {fileID: 11400000, guid: 529c930f072ce584a9b1e0d3b757e52c, type: 2}
+  - {fileID: 11400000, guid: 061310f3e568ee848827444467c0b17c, type: 2}
+  - {fileID: 11400000, guid: 2430319fe32c9874a97d1f8d626dcfd3, type: 2}
+  - {fileID: 11400000, guid: 08da4290698264642bf320ab6c9bda4e, type: 2}
+  - {fileID: 11400000, guid: 96a3aa864f4799640a0c386af1d54947, type: 2}
+  - {fileID: 11400000, guid: f39e5ee31f03c14479e1ecc7cbfbfe9e, type: 2}
+  - {fileID: 11400000, guid: 1f70b56c634eb2d459cec81c13df2eb1, type: 2}
+  - {fileID: 11400000, guid: 580be1632ef5df84fac3b6cf3e9c75c9, type: 2}
+  - {fileID: 11400000, guid: 6d72d7d3ced355f45ad1c4623d1a0823, type: 2}
 --- !u!1 &5856741249316013018
 GameObject:
   m_ObjectHideFlags: 0

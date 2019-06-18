@@ -25,7 +25,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
 
 
     private DynamicCharacterAvatar avatar;
-
+    public NetworkPlayerCombatHandler combatHandler;
     //-------------------------------LOADOUT SLOTS-----------------------------
     public InventorySlotLoadout loadout_head;
     public InventorySlotLoadout loadout_chest;
@@ -54,8 +54,8 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
     private Item ranged;
 
 
-    private Item weapon_0;
-    private Item weapon_1;
+    public Item weapon_0;
+    public Item weapon_1;
     private Item shield;
 
     public Item backpack;
@@ -71,6 +71,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         for (int i = 0; i < slots.Length; i++)
             slots[i] = panel_personalInventorySlots[i].GetComponent<InventorySlotPersonal>();
         items = new Item[slots.Length];
+        this.combatHandler = GetComponent<NetworkPlayerCombatHandler>();
     }
 
 
@@ -911,7 +912,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
             }
             else if (to is InventorySlotPersonal)//iz backpacka v inventorij
             {
-               BackpackToInventory(invSlot);
+                throw new NotImplementedException();
                
             }
             else if (to is InventorySlotBackpack)//premikamo znotraj backpacka
@@ -924,10 +925,6 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
 
     }
 
-    private void BackpackToInventory(RectTransform invSlot)
-    {
-        throw new NotImplementedException();
-    }
     internal void handleLoadoutToBackpackDrag(RectTransform invSlot)
     {
         if (networkObject.IsOwner)
@@ -1296,12 +1293,18 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
     {
         if (!networkObject.IsServer || args.Info.SendingPlayer.NetworkId != networkObject.Owner.NetworkId) { Debug.LogError("client probava dropat item, to mora met server cez.. al pa request ni od ownerja"); return; }
         string type_s = args.GetNext<string>();
-        Item.Type type = getItemTypefromString(type_s);
-        int index = args.GetNext<int>();
+        Item.Type t = getItemTypefromString(type_s);
+        int loadout_index = args.GetNext<int>();
         Vector3 camera_vector = args.GetNext<Vector3>();
         Vector3 camera_forward = args.GetNext<Vector3>();
-        Item i = PopLoadoutItem(type, index);
+        Item i = PopLoadoutItem(t, loadout_index);
         instantiateDroppedItem(i, 1, camera_vector, camera_forward);
+
+        if (current_equipped_weapon_was_removed(t, loadout_index))
+        {
+            //set current weapon to first non empty.
+            combatHandler.setCurrentWeaponToFirstNotEmpty();
+        }
 
         //rpc update
         sendNetworkUpdate(false, true);
@@ -1367,6 +1370,8 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
             return;
         }
 
+        
+
         if (index != -1)
         {//za right click
             if (this.items[index] != null)//ce smo potegnil na item k ze obstaja.
@@ -1411,6 +1416,11 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
             instantiateDroppedItem(loadout_item, 1, transform.position + new Vector3(0, 1, 0), transform.forward);
         }
 
+        if (current_equipped_weapon_was_removed(t, loadout_index)) {
+            //set current weapon to first non empty.
+            combatHandler.setCurrentWeaponToFirstNotEmpty();
+        }
+
         //rpc update
         sendNetworkUpdate(true, true);
 
@@ -1421,10 +1431,29 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
 
     }
 
+
     private bool backpackHasSpace() {
         if (this.backpack_inventory != null)
             if (this.backpack_inventory.hasSpace())
                 return true;
+        return false;
+    }
+
+
+    public bool current_equipped_weapon_was_removed(Item.Type t, int loadout_index)
+    {
+        //get current weapon
+        //0,1 unarmed
+        //2-0
+        //3 -1
+        //4 - ranged slot
+        if (t == Item.Type.weapon) {
+            int index = combatHandler.index_of_currently_selected_weapon_from_equipped_weapons;
+            if ((index - 2) == loadout_index) return true;
+        } else if (t == Item.Type.ranged) {
+            int index = combatHandler.index_of_currently_selected_weapon_from_equipped_weapons;
+            if (index == 4) return true;
+        }
         return false;
     }
 
