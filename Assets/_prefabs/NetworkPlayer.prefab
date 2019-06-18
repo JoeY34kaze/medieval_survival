@@ -4175,9 +4175,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   normal_speed: 1.8
-  sprint_modifier: 2
-  crouched_modifier: 0.35
-  visina_skoka: 3.42
+  sprint_modifier: 2.2
+  crouched_modifier: 0.4
+  visina_skoka: 4
   light_weapon_speed_modifier: 0.8
   heavy_weapon_speed_modifier: 0.6
   dolzina_za_ground_check_raycast: 0.4
