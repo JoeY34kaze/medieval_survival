@@ -3592,6 +3592,11 @@ MonoBehaviour:
   - {fileID: 4441110639782602852, guid: ea643d2d412ed62489676af911071156, type: 3}
   - {fileID: 6652605447008935094, guid: 15f58846ac9e68d409676d5091a0da36, type: 3}
   - {fileID: 4085966536946698793, guid: 14a7f66479214924b8530a704688439b, type: 3}
+  - {fileID: 1206042230447930, guid: eea04282fd72c0d419f47ebb335033a5, type: 3}
+  - {fileID: 1939998621894806, guid: 760c8381f3bbe494aa906e98069f2b4f, type: 3}
+  - {fileID: 1153930742003218, guid: eaa090afaaee64e41843d94c7c1b8b9b, type: 3}
+  - {fileID: 1190600162460664, guid: 88a61f54fa7549247b7a16f72c6466b5, type: 3}
+  - {fileID: 1398047969005088, guid: ed857d4b131cf6e45935a826da82fb80, type: 3}
 --- !u!95 &925516205726404621
 Animator:
   serializedVersion: 3
@@ -3650,7 +3655,7 @@ CapsuleCollider:
   m_Material: {fileID: 0}
   m_IsTrigger: 0
   m_Enabled: 1
-  m_Radius: 0.35725343
+  m_Radius: 0.45
   m_Height: 1.9970186
   m_Direction: 1
   m_Center: {x: -0.012844205, y: 1.0087625, z: 0}

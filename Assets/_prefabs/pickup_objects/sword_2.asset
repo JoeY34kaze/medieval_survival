@@ -10,14 +10,15 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5ba0d0d991d7fd84490deca31f6fb3d9, type: 3}
-  m_Name: sword_1h
+  m_Name: sword_2
   m_EditorClassIdentifier: 
-  Display_name: Iron sword
+  Display_name: Steel sword
   type: 6
   icon: {fileID: 21300000, guid: aaf0ffac735cfaf48b1499a0440f7a65, type: 3}
-  damage: 40
+  damage: 50
+  size: 0
   damage_reduction: 0
-  id: 2
+  id: 39
   prefab_pickup: {fileID: 1566654935662004460, guid: 7d09e4243d4bf0e4197bce45a4178b1b,
     type: 3}
   weapon_animation_class: 2

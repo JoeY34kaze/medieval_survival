@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 5076954783925228688}
   - component: {fileID: 6733891265131876339}
   - component: {fileID: 2197787211143400879}
-  m_Layer: 9
+  m_Layer: 0
   m_Name: model
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -90,9 +90,9 @@ GameObject:
   - component: {fileID: 6410002049233632170}
   - component: {fileID: 4862703782295183973}
   - component: {fileID: 5482921166784687691}
-  m_Layer: 9
+  m_Layer: 0
   m_Name: Axe2_pickup
-  m_TagString: weapon_player
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0

@@ -842,18 +842,22 @@ public class NetworkArmorStand : NetworkArmorStandBehavior
     //{
     //    redraw_armor_stand();
     //}
-
+    /// <summary>
+    /// ineficiend. optimize it later
+    /// </summary>
+    /// <param name="i"></param>
+    /// <param name="retard"></param>
     private void show_weapon(int i, Transform retard)//prikaze weapon k pripada id-ju na pozicijo kot child transforma.
     {
         //zbris vse
         for (int k = 0; k < retard.childCount; k++)//ce dam tle samo destroy ucas kr faila. nimam pojma zakaj. ce dam destroy u update ga ubije, sicer g apa ne. no fucking clue. to sm skor prepičan da je unity bug
         {
-            retard.GetChild(k).gameObject.AddComponent<destructor>();//nalima class na objekt k ne dela druzga ko da mu vsak jeben frame zatezi da nj crkne. cigan jeben
+            Destroy(retard.GetChild(k).gameObject);// crkni cigan jeben
         }
 
         if (i == -1)
         {
-            //ce je prazn nared nc
+            //ce je prazn nared nc ker si itak ze vse zbrisal
         }
         else//ce ni prazn izris to kar mora bit gor
         {
