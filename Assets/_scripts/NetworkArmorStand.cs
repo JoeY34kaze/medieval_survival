@@ -27,7 +27,7 @@ public class NetworkArmorStand : NetworkArmorStandBehavior
 
 
 
-    public int head=-1;
+    public int head = -1;
     public int chest = -1;
     public int hands = -1;
     public int legs = -1;
@@ -57,30 +57,19 @@ public class NetworkArmorStand : NetworkArmorStandBehavior
 
     }
 
-    internal void local_interaction_request(int collider_index, uint server_id) {
+    internal void local_interaction_request(int collider_index, uint server_id)
+    {
         //check if both equipped item and armor stand collider items are empty, else send request
-        if (Is_sending_request_valid(collider_index, server_id)) {
+        if (Is_sending_request_valid(collider_index, server_id))
+        {
             networkObject.SendRpc(RPC_ARMOR_STAND_INTERACTION_REQUEST, Receivers.Server, server_id, collider_index);
         }
     }
 
-    private void Update()
-    {
-        if (item_mismatch()) {//looks reatrded, but it fixes a bug which i believe it's from unity. redraw_armor_stand doesnt destroy child objects even though Destroy() is called correctly.
-            redraw_armor_stand();
-        }
-    }
 
-    private bool item_mismatch()
-    {
-        if (this.weapon_0 == -1 && this.w0.childCount > 0) return true;
-        if (this.weapon_1 == -1 && this.w1.childCount > 0) return true;
-        if (this.shield == -1 && this.sh.childCount > 0) return true;
-        if (this.ranged == -1 && this.ra.childCount > 0) return true;
-        return false;
-    }
 
-    private bool Is_sending_request_valid(int collider_index,uint server_id)
+
+    private bool Is_sending_request_valid(int collider_index, uint server_id)
     {
         NetworkPlayerInventory npi = FindByid(server_id).GetComponent<NetworkPlayerInventory>();
         switch (collider_index)
@@ -130,7 +119,7 @@ public class NetworkArmorStand : NetworkArmorStandBehavior
     /// <param name="server_id"></param>
     internal void local_interaction_get_all_request(uint server_id)
     {
-        networkObject.SendRpc(RPC_ARMOR_STAND_BULK_INTERACTION_REQUEST, Receivers.Server,server_id, (byte)2);
+        networkObject.SendRpc(RPC_ARMOR_STAND_BULK_INTERACTION_REQUEST, Receivers.Server, server_id, (byte)2);
     }
 
     /// <summary>
@@ -142,7 +131,8 @@ public class NetworkArmorStand : NetworkArmorStandBehavior
         networkObject.SendRpc(RPC_ARMOR_STAND_BULK_INTERACTION_REQUEST, Receivers.Server, server_id, (byte)1);
     }
 
-    internal Item.Type getItemTypeFromColliderIndex(int i) {
+    internal Item.Type getItemTypeFromColliderIndex(int i)
+    {
         switch (i)
         {
             case 0:
@@ -203,19 +193,21 @@ public class NetworkArmorStand : NetworkArmorStandBehavior
                     if (npi.getHeadItem() != null)
                     {
                         //perform swap
-                        Item loadout_item = npi.PopItemLoadout(Item.Type.head,0);
+                        Item loadout_item = npi.PopItemLoadout(Item.Type.head, 0);
                         Item onStand = Mapper.instance.getItemById(this.head);
                         this.head = loadout_item.id;
-                        npi.SetLoadoutItem(onStand,0);
+                        npi.SetLoadoutItem(onStand, 0);
                     }
-                    else {
+                    else
+                    {
                         //equip item from stand
                         Item onStand = Mapper.instance.getItemById(this.head);
                         npi.SetLoadoutItem(onStand, 0);
                         this.head = -1;
                     }
                 }
-                else {
+                else
+                {
                     if (npi.getHeadItem() != null)
                     {
                         //place equipped item on stand
@@ -510,7 +502,7 @@ public class NetworkArmorStand : NetworkArmorStandBehavior
         networkObject.SendRpc(RPC_ARMOR_STAND_REFRESH, Receivers.All, this.head, this.chest, this.hands, this.legs, this.feet, this.weapon_0, this.weapon_1, this.shield, this.ranged);
     }
 
-    
+
 
     /// <summary>
     /// poslje client serverju ko se connecta gor. kot response pricakuje rpc armorStandRefresh
@@ -533,15 +525,16 @@ public class NetworkArmorStand : NetworkArmorStandBehavior
         uint server_id = args.GetNext<uint>();
         byte tip = args.GetNext<byte>();
         NetworkPlayerInventory npi = FindByid(server_id).GetComponent<NetworkPlayerInventory>();
-        switch (tip) {
+        switch (tip)
+        {
             case 0://swap
-                swap_in_full(server_id,npi);
+                swap_in_full(server_id, npi);
                 break;
             case 1://give
-                give_all_missing(server_id,npi);
+                give_all_missing(server_id, npi);
                 break;
             case 2://take
-                take_all_missing(server_id,npi);
+                take_all_missing(server_id, npi);
                 break;
             default:
                 //throw new NotImplementedException; ?
@@ -552,10 +545,11 @@ public class NetworkArmorStand : NetworkArmorStandBehavior
         networkObject.SendRpc(RPC_ARMOR_STAND_REFRESH, Receivers.All, this.head, this.chest, this.hands, this.legs, this.feet, this.weapon_0, this.weapon_1, this.shield, this.ranged);
     }
 
-    private void take_all_missing(uint server_id,NetworkPlayerInventory npi)
+    private void take_all_missing(uint server_id, NetworkPlayerInventory npi)
     {
 
-        if (npi.getHeadItem() == null) {
+        if (npi.getHeadItem() == null)
+        {
             if (this.head != -1)
             {
                 npi.SetLoadoutItem(Mapper.instance.getItemById(this.head), 0);
@@ -647,13 +641,14 @@ public class NetworkArmorStand : NetworkArmorStandBehavior
         Item loadout_item;
         //head
 
-        if (this.head == -1) {//samo pogleda, nc ne spremeni
+        if (this.head == -1)
+        {//samo pogleda, nc ne spremeni
             loadout_item = npi.PopItemLoadout(Item.Type.head, 0);//lahko vrne null
-            if(loadout_item!=null)this.head = loadout_item.id;
+            if (loadout_item != null) this.head = loadout_item.id;
         }
 
         //chest
-        if (this.chest ==-1)
+        if (this.chest == -1)
         {//samo pogleda, nc ne spremeni
             loadout_item = npi.PopItemLoadout(Item.Type.chest, 0);//lahko vrne null
             if (loadout_item != null) this.chest = loadout_item.id;
@@ -708,82 +703,68 @@ public class NetworkArmorStand : NetworkArmorStandBehavior
         //head
         Item loadout_item = npi.PopItemLoadout(Item.Type.head, 0);//lahko vrne null
         Item onStand = Mapper.instance.getItemById(this.head); //lahko vrne null
-        if(loadout_item!=null)this.head = loadout_item.id;
-        if (onStand != null) {
-            npi.SetLoadoutItem(onStand, 0);
-            this.head = -1;
-        }
+        if (loadout_item != null) this.head = loadout_item.id;
+        else this.head = -1;
+        if (onStand != null) npi.SetLoadoutItem(onStand, 0);
+        else npi.RemoveItemLoadout(Item.Type.head, 0);
 
         //chest
         loadout_item = npi.PopItemLoadout(Item.Type.chest, 0);//lahko vrne null
         onStand = Mapper.instance.getItemById(this.chest); //lahko vrne null
         if (loadout_item != null) this.chest = loadout_item.id;
-        if (onStand != null)
-        {
-            npi.SetLoadoutItem(onStand, 0);
-            this.chest = -1;
-        }
+        else this.chest = -1;
+        if (onStand != null) npi.SetLoadoutItem(onStand, 0);
+        else npi.RemoveItemLoadout(Item.Type.chest, 0);
         //hands
         loadout_item = npi.PopItemLoadout(Item.Type.hands, 0);//lahko vrne null
         onStand = Mapper.instance.getItemById(this.hands); //lahko vrne null
         if (loadout_item != null) this.hands = loadout_item.id;
-        if (onStand != null) { npi.SetLoadoutItem(onStand, 0);
-            this.hands = -1;
-        }
+        else this.hands = -1;
+        if (onStand != null) npi.SetLoadoutItem(onStand, 0);
+        else npi.RemoveItemLoadout(Item.Type.hands, 0);
         //legs
         loadout_item = npi.PopItemLoadout(Item.Type.legs, 0);//lahko vrne null
         onStand = Mapper.instance.getItemById(this.legs); //lahko vrne null
         if (loadout_item != null) this.legs = loadout_item.id;
-        if (onStand != null)
-        {
-            npi.SetLoadoutItem(onStand, 0);
-            this.legs = -1;
-        }
+        else this.legs = -1;
+        if (onStand != null) npi.SetLoadoutItem(onStand, 0);
+        else npi.RemoveItemLoadout(Item.Type.legs, 0);
         //feet
         loadout_item = npi.PopItemLoadout(Item.Type.feet, 0);//lahko vrne null
         onStand = Mapper.instance.getItemById(this.feet); //lahko vrne null
         if (loadout_item != null) this.feet = loadout_item.id;
-        if (onStand != null)
-        {
-            npi.SetLoadoutItem(onStand, 0);
-            this.feet = -1;
-        }
+        else this.feet = -1;
+        if (onStand != null) npi.SetLoadoutItem(onStand, 0);
+        else npi.RemoveItemLoadout(Item.Type.feet, 0);
         //wep0
         loadout_item = npi.PopItemLoadout(Item.Type.weapon, 0);//lahko vrne null
         onStand = Mapper.instance.getItemById(this.weapon_0); //lahko vrne null
         if (loadout_item != null) this.weapon_0 = loadout_item.id;
-        if (onStand != null)
-        {
-            npi.SetLoadoutItem(onStand, 0);
-            this.weapon_0 = -1;
-        }
+        else this.weapon_0 = -1;
+        if (onStand != null) npi.SetLoadoutItem(onStand, 0);
+        else npi.RemoveItemLoadout(Item.Type.weapon, 0);
         //wep1
         loadout_item = npi.PopItemLoadout(Item.Type.weapon, 1);//lahko vrne null
         onStand = Mapper.instance.getItemById(this.weapon_1); //lahko vrne null
         if (loadout_item != null) this.weapon_1 = loadout_item.id;
-        if (onStand != null)
-        {
-            npi.SetLoadoutItem(onStand, 1);
-            this.weapon_1 = -1;
-        }
+        else this.weapon_1 = -1;
+        if (onStand != null) npi.SetLoadoutItem(onStand, 1);
+        else npi.RemoveItemLoadout(Item.Type.weapon, 1);
         //shield
         loadout_item = npi.PopItemLoadout(Item.Type.shield, 0);//lahko vrne null
         onStand = Mapper.instance.getItemById(this.shield); //lahko vrne null
         if (loadout_item != null) this.shield = loadout_item.id;
-        if (onStand != null)
-        {
-            npi.SetLoadoutItem(onStand, 0);
-            this.shield = -1;
-        }
+        else this.shield = -1;
+        if (onStand != null) npi.SetLoadoutItem(onStand, 0);
+        else npi.RemoveItemLoadout(Item.Type.shield, 0);
         //ranged
         loadout_item = npi.PopItemLoadout(Item.Type.ranged, 0);//lahko vrne null
         onStand = Mapper.instance.getItemById(this.ranged); //lahko vrne null
-        if (loadout_item != null) this.ranged = loadout_item.id;
-        if (onStand != null)
-        {
-            npi.SetLoadoutItem(onStand, 0);
-            this.ranged = -1;
-        }
+        if (loadout_item != null)this.ranged = loadout_item.id;
+        else this.ranged = -1;
+        if (onStand != null) npi.SetLoadoutItem(onStand, 0);
+        else npi.RemoveItemLoadout(Item.Type.ranged, 0);
+
 
     }
 
@@ -846,13 +827,13 @@ public class NetworkArmorStand : NetworkArmorStandBehavior
         //--------------------------------------WEAPONS AND SHIELD-----------------------------------------
 
 
-            show_weapon(this.weapon_0, w0);
+        show_weapon(this.weapon_0, w0);
 
-            show_weapon(this.weapon_1, w1);
+        show_weapon(this.weapon_1, w1);
 
-            show_weapon(this.shield, sh);
+        show_weapon(this.shield, sh);
 
-            show_weapon(this.ranged, ra);
+        show_weapon(this.ranged, ra);
 
 
 
@@ -864,15 +845,17 @@ public class NetworkArmorStand : NetworkArmorStandBehavior
 
     private void show_weapon(int i, Transform retard)//prikaze weapon k pripada id-ju na pozicijo kot child transforma.
     {
+        //zbris vse
+        for (int k = 0; k < retard.childCount; k++)//ce dam tle samo destroy ucas kr faila. nimam pojma zakaj. ce dam destroy u update ga ubije, sicer g apa ne. no fucking clue. to sm skor prepičan da je unity bug
+        {
+            retard.GetChild(k).gameObject.AddComponent<destructor>();//nalima class na objekt k ne dela druzga ko da mu vsak jeben frame zatezi da nj crkne. cigan jeben
+        }
+
         if (i == -1)
         {
-            for (int k = 0; k < retard.childCount; k++)//ce dam tle samo destroy ucas kr faila. nimam pojma zakaj. ce dam destroy u update ga ubije, sicer g apa ne. no fucking clue. to sm skor prepičan da je unity bug
-            {
-                Destroy(retard.GetChild(0).gameObject);
-            }
-            return;
+            //ce je prazn nared nc
         }
-        else
+        else//ce ni prazn izris to kar mora bit gor
         {
 
             GameObject w = null;
