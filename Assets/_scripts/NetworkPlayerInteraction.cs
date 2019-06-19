@@ -141,6 +141,8 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
         target.GetComponent<Interactable_player>().local_player_pickup_request(stats.server_id);
     }
 
+    //------------HEALTHY PLAYER-------------
+
     internal void local_player_interaction_guild_invite_request(GameObject target)
     { 
         target.GetComponent<Interactable_player>().local_player_guild_invite_request(stats.server_id);
@@ -148,7 +150,9 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
 
     internal void local_player_interaction_team_invite_request(GameObject target)
     {
-        target.GetComponent<Interactable_player>().local_player_team_invite_request(stats.server_id);
+       // target.GetComponent<Interactable_player>().local_player_team_invite_request(stats.server_id);tole zbrisat ker ta shit negre tukej
+        stats.localTeamInviteRequest(target.GetComponent<NetworkPlayerStats>().server_id);
+
     }
 
     //                                                                                       -----------------ARMOR STAND---------------------

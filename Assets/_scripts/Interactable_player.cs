@@ -51,11 +51,11 @@ public class Interactable_player : Interactable
         Debug.Log(" ReviveDownedPlayersponse : (" + args.Info.SendingPlayer.NetworkId + " | " + GetComponent<NetworkPlayerStats>().server_id + ")");
         GetComponent<NetworkPlayerStats>().handle_player_pickup();
     }
-
+    /*
     internal void local_player_team_invite_request(uint server_id)
     {
         throw new NotImplementedException();
-    }
+    }*/
 
     internal void local_player_guild_invite_request(uint server_id)
     {

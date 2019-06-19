@@ -12,7 +12,7 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
     public bool inDodge = false;
     public bool downed = false;
     public bool dead = false;
-    private float max_health = 255;
+    public float max_health = 255;
     public float health = 255;//for debug purposes, its not being called from any other script that i made, its public just so that i can see it easier in inspector
     public Image healthBar;
 
@@ -31,6 +31,10 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
     private NetworkPlayerInventory npi;
 
     public GameObject[] sound_effects_on_player;
+
+    public decicions_handler_ui decision_handler;
+
+    private uint[] team; //array networkId-jev team memberjev. server vedno hrani to vrednost za vse playerje. drugi dobijo samo update od serverja
 
     /*
      HOW DAMAGE WORKS RIGHT NOW:
@@ -408,7 +412,214 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
         //izris prica al karkoli bo ze letel po zraku do tvojga otroka da ga possessa(!b)
     }
 
+    /// <summary>
+    /// poklice server da poslje nmovo stanje vsem team memberjim. tud sam sebi ce  je v teamu
+    /// </summary>
+    /// <param name="args"></param>
+    public override void UpdateTeam(RpcArgs args)
+    {
+        if (args.Info.SendingPlayer.NetworkId != 0) return;
+
+        String updatedMemebers = args.GetNext<string>();
+        this.team = stringToTeam(updatedMemebers);
+
+        GetComponentInChildren<local_team_panel_handler>().refreshAll(this.team);
+    }
 
 
-    //treba je nekak nrdit da bo server povedov agresorju da nj izrise damage text. zaenkrat to vseskup server rihta in lokalni player sploh neve ce je naredu damage. to bo mal tezje kot sm mislu. mrde podat argument zravn rpcja za nastavlat dmg al pa mrde nov locen rpc nrdit. hmm
+    private uint[] stringToTeam(string s) {
+        string[] ss = s.Split('|');
+        uint[] rez = new uint[ss.Length - 1];//zacne se z "" zato en slot sfali
+        for (int i = 1; i < ss.Length; i++)
+        {//zacne z 1 ker je ss[0] = ""
+            int k = -1;
+            Int32.TryParse(ss[i], out k);
+            rez[i - 1] = (uint)k;
+        }
+        return rez;
+    }
+
+    private String teamToString(uint[] t) {
+        string s = "";
+        for (int i = 0; i < t.Length; i++)
+        {
+                s = s + "|" + t[i];
+
+        }
+        //Debug.Log(s);
+        return s;
+    }
+
+    internal void localTeamInviteRequest(uint other) {
+        if (networkObject.IsOwner)
+            networkObject.SendRpc(RPC_TEAM_INVITE_REQUEST, Receivers.Server, other);
+    }
+
+    /// <summary>
+    /// dobi server, poslje player k hoce invitat druzga playerja. id druzga playerja je u args
+    /// </summary>
+    /// <param name="args"></param>
+    public override void teamInviteRequest(RpcArgs args)
+    {
+        if (networkObject.IsServer && args.Info.SendingPlayer.NetworkId==networkObject.Owner.NetworkId) {
+            uint other = args.GetNext<uint>();
+
+            //ce je clovk ze u teamu skipej?????
+            if (FindByid(other).GetComponent<NetworkPlayerStats>().team.Length > 0) {
+                Debug.Log("PLAYER THAT YOU TRIED INVITING ALREADY HAS A TEAM. Zaenkrat user ne dobi nbenga responsa. treba nek rpc nrdit");
+                return;
+            }
+
+            if (!isTeamMember(other)) {
+                //request invite to team
+
+                lock (myNetWorker.Players)
+                {
+                    
+                    myNetWorker.IteratePlayers((player) =>
+                    {
+                        if (player.NetworkId == other) //passive target
+                        {
+                            networkObject.SendRpc(player, RPC_TEAM_INVITE_REQUEST_TO_OTHER, args.Info.SendingPlayer.NetworkId); //mormo poslat id zravn ker ne posilja ta player ampak server
+                            return;
+                        }
+                    });
+
+                }
+
+
+
+            }
+        }
+        
+    }
+
+    private bool isTeamMember(uint other) {
+        if (this.team.Length == 0 || this.team.Length == 1) return false;
+        foreach (uint i in this.team)
+            if (i == other) return true;
+
+        return false;
+    }
+
+    /// <summary>
+    /// poslje server ownerju tega k ga hocmo invitat
+    /// </summary>
+    /// <param name="args"></param>
+    public override void teamInviteRequestToOther(RpcArgs args)
+    {
+        if (args.Info.SendingPlayer.NetworkId == 0 && networkObject.IsOwner) {
+            uint other = args.GetNext<uint>();
+            GameObject other_gameobject = FindByid(other);
+
+            if (this.team.Length > 0) return;//smo ze u teamu
+
+
+            ///izris eno panelo kjer te vprasa ce se hocs joinat. podatke dobimo iz other_gameobject
+            this.decision_handler.draw_team_invite_decision(other_gameobject);
+
+            //response posljemo kot RPC_TEAM_INVITE_OTHER_RESPONSE,otherplayerNetworkId,bool -> LocalTeamRequestResponse(uint id, bool resp) {
+        }
+    }
+
+
+    /// <summary>
+    /// metoda se klice, ko player klikne accept/decline na paneli, ki jo dobi k  ga en invita u team. posle odgovor serverju kaj si je zmislu
+    /// </summary>
+    /// <param name="id"></param>
+    /// <param name="resp"></param>
+    internal void LocalTeamRequestResponse(uint id, bool resp)
+    {
+        if (networkObject.IsOwner)
+            networkObject.SendRpc(RPC_TEAM_INVITE_OTHER_RESPONSE, Receivers.Server, id, resp);
+    }
+
+    public GameObject FindByid(uint targetNetworkId) //koda kopširana v network_body.cs in Interactable.cs
+    {
+        Debug.Log("interactable.findplayerById");
+        Debug.Log(targetNetworkId);
+        foreach (GameObject p in GameObject.FindGameObjectsWithTag("Player"))
+        {//very fucking inefficient ampak uno k je spodej nedela. nevem kaj je fora une kode ker networker,NetworkObjects niso playerji, so networkani objekti k drzijo playerje in njihova posizija znotraj lista se spreminja. kojikurac
+            if (p.GetComponent<NetworkPlayerStats>().server_id == targetNetworkId) return p;
+        }
+        Debug.Log("TARGET PLAYER NOT FOUND!");
+        // NetworkBehavior networkBehavior = (NetworkBehavior)NetworkManager.Instance.Networker.NetworkObjects[(uint)targetNetworkId].AttachedBehavior;
+        // GameObject obj = networkBehavior.gameObject;
+
+
+        return null;
+    }
+
+    /// <summary>
+    /// poslje un player k je invitan odgovor serverju. server pohendla stvar zdj ko ve vse kaksna je stvar. na koncu poslje novo stanje vsem
+    /// </summary>
+    /// <param name="args"></param>
+    public override void teamInviteOtherResponse(RpcArgs args)
+    {
+        if (networkObject.IsServer && args.Info.SendingPlayer.NetworkId == networkObject.Owner.NetworkId) {
+            uint other = args.GetNext<uint>();//originalni player
+            bool decision = args.GetNext<bool>();
+
+            if (!check_legitimacy_of_response(other, args.Info.SendingPlayer.NetworkId)) return;
+
+            if (decision) {
+                //sestavi nov team za ta objekt. poglej za playerja k je u originalu poslov invitew, in dodaj tega playerja v njegov team. posl update vsem, tud serverju.
+                uint[] new_team = FindByid(other).GetComponent<NetworkPlayerStats>().team;//server mora zmer hrant to vrednost
+                if (new_team.Length < 2)
+                {
+                    new_team = new uint[2];
+                    new_team[0] = other;
+                    new_team[1] = args.Info.SendingPlayer.NetworkId;//mora bit isto kot this.server_id ce sm sigurn..
+                }
+                else {
+                    uint[] temp_team = new uint[new_team.Length + 1];
+                    for (int i = 0; i < new_team.Length; i++)
+                        temp_team[i] = new_team[i];
+                    temp_team[new_team.Length] = args.Info.SendingPlayer.NetworkId;
+                    new_team = temp_team;
+                }
+
+                //posl networkupdate vsem k so u teamu + server
+                string s = teamToString(new_team);
+                int count = 0;
+                lock (myNetWorker.Players)
+                {
+
+                    myNetWorker.IteratePlayers((player) =>
+                    {
+                        if (player.NetworkId == 0 || isTeamMemberForNetworkUpdate(new_team,player.NetworkId)) //passive target
+                        {
+                            networkObject.SendRpc(player, RPC_UPDATE_TEAM, s);
+                            count++;
+                            if (count >= new_team.Length+1) return;//+1 je zato ker je treba zmer poslat tud serverju. ce je server v teamu bo zal iteriral cez vse playerje, sj jih nebo dost so i dont give a fuck
+                        }
+                    });
+
+                }
+
+            }
+        }
+    }
+
+    //preveri ali je rpc response, ki je prsu od networkId legitimen, tj- ali odgovarja na nek pending request, ali se hoce ilegalno utaknit v nek team.
+    private bool check_legitimacy_of_response(uint other, uint networkId)
+    {
+        Debug.LogError("NOT IMPLEMENTED!");
+        return true;
+    }
+
+    /// <summary>
+    /// ne primerja prot this.team, ampak server gleda komu poslat rpc za update teama
+    /// </summary>
+    /// <param name="new_team"></param>
+    /// <param name="networkId"></param>
+    /// <returns></returns>
+    private bool isTeamMemberForNetworkUpdate(uint[] new_team, uint networkId)
+    {
+        foreach (uint i in new_team)
+            if (i == networkId)
+                return true;
+        return false;
+    }
+
 }
