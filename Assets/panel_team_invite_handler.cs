@@ -13,11 +13,22 @@ public class panel_team_invite_handler : MonoBehaviour
     private uint id_other;
 
 
-    public void init(GameObject player_other) {
-        info.text = "You are being invited to team by : " + player_other.GetComponent<NetworkPlayerStats>().player_name;
-        this.id_other = player_other.GetComponent<NetworkPlayerStats>().server_id;
+    public void init2()
+    {
+        info.text = "You are being invited to team by : " ;
+        this.id_other = 0;
+        GetComponent<RectTransform>().offsetMin = new Vector2(0, 0);
+        GetComponent<RectTransform>().offsetMax = new Vector2(0, 0);
     }
 
+    public void init(GameObject player_other)
+    {
+        info.text = "You are being invited to team by : " + player_other.GetComponent<NetworkPlayerStats>().player_name;
+        this.id_other = player_other.GetComponent<NetworkPlayerStats>().server_id;
+        GetComponent<RectTransform>().offsetMin = new Vector2(0, 0);
+        GetComponent<RectTransform>().offsetMax = new Vector2(0, 0);
+        
+    }
     public void declineClick() {
 
         transform.root.GetComponent<NetworkPlayerStats>().LocalTeamRequestResponse(this.id_other, false);

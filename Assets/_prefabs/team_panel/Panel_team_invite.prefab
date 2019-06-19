@@ -349,6 +349,7 @@ GameObject:
   - component: {fileID: 1139275714274828622}
   - component: {fileID: 7170752639575607383}
   - component: {fileID: 874010648542663634}
+  - component: {fileID: 1154666085971402731}
   m_Layer: 5
   m_Name: Panel_team_invite
   m_TagString: Untagged
@@ -430,6 +431,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   info: {fileID: 6726686621679548901}
   countdown: {fileID: 7161365486239377756}
+--- !u!225 &1154666085971402731
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6995376778805785654}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 1
 --- !u!1 &7358326139759726007
 GameObject:
   m_ObjectHideFlags: 0

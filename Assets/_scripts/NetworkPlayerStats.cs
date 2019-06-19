@@ -453,6 +453,7 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
     internal void localTeamInviteRequest(uint other) {
         if (networkObject.IsOwner)
             networkObject.SendRpc(RPC_TEAM_INVITE_REQUEST, Receivers.Server, other);
+       
     }
 
     /// <summary>
@@ -464,13 +465,15 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
         if (networkObject.IsServer && args.Info.SendingPlayer.NetworkId==networkObject.Owner.NetworkId) {
             uint other = args.GetNext<uint>();
 
+            NetworkPlayerStats other_player_stats = FindByid(other).GetComponent<NetworkPlayerStats>();
             //ce je clovk ze u teamu skipej?????
-            if (FindByid(other).GetComponent<NetworkPlayerStats>().team.Length > 0) {
-                Debug.Log("PLAYER THAT YOU TRIED INVITING ALREADY HAS A TEAM. Zaenkrat user ne dobi nbenga responsa. treba nek rpc nrdit");
-                return;
-            }
+            if (other_player_stats.team!=null)
+                if (other_player_stats.team.Length > 0) {
+                    Debug.Log("PLAYER THAT YOU TRIED INVITING ALREADY HAS A TEAM. Zaenkrat user ne dobi nbenga responsa. treba nek rpc nrdit");
+                    return;
+                }
 
-            if (!isTeamMember(other)) {
+            if (!isMyTeamMember(other)) {
                 //request invite to team
 
                 lock (myNetWorker.Players)
@@ -480,7 +483,7 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
                     {
                         if (player.NetworkId == other) //passive target
                         {
-                            networkObject.SendRpc(player, RPC_TEAM_INVITE_REQUEST_TO_OTHER, args.Info.SendingPlayer.NetworkId); //mormo poslat id zravn ker ne posilja ta player ampak server
+                            other_player_stats.serverSide_TeamInviteRequestToOther(player, args.Info.SendingPlayer.NetworkId);
                             return;
                         }
                     });
@@ -493,9 +496,17 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
         }
         
     }
+    /// <summary>
+    /// metoda nrjena zato ker ce hocmo klicat playerja X in ce hocmo da se oglas owner, mormo klicat z skripte, katere owner je player X
+    /// </summary>
+    void serverSide_TeamInviteRequestToOther(NetworkingPlayer player, uint sender) {
+        if(networkObject.IsServer)
+            networkObject.SendRpc(player, RPC_TEAM_INVITE_REQUEST_TO_OTHER, sender); //mormo poslat id zravn ker ne posilja ta player ampak server
+    }
 
-    private bool isTeamMember(uint other) {
-        if (this.team.Length == 0 || this.team.Length == 1) return false;
+    private bool isMyTeamMember(uint other) {
+        if (this.team == null) return false;
+        if (this.team.Length == 1) return false;
         foreach (uint i in this.team)
             if (i == other) return true;
 
@@ -512,7 +523,8 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
             uint other = args.GetNext<uint>();
             GameObject other_gameobject = FindByid(other);
 
-            if (this.team.Length > 0) return;//smo ze u teamu
+            if (this.team !=null)
+                if (this.team.Length > 0) return;//smo ze u teamu
 
 
             ///izris eno panelo kjer te vprasa ce se hocs joinat. podatke dobimo iz other_gameobject
@@ -540,6 +552,7 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
         Debug.Log(targetNetworkId);
         foreach (GameObject p in GameObject.FindGameObjectsWithTag("Player"))
         {//very fucking inefficient ampak uno k je spodej nedela. nevem kaj je fora une kode ker networker,NetworkObjects niso playerji, so networkani objekti k drzijo playerje in njihova posizija znotraj lista se spreminja. kojikurac
+            Debug.Log(p.GetComponent<NetworkPlayerStats>().server_id);
             if (p.GetComponent<NetworkPlayerStats>().server_id == targetNetworkId) return p;
         }
         Debug.Log("TARGET PLAYER NOT FOUND!");
@@ -565,7 +578,8 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
             if (decision) {
                 //sestavi nov team za ta objekt. poglej za playerja k je u originalu poslov invitew, in dodaj tega playerja v njegov team. posl update vsem, tud serverju.
                 uint[] new_team = FindByid(other).GetComponent<NetworkPlayerStats>().team;//server mora zmer hrant to vrednost
-                if (new_team.Length < 2)
+
+                if (new_team ==null || new_team.Length < 2)
                 {
                     new_team = new uint[2];
                     new_team[0] = other;
@@ -589,7 +603,8 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
                     {
                         if (player.NetworkId == 0 || isTeamMemberForNetworkUpdate(new_team,player.NetworkId)) //passive target
                         {
-                            networkObject.SendRpc(player, RPC_UPDATE_TEAM, s);
+                            
+                            FindByid(player.NetworkId).GetComponent<NetworkPlayerStats>().serverSide_updateTeamhelper(player, s);
                             count++;
                             if (count >= new_team.Length+1) return;//+1 je zato ker je treba zmer poslat tud serverju. ce je server v teamu bo zal iteriral cez vse playerje, sj jih nebo dost so i dont give a fuck
                         }
@@ -600,6 +615,16 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
             }
         }
     }
+    /// <summary>
+    /// teamInviteOtherResponse ->find owners player object-> send update to owner
+    /// </summary>
+    /// <param name="player"></param>
+    /// <param name="s"></param>
+    private void serverSide_updateTeamhelper(NetworkingPlayer player, string s) {
+        if(networkObject.IsServer)
+            networkObject.SendRpc(player, RPC_UPDATE_TEAM, s);
+    }
+
 
     //preveri ali je rpc response, ki je prsu od networkId legitimen, tj- ali odgovarja na nek pending request, ali se hoce ilegalno utaknit v nek team.
     private bool check_legitimacy_of_response(uint other, uint networkId)

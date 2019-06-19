@@ -111,7 +111,7 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
         {
             if (stats.inDodge)
             {
-                Debug.Log("dodging "+this.dodge_direction);
+                //Debug.Log("dodging "+this.dodge_direction);
 
                 next_position = transform.position;
 

@@ -16,10 +16,13 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
     public Interactable_radial_menu menu;
     private bool interacting = false;
 
+    public GameObject canvas;
     private void Start()
     {
         stats = GetComponent<NetworkPlayerStats>();
         networkPlayerInventory = GetComponent<NetworkPlayerInventory>();
+
+        
     }
 
     protected override void NetworkStart()
@@ -27,6 +30,8 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
         base.NetworkStart();
         // TODO:  Your initialization code that relies on network setup for this object goes here
         myNetWorker = GameObject.Find("NetworkManager(Clone)").GetComponent<NetworkManager>().Networker;
+        if(!networkObject.IsOwner)
+            Destroy(canvas);
     }
 
     // Update is called once per frame
