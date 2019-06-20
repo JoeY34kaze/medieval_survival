@@ -103,9 +103,14 @@ public class local_team_panel_handler : MonoBehaviour
 
 
     public void refreshHp(uint player, float newHp) {//inneficient. optimize later
-        foreach (Transform child in transform)
-            if (child.GetComponent<team_memeber_panel_helper>().id_player == player)
-                child.GetComponent<team_memeber_panel_helper>().changeHp(newHp);
+        if (transform.childCount > 2)
+            foreach (Transform child in transform)
+            {
+                team_memeber_panel_helper th = child.GetComponent<team_memeber_panel_helper>();
+                if (th != null)
+                    if (th.id_player == player)
+                        th.changeHp(newHp);
+            }
     }
 
     public GameObject FindByid(uint targetNetworkId) //koda kopširana v network_body.cs in Interactable.cs
