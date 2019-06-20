@@ -7,30 +7,46 @@ using UnityEngine.UI;
 public class local_team_panel_handler : MonoBehaviour
 {
     public GameObject panel_prefab;
-
+    public GameObject leave_button;
     /// <summary>
     /// metoda v celoti updejta UI za team. pricakuje da dobi vse podatke, ker je metoda lokalna. ker je v celoti lokalno je array lahko neurejen in bo metoda sortirala po networkId predn izrise.
     ///vhod je array uint[networkId]
     /// </summary>
     public void refreshAll(uint[] my_boys) {//bols blo nrdit da e sam preshiftajo ko se spremeni ampak to bo ksnej se jebat
-        //sortirej nekak
-        Array.Sort(my_boys);
-
-        //kill the current panels
-        foreach (Transform c in transform)
-            Destroy(c.gameObject);
+             
 
 
-        for (int i = 0; i < my_boys.Length; i++) {
-            GameObject p = GameObject.Instantiate(panel_prefab);
+        for (int i = 0; i < this.transform.childCount; i++) {
+            Debug.Log(transform.GetChild(i).name);
+            Destroy(transform.GetChild(i).gameObject);
+        }
+
+
+
+        if (my_boys != null)//ce je null smo zakljucli. smo rabil samo zbrisat
+        {
+
+            //sortirej nekak
+            Array.Sort(my_boys);
+
+
+            //----------------------BUTTON-----------------
+            GameObject p = GameObject.Instantiate(leave_button);
             p.transform.SetParent(transform);
-            Text t=p.GetComponentInChildren<Text>();
-            NetworkPlayerStats s = FindByid(my_boys[i]).GetComponent<NetworkPlayerStats>();
-            float max = s.max_health;
-            float current = s.health;
-            p.transform.GetChild(0).GetChild(0).GetComponent<Image>().fillAmount = current / (max);
-            p.transform.GetChild(0).GetChild(0).GetChild(0).GetComponent<Text>().text = s.player_name.text;
-            p.GetComponent<team_memeber_panel_helper>().init(my_boys[i]);
+
+            //---------------------PANELS----------------------
+            for (int i = 0; i < my_boys.Length; i++)
+            {
+                p = GameObject.Instantiate(panel_prefab);
+                p.transform.SetParent(transform);
+                Text t = p.GetComponentInChildren<Text>();
+                NetworkPlayerStats s = FindByid(my_boys[i]).GetComponent<NetworkPlayerStats>();
+                float max = s.max_health;
+                float current = s.health;
+                p.transform.GetChild(0).GetChild(0).GetComponent<Image>().fillAmount = current / (max);
+                p.transform.GetChild(0).GetChild(0).GetChild(0).GetComponent<Text>().text = s.player_name.text;
+                p.GetComponent<team_memeber_panel_helper>().init(my_boys[i]);
+            }
         }
     }
 

@@ -411,7 +411,7 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
     }
 
     /// <summary>
-    /// poklice server da poslje nmovo stanje vsem team memberjim. tud sam sebi ce  je v teamu
+    /// poklice server da poslje nmovo stanje vsem team memberjim. tud sam sebi ce  je v teamu. new_team je lahko null
     /// </summary>
     /// <param name="args"></param>
     public override void UpdateTeam(RpcArgs args)
@@ -420,12 +420,13 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
 
         String updatedMemebers = args.GetNext<string>();
         this.team = stringToTeam(updatedMemebers);
-
         GetComponentInChildren<local_team_panel_handler>().refreshAll(this.team);
     }
 
 
     private uint[] stringToTeam(string s) {
+        if (s == null) return null;
+
         string[] ss = s.Split('|');
         uint[] rez = new uint[ss.Length - 1];//zacne se z "" zato en slot sfali
         for (int i = 1; i < ss.Length; i++)
@@ -438,6 +439,8 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
     }
 
     private String teamToString(uint[] t) {
+        if (t == null) return "";
+
         string s = "";
         for (int i = 0; i < t.Length; i++)
         {
@@ -676,25 +679,8 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
                 }
 
                 //posl networkupdate vsem k so u teamu + server
-                
-                int count = 0;
-                lock (myNetWorker.Players)
-                {
-
-                    myNetWorker.IteratePlayers((player) =>
-                    {
-                        if (isTeamMemberForNetworkUpdate(new_team, player.NetworkId)) //team memberji. vsakemu memberju nastav kdo so njegovi team memberji, tud na serverjevi skripti
-                        {
-                            NetworkPlayerStats nps = FindByid(player.NetworkId).GetComponent<NetworkPlayerStats>();
-                            
-                            nps.team = new_team ;//da zrihta na serverju
-                            nps.serverSide_updateTeamhelper();//da zrihta na clientu
-                            count++;
-                            if (count >= new_team.Length + 1) return;//+1 je zato ker je treba zmer poslat tud serverju. ce je server v teamu bo zal iteriral cez vse playerje, sj jih nebo dost so i dont give a fuck
-                        }
-                    });
-
-                }
+                serverSide_send_team_update(new_team, new_team, false, other);//tle sta parametra enaka, pri leavanju skupine sta razlicna
+               
 
             }
             else {//player declined or timed out.
@@ -735,4 +721,78 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
     }
 
 
+    //-----------------------------LEAVE BUTTON-------------
+    internal void local_tryToLeaveTeam()
+    {
+        if (networkObject.IsOwner) {
+            networkObject.SendRpc(RPC_TEAM_LEAVE_REQUEST, Receivers.Server);
+        }
+    }
+
+    public override void teamLeaveRequest(RpcArgs args)
+    {
+        if (networkObject.IsServer && args.Info.SendingPlayer.NetworkId == networkObject.Owner.NetworkId) {
+            if (this.team != null)
+            {
+                uint[] new_team;
+                if (this.team.Length < 3) new_team = null;
+                else//vsaj 3je elementi so not
+                    new_team = remove_from_uint(this.team, args.Info.SendingPlayer.NetworkId);
+                serverSide_send_team_update(new_team, this.team, true, args.Info.SendingPlayer.NetworkId);
+            }
+            else {
+                //poglej da je res vrzen iz vsah vn in posl sinhronizacijo u network ce si kje naredu spremembo. to se nebi smel nikol izvest sicer..
+                uint[] x = new uint[1];
+                x[0] = args.Info.SendingPlayer.NetworkId;
+                serverSide_send_team_update(null, x, true, args.Info.SendingPlayer.NetworkId);//posl senderju zahtevo da nj neha bit retard pa nj poupdejta
+            }
+        }
+    }
+
+    private uint[] remove_from_uint(uint[] team, uint id)
+    {
+        uint[] n = new uint[team.Length - 1];
+        int c= 0;
+        foreach (uint u in team)
+            if (u != id)
+                n[c++] = u;
+        return n;
+    }
+
+    private void serverSide_send_team_update(uint[] new_team, uint[] players_to_update, bool deleting, uint requester) {
+        int count = 0;
+        lock (myNetWorker.Players)
+        {
+
+            myNetWorker.IteratePlayers((player) =>
+            {
+                if (isTeamMemberForNetworkUpdate(players_to_update, player.NetworkId)) //team memberji. vsakemu memberju nastav kdo so njegovi team memberji, tud na serverjevi skripti
+                {
+                    NetworkPlayerStats nps = FindByid(player.NetworkId).GetComponent<NetworkPlayerStats>();
+
+
+                    if (!deleting)
+                    {
+                        nps.team = new_team;//da zrihta na serverju
+                        nps.serverSide_updateTeamhelper();//da zrihta na clientu
+                    }
+                    else {
+                        if (player.NetworkId != requester)
+                        {
+                            nps.team = new_team;//da zrihta na serverju
+                            nps.serverSide_updateTeamhelper();//da zrihta na clientu
+
+                        }
+                        else {//mora poslat null sicer se zmer vidi team kar je ostal od njega
+                            nps.team = null;//da zrihta na serverju
+                            nps.serverSide_updateTeamhelper();//da zrihta na clientu
+                        }
+                    }
+                    count++;
+                    if (count >= players_to_update.Length) return;//ce je server v teamu bo zal iteriral cez vse playerje, sj jih nebo dost so i dont give a fuck
+                }
+            });
+
+        }
+    }
 }
