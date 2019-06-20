@@ -12,7 +12,7 @@ public class local_team_panel_handler : MonoBehaviour
     /// metoda v celoti updejta UI za team. pricakuje da dobi vse podatke, ker je metoda lokalna. ker je v celoti lokalno je array lahko neurejen in bo metoda sortirala po networkId predn izrise.
     ///vhod je array uint[networkId]
     /// </summary>
-    public void refreshAll(uint[] my_boys) {
+    public void refreshAll(uint[] my_boys) {//bols blo nrdit da e sam preshiftajo ko se spremeni ampak to bo ksnej se jebat
         //sortirej nekak
         Array.Sort(my_boys);
 
@@ -30,7 +30,14 @@ public class local_team_panel_handler : MonoBehaviour
             float current = s.health;
             p.transform.GetChild(0).GetChild(0).GetComponent<Image>().fillAmount = current / (max);
             p.transform.GetChild(0).GetChild(0).GetChild(0).GetComponent<Text>().text = s.player_name.text;
+            p.GetComponent<team_memeber_panel_helper>().init(my_boys[i]);
         }
+    }
+
+    public void refreshHp(uint player, float newHp) {//inneficient. optimize later
+        foreach (Transform child in transform)
+            if (child.GetComponent<team_memeber_panel_helper>().id_player == player)
+                child.GetComponent<team_memeber_panel_helper>().changeHp(newHp);
     }
 
     public GameObject FindByid(uint targetNetworkId) //koda kopširana v network_body.cs in Interactable.cs

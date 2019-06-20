@@ -35,6 +35,7 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
     public GameObject[] sound_effects_on_player;
 
     public decicions_handler_ui decision_handler;
+    public local_team_panel_handler team_panel;
 
     private uint[] team; //array networkId-jev team memberjev. server vedno hrani to vrednost za vse playerje. drugi dobijo samo update od serverja
     private List<uint> already_processed_inviters;
@@ -154,8 +155,8 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
         if (!networkObject.IsServer) return;
 
         // Debug.Log("Spawning body");
-
-        GetComponent<NetworkPlayerInventory>().backpackSpot.GetComponentInChildren<NetworkBackpack>().local_server_BackpackUnequip();
+        if(GetComponent<NetworkPlayerInventory>().backpackSpot.GetComponentInChildren<NetworkBackpack>()!=null)
+            GetComponent<NetworkPlayerInventory>().backpackSpot.GetComponentInChildren<NetworkBackpack>().local_server_BackpackUnequip();
 
         spawn_UMA_body(transform.position, get_UMA_to_string(), player_id);//poslje rpc da nrdi uma body in disabla renderer za playerja v enem
                                                                            // server mora vsem sporocit da nj nehajo renderat playerja k je lihkar umru ker ga je vizualno zamenjov ragdoll
@@ -320,8 +321,8 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
 
     public override void setHealthPassiveTarget(RpcArgs args)
     {
-        if (!networkObject.IsOwner) {
-            Debug.LogError("Server sent request for health change to wrong client. client that received it : "+this.server_id);
+        if (!networkObject.IsOwner && args.Info.SendingPlayer.NetworkId!=0) {
+            
             return;
         }
        // if (networkObject.IsOwner)
@@ -340,7 +341,8 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
         string tag = args.GetNext<string>();
         if (!tag.Equals("block_player") && !tag.Equals("revive")) GameObject.Instantiate(this.sound_effects_on_player[0]);
         this.healthBar.fillAmount = this.health / (this.max_health);
-            networkObject.SendRpc(RPC_SET_HEALTH_ON_OTHERS,Receivers.Others, this.health, tag);
+        this.team_panel.refreshHp(this.server_id, this.healthBar.fillAmount);
+        networkObject.SendRpc(RPC_SET_HEALTH_ON_OTHERS,Receivers.Others, this.health, tag);
         //}
     }
 
@@ -360,6 +362,10 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
 
 
         this.healthBar.fillAmount =this.health / (this.max_health);
+
+       
+        FindByid(NetworkManager.Instance.Networker.Me.NetworkId).GetComponent<NetworkPlayerStats>().team_panel.refreshHp(this.server_id, this.healthBar.fillAmount);
+
     }
 
     public override void ReceiveNotificationForDamageDealt(RpcArgs args)//tole funkcijo dobi owner agresor objekta in izrise na ekran da je naredu damage, rpc poslje server v metodi take_damage_server_authority
