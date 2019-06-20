@@ -13,13 +13,6 @@ public class panel_team_invite_handler : MonoBehaviour
     private uint id_other;
 
 
-    public void init2()
-    {
-        info.text = "You are being invited to team by : " ;
-        this.id_other = 0;
-        GetComponent<RectTransform>().offsetMin = new Vector2(0, 0);
-        GetComponent<RectTransform>().offsetMax = new Vector2(0, 0);
-    }
 
     public void init(GameObject player_other)
     {
@@ -27,7 +20,7 @@ public class panel_team_invite_handler : MonoBehaviour
         this.id_other = player_other.GetComponent<NetworkPlayerStats>().server_id;
         GetComponent<RectTransform>().offsetMin = new Vector2(0, 0);
         GetComponent<RectTransform>().offsetMax = new Vector2(0, 0);
-        
+        StartCoroutine(Timer());
     }
     public void declineClick() {
 
@@ -44,6 +37,7 @@ public class panel_team_invite_handler : MonoBehaviour
     {
         for (int i = 60; i >= 0; i -= 1)
         {
+            countdown.text = "TIMEOUT : " + i + "s";
             yield return new WaitForSecondsRealtime(1);
         }
         Debug.Log("Received no response! declining request to team!");

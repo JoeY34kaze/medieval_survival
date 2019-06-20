@@ -4,6 +4,8 @@ using BeardedManStudios.Forge.Networking.Generated;
 using BeardedManStudios.Forge.Networking;
 using BeardedManStudios.Forge.Networking.Unity;
 using System;
+using System.Collections.Generic;
+using System.Collections;
 
 public class NetworkPlayerStats : NetworkPlayerStatsBehavior
 {
@@ -35,7 +37,8 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
     public decicions_handler_ui decision_handler;
 
     private uint[] team; //array networkId-jev team memberjev. server vedno hrani to vrednost za vse playerje. drugi dobijo samo update od serverja
-
+    private List<uint> already_processed_inviters;
+    private bool team_invite_pending = false;
     /*
      HOW DAMAGE WORKS RIGHT NOW:
      na serverju se detektira hit. trenutno edina skripta ki to dela je Weapon_Collider_handler, ki poklice tole metodo. ta metoda izracuna nov health od tega k je bil napaden. to vrednost poslje
@@ -456,6 +459,40 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
        
     }
 
+    private void serverSide_sendNegativeTeamResponse(uint other) {
+        lock (myNetWorker.Players)
+        {
+
+            myNetWorker.IteratePlayers((player) =>
+            {
+                if (player.NetworkId == other) //passive target
+                {
+                    serverSide_sendNegativeTeamResponse(player);
+                    return;
+                }
+            });
+
+        }
+    }
+    private void serverSide_sendNegativeTeamResponse(NetworkingPlayer p)
+    {
+        if (networkObject.IsServer)
+            FindByid(p.NetworkId).GetComponent<NetworkPlayerStats>().negative_team_dejanski_rpc(p);
+    }
+
+    private void negative_team_dejanski_rpc(NetworkingPlayer p)
+    {
+        if (networkObject.IsServer)
+            networkObject.SendRpc(p, RPC_TEAM_INVITE_NEGATIVE_RESPONSE);
+    }
+    public override void teamInviteNegativeResponse(RpcArgs args)
+    {
+        if (networkObject.IsOwner && args.Info.SendingPlayer.NetworkId == 0) {
+            //nekak uporabniku prkazat da je failal
+            Debug.LogError("tole bo treba dopolnit pri implementaciji chata. v chat naj izpise da je request za team failov.");
+        }
+    }
+
     /// <summary>
     /// dobi server, poslje player k hoce invitat druzga playerja. id druzga playerja je u args
     /// </summary>
@@ -467,11 +504,26 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
 
             NetworkPlayerStats other_player_stats = FindByid(other).GetComponent<NetworkPlayerStats>();
             //ce je clovk ze u teamu skipej?????
-            if (other_player_stats.team!=null)
-                if (other_player_stats.team.Length > 0) {
-                    Debug.Log("PLAYER THAT YOU TRIED INVITING ALREADY HAS A TEAM. Zaenkrat user ne dobi nbenga responsa. treba nek rpc nrdit");
-                    return;
+            bool fail = false;
+            if (other_player_stats.team_invite_pending == false)
+            {
+                if (other_player_stats.team != null)
+                {
+                    if (other_player_stats.team.Length > 0)
+                    {
+                        Debug.Log("PLAYER team response negative");
+
+                        serverSide_send_full_team_notification(other);
+
+                        fail = true;
+                    }
                 }
+            }
+            else {
+                fail = true;
+            }
+            if (fail) serverSide_sendNegativeTeamResponse(args.Info.SendingPlayer);
+
 
             if (!isMyTeamMember(other)) {
                 //request invite to team
@@ -483,6 +535,8 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
                     {
                         if (player.NetworkId == other) //passive target
                         {
+                            other_player_stats.team_invite_pending = true;
+                            StartCoroutine(teamInviteLock(other_player_stats));//mislen je da lahko dobi samo en team request naenkrat. ce jih dobi vec nevem kaj se nrdi honestly.
                             other_player_stats.serverSide_TeamInviteRequestToOther(player, args.Info.SendingPlayer.NetworkId);
                             return;
                         }
@@ -496,6 +550,35 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
         }
         
     }
+
+    private void serverSide_send_full_team_notification(uint other)
+    {
+        if (networkObject.IsServer)
+            FindByid(other).GetComponent<NetworkPlayerStats>().send_full_team_notification_to_owner(this.server_id);
+
+    }
+
+    private void send_full_team_notification_to_owner(uint other)
+    {
+        if (networkObject.IsServer)
+            networkObject.SendRpc(RPC_TEAM_INVITE_ALREADY_IN_PARTY_NOTIFICATION, Receivers.Owner, other);
+    }
+
+    public override void teamInviteAlreadyInPartyNotification(RpcArgs args)
+    {
+        if (networkObject.IsOwner && args.Info.SendingPlayer.NetworkId == 0)
+            Debug.LogError("player tried inviting you to team, but you are already in a party.");
+    }
+
+
+    IEnumerator teamInviteLock(NetworkPlayerStats s)
+    {
+        
+            yield return new WaitForSecondsRealtime(60);
+            s.team_invite_pending = false;
+    }
+
+
     /// <summary>
     /// metoda nrjena zato ker ce hocmo klicat playerja X in ce hocmo da se oglas owner, mormo klicat z skripte, katere owner je player X
     /// </summary>
@@ -573,19 +656,23 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
             uint other = args.GetNext<uint>();//originalni player
             bool decision = args.GetNext<bool>();
 
-            if (!check_legitimacy_of_response(other, args.Info.SendingPlayer.NetworkId)) return;
+            this.team_invite_pending = false;
 
-            if (decision) {
+            if (!check_legitimacy_of_response(other, args.Info.SendingPlayer.NetworkId)) { serverSide_sendNegativeTeamResponse(other); }
+
+            if (decision)
+            {
                 //sestavi nov team za ta objekt. poglej za playerja k je u originalu poslov invitew, in dodaj tega playerja v njegov team. posl update vsem, tud serverju.
                 uint[] new_team = FindByid(other).GetComponent<NetworkPlayerStats>().team;//server mora zmer hrant to vrednost
 
-                if (new_team ==null || new_team.Length < 2)
+                if (new_team == null || new_team.Length < 2)
                 {
                     new_team = new uint[2];
                     new_team[0] = other;
                     new_team[1] = args.Info.SendingPlayer.NetworkId;//mora bit isto kot this.server_id ce sm sigurn..
                 }
-                else {
+                else
+                {
                     uint[] temp_team = new uint[new_team.Length + 1];
                     for (int i = 0; i < new_team.Length; i++)
                         temp_team[i] = new_team[i];
@@ -594,35 +681,40 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
                 }
 
                 //posl networkupdate vsem k so u teamu + server
-                string s = teamToString(new_team);
+                
                 int count = 0;
                 lock (myNetWorker.Players)
                 {
 
                     myNetWorker.IteratePlayers((player) =>
                     {
-                        if (player.NetworkId == 0 || isTeamMemberForNetworkUpdate(new_team,player.NetworkId)) //passive target
+                        if (isTeamMemberForNetworkUpdate(new_team, player.NetworkId)) //team memberji. vsakemu memberju nastav kdo so njegovi team memberji, tud na serverjevi skripti
                         {
+                            NetworkPlayerStats nps = FindByid(player.NetworkId).GetComponent<NetworkPlayerStats>();
                             
-                            FindByid(player.NetworkId).GetComponent<NetworkPlayerStats>().serverSide_updateTeamhelper(player, s);
+                            nps.team = new_team ;//da zrihta na serverju
+                            nps.serverSide_updateTeamhelper();//da zrihta na clientu
                             count++;
-                            if (count >= new_team.Length+1) return;//+1 je zato ker je treba zmer poslat tud serverju. ce je server v teamu bo zal iteriral cez vse playerje, sj jih nebo dost so i dont give a fuck
+                            if (count >= new_team.Length + 1) return;//+1 je zato ker je treba zmer poslat tud serverju. ce je server v teamu bo zal iteriral cez vse playerje, sj jih nebo dost so i dont give a fuck
                         }
                     });
 
                 }
 
             }
+            else {//player declined or timed out.
+                serverSide_sendNegativeTeamResponse(other);
+            }
         }
     }
     /// <summary>
-    /// teamInviteOtherResponse ->find owners player object-> send update to owner
+    /// poslje trenutno stanje this.team na ownerjevo instanco
     /// </summary>
     /// <param name="player"></param>
     /// <param name="s"></param>
-    private void serverSide_updateTeamhelper(NetworkingPlayer player, string s) {
+    private void serverSide_updateTeamhelper() {
         if(networkObject.IsServer)
-            networkObject.SendRpc(player, RPC_UPDATE_TEAM, s);
+            networkObject.SendRpc(RPC_UPDATE_TEAM,Receivers.Owner, teamToString(this.team));
     }
 
 
@@ -646,5 +738,6 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
                 return true;
         return false;
     }
+
 
 }
