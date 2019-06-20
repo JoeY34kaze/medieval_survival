@@ -114,9 +114,9 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
             float all_modifiers = locational_damage_reduction * current_block_damage_reduction * armor_damage_reduction_modifier;
             //-------------------------------------------------------------------------------------------------------------
             float final_damage_taken = dmg * all_modifiers;
-            this.health -= final_damage_taken;
-            if (this.health < 0) this.health = 0;
-            healthBar.fillAmount = (float)this.health / (float)this.max_health;
+            float new_hp= this.health - final_damage_taken;// - health bomo poslal po rpcju - tud host bo sam seb poslov tko da nima veze ce kdo spreminja network.
+            if (new_hp < 0) new_hp = 0;
+            //healthBar.fillAmount = (float)this.health / (float)this.max_health;
 
             lock (myNetWorker.Players)
             {
@@ -126,7 +126,7 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
                     if (player.NetworkId == passive_player_server_network_id) //passive target
                     {
                         //Debug.Log("Victim found! "+ passive_player_server_network_id);
-                        networkObject.SendRpc(player, RPC_SET_HEALTH_PASSIVE_TARGET, this.health, tag_passive);
+                        networkObject.SendRpc(RPC_SET_HEALTH_PASSIVE_TARGET,Receivers.All, new_hp, tag_passive);
                         count++;
 
                         if (prev_hp == 0 && final_damage_taken > 0) {
@@ -257,7 +257,8 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
                 if (player.NetworkId == id) //passive target
                 {
                    // Debug.Log("server :set player health - player found");
-                    networkObject.SendRpc(player, RPC_SET_HEALTH_PASSIVE_TARGET, amount, "revive");
+                    //networkObject.SendRpc(player, RPC_SET_HEALTH_PASSIVE_TARGET, amount, "revive");
+                    networkObject.SendRpc(RPC_SET_HEALTH_PASSIVE_TARGET, Receivers.All, amount, "revive");
                     return;
                 }
             });
@@ -320,53 +321,41 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
         //Debug.Log("changing id to" + this.server_id);
     }
 
+
+    /// <summary>
+    /// server poklice da se nastav health na skripti. klice se na vsah skriptah, tud an serverju
+    /// </summary>
+    /// <param name="args"></param>
     public override void setHealthPassiveTarget(RpcArgs args)
     {
-        if (!networkObject.IsOwner && args.Info.SendingPlayer.NetworkId!=0) {
-            
+        if (args.Info.SendingPlayer.NetworkId!=0) 
             return;
-        }
-       // if (networkObject.IsOwner)
-        //{            //if its the owner change the value on other clients
-        //Debug.Log("Changing Health from server's RPC");
         
 
-        float h = args.GetNext<float>();
+        float hp = args.GetNext<float>();
         float prev_hp = this.health;
-        this.health = h;
-        
-        if (!this.downed && h==0 ) {// client check, server check ker server bo ze prej nastavu
-            handle_0_hp();
-        }
-        
+        bool downed = false;
+        if (this.health > 0 && hp == 0)
+            downed = true;
+        this.health = hp;
+
+
+
+        if (downed) handle_0_hp();
+
+
+
         string tag = args.GetNext<string>();
-        if (!tag.Equals("block_player") && !tag.Equals("revive")) GameObject.Instantiate(this.sound_effects_on_player[0]);
+        if (!tag.Equals("block_player") && !tag.Equals("revive")) GameObject.Instantiate(this.sound_effects_on_player[0]);//tag ni od objekta al pa kej. je samo kot parameter da se ve, da smo pobral cloveka
         this.healthBar.fillAmount = this.health / (this.max_health);
-        this.team_panel.refreshHp(this.server_id, this.healthBar.fillAmount);
-        networkObject.SendRpc(RPC_SET_HEALTH_ON_OTHERS,Receivers.Others, this.health, tag);
+        FindByid(NetworkManager.Instance.Networker.Me.NetworkId).GetComponent<NetworkPlayerStats>().team_panel.refreshHp(this.server_id, this.healthBar.fillAmount);
+        
         //}
     }
 
     public override void setHealthOnOthers(RpcArgs args)
     {
-        //Debug.Log("Changing Health from victim's RPC");
-        float h = args.GetNext<float>();
-        this.health = h;
-        if ((!this.downed && h == 0))
-        {
-            handle_0_hp();
-        }
         
-         string tag = args.GetNext<string>();
-        if (!tag.Equals("block_player") && !tag.Equals("revive")) GameObject.Instantiate(this.sound_effects_on_player[0]);
-         
-
-
-        this.healthBar.fillAmount =this.health / (this.max_health);
-
-       
-        FindByid(NetworkManager.Instance.Networker.Me.NetworkId).GetComponent<NetworkPlayerStats>().team_panel.refreshHp(this.server_id, this.healthBar.fillAmount);
-
     }
 
     public override void ReceiveNotificationForDamageDealt(RpcArgs args)//tole funkcijo dobi owner agresor objekta in izrise na ekran da je naredu damage, rpc poslje server v metodi take_damage_server_authority
@@ -393,11 +382,10 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
         this.downed = false;
         this.dead = false;
 
+        local_setDrawingPlayer(true);
+
         if (networkObject.IsServer)//server nastima vsem health
             set_player_health(max_health/2, this.server_id);
-
-        //izrise nazaj body
-        local_setDrawingPlayer(true);
 
     }
 
@@ -415,6 +403,7 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
             
             this.downed = false;
             this.dead = true; //to bi moral lockat combat pa tak
+            this.health = 0;
             Debug.Log("player died! - downed: " + this.downed + " dead: " + this.dead);
             GetComponent<NetworkPlayerCombatHandler>().handle_player_death();//disabla shield pa weapon
             GetComponent<NetworkPlayerAnimationLogic>().handle_player_death();
