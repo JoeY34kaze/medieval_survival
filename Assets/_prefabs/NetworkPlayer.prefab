@@ -2220,6 +2220,7 @@ MonoBehaviour:
     type: 3}
   leave_button: {fileID: 6160946409265795814, guid: 469c4f6c49abea54ba3088cbd4f9d593,
     type: 3}
+  btn_retard: {fileID: 0}
 --- !u!114 &3288565238185552956
 MonoBehaviour:
   m_ObjectHideFlags: 0

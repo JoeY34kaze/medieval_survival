@@ -8,18 +8,62 @@ public class local_team_panel_handler : MonoBehaviour
 {
     public GameObject panel_prefab;
     public GameObject leave_button;
+    public GameObject btn_retard;
+
     /// <summary>
     /// metoda v celoti updejta UI za team. pricakuje da dobi vse podatke, ker je metoda lokalna. ker je v celoti lokalno je array lahko neurejen in bo metoda sortirala po networkId predn izrise.
     ///vhod je array uint[networkId]
     /// </summary>
-    public void refreshAll(uint[] my_boys) {//bols blo nrdit da e sam preshiftajo ko se spremeni ampak to bo ksnej se jebat
-             
+    /// 
 
+    /*
+        private void Start()
+        {
+            for (int i = 0; i < this.transform.childCount; i++)
+            {
+                Debug.Log(transform.GetChild(i).name);
+                if (transform.GetChild(i).GetComponent<team_leave_button_handler>() != null)
+                {//ce ni button
+                    Destroy(transform.GetChild(i).gameObject);
+
+                    //transform.GetChild(i).gameObject.SetActive(false);
+                    //transform.GetChild(i).transform.GetChild(0).gameObject.SetActive(false);
+                    //transform.GetChild(i).transform.GetChild(0).GetChild(0).gameObject.SetActive(false);
+                    //Destroy(transform.GetChild(i));
+                    DestroyImmediate(transform.GetChild(i).gameObject);
+                    Destroy(transform.GetChild(i).GetComponent<CanvasGroup>());
+                    Destroy(transform.GetChild(i).gameObject);
+                }
+
+
+            }
+        }
+        */
+
+    public void refreshAll(uint[] my_boys) {//bols blo nrdit da e sam preshiftajo ko se spremeni ampak to bo ksnej se jebat
+
+
+        //if(btn_retard!=null)Destroy(btn_retard);
+        //transform.GetChild(i).gameObject.SetActive(false);
+        //transform.GetChild(i).transform.GetChild(0).gameObject.SetActive(false);
+        //transform.GetChild(i).transform.GetChild(0).GetChild(0).gameObject.SetActive(false);
+        //Destroy(transform.GetChild(i));
+
+
+        //if (btn_retard != null) DestroyImmediate(btn_retard);
+        //if (btn_retard != null) if (btn_retard.GetComponent<CanvasGroup>()!=null) Destroy(btn_retard.GetComponent<CanvasGroup>());
+        //if (btn_retard != null) Destroy(btn_retard);
+        if (btn_retard != null) btn_retard.GetComponent<team_leave_button_handler>().retard = true;
+
+        
 
         for (int i = 0; i < this.transform.childCount; i++) {
             Debug.Log(transform.GetChild(i).name);
-            Destroy(transform.GetChild(i).gameObject);
+            if(transform.GetChild(i).GetComponent<team_leave_button_handler>()==null)//ce ni button
+                Destroy(transform.GetChild(i).gameObject);
         }
+
+
 
 
 
@@ -31,13 +75,18 @@ public class local_team_panel_handler : MonoBehaviour
 
 
             //----------------------BUTTON-----------------
-            GameObject p = GameObject.Instantiate(leave_button);
-            p.transform.SetParent(transform);
-
+      
+                GameObject p = GameObject.Instantiate(leave_button);
+                p.transform.SetParent(transform);
+                this.btn_retard = p;
+            
+            // leave_button.SetActive(true);
+            // leave_button.transform.GetChild(0).gameObject.SetActive(true);
+            // leave_button.transform.GetChild(0).GetChild(0).gameObject.SetActive(true);
             //---------------------PANELS----------------------
             for (int i = 0; i < my_boys.Length; i++)
             {
-                p = GameObject.Instantiate(panel_prefab);
+                 p = GameObject.Instantiate(panel_prefab);
                 p.transform.SetParent(transform);
                 Text t = p.GetComponentInChildren<Text>();
                 NetworkPlayerStats s = FindByid(my_boys[i]).GetComponent<NetworkPlayerStats>();
@@ -48,7 +97,10 @@ public class local_team_panel_handler : MonoBehaviour
                 p.GetComponent<team_memeber_panel_helper>().init(my_boys[i]);
             }
         }
+
     }
+
+
 
     public void refreshHp(uint player, float newHp) {//inneficient. optimize later
         foreach (Transform child in transform)
