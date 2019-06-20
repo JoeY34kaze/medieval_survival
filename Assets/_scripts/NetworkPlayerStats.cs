@@ -271,7 +271,8 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
     private void handle_0_hp() {//sprozi tko na ownerju, kot na clientih
         this.downed = true;
         GetComponent<NetworkPlayerAnimationLogic>().handle_downed_start();
-        GetComponent<NetworkPlayerInventory>().backpackSpot.GetComponentInChildren<NetworkBackpack>().local_server_BackpackUnequip();
+        if(GetComponent<NetworkPlayerInventory>().backpackSpot.GetComponentInChildren<NetworkBackpack>())
+            GetComponent<NetworkPlayerInventory>().backpackSpot.GetComponentInChildren<NetworkBackpack>().local_server_BackpackUnequip();
 
 
     }
@@ -406,14 +407,18 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
     /// <param name="args"></param>
     public override void OnPlayerDeath(RpcArgs args)//vsi dobijo
     {
-        local_setDrawingPlayer(false);//v drugi metodi zato ker se klice se z vsaj ene druge metode
+        if (args.Info.SendingPlayer.NetworkId == 0)
+        {
+            local_setDrawingPlayer(false);//v drugi metodi zato ker se klice se z vsaj ene druge metode
 
-        //ce "umre" mormo tud resetirat za animacijo da ne lezi vec na tleh. to se izvede na vseh clientih in serverju
-        this.downed = false;
-        this.dead = true; //to bi moral lockat combat pa tak
-        GetComponent<NetworkPlayerCombatHandler>().handle_player_death();//disabla shield pa weapon
-        GetComponent<NetworkPlayerAnimationLogic>().handle_player_death();
-
+            //ce "umre" mormo tud resetirat za animacijo da ne lezi vec na tleh. to se izvede na vseh clientih in serverju
+            
+            this.downed = false;
+            this.dead = true; //to bi moral lockat combat pa tak
+            Debug.Log("player died! - downed: " + this.downed + " dead: " + this.dead);
+            GetComponent<NetworkPlayerCombatHandler>().handle_player_death();//disabla shield pa weapon
+            GetComponent<NetworkPlayerAnimationLogic>().handle_player_death();
+        }
     }
 
     private void local_setDrawingPlayer(bool b) {

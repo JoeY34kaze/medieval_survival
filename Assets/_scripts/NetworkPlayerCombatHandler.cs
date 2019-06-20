@@ -579,12 +579,15 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
     public override void ChangeCombatModeResponse(RpcArgs args)//ALL GET IT, EVEN SERVER
     {
         if (args.Info.SendingPlayer.NetworkId != 0) return;
-        Debug.Log("client: got change combat mode response");
+        
         int new_mode = args.GetNext<int>();
+
+        this.combat_mode = (byte)new_mode;
+        Debug.Log("got change combat mode response : "+this.combat_mode + " "+new_mode);
 
         if (new_mode == 0)
         {
-            this.combat_mode = 0;
+            
             animator.SetInteger("combat_mode", 0);
 
 
@@ -593,7 +596,7 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
             //disable_all_possible_equipped_weapons();
         }
         else {
-            this.combat_mode = 1;
+            
             animator.SetInteger("combat_mode", 1);
             animator.SetInteger("weapon_animation_class", getWeaponClassForAnimator(equipped_weapons[this.index_of_currently_selected_weapon_from_equipped_weapons]));
 
