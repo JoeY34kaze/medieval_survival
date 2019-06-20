@@ -93,7 +93,8 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
                                 //-------------------------------------------  player ---------------------------------------------------------------
                                 if (interactable is Interactable_player)
                                 {
-                                    this.menu.show_player_interaction_menu(interactable.gameObject);
+                                    if(!interactable.transform.root.Equals(transform))//ce nismo raycastal samo nase ( recimo ce smo gledal dol na lastno nogo/roko al pa kej
+                                        this.menu.show_player_interaction_menu(interactable.gameObject);
                                 }
                                 //-----------------------------------------------------ARMOR STAND-------------------------------
                                 if (interactable is Interactible_ArmorStand)

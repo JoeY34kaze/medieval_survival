@@ -15,7 +15,7 @@ GameObject:
   - component: {fileID: 3161609424266415851}
   - component: {fileID: 4423354189138127493}
   - component: {fileID: 1380785991644753362}
-  m_Layer: 0
+  m_Layer: 11
   m_Name: shield_wood_pickup
   m_TagString: Untagged
   m_Icon: {fileID: 0}

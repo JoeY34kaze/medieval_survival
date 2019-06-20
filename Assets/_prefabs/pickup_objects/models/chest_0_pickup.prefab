@@ -15,7 +15,7 @@ GameObject:
   - component: {fileID: 8210173592186475130}
   - component: {fileID: 7975978644590971890}
   - component: {fileID: 2687700613903342651}
-  m_Layer: 0
+  m_Layer: 11
   m_Name: chest_0_pickup
   m_TagString: Untagged
   m_Icon: {fileID: 0}

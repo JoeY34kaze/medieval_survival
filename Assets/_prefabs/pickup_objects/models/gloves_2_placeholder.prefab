@@ -15,7 +15,7 @@ GameObject:
   - component: {fileID: 7066038424638375748}
   - component: {fileID: 2900738277275932339}
   - component: {fileID: 3026790601549032613}
-  m_Layer: 0
+  m_Layer: 11
   m_Name: gloves_2_placeholder
   m_TagString: Untagged
   m_Icon: {fileID: 0}

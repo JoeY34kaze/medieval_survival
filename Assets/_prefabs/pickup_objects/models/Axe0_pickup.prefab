@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 4842459027551248507}
   - component: {fileID: 5521097529389554193}
   - component: {fileID: 3501305074814915655}
-  m_Layer: 0
+  m_Layer: 11
   m_Name: model
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -90,7 +90,7 @@ GameObject:
   - component: {fileID: 4267555248030065123}
   - component: {fileID: 5405862577046197613}
   - component: {fileID: 7495518528968806150}
-  m_Layer: 0
+  m_Layer: 11
   m_Name: Axe0_pickup
   m_TagString: Untagged
   m_Icon: {fileID: 0}

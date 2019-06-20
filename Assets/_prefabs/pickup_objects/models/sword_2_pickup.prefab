@@ -15,7 +15,7 @@ GameObject:
   - component: {fileID: 8452941681511589541}
   - component: {fileID: 8815208978924338143}
   - component: {fileID: 3184638034317637495}
-  m_Layer: 0
+  m_Layer: 11
   m_Name: sword_2_pickup
   m_TagString: Untagged
   m_Icon: {fileID: 0}

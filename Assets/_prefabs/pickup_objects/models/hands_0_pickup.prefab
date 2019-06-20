@@ -15,7 +15,7 @@ GameObject:
   - component: {fileID: 1348755910180563228}
   - component: {fileID: 5101848143668308469}
   - component: {fileID: 6671804810408836879}
-  m_Layer: 0
+  m_Layer: 11
   m_Name: hands_0_pickup
   m_TagString: Untagged
   m_Icon: {fileID: 0}

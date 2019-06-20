@@ -15,8 +15,8 @@ GameObject:
   - component: {fileID: 5694522531213445700}
   - component: {fileID: 4557569600726644861}
   - component: {fileID: 627926558578801359}
-  m_Layer: 0
-  m_Name: gloves_2_pickup
+  m_Layer: 11
+  m_Name: hands_2_pickup
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

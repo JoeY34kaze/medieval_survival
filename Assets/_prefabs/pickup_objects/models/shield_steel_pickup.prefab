@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 274690716}
   - component: {fileID: 274690715}
   - component: {fileID: 274690714}
-  m_Layer: 0
+  m_Layer: 11
   m_Name: shield_steel_pickup
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -121,7 +121,7 @@ GameObject:
   - component: {fileID: 6567580734541153226}
   - component: {fileID: 5167585820255413279}
   - component: {fileID: 6065848524609169476}
-  m_Layer: 0
+  m_Layer: 11
   m_Name: twoo
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -198,7 +198,7 @@ GameObject:
   - component: {fileID: 3693323414640828643}
   - component: {fileID: 5648922977312084422}
   - component: {fileID: 8886325924709428841}
-  m_Layer: 0
+  m_Layer: 11
   m_Name: shield
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -275,7 +275,7 @@ GameObject:
   - component: {fileID: 7946756727811699366}
   - component: {fileID: 5995750803509633232}
   - component: {fileID: 7962308034975088595}
-  m_Layer: 0
+  m_Layer: 11
   m_Name: twoo001
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -352,7 +352,7 @@ GameObject:
   - component: {fileID: 5085840877681607793}
   - component: {fileID: 6198478136863806294}
   - component: {fileID: 2735414347955453976}
-  m_Layer: 0
+  m_Layer: 11
   m_Name: Object002
   m_TagString: Untagged
   m_Icon: {fileID: 0}

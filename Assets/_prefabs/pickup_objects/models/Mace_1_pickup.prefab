@@ -15,7 +15,7 @@ GameObject:
   - component: {fileID: 6578769114924819152}
   - component: {fileID: 736351408702290809}
   - component: {fileID: 1728892680198612933}
-  m_Layer: 0
+  m_Layer: 11
   m_Name: Mace_1_pickup
   m_TagString: Untagged
   m_Icon: {fileID: 0}

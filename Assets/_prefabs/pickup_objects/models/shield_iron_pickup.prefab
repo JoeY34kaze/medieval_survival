@@ -15,7 +15,7 @@ GameObject:
   - component: {fileID: 8461985870998478538}
   - component: {fileID: 5266176857241076448}
   - component: {fileID: 2165574089536828132}
-  m_Layer: 0
+  m_Layer: 11
   m_Name: shield_iron_pickup
   m_TagString: Untagged
   m_Icon: {fileID: 0}

@@ -17,8 +17,8 @@ GameObject:
   - component: {fileID: 1967775958}
   - component: {fileID: 1967775959}
   - component: {fileID: 3072579460640918665}
-  m_Layer: 0
-  m_Name: Backpack
+  m_Layer: 11
+  m_Name: backpack_0
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -124,6 +124,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 970e18190dd2d7a478ed58fe458652b8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  items: []
 --- !u!114 &1967775958
 MonoBehaviour:
   m_ObjectHideFlags: 0
