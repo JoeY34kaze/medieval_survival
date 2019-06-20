@@ -126,7 +126,7 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
                     if (player.NetworkId == passive_player_server_network_id) //passive target
                     {
                         //Debug.Log("Victim found! "+ passive_player_server_network_id);
-                        networkObject.SendRpc(RPC_SET_HEALTH_PASSIVE_TARGET,Receivers.All, new_hp, tag_passive);
+                        networkObject.SendRpc(RPC_SET_HEALTH,Receivers.All, new_hp, tag_passive);
                         count++;
 
                         if (prev_hp == 0 && final_damage_taken > 0) {
@@ -258,7 +258,7 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
                 {
                    // Debug.Log("server :set player health - player found");
                     //networkObject.SendRpc(player, RPC_SET_HEALTH_PASSIVE_TARGET, amount, "revive");
-                    networkObject.SendRpc(RPC_SET_HEALTH_PASSIVE_TARGET, Receivers.All, amount, "revive");
+                    networkObject.SendRpc(RPC_SET_HEALTH, Receivers.All, amount, "revive");
                     return;
                 }
             });
@@ -326,7 +326,7 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
     /// server poklice da se nastav health na skripti. klice se na vsah skriptah, tud an serverju
     /// </summary>
     /// <param name="args"></param>
-    public override void setHealthPassiveTarget(RpcArgs args)
+    public override void setHealth(RpcArgs args)
     {
         if (args.Info.SendingPlayer.NetworkId!=0) 
             return;
@@ -351,11 +351,6 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
         FindByid(NetworkManager.Instance.Networker.Me.NetworkId).GetComponent<NetworkPlayerStats>().team_panel.refreshHp(this.server_id, this.healthBar.fillAmount);
         
         //}
-    }
-
-    public override void setHealthOnOthers(RpcArgs args)
-    {
-        
     }
 
     public override void ReceiveNotificationForDamageDealt(RpcArgs args)//tole funkcijo dobi owner agresor objekta in izrise na ekran da je naredu damage, rpc poslje server v metodi take_damage_server_authority
