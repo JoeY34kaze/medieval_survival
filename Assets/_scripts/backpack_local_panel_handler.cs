@@ -31,6 +31,7 @@ public class backpack_local_panel_handler : MonoBehaviour
     {
         this.nci = nci;//nci je najprej prazn. po tej metodi dobi sele updejt o itemih
         this.size = size;
+        
         this.slots = new InventorySlotBackpack[this.size];
         for (int i = 0; i < this.size; i++) {
            GameObject g= GameObject.Instantiate(InventorySlotBackpackPrefab);

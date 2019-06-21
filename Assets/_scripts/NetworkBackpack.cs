@@ -52,14 +52,14 @@ public class NetworkBackpack : NetworkBackpackBehavior
     }
 
     //------------------------------LOKALNI KLICI ZA INTERAKCIJO------------------
-    internal void local_player_equip_request(uint server_id)
+    internal void local_player_equip_request()
     {
-        networkObject.SendRpc(RPC_BACKPACK_INTERACTION_REQUEST, Receivers.Server, (byte)0, server_id);
+        networkObject.SendRpc(RPC_BACKPACK_INTERACTION_REQUEST, Receivers.Server, (byte)0);
     }
 
-    internal void local_player_look_request(uint server_id)
+    internal void local_player_look_request()
     {
-        networkObject.SendRpc(RPC_BACKPACK_INTERACTION_REQUEST, Receivers.Server, (byte)1,server_id);
+        networkObject.SendRpc(RPC_BACKPACK_INTERACTION_REQUEST, Receivers.Server, (byte)1);
     }
 
     public void local_player_backpack_unequip_request() {
@@ -80,7 +80,7 @@ public class NetworkBackpack : NetworkBackpackBehavior
        
 
         byte tip = args.GetNext<byte>();
-        uint player_id = args.GetNext<uint>();
+        uint player_id = args.Info.SendingPlayer.NetworkId;
         if (tip == 0 && this.owner_id == -1)//equip request
         {
 
@@ -90,7 +90,7 @@ public class NetworkBackpack : NetworkBackpackBehavior
             if (player.GetComponentInChildren<NetworkBackpack>() == null)
             {
                 //lahko pobere
-                networkObject.AssignOwnership(args.Info.SendingPlayer);
+                //networkObject.AssignOwnership(args.Info.SendingPlayer);
                 NetworkPlayerInventory n = player.GetComponent<NetworkPlayerInventory>();
                 n.SetLoadoutItem(Mapper.instance.getItemById(GetComponent<identifier_helper>().id), 0);//to nrdi samo server..
                 n.sendNetworkUpdate(false, true);
@@ -250,10 +250,11 @@ public class NetworkBackpack : NetworkBackpackBehavior
         Item item =Mapper.instance.getItemById(GetComponent<identifier_helper>().id);
         
         Transform transformForBackpack = this.npi.backpackSpot;
-        this.panel_handler = this.npi.backpackPanel;
+        //this.panel_handler = this.npi.backpackPanel;
         if(r==null) r = GetComponent<Rigidbody>();
-        if (!r.isKinematic) r.isKinematic = true;
+        
         if (r.detectCollisions) r.detectCollisions = false;
+        if (!r.isKinematic) r.isKinematic = true;
 
         this.transform.SetParent(transformForBackpack);
         this.transform.localPosition = Vector3.zero;
@@ -261,10 +262,15 @@ public class NetworkBackpack : NetworkBackpackBehavior
         npi.requestUiUpdate();//najbrz overkill k itak posle redraw zmer k odpres inventorij ampak za zacetk je ok - da izrise backpack na svoj slot u loadoutu
         
         //nastimat je treba tud panel za backpack slote.
-        this.panel_handler.init(item.size, this.nci);//nastav samo slote
+
+        
 
         if (networkObject.IsOwner)
+        {
+            this.panel_handler = this.npi.backpackPanel;
+            this.panel_handler.init(item.size, this.nci);//nastav samo slote
             networkObject.SendRpc(RPC_BACKPACK_INTERACTION_REQUEST, Receivers.Server, (byte)1, networkObject.Owner.NetworkId);//posle request da mu updejta iteme
+        }
     }
 
     public override void BackpackUnequipRequest(RpcArgs args)
@@ -294,7 +300,8 @@ public class NetworkBackpack : NetworkBackpackBehavior
             //nastimat nek force da ga nekam vrze? mybe. kodo ze mamo u instantiationu itemov
             if (r.isKinematic) r.isKinematic = false;
             if (!r.detectCollisions) r.detectCollisions = true;
-            this.panel_handler.clear();
+            if(networkObject.IsOwner)
+                this.panel_handler.clear();
             npi.requestUiUpdate();//najbrz overkill k itak posle redraw zmer k odpres inventorij ampak za zacetk je ok
             this.npi.backpack_inventory = null;
             this.npi = null;

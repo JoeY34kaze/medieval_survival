@@ -17,12 +17,16 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
     private bool interacting = false;
 
     public GameObject canvas;
+
+    private double time_pressed = 0;
+    private DateTime baseDate;
+
     private void Start()
     {
         stats = GetComponent<NetworkPlayerStats>();
         networkPlayerInventory = GetComponent<NetworkPlayerInventory>();
 
-        
+        this.baseDate = new DateTime(1970, 1, 1);
     }
 
     protected override void NetworkStart()
@@ -30,7 +34,7 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
         base.NetworkStart();
         // TODO:  Your initialization code that relies on network setup for this object goes here
         myNetWorker = GameObject.Find("NetworkManager(Clone)").GetComponent<NetworkManager>().Networker;
-        if(!networkObject.IsOwner)
+        if (!networkObject.IsOwner)
             Destroy(canvas);
     }
 
@@ -49,8 +53,8 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
         {
             setup_player_cam();
         }
-        else{
-            
+        else {
+
             //check what we are looking at with camera.
             Ray ray = new Ray(player_cam.position, player_cam.forward);
 
@@ -59,12 +63,12 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
 
             if (Physics.Raycast(ray, out hit, 50)) {
 
-                Debug.DrawRay(player_cam.position, player_cam.forward*10,Color.blue);
+                Debug.DrawRay(player_cam.position, player_cam.forward * 10, Color.blue);
 
                 //Debug.Log("raycast : "+hit.collider.name);
 
                 Interactable interactable = hit.collider.GetComponent<Interactable>();
-                if(interactable==null) interactable = hit.collider.GetComponentInParent<Interactable>();//je collider popravlen zarad neujemanja pivota ker je blender ziva nocna mora
+                if (interactable == null) interactable = hit.collider.GetComponentInParent<Interactable>();//je collider popravlen zarad neujemanja pivota ker je blender ziva nocna mora
 
 
                 if (interactable != null)
@@ -80,20 +84,47 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
                          Izsis se kaj dodatnega da bo vedu da lohko direkt pobere - glow?
 
                          */
-                        if (Input.GetButtonDown("Interact"))
+                        if (Input.GetButtonDown("Interact") && this.time_pressed == 0f)
                         {
+
+                            TimeSpan diff = DateTime.Now - baseDate;
+                            this.time_pressed = diff.TotalMilliseconds;
+                        }
+
+
+                        else if (Input.GetButtonUp("Interact") && this.time_pressed > 0)
+                        {
+
+                            Debug.Log("quick press");
+                            this.time_pressed = 0;
+                            //Debug.Log("quick press" + (time_released - this.time_pressed));
+                            if (interactable is ItemPickup)//pobere item
+                                interactable.interact(stats.server_id);
+
+                            if (interactable is Interactable_Backpack)//pobere backpack
+                                                                      //this.menu.show_backpack_interaction_menu(interactable.gameObject);
+                                interactable.GetComponent<NetworkBackpack>().local_player_equip_request();
+
+                            if (interactable is Interactible_ArmorStand)
+                            {
+                                ((Interactible_ArmorStand)interactable).local_player_interaction_swap_request(stats.server_id);
+                            }
+
+                        } else if (Input.GetButton("Interact") && this.time_pressed > 0 && time_passed(150f))
+                        {
+                            this.time_pressed = 0;
+                            //long hold - odpri radial menu
+                            Debug.Log("long hold");
                             Debug.Log("Interacting with " + hit.collider.name + " with distance of " + hit.distance);
                             if (!stats.downed && !stats.dead)//ce je prayer ziv
                             {
                                 // -----------------------------------------    Inventory item / weapon /gear ---------------------------------------------------
                                 if (interactable is ItemPickup)
                                     interactable.interact(stats.server_id);//full inventory se mora handlat drugje
-
-
-                                //-------------------------------------------  player ---------------------------------------------------------------
+                                                                           //-------------------------------------------  player ---------------------------------------------------------------
                                 if (interactable is Interactable_player)
                                 {
-                                    if(!interactable.transform.root.Equals(transform))//ce nismo raycastal samo nase ( recimo ce smo gledal dol na lastno nogo/roko al pa kej
+                                    if (!interactable.transform.root.Equals(transform))//ce nismo raycastal samo nase ( recimo ce smo gledal dol na lastno nogo/roko al pa kej
                                         this.menu.show_player_interaction_menu(interactable.gameObject);
                                 }
                                 //-----------------------------------------------------ARMOR STAND-------------------------------
@@ -101,17 +132,16 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
                                 {
                                     this.menu.show_ArmorStand_interaction_menu(interactable.gameObject);
                                 }
-
-                                if(interactable is Interactable_Backpack)
+                                if (interactable is Interactable_Backpack)
                                     this.menu.show_backpack_interaction_menu(interactable.gameObject);
-
                             }
                         }
+
                     }
                 }
-                else {
-                   // Debug.Log("Looking at not interactable " + hit.collider.name + " with distance of " + hit.distance);
-                }
+            }
+            else {
+                // Debug.Log("Looking at not interactable " + hit.collider.name + " with distance of " + hit.distance);
             }
         }
         if (Input.GetButtonUp("Interact"))
@@ -120,6 +150,19 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
         }
     }
 
+
+
+
+
+private bool time_passed(float limit) {
+    double time_released = (DateTime.Now - this.baseDate).TotalMilliseconds;
+
+    if (time_released - this.time_pressed >= limit)
+    {
+        return true;
+    }
+        return false;
+}
 
     private void setup_player_cam()
     {
@@ -225,12 +268,12 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
 
     internal void local_backpack_interaction_equip_request(GameObject target)
     {
-        target.GetComponent<NetworkBackpack>().local_player_equip_request(stats.server_id);
+        target.GetComponent<NetworkBackpack>().local_player_equip_request();
     }
 
     internal void local_backpack_interaction_look_request(GameObject target)
     {
-        target.GetComponent<NetworkBackpack>().local_player_look_request(stats.server_id);
+        target.GetComponent<NetworkBackpack>().local_player_look_request();
     }
 
 

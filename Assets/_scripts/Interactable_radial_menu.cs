@@ -346,121 +346,143 @@ public class Interactable_radial_menu : MonoBehaviour
 
     public void player_interaction_button_execution()
     {
+        hide_radial_menu();
         //Debug.Log("button - execution - " + this.other.name);
         interaction.local_player_interaction_execution_request(this.target);
     }
 
     public void player_interaction_button_tieUp()
     {
+        hide_radial_menu();
         interaction.local_player_interaction_tieup_request(this.target);
         //Debug.Log("button - tieUp - " + this.other.name);
     }
 
     public void player_interaction_button_steal() {
+        hide_radial_menu();
         //Debug.Log("button - steal - " + this.other.name);
         interaction.local_player_interaction_steal_request(this.target);
     }
 
     public void player_interaction_button_pickup()
     {
+        hide_radial_menu();
         //Debug.Log("button - pickUp - " + this.other.name);
         interaction.local_player_interaction_pickup_request(this.target);
     }
 
     public void player_interaction_button_mock()
     {
+        hide_radial_menu();
         //Debug.Log("button - mock - " + this.other.name);
         interaction.local_player_interaction_guild_invite_request(this.target);
     }
 
     public void player_interaction_button_guild_invite()
     {
+        hide_radial_menu();
         //Debug.Log("button - mock - " + this.other.name);
         interaction.local_player_interaction_guild_invite_request(this.target);
     }
 
     public void player_interaction_button_team_invite()
     {
+        hide_radial_menu();
         //Debug.Log("button - mock - " + this.other.name);
         interaction.local_player_interaction_team_invite_request(this.target);
     }
 
     private void armor_stand_interaction_button_ranged()
     {
+        hide_radial_menu();
         interaction.local_armor_stand_interaction_ranged_request(this.target);
     }
 
     private void armor_stand_interaction_button_shield()
     {
+        hide_radial_menu();
         interaction.local_armor_stand_interaction_shield_request(this.target);
     }
 
     private void armor_stand_interaction_button_weapon1()
     {
+        hide_radial_menu();
         interaction.local_armor_stand_interaction_weapon1_request(this.target);
     }
 
     private void armor_stand_interaction_button_weapon0()
     {
+        hide_radial_menu();
         interaction.local_armor_stand_interaction_weapon0_request(this.target);
     }
 
     private void armor_stand_interaction_button_feet()
     {
+        hide_radial_menu();
         interaction.local_armor_stand_interaction_feet_request(this.target);
 
     }
 
     private void armor_stand_interaction_button_legs()
     {
+        hide_radial_menu();
         interaction.local_armor_stand_interaction_legs_request(this.target);
 
     }
 
     private void armor_stand_interaction_button_hands()
     {
+        hide_radial_menu();
         interaction.local_armor_stand_interaction_hands_request(this.target);
 
     }
 
     private void armor_stand_interaction_button_chest()
     {
+        hide_radial_menu();
         interaction.local_armor_stand_interaction_chest_request(this.target);
 
     }
 
     private void armor_stand_interaction_button_helmet()
     {
+        hide_radial_menu();
         interaction.local_armor_stand_interaction_helmet_request(this.target);
 
     }
 
     private void armor_stand_interaction_button_give_all()
     {
+        hide_radial_menu();
         interaction.local_armor_stand_interaction_give_all_request(this.target);
 
     }
 
     private void armor_stand_interaction_button_take_all()
     {
+        hide_radial_menu();
         interaction.local_armor_stand_interaction_take_all_request(this.target);
 
     }
 
     private void armor_stand_interaction_button_swap()
     {
+        hide_radial_menu();
         interaction.local_armor_stand_interaction_swap_request(this.target);
     }
 
 
     private void backpack_interaction_equip()
     {
+        hide_radial_menu();
         interaction.local_backpack_interaction_equip_request(this.target);
     }
 
     private void backpack_interaction_look()
     {
+        hide_radial_menu();
         interaction.local_backpack_interaction_look_request(this.target);
+
     }
 
 }
