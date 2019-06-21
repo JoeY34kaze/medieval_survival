@@ -45,6 +45,10 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
      na serverju se detektira hit. trenutno edina skripta ki to dela je Weapon_Collider_handler, ki poklice tole metodo. ta metoda izracuna nov health od tega k je bil napaden. to vrednost poslje
      napadenmu playerju da si poupdejta health. ta player pol ko si je updejtov health poslje nov rpc vsem drugim da nj si nastavijo njegov health na njegov health. tud server(i can see how this is bad ampak za prototip me ne skrbi.)
          */
+    public uint[] getTeam() {
+        return this.team;
+    }
+
     public void take_weapon_damage_server_authority(Item weapon,string tag_passive, string tag_agressor ,uint passive_player_server_network_id, uint agressor_server_network_id)
     {
         

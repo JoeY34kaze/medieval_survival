@@ -43,6 +43,23 @@ public class Interactable_radial_menu : MonoBehaviour
         this.interaction = transform.root.GetComponent<NetworkPlayerInteraction>();
     }
 
+    private void show_menu()
+    {
+
+        //pobris od prejsnjega za vsak slucaj ceprav bi moral bit ze prazno
+        menu.elements.Clear();
+        foreach (Transform child in elements)
+        {
+            GameObject.Destroy(child.gameObject);
+        }
+        center_label.text = "";
+        radialMenu.SetActive(true);
+        this.target = null;
+        Cursor.visible = true;
+        Cursor.lockState = CursorLockMode.None;
+    }
+
+
     private void show_menu(GameObject target) {
 
         //pobris od prejsnjega za vsak slucaj ceprav bi moral bit ze prazno
@@ -55,7 +72,7 @@ public class Interactable_radial_menu : MonoBehaviour
 
 
 
-        //Debug.Log("Opening menu! - interaction with a player");
+        //Debug.Log("Opening menu!");
         radialMenu.SetActive(true);
         this.target = target;
         Cursor.visible = true;
@@ -223,24 +240,38 @@ public class Interactable_radial_menu : MonoBehaviour
         menu.reDraw();
     }
 
+    internal void show_alert_menu(Vector3 point)
+    {
+        show_menu();
+
+        this.number_of_elements = 2;
+        menu.angleOffset = (360f / this.number_of_elements);
+        center_label.text = "Send Alert";
+
+
+        GameObject btn_0 = GameObject.Instantiate(Resources.Load<GameObject>("radial_menu_elements/alert_ground"));
+        GameObject btn_1 = GameObject.Instantiate(Resources.Load<GameObject>("radial_menu_elements/alert_danger"));
+
+
+        menu.elements.Clear();
+
+        setup_button(btn_0, menu.angleOffset * 0);
+        setup_button(btn_1, menu.angleOffset * 1);
+
+        Button button = btn_0.transform.GetComponentInChildren<Button>();
+        button.onClick.RemoveAllListeners();
+        button.onClick.AddListener(delegate { alert_ground(point); });
+
+        button = btn_1.transform.GetComponentInChildren<Button>();
+        button.onClick.RemoveAllListeners();
+        button.onClick.AddListener(delegate { alert_danger(point); });
+
+
+        menu.reDraw();
+    }
+
     internal void show_ArmorStand_interaction_menu(GameObject stand)
     {
-        show_menu(stand);
-        /*
-        this.button_title[1] = "Swap";
-        this.button_title[1] = "Take All";
-        this.button_title[2] = "Give All";
-        this.button_title[3] = "Helmet";
-        this.button_title[4] = "Chest";
-        this.button_title[5] = "Gloves";
-        this.button_title[6] = "Greaves";
-        this.button_title[7] = "Boots";
-        this.button_title[8] = "Main Weapon";
-        this.button_title[9] = "Secondary Weapon";
-        this.button_title[10] = "Shield";
-        this.button_title[11] = "Ranged Weapon";
-        */
-
         show_menu(stand);
 
         this.number_of_elements = 12;
@@ -483,6 +514,18 @@ public class Interactable_radial_menu : MonoBehaviour
         hide_radial_menu();
         interaction.local_backpack_interaction_look_request(this.target);
 
+    }
+
+    private void alert_danger(Vector3 point)
+    {
+        hide_radial_menu();
+        interaction.local_alert_danger_request(point);
+    }
+
+    private void alert_ground(Vector3 point)
+    {
+        hide_radial_menu();
+        interaction.local_alert_ground_request(point);
     }
 
 }

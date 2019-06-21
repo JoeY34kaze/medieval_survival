@@ -18,8 +18,11 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
 
     public GameObject canvas;
 
-    private double time_pressed = 0;
+    private double time_pressed_interaction = 0;
+    private double time_pressed_alert = 0;
     private DateTime baseDate;
+
+    public GameObject[] alert_world_prefab;
 
     private void Start()
     {
@@ -84,19 +87,17 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
                          Izsis se kaj dodatnega da bo vedu da lohko direkt pobere - glow?
 
                          */
-                        if (Input.GetButtonDown("Interact") && this.time_pressed == 0f)
+                        if (Input.GetButtonDown("Interact") && this.time_pressed_interaction == 0f  &&!(Input.GetButton("Alert") || this.time_pressed_alert>0))
                         {
 
                             TimeSpan diff = DateTime.Now - baseDate;
-                            this.time_pressed = diff.TotalMilliseconds;
+                            this.time_pressed_interaction = diff.TotalMilliseconds;
                         }
-
-
-                        else if (Input.GetButtonUp("Interact") && this.time_pressed > 0)
+                        else if (Input.GetButtonUp("Interact") && this.time_pressed_interaction > 0 && !(Input.GetButton("Alert") || this.time_pressed_alert > 0))
                         {
 
                             Debug.Log("quick press");
-                            this.time_pressed = 0;
+                            this.time_pressed_interaction = 0;
                             //Debug.Log("quick press" + (time_released - this.time_pressed));
                             if (interactable is ItemPickup)//pobere item
                                 interactable.interact(stats.server_id);
@@ -110,9 +111,9 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
                                 ((Interactible_ArmorStand)interactable).local_player_interaction_swap_request(stats.server_id);
                             }
 
-                        } else if (Input.GetButton("Interact") && this.time_pressed > 0 && time_passed(150f))
+                        } else if (Input.GetButton("Interact") && this.time_pressed_interaction > 0 && time_passed_interaction(150f) && !(Input.GetButton("Alert") || this.time_pressed_alert > 0))
                         {
-                            this.time_pressed = 0;
+                            this.time_pressed_interaction = 0;
                             //long hold - odpri radial menu
                             Debug.Log("long hold");
                             Debug.Log("Interacting with " + hit.collider.name + " with distance of " + hit.distance);
@@ -136,15 +137,35 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
                                     this.menu.show_backpack_interaction_menu(interactable.gameObject);
                             }
                         }
-
                     }
                 }
+
+                // ------------------- za alerte 
+                if (Input.GetButtonDown("Alert") && this.time_pressed_alert == 0f && !(Input.GetButton("Interact") || this.time_pressed_interaction > 0))
+                {
+                    TimeSpan diff = DateTime.Now - baseDate;
+                    this.time_pressed_alert = diff.TotalMilliseconds;
+                    Debug.Log("ALERT start");
+                }
+                else if (Input.GetButtonUp("Alert") && this.time_pressed_alert > 0 && !(Input.GetButton("Interact") || this.time_pressed_interaction > 0))
+                {
+                    this.time_pressed_alert = 0;
+                    Debug.Log("ALERT quick");
+                    local_send_alert(hit.point, 1);
+                }
+                else if (Input.GetButton("Alert") && this.time_pressed_alert > 0 && time_passed_alert(250f) && !(Input.GetButton("Interact") || this.time_pressed_interaction > 0))
+                {
+                    this.time_pressed_alert = 0;
+                    Debug.Log("ALERT long");
+                    this.menu.show_alert_menu(hit.point);
+                }
+                //----------------- konc alertov
             }
             else {
                 // Debug.Log("Looking at not interactable " + hit.collider.name + " with distance of " + hit.distance);
             }
         }
-        if (Input.GetButtonUp("Interact"))
+        if (Input.GetButtonUp("Interact") || Input.GetButtonUp("Alert"))
         {
             this.menu.hide_radial_menu();
         }
@@ -154,15 +175,26 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
 
 
 
-private bool time_passed(float limit) {
+private bool time_passed_interaction(float limit) {
     double time_released = (DateTime.Now - this.baseDate).TotalMilliseconds;
 
-    if (time_released - this.time_pressed >= limit)
+    if (time_released - this.time_pressed_interaction >= limit)
     {
         return true;
     }
         return false;
 }
+
+    private bool time_passed_alert(float limit)
+    {
+        double time_released = (DateTime.Now - this.baseDate).TotalMilliseconds;
+
+        if (time_released - this.time_pressed_alert >= limit)
+        {
+            return true;
+        }
+        return false;
+    }
 
     private void setup_player_cam()
     {
@@ -276,6 +308,60 @@ private bool time_passed(float limit) {
         target.GetComponent<NetworkBackpack>().local_player_look_request();
     }
 
+    internal void local_alert_danger_request(Vector3 point)
+    {
+        local_send_alert(point, 0);
+    }
+
+    internal void local_alert_ground_request(Vector3 point)
+    {
+        local_send_alert(point, 1);
+    }
+
+    private void local_send_alert(Vector3 point, int v)
+    {
+        if (networkObject.IsOwner) {
+            //poisc njegov team
+            uint[] team = stats.getTeam();
+            if (team == null)
+            {
+
+            }
+            else {
+                lock (myNetWorker.Players)
+                {
+
+                    myNetWorker.IteratePlayers((player) =>
+                    {
+                        if (contains(team,player.NetworkId)) //passive target
+                        {
+                            networkObject.SendRpc(player, RPC_ALERT, (byte)v,point);
+                        }
+                    });
+
+                }
+            }
+        }
+    }
+
+    private bool contains(uint[] team, uint networkId)
+    {
+        foreach (uint i in team)
+            if (i == networkId)
+                return true;
+        return false;
+    }
+    /// <summary>
+    /// kdorkoli lahko poslje. rpc se poslje vsem k so u njegovmu teamu. ce nima teama se ne pšoslje nikamor
+    /// </summary>
+    /// <param name="args"></param>
+    public override void Alert(RpcArgs args)
+    {
+        if (args.Info.SendingPlayer.NetworkId == networkObject.Owner.NetworkId)
+            GameObject.Instantiate<GameObject>(this.alert_world_prefab[(int)args.GetNext<byte>()],args.GetNext<Vector3>(),Quaternion.identity);
+
+
+    }
 
     public override void ItemPickupRequest(RpcArgs args)//ne nrdi nc
     {
