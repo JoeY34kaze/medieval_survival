@@ -634,10 +634,10 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
     public GameObject FindByid(uint targetNetworkId) //koda kopširana v network_body.cs in Interactable.cs
     {
         Debug.Log("interactable.findplayerById");
-        Debug.Log(targetNetworkId);
+        //Debug.Log(targetNetworkId);
         foreach (GameObject p in GameObject.FindGameObjectsWithTag("Player"))
         {//very fucking inefficient ampak uno k je spodej nedela. nevem kaj je fora une kode ker networker,NetworkObjects niso playerji, so networkani objekti k drzijo playerje in njihova posizija znotraj lista se spreminja. kojikurac
-            Debug.Log(p.GetComponent<NetworkPlayerStats>().server_id);
+        //    Debug.Log(p.GetComponent<NetworkPlayerStats>().server_id);
             if (p.GetComponent<NetworkPlayerStats>().server_id == targetNetworkId) return p;
         }
         Debug.Log("TARGET PLAYER NOT FOUND!");

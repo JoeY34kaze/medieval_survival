@@ -791,7 +791,7 @@ public class NetworkArmorStand : NetworkArmorStandBehavior
 
     private void redraw_armor_stand()//izrise stvari k so na uma
     {
-        Debug.Log("Redrawing");
+        //Debug.Log("Redrawing");
 
         //--------------------------------------CLOTHING-----------------------------------------
 

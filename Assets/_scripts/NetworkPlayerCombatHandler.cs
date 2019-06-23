@@ -181,7 +181,7 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
     /// <returns></returns>
     private bool current_shield_can_perform_block()
     {
-        Debug.Log("Trying to perform block!");
+       // Debug.Log("Trying to perform block!");
         return true;
     }
 
@@ -190,7 +190,7 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
         if (!networkObject.IsOwner) return;
         if (Input.GetAxis("Mouse ScrollWheel") > 0f && !this.blocking && !this.in_attack_animation) // forward - menja weapone. unarmed fist - unarmed block se skippa vmes - weapon0 - weapon1 - ranged
         {
-            Debug.Log("client : sending weapon change request");
+         //   Debug.Log("client : sending weapon change request");
             networkObject.SendRpc(RPC_CHANGE_CURRENT_WEAPON_REQUEST, Receivers.Server);
         }
     }
@@ -217,9 +217,9 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
     {
         update_equipped_weapons();
 
-        Debug.Log("server: checking to see it player is unarmed");
+       // Debug.Log("server: checking to see it player is unarmed");
         if (this.equipped_weapons[index_of_currently_selected_weapon_from_equipped_weapons] > 1) return;
-        Debug.Log("server: player is unarmed. setting current weapon to first not empty");
+       // Debug.Log("server: player is unarmed. setting current weapon to first not empty");
         //nastimej na prvga k ni empty
         int first = 0;
         if (this.equipped_weapons[2] != 0) { first = 2; }
@@ -249,7 +249,7 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
     }
 
     private void refresh_in_hand() {
-        Debug.Log("refreshing all in hand");
+        //Debug.Log("refreshing all in hand");
         //deaktiviramo vse in aktiviramo kar ima v rokah.
         refresh_weapon(this.index_of_currently_selected_weapon_from_equipped_weapons);
         refresh_shield(this.currently_equipped_shield);
@@ -526,7 +526,7 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
     public override void ChangeCurrentWeaponRequest(RpcArgs args)
     {
         if (!networkObject.IsServer || args.Info.SendingPlayer.NetworkId != networkObject.Owner.NetworkId) return;
-        Debug.Log("server: got weapon change request. sending response IF all is legit");
+       // Debug.Log("server: got weapon change request. sending response IF all is legit");
 
         //djmo scrollat samo prek weaponov k niso unarmed. nocmo trikat misko premaknt ker je povsod unarmed
         if (this.blocking || this.in_attack_animation) return;
@@ -555,7 +555,7 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
     {
         if (args.Info.SendingPlayer.NetworkId == 0)
         {
-            Debug.Log("Client & server : got weapon change response.");
+          //  Debug.Log("Client & server : got weapon change response.");
             if(!networkObject.IsServer)this.index_of_currently_selected_weapon_from_equipped_weapons = args.GetNext<int>(); // event pohendla vse kar se rab nrdit ob spremembi
             animator.SetInteger("weapon_animation_class", getWeaponClassForAnimator(equipped_weapons[this.index_of_currently_selected_weapon_from_equipped_weapons]));
             draw_current_weapon();
@@ -566,7 +566,7 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
     public override void ChangeCombatModeRequest(RpcArgs args)
     {
         if (!networkObject.IsServer || args.Info.SendingPlayer.NetworkId != networkObject.Owner.NetworkId) return;
-        Debug.Log("server : got change combat mode request");
+       // Debug.Log("server : got change combat mode request");
         if (!this.in_attack_animation) {
             int prev = this.combat_mode;
             int next = 0;
@@ -583,7 +583,7 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
         int new_mode = args.GetNext<int>();
 
         this.combat_mode = (byte)new_mode;
-        Debug.Log("got change combat mode response : "+this.combat_mode + " "+new_mode);
+       // Debug.Log("got change combat mode response : "+this.combat_mode + " "+new_mode);
 
         if (new_mode == 0)
         {

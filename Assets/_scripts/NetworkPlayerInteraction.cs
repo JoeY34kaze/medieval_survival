@@ -40,7 +40,22 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
         if (!networkObject.IsOwner)
             Destroy(canvas);
     }
+    public GameObject FindByid(uint targetNetworkId) //koda kopširana v network_body.cs in Interactable.cs
+    {
+        Debug.Log("interactable.findplayerById");
+        //Debug.Log(targetNetworkId);
+        foreach (GameObject p in GameObject.FindGameObjectsWithTag("Player"))
+        {//very fucking inefficient ampak uno k je spodej nedela. nevem kaj je fora une kode ker networker,NetworkObjects niso playerji, so networkani objekti k drzijo playerje in njihova posizija znotraj lista se spreminja. kojikurac
+         //    Debug.Log(p.GetComponent<NetworkPlayerStats>().server_id);
+            if (p.GetComponent<NetworkPlayerStats>().server_id == targetNetworkId) return p;
+        }
+        Debug.Log("TARGET PLAYER NOT FOUND!");
+        // NetworkBehavior networkBehavior = (NetworkBehavior)NetworkManager.Instance.Networker.NetworkObjects[(uint)targetNetworkId].AttachedBehavior;
+        // GameObject obj = networkBehavior.gameObject;
 
+
+        return null;
+    }
     // Update is called once per frame
     void Update()
     {
@@ -153,7 +168,7 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
                     Debug.Log("ALERT quick");
                     local_send_alert(hit.point, 1);
                 }
-                else if (Input.GetButton("Alert") && this.time_pressed_alert > 0 && time_passed_alert(250f) && !(Input.GetButton("Interact") || this.time_pressed_interaction > 0))
+                else if (Input.GetButton("Alert") && this.time_pressed_alert > 0 && time_passed_alert(150f) && !(Input.GetButton("Interact") || this.time_pressed_interaction > 0))
                 {
                     this.time_pressed_alert = 0;
                     Debug.Log("ALERT long");
@@ -318,30 +333,42 @@ private bool time_passed_interaction(float limit) {
         local_send_alert(point, 1);
     }
 
-    private void local_send_alert(Vector3 point, int v)
+    public override void AlertRequest(RpcArgs args)
     {
-        if (networkObject.IsOwner) {
+        if (networkObject.IsServer)
+        {
             //poisc njegov team
-            uint[] team = stats.getTeam();
+            uint[] team = FindByid(args.Info.SendingPlayer.NetworkId).GetComponent<NetworkPlayerStats>().getTeam();
             if (team == null)
             {
 
             }
-            else {
+            else
+            {
+                byte b = args.GetNext<byte>();
+                Vector3 p = args.GetNext<Vector3>();
                 lock (myNetWorker.Players)
                 {
 
                     myNetWorker.IteratePlayers((player) =>
                     {
-                        if (contains(team,player.NetworkId)) //passive target
+                        if (contains(team, player.NetworkId)) //passive target
                         {
-                            networkObject.SendRpc(player, RPC_ALERT, (byte)v,point);
+                            
+                            networkObject.SendRpc(player, RPC_ALERT,b , p);
+                            Debug.Log("sending alerto from server to " + player.NetworkId);
                         }
                     });
 
                 }
             }
         }
+    }
+
+    private void local_send_alert(Vector3 point, int v)
+    {
+        if(networkObject.IsOwner)
+            networkObject.SendRpc(RPC_ALERT_REQUEST, Receivers.Server, (byte)v, point);
     }
 
     private bool contains(uint[] team, uint networkId)
@@ -357,7 +384,8 @@ private bool time_passed_interaction(float limit) {
     /// <param name="args"></param>
     public override void Alert(RpcArgs args)
     {
-        if (args.Info.SendingPlayer.NetworkId == networkObject.Owner.NetworkId)
+        Debug.Log("sending player id: " + args.Info.SendingPlayer.NetworkId + " owner: "+networkObject.Owner.NetworkId);
+        if (args.Info.SendingPlayer.NetworkId == 0)
             GameObject.Instantiate<GameObject>(this.alert_world_prefab[(int)args.GetNext<byte>()],args.GetNext<Vector3>(),Quaternion.identity);
 
 
