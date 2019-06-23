@@ -3,6 +3,7 @@ using BeardedManStudios.Forge.Networking.Generated;
 using BeardedManStudios.Forge.Networking;
 using UnityEngine;
 using BeardedManStudios.Forge.Networking.Unity;
+using System.Collections.Generic;
 
 public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
 {
@@ -17,7 +18,7 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
     private bool interacting = false;
 
     public GameObject canvas;
-
+    private List<GameObject> alerts;
     private double time_pressed_interaction = 0;
     private double time_pressed_alert = 0;
     private DateTime baseDate;
@@ -28,7 +29,7 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
     {
         stats = GetComponent<NetworkPlayerStats>();
         networkPlayerInventory = GetComponent<NetworkPlayerInventory>();
-
+        this.alerts = new List<GameObject>();
         this.baseDate = new DateTime(1970, 1, 1);
     }
 
@@ -386,7 +387,14 @@ private bool time_passed_interaction(float limit) {
     {
         Debug.Log("sending player id: " + args.Info.SendingPlayer.NetworkId + " owner: "+networkObject.Owner.NetworkId);
         if (args.Info.SendingPlayer.NetworkId == 0)
-            GameObject.Instantiate<GameObject>(this.alert_world_prefab[(int)args.GetNext<byte>()],args.GetNext<Vector3>(),Quaternion.identity);
+        {
+            foreach (GameObject g in this.alerts) {
+                Destroy(g);
+            }
+
+            this.alerts.Clear();
+            alerts.Add(GameObject.Instantiate<GameObject>(this.alert_world_prefab[(int)args.GetNext<byte>()], args.GetNext<Vector3>(), Quaternion.identity));
+        }
 
 
     }
