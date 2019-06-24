@@ -203,6 +203,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 9096499026483526784}
+  - component: {fileID: 2136690800734922736}
   m_Layer: 0
   m_Name: alert_danger
   m_TagString: Untagged
@@ -226,6 +227,19 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2136690800734922736
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9096499026483526787}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 687a96d9678821e4e81aba7f3d1c0062, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  linked_player_interaction: {fileID: 0}
 --- !u!1001 &2286740393283183803
 PrefabInstance:
   m_ObjectHideFlags: 0

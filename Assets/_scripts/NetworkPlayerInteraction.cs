@@ -25,6 +25,7 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
 
     public GameObject[] alert_world_prefab;
 
+    public Greyman.OffScreenIndicator offscreen_indicator;//kupljen asset
     private void Start()
     {
         stats = GetComponent<NetworkPlayerStats>();
@@ -355,8 +356,8 @@ private bool time_passed_interaction(float limit) {
                     {
                         if (contains(team, player.NetworkId)) //passive target
                         {
-                            
-                            networkObject.SendRpc(player, RPC_ALERT,b , p);
+
+                            FindByid(player.NetworkId).GetComponent<NetworkPlayerInteraction>().send_alert_server_side(b, p);
                             Debug.Log("sending alerto from server to " + player.NetworkId);
                         }
                     });
@@ -365,6 +366,11 @@ private bool time_passed_interaction(float limit) {
             }
         }
     }
+
+    private void send_alert_server_side(byte b, Vector3 p) {
+        networkObject.SendRpc( RPC_ALERT,Receivers.Owner, b, p);
+    }
+
 
     private void local_send_alert(Vector3 point, int v)
     {
@@ -388,16 +394,30 @@ private bool time_passed_interaction(float limit) {
         Debug.Log("sending player id: " + args.Info.SendingPlayer.NetworkId + " owner: "+networkObject.Owner.NetworkId);
         if (args.Info.SendingPlayer.NetworkId == 0)
         {
-            foreach (GameObject g in this.alerts) {
-                Destroy(g);
+            foreach (GameObject gi in this.alerts) {
+                removeIndicator(gi.transform);
+                Destroy(gi);
             }
 
             this.alerts.Clear();
-            alerts.Add(GameObject.Instantiate<GameObject>(this.alert_world_prefab[(int)args.GetNext<byte>()], args.GetNext<Vector3>(), Quaternion.identity));
+
+            int tip = (int)args.GetNext<byte>();
+            GameObject g = GameObject.Instantiate<GameObject>(this.alert_world_prefab[tip], args.GetNext<Vector3>(), Quaternion.identity);
+            alerts.Add(g);
+            g.GetComponent<alert_world_object>().linked_player_interaction = this;
+            offscreen_indicator.AddIndicator(g.transform, tip);
         }
-
-
     }
+
+    public void kill_alert_from_alert(Transform t) {
+        removeIndicator(t);
+        this.alerts.Clear();//ker se je stvar rabila saba ubit moramo pohendlat ta shit ker gani nbena stvar prepisala.
+    }
+
+    private void removeIndicator(Transform t) {
+        offscreen_indicator.RemoveIndicator(t);
+    }
+
 
     public override void ItemPickupRequest(RpcArgs args)//ne nrdi nc
     {
