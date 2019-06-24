@@ -19,6 +19,7 @@ MonoBehaviour:
   size: 0
   damage_reduction: 0
   id: 34
-  prefab_pickup: {fileID: 0}
+  prefab_pickup: {fileID: 1206042230447930, guid: 2cc73f9fe09ae6642bf2ef85f51e2fc5,
+    type: 3}
   weapon_animation_class: 2
   recipeName: 
