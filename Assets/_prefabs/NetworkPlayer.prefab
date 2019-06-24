@@ -4473,8 +4473,8 @@ MonoBehaviour:
   menu: {fileID: 6590091600152796470}
   canvas: {fileID: 9001569400916587085}
   alert_world_prefab:
-  - {fileID: 8426917478716109983, guid: 74c39d3e911bb164c9688e2de004f3b8, type: 3}
-  - {fileID: 8426917478716109983, guid: 34243d87fe7b9a442aa0b5d657148411, type: 3}
+  - {fileID: 9096499026483526787, guid: 4c4c72b1acfcd7848a809f72e3aa9066, type: 3}
+  - {fileID: 9096499026483526787, guid: 34243d87fe7b9a442aa0b5d657148411, type: 3}
 --- !u!114 &7040696969213881553
 MonoBehaviour:
   m_ObjectHideFlags: 0
