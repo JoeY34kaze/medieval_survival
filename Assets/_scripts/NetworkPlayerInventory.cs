@@ -92,7 +92,8 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
 
     void refresh_UMA_equipped_gear()
     {
-        avatar.ClearSlots();
+        if (avatar == null) return;
+            avatar.ClearSlots();
 
         if (this.head != null)
         {
@@ -691,6 +692,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
     {
         if (!networkObject.IsOwner) return;
         //personal inventory
+        if (slots == null) return;
         for (int i = 0; i < slots.Length; i++)
         {
             if (items[i]!=null)  // If there is an item to add

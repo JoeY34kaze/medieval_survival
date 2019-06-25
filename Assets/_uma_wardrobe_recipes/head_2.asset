@@ -17,20 +17,12 @@ MonoBehaviour:
   compatibleRaces:
   - HumanMale
   - HumanMaleDCS
-  - HumanMaleHighPoly
-  - HumanMale_OBM
   - HumanFemaleDCS
   wardrobeRecipeThumbs:
   - race: HumanMale
     filename: 
-    thumb: {fileID: 0}
+    thumb: {fileID: 21300000, guid: 34a2fb4ca5833c2449791d7de91908c1, type: 3}
   - race: HumanMaleDCS
-    filename: 
-    thumb: {fileID: 0}
-  - race: HumanMaleHighPoly
-    filename: 
-    thumb: {fileID: 0}
-  - race: HumanMale_OBM
     filename: 
     thumb: {fileID: 0}
   - race: HumanFemaleDCS
