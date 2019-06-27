@@ -214,6 +214,12 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
                 myNetWorker = GameObject.Find("NetworkManager(Clone)").GetComponent<NetworkManager>().Networker;
             }
         }
+        //-----------------------CRAPPY BUGFIX ZARAD UPGREJDA UNITY VERZIJE------------------
+
+        if (gameObject.layer != 10) gameObject.layer = 10;//ragdoll ga forsira na layer 9 kar se pa zjebe ker tole je collider za hojo okol in ni en od unih na playerju za ragdoll.
+        //------------------------CRAPPY BUGFIX ZARAD UPGREJDA UNITY VERZIJE------------------
+
+
 
         if (networkObject.IsServer && Input.GetKeyDown(KeyCode.X))
         {
