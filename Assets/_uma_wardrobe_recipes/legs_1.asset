@@ -27,8 +27,9 @@ MonoBehaviour:
   wardrobeSlot: Legs
   Hides:
   - MaleLegs
+  - FemaleLegs
   suppressWardrobeSlots: []
   activeWardrobeSet: []
   MeshHideAssets: []
-  recipeString: '{"version":3,"packedSlotDataList":[],"slotsV2":[],"slotsV3":[{"id":"","scale":1,"copyIdx":-1,"overlays":[]},{"id":"SWL_Trousers","scale":100,"copyIdx":-1,"overlays":[{"id":"SWL_Trousers","colorIdx":0,"rect":[0,0,0,0]}]}],"colors":[],"fColors":[{"name":"","colors":[255,255,255,255,0,0,0,0,255,255,255,255,0,0,0,0,255,255,255,255,0,0,0,0]}],"sharedColorCount":0,"race":"","packedDna":[]}'
+  recipeString: '{"version":3,"packedSlotDataList":[],"slotsV2":[],"slotsV3":[{"id":"","scale":1,"copyIdx":-1,"overlays":[]},{"id":"SWL_Trousers","scale":100,"copyIdx":-1,"overlays":[{"id":"SWL_Trousers","colorIdx":0,"rect":[0,0,0,0]}]}],"colors":[],"fColors":[{"name":"-","colors":[255,255,255,255,0,0,0,0,255,255,255,255,0,0,0,0,255,255,255,255,0,0,0,0]}],"sharedColorCount":0,"race":"","packedDna":[]}'
   replaces: Nothing
