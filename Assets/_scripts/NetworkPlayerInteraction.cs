@@ -22,6 +22,7 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
     private double time_pressed_interaction = 0;
     private double time_pressed_alert = 0;
     private DateTime baseDate;
+    private Interactable recent_interactable;
 
     public GameObject[] alert_world_prefab;
 
@@ -95,15 +96,27 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
                 {
                     //izriši eno obrobo al pa nekej samo tolk da player vidi da lahko z stvarjo eventualno interacta?
                     /*
-
+                   
                  
                  */
+
+
                     if (hit.distance <= radius)
                     {
                         /*
                          Izsis se kaj dodatnega da bo vedu da lohko direkt pobere - glow?
 
                          */
+
+                        if (interactable is ItemPickup && interactable != this.recent_interactable)
+                        {
+                            interactable.setMaterialGlow();
+                            if (this.recent_interactable != null)
+                                this.recent_interactable.resetMaterial();
+                            this.recent_interactable = interactable;
+                        }
+
+
                         if (Input.GetButtonDown("Interact") && this.time_pressed_interaction == 0f  &&!(Input.GetButton("Alert") || this.time_pressed_alert>0))
                         {
 
@@ -155,6 +168,12 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
                             }
                         }
                     }
+                }
+                else
+                {
+                    if (this.recent_interactable != null)
+                        this.recent_interactable.resetMaterial();
+                    this.recent_interactable = null;
                 }
 
                 // ------------------- za alerte 
@@ -417,7 +436,6 @@ private bool time_passed_interaction(float limit) {
     private void removeIndicator(Transform t) {
         offscreen_indicator.RemoveIndicator(t);
     }
-
 
     public override void ItemPickupRequest(RpcArgs args)//ne nrdi nc
     {

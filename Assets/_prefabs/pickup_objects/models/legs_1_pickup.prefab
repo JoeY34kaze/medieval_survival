@@ -120,9 +120,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5327fb6c6a24cc849aecfd7685c43422, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  local_lock: {fileID: 3488555824391006084}
   i: {fileID: 11400000, guid: 07036b7c91c170248884de1c51a21f62, type: 2}
   quantity: 1
   stackable: 0
+  glow: {fileID: 2100000, guid: d87efb6957a72124c859c04e3fba502d, type: 2}
+  original_material: {fileID: 2100000, guid: 1e8706e4b38ec384696993022cce516f, type: 2}
 --- !u!54 &3488555824391006081
 Rigidbody:
   m_ObjectHideFlags: 0

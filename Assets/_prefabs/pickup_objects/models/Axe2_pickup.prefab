@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 6733891265131876339}
   - component: {fileID: 2197787211143400879}
   m_Layer: 11
-  m_Name: model
+  m_Name: sadasdas
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -167,6 +167,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5327fb6c6a24cc849aecfd7685c43422, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  local_lock: {fileID: 6410002049233632170}
   i: {fileID: 11400000, guid: 7791524775a3e8d449c36b12b33c3d68, type: 2}
   quantity: 1
   stackable: 0
+  glow: {fileID: 2100000, guid: d87efb6957a72124c859c04e3fba502d, type: 2}
+  original_material: {fileID: 2100000, guid: 5f2c5b1e15ad29b4a82284ad5b92c2ba, type: 2}

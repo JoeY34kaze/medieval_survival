@@ -16,11 +16,11 @@ to se vse overrida
 */
 public class Interactable : Interactable_objectBehavior
 {
-    protected InteractableLocalLock local_lock;
+    public InteractableLocalLock local_lock;
 
     private void Start()
     {
-        local_lock = GetComponent<InteractableLocalLock>();
+        local_lock = GetComponent<InteractableLocalLock>();//tole se ne izvede...bugfixat
         //Debug.Log("found lock");
     }
     private void Update()//ce item slucajn ni od serverja
@@ -30,6 +30,7 @@ public class Interactable : Interactable_objectBehavior
             networkObject.TakeOwnership();
             //assignOwnership je za server ampak rabs mu dat networkPlayer argument.
         }
+        if (this.local_lock == null) GetComponent<InteractableLocalLock>();
     }
 
     public override void DestroyWrapper(RpcArgs args)
@@ -91,6 +92,16 @@ public class Interactable : Interactable_objectBehavior
     }
 
     public override void ReviveDownedPlayerResponse(RpcArgs args)
+    {
+        throw new NotImplementedException();
+    }
+
+    public virtual void setMaterialGlow()
+    {
+        throw new NotImplementedException();
+    }
+
+    public virtual void resetMaterial()
     {
         throw new NotImplementedException();
     }

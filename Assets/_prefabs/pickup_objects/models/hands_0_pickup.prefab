@@ -77,9 +77,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5327fb6c6a24cc849aecfd7685c43422, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  local_lock: {fileID: 1348755910180563228}
   i: {fileID: 11400000, guid: 2430319fe32c9874a97d1f8d626dcfd3, type: 2}
   quantity: 1
   stackable: 0
+  glow: {fileID: 2100000, guid: d87efb6957a72124c859c04e3fba502d, type: 2}
+  original_material: {fileID: 2100000, guid: ff2917974883ed2458c5734cf0c43f2e, type: 2}
 --- !u!114 &1348755910180563228
 MonoBehaviour:
   m_ObjectHideFlags: 0

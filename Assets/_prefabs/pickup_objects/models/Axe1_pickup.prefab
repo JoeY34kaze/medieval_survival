@@ -76,9 +76,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5327fb6c6a24cc849aecfd7685c43422, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  local_lock: {fileID: 7282125089516517828}
   i: {fileID: 11400000, guid: aefb49ea94e55ae4d91809916ca159cc, type: 2}
   quantity: 1
   stackable: 0
+  glow: {fileID: 2100000, guid: d87efb6957a72124c859c04e3fba502d, type: 2}
+  original_material: {fileID: 2100000, guid: 5f2c5b1e15ad29b4a82284ad5b92c2ba, type: 2}
 --- !u!114 &7282125089516517828
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -105,7 +108,7 @@ GameObject:
   - component: {fileID: 4425105877646279229}
   - component: {fileID: 4302976055683871483}
   m_Layer: 11
-  m_Name: model
+  m_Name: asdasdasdasd
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

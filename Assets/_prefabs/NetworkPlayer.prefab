@@ -4636,6 +4636,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 149ff4bb66969a44bbdaff00a4559c82, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  local_lock: {fileID: 0}
 --- !u!1 &4071417591800162448
 GameObject:
   m_ObjectHideFlags: 0
@@ -10660,7 +10661,7 @@ PrefabInstance:
     - target: {fileID: 153643981316704341, guid: fda6cff1de33cde4d9d5d49932bd66ad,
         type: 3}
       propertyPath: m_Name
-      value: unarmed_fist
+      value: l_unarmed_fist
       objectReference: {fileID: 0}
     - target: {fileID: 153643981316704341, guid: fda6cff1de33cde4d9d5d49932bd66ad,
         type: 3}
@@ -11312,7 +11313,7 @@ PrefabInstance:
     - target: {fileID: 2014122048747877151, guid: 3c2716ed3cde66140a5524e6840f82f5,
         type: 3}
       propertyPath: m_Name
-      value: unarmed_block
+      value: l_unarmed_block
       objectReference: {fileID: 0}
     - target: {fileID: 2014122048747877151, guid: 3c2716ed3cde66140a5524e6840f82f5,
         type: 3}

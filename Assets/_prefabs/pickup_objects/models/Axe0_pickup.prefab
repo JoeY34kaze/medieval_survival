@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 5521097529389554193}
   - component: {fileID: 3501305074814915655}
   m_Layer: 11
-  m_Name: model
+  m_Name: model_55
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -153,9 +153,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5327fb6c6a24cc849aecfd7685c43422, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  local_lock: {fileID: 7495518528968806150}
   i: {fileID: 11400000, guid: 6d72d7d3ced355f45ad1c4623d1a0823, type: 2}
   quantity: 1
   stackable: 0
+  glow: {fileID: 2100000, guid: d87efb6957a72124c859c04e3fba502d, type: 2}
+  original_material: {fileID: 2100000, guid: afb6ea850faa99948a6f891448ababee, type: 2}
 --- !u!114 &7495518528968806150
 MonoBehaviour:
   m_ObjectHideFlags: 0

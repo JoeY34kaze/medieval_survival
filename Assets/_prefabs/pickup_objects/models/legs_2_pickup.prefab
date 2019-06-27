@@ -107,9 +107,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5327fb6c6a24cc849aecfd7685c43422, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  local_lock: {fileID: 4601069242401602997}
   i: {fileID: 11400000, guid: 6c0f8588e1e498947a67d518f23bf1d9, type: 2}
   quantity: 1
   stackable: 0
+  glow: {fileID: 2100000, guid: d87efb6957a72124c859c04e3fba502d, type: 2}
+  original_material: {fileID: 2100000, guid: b2f02abb9ae2c7345aa51cdeae1c6cc5, type: 2}
 --- !u!54 &4601069242401603003
 Rigidbody:
   m_ObjectHideFlags: 0

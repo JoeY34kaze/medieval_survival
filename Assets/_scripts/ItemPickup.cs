@@ -10,14 +10,27 @@ public class ItemPickup : Interactable {
     public Item i; //ujemat se mora z id-jem itema na playerju ce je na playerju al pa nevem
     public int quantity = 1;
     public bool stackable = false;
+
+    public Material glow;
+    public Material original_material;
+    private MeshRenderer renderer;
     //zaenkrat smao pove da je item k se ga lahko pobere
 
+    private void Start()
+    {
+        if (this.renderer == null)this.renderer= GetComponent<MeshRenderer>();
+        if (this.renderer == null) this.renderer = GetComponentInChildren<MeshRenderer>();
+        
+        
+    }
 
     IEnumerator changeOwner()//hacky, but we save 1 rpc call because of it
     {
         yield return new WaitForSeconds(1);
         if (networkObject == null) { Debug.LogError("networkObject is null."); }
         if (networkObject.IsServer) networkObject.TakeOwnership();
+
+
     }
 
     protected override void NetworkStart()
@@ -25,13 +38,14 @@ public class ItemPickup : Interactable {
         base.NetworkStart();
         // TODO:  Your initialization code that relies on network setup for this object goes here
         StartCoroutine(changeOwner());
-
+        if (this.renderer == null) this.renderer = GetComponent<MeshRenderer>();
+        if (this.renderer == null) this.renderer = GetComponentInChildren<MeshRenderer>();
     }
 
     internal override void interact(uint server_id)//sprozi na playerju
     {
         if (networkObject == null) { Debug.LogError("networkObject is null."); }
-
+        if(this.local_lock==null) this.local_lock = GetComponent<InteractableLocalLock>();
         if (local_lock.item_allows_interaction)
         {
             Debug.Log("Sending from local object to server for aprooval");
@@ -149,5 +163,18 @@ public class ItemPickup : Interactable {
             transform.position = pos;//da se zacne na isti poziciji kot na serverju
             rb.AddForce(dir * 1500);
         }
+    }
+
+    public override void setMaterialGlow() {
+        if (this.renderer == null) this.renderer = GetComponent<MeshRenderer>();
+        if (this.renderer == null) this.renderer = GetComponentInChildren<MeshRenderer>();
+
+        this.renderer.material = this.glow;
+    }
+
+    public override void resetMaterial() {
+        if (this.renderer == null) this.renderer = GetComponent<MeshRenderer>();
+        if (this.renderer == null) this.renderer = GetComponentInChildren<MeshRenderer>();
+        this.renderer.material = this.original_material;
     }
 }
