@@ -40,6 +40,8 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
     private uint[] team; //array networkId-jev team memberjev. server vedno hrani to vrednost za vse playerje. drugi dobijo samo update od serverja
     private List<uint> already_processed_inviters;
     private bool team_invite_pending = false;
+
+    public Transform soul;
     /*
      HOW DAMAGE WORKS RIGHT NOW:
      na serverju se detektira hit. trenutno edina skripta ki to dela je Weapon_Collider_handler, ki poklice tole metodo. ta metoda izracuna nov health od tega k je bil napaden. to vrednost poslje
@@ -412,6 +414,8 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
     private void local_setDrawingPlayer(bool b) {
         transform.Find("UMARenderer").gameObject.SetActive(b);
         //izris prica al karkoli bo ze letel po zraku do tvojga otroka da ga possessa(!b)
+        this.soul.gameObject.SetActive(!b);
+        GetComponent<Collider>().enabled = b;
     }
 
     /// <summary>
