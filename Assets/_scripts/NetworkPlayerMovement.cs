@@ -106,8 +106,8 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
         }
 
         */
-
-        if (!stats.downed)//dvakrat je tale check. zato da ce je downan v zraku se zmer pade na tla in ne lebdi v zrak
+        next_position = transform.position;
+        if (!stats.downed && !stats.dead)//dvakrat je tale check. zato da ce je downan v zraku se zmer pade na tla in ne lebdi v zrak
         {
             if (stats.inDodge)
             {
@@ -120,12 +120,12 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
 
                 Vector3 dirVector = (transform.forward).normalized * speed * Time.fixedDeltaTime;
 
-                if(dodge_direction == 1)
+                if (dodge_direction == 1)
                     dirVector = (transform.right * (-1)).normalized * speed * Time.fixedDeltaTime;
                 else if (dodge_direction == 2)
                     dirVector = (transform.right * 1).normalized * speed * Time.fixedDeltaTime;
-                else if(dodge_direction == 3)
-                    dirVector = (transform.forward *(-1)).normalized * speed * Time.fixedDeltaTime;
+                else if (dodge_direction == 3)
+                    dirVector = (transform.forward * (-1)).normalized * speed * Time.fixedDeltaTime;
 
                 next_position += dirVector;
 
@@ -193,6 +193,15 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
             */
 
         }
+        else if (stats.dead)
+        {//ubistvu nek wisp k leti po zraku
+            speed = normal_speed + sprint_modifier;
+            Vector3 dirVector = (Camera.main.transform.forward * Input.GetAxis("Vertical") + Camera.main.transform.right * Input.GetAxis("Horizontal")).normalized * speed * Time.fixedDeltaTime;
+
+            Quaternion turnAngle = Quaternion.AngleAxis(Input.GetAxis("Mouse X") * GetComponent<player_camera_handler>().mouse_sensitivity_multiplier, Vector3.up);
+            transform.eulerAngles = transform.eulerAngles + turnAngle.eulerAngles;
+            next_position += dirVector;
+        }
 
         rigidbody.MovePosition(next_position);
         //transform.position = next_position;
@@ -219,7 +228,7 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
     {
         in_a_jump = true;
         anim.SetTrigger("jump");
-            yield return new WaitForSeconds(t);
+        yield return new WaitForSeconds(t);
         in_a_jump = false;
 
     }
@@ -253,7 +262,8 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
         networkObject.SendRpc(RPC_SET_DODGE, Receivers.OthersProximity, this.dodge_direction);
     }
 
-    public void handleDodgeEnd() {//animacija poklice tole metodo na vsah clientih da resetirajo vse kar je povezano z dodganjem
+    public void handleDodgeEnd()
+    {//animacija poklice tole metodo na vsah clientih da resetirajo vse kar je povezano z dodganjem
         stats.inDodge = false;
         //Debug.Log("dodge parameters cleared");
     }

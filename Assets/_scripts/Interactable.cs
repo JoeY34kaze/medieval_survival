@@ -20,7 +20,7 @@ public class Interactable : Interactable_objectBehavior
 
     private void Start()
     {
-        local_lock = GetComponent<InteractableLocalLock>();
+        this.local_lock = GetComponent<InteractableLocalLock>();
         //Debug.Log("found lock");
     }
     private void Update()//ce item slucajn ni od serverja
@@ -91,6 +91,16 @@ public class Interactable : Interactable_objectBehavior
     }
 
     public override void ReviveDownedPlayerResponse(RpcArgs args)
+    {
+        throw new NotImplementedException();
+    }
+
+    public virtual void setMaterialGlow()
+    {
+        throw new NotImplementedException();
+    }
+
+    public virtual void resetMaterial()
     {
         throw new NotImplementedException();
     }

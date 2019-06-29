@@ -22,6 +22,7 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
     private double time_pressed_interaction = 0;
     private double time_pressed_alert = 0;
     private DateTime baseDate;
+    private Interactable recent_interactable;
 
     public GameObject[] alert_world_prefab;
 
@@ -73,7 +74,8 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
         {
             setup_player_cam();
         }
-        else {
+        else
+        {
 
             //check what we are looking at with camera.
             Ray ray = new Ray(player_cam.position, player_cam.forward);
@@ -81,7 +83,8 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
 
             RaycastHit hit;
 
-            if (Physics.Raycast(ray, out hit, 50)) {
+            if (Physics.Raycast(ray, out hit, 50))
+            {
 
                 Debug.DrawRay(player_cam.position, player_cam.forward * 10, Color.blue);
 
@@ -95,16 +98,28 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
                 {
                     //izriši eno obrobo al pa nekej samo tolk da player vidi da lahko z stvarjo eventualno interacta?
                     /*
-
+                   
                  
                  */
+
+
                     if (hit.distance <= radius)
                     {
                         /*
                          Izsis se kaj dodatnega da bo vedu da lohko direkt pobere - glow?
 
                          */
-                        if (Input.GetButtonDown("Interact") && this.time_pressed_interaction == 0f  &&!(Input.GetButton("Alert") || this.time_pressed_alert>0))
+
+                        if (interactable is ItemPickup && interactable != this.recent_interactable)
+                        {
+                            interactable.setMaterialGlow();
+                            if (this.recent_interactable != null)
+                                this.recent_interactable.resetMaterial();
+                            this.recent_interactable = interactable;
+                        }
+
+
+                        if (Input.GetButtonDown("Interact") && this.time_pressed_interaction == 0f && !(Input.GetButton("Alert") || this.time_pressed_alert > 0))
                         {
 
                             TimeSpan diff = DateTime.Now - baseDate;
@@ -128,7 +143,8 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
                                 ((Interactible_ArmorStand)interactable).local_player_interaction_swap_request(stats.server_id);
                             }
 
-                        } else if (Input.GetButton("Interact") && this.time_pressed_interaction > 0 && time_passed_interaction(150f) && !(Input.GetButton("Alert") || this.time_pressed_alert > 0))
+                        }
+                        else if (Input.GetButton("Interact") && this.time_pressed_interaction > 0 && time_passed_interaction(150f) && !(Input.GetButton("Alert") || this.time_pressed_alert > 0))
                         {
                             this.time_pressed_interaction = 0;
                             //long hold - odpri radial menu
@@ -156,6 +172,12 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
                         }
                     }
                 }
+                else
+                {
+                    if (this.recent_interactable != null)
+                        this.recent_interactable.resetMaterial();
+                    this.recent_interactable = null;
+                }
 
                 // ------------------- za alerte 
                 if (Input.GetButtonDown("Alert") && this.time_pressed_alert == 0f && !(Input.GetButton("Interact") || this.time_pressed_interaction > 0))
@@ -178,7 +200,8 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
                 }
                 //----------------- konc alertov
             }
-            else {
+            else
+            {
                 // Debug.Log("Looking at not interactable " + hit.collider.name + " with distance of " + hit.distance);
             }
         }
@@ -192,15 +215,16 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
 
 
 
-private bool time_passed_interaction(float limit) {
-    double time_released = (DateTime.Now - this.baseDate).TotalMilliseconds;
-
-    if (time_released - this.time_pressed_interaction >= limit)
+    private bool time_passed_interaction(float limit)
     {
-        return true;
-    }
+        double time_released = (DateTime.Now - this.baseDate).TotalMilliseconds;
+
+        if (time_released - this.time_pressed_interaction >= limit)
+        {
+            return true;
+        }
         return false;
-}
+    }
 
     private bool time_passed_alert(float limit)
     {
@@ -242,13 +266,13 @@ private bool time_passed_interaction(float limit) {
     //------------HEALTHY PLAYER-------------
 
     internal void local_player_interaction_guild_invite_request(GameObject target)
-    { 
+    {
         target.GetComponent<Interactable_player>().local_player_guild_invite_request(stats.server_id);
     }
 
     internal void local_player_interaction_team_invite_request(GameObject target)
     {
-       // target.GetComponent<Interactable_player>().local_player_team_invite_request(stats.server_id);tole zbrisat ker ta shit negre tukej
+        // target.GetComponent<Interactable_player>().local_player_team_invite_request(stats.server_id);tole zbrisat ker ta shit negre tukej
         stats.localTeamInviteRequest(target.GetComponent<NetworkPlayerStats>().server_id);
 
     }
@@ -367,14 +391,15 @@ private bool time_passed_interaction(float limit) {
         }
     }
 
-    private void send_alert_server_side(byte b, Vector3 p) {
-        networkObject.SendRpc( RPC_ALERT,Receivers.Owner, b, p);
+    private void send_alert_server_side(byte b, Vector3 p)
+    {
+        networkObject.SendRpc(RPC_ALERT, Receivers.Owner, b, p);
     }
 
 
     private void local_send_alert(Vector3 point, int v)
     {
-        if(networkObject.IsOwner)
+        if (networkObject.IsOwner)
             networkObject.SendRpc(RPC_ALERT_REQUEST, Receivers.Server, (byte)v, point);
     }
 
@@ -391,10 +416,11 @@ private bool time_passed_interaction(float limit) {
     /// <param name="args"></param>
     public override void Alert(RpcArgs args)
     {
-        Debug.Log("sending player id: " + args.Info.SendingPlayer.NetworkId + " owner: "+networkObject.Owner.NetworkId);
+        Debug.Log("sending player id: " + args.Info.SendingPlayer.NetworkId + " owner: " + networkObject.Owner.NetworkId);
         if (args.Info.SendingPlayer.NetworkId == 0)
         {
-            foreach (GameObject gi in this.alerts) {
+            foreach (GameObject gi in this.alerts)
+            {
                 removeIndicator(gi.transform);
                 Destroy(gi);
             }
@@ -409,15 +435,16 @@ private bool time_passed_interaction(float limit) {
         }
     }
 
-    public void kill_alert_from_alert(Transform t) {
+    public void kill_alert_from_alert(Transform t)
+    {
         removeIndicator(t);
         this.alerts.Clear();//ker se je stvar rabila saba ubit moramo pohendlat ta shit ker gani nbena stvar prepisala.
     }
 
-    private void removeIndicator(Transform t) {
+    private void removeIndicator(Transform t)
+    {
         offscreen_indicator.RemoveIndicator(t);
     }
-
 
     public override void ItemPickupRequest(RpcArgs args)//ne nrdi nc
     {

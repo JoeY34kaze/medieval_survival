@@ -12,6 +12,20 @@ public class ItemPickup : Interactable {
     public bool stackable = false;
     //zaenkrat smao pove da je item k se ga lahko pobere
 
+    private Material glow;
+    public Material original_material;
+    private MeshRenderer renderer;
+    private bool initialized = false;
+    private void Start()
+    {
+        if (this.renderer == null) this.renderer = GetComponent<MeshRenderer>();
+        if (this.renderer == null) this.renderer = GetComponentInChildren<MeshRenderer>();
+
+        this.glow = (Material)Resources.Load("Glow_green", typeof(Material));
+        this.original_material = this.renderer.material;
+        this.local_lock = GetComponent<InteractableLocalLock>();
+        this.initialized = true;
+    }
 
     IEnumerator changeOwner()//hacky, but we save 1 rpc call because of it
     {
@@ -31,7 +45,7 @@ public class ItemPickup : Interactable {
     internal override void interact(uint server_id)//sprozi na playerju
     {
         if (networkObject == null) { Debug.LogError("networkObject is null."); }
-
+        if(this.local_lock==null)this.local_lock = GetComponent<InteractableLocalLock>();
         if (local_lock.item_allows_interaction)
         {
             Debug.Log("Sending from local object to server for aprooval");
@@ -61,6 +75,7 @@ public class ItemPickup : Interactable {
         if (networkObject == null) { Debug.LogError("networkObject is null."); }
         if (!networkObject.IsServer) return;
         Debug.Log("Server received item pickup request");
+        if (this.local_lock == null) this.local_lock = GetComponent<InteractableLocalLock>();
         if (!local_lock.item_allows_interaction) {
             Debug.Log("item does not allow interaction at this time.");
         }
@@ -100,9 +115,16 @@ public class ItemPickup : Interactable {
 
     private void handle_network_destruction_server()
     {
+        if (this.local_lock == null) this.local_lock = GetComponent<InteractableLocalLock>();
         local_lock.item_allows_interaction = false;
         local_lock.item_waiting_for_destruction = true;
-        StartCoroutine(DestroyDelayed());
+        //StartCoroutine(DestroyDelayed());
+
+        networkObject.SendRpc(RPC_DESTROY_WRAPPER, Receivers.AllProximity);//tole je da disabla interakcijo drugje pa da zacne fadeout al pa nekej. uglavnem nekej casa mora pretect predn se ga unici
+        //yield return new WaitForSeconds(0.1f);
+        if (!networkObject.IsOwner)
+            Debug.Log("NOT OWNER!!");
+        networkObject.Destroy();
 
     }
 
@@ -110,7 +132,7 @@ public class ItemPickup : Interactable {
     {
 
         networkObject.SendRpc(RPC_DESTROY_WRAPPER, Receivers.AllProximity);//tole je da disabla interakcijo drugje pa da zacne fadeout al pa nekej. uglavnem nekej casa mora pretect predn se ga unici
-        yield return new WaitForSeconds(0.5f);
+        yield return new WaitForSeconds(0.1f);
         if (!networkObject.IsOwner)
             Debug.Log("NOT OWNER!!");
         networkObject.Destroy();
@@ -149,5 +171,21 @@ public class ItemPickup : Interactable {
             transform.position = pos;//da se zacne na isti poziciji kot na serverju
             rb.AddForce(dir * 1500);
         }
+    }
+
+    public override void setMaterialGlow()
+    {
+        if (this.renderer == null) this.renderer = GetComponent<MeshRenderer>();
+        if (this.renderer == null) this.renderer = GetComponentInChildren<MeshRenderer>();
+
+        if(this.initialized)
+            this.renderer.material = this.glow;
+    }
+
+    public override void resetMaterial()
+    {
+        if (this.renderer == null) this.renderer = GetComponent<MeshRenderer>();
+        if (this.renderer == null) this.renderer = GetComponentInChildren<MeshRenderer>();
+        this.renderer.material = this.original_material;
     }
 }
