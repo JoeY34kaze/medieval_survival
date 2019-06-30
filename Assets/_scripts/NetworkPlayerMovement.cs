@@ -7,296 +7,359 @@ using System.Collections;
 
 public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
 {
-    /// <summary>
-    /// The speed that the cube will move by when the user presses a
-    /// Horizontal or Vertical mapped key
-    /// </summary>
-    public float normal_speed = 1.0f;
-    private int dodge_direction = 0;
 
-    public float sprint_modifier = 2.0f;
-    public float crouched_modifier = 0.25f;
+    public string horizontalInput = "Horizontal";
+    public string verticallInput = "Vertical";
 
-    public float visina_skoka = 2.0f;
+    [Header("Camera Settings")]
+    public string rotateCameraXInput = "Mouse X";
+    public string rotateCameraYInput = "Mouse Y";
 
-    private bool crouched;
+    #region Layers
+    [Header("---! Layers !---")]
+    [Tooltip("Layers that the character can walk on")]
+    public LayerMask groundLayer = 1 << 0;
+    [Tooltip("Distance to became not grounded")]
+    [SerializeField]
+    protected float groundMinDistance = 0.2f;
+    [SerializeField]
+    protected float groundMaxDistance = 0.5f;
+    #endregion
 
-    public float light_weapon_speed_modifier = 0.8f;
-    public float heavy_weapon_speed_modifier = 0.6f;
+    #region Character Variables
 
-    private float speed = 1.0f;
-    private float dodge_speed_modifier = 4f;
-    private Animator anim;
-    //public CapsuleCollider movement_collider_checker;
+    public enum LocomotionType
+    {
+        FreeWithStrafe,
+        OnlyStrafe,
+        OnlyFree
+    }
 
-    //public bool do_ragdoll = false;
-    public float dolzina_za_ground_check_raycast = 0.4f;
-    public float distance_from_center_raycast = 0.2f;
-    private bool isGrounded = true;
-    private bool in_a_jump = false;
+    [Header("--- Locomotion Setup ---")]
 
-    private Rigidbody rigidbody;
+    public LocomotionType locomotionType = LocomotionType.FreeWithStrafe;
+    [Tooltip("lock the player movement")]
+    public bool lockMovement;
+    [Tooltip("Speed of the rotation on free directional movement")]
+    [SerializeField]
+    public float freeRotationSpeed = 10f;
+    [Tooltip("Speed of the rotation while strafe movement")]
+    public float strafeRotationSpeed = 10f;
+
+    [Header("Jump Options")]
+
+    [Tooltip("Check to control the character while jumping")]
+    public bool jumpAirControl = true;
+    [Tooltip("How much time the character will be jumping")]
+    public float jumpTimer = 0.3f;
+    [HideInInspector]
+    public float jumpCounter;
+    [Tooltip("Add Extra jump speed, based on your speed input the character will move forward")]
+    public float jumpForward = 3f;
+    [Tooltip("Add Extra jump height, if you want to jump only with Root Motion leave the value with 0.")]
+    public float jumpHeight = 4f;
+
+    [Header("--- Movement Speed ---")]
+    [Tooltip("Check to drive the character using RootMotion of the animation")]
+    public bool useRootMotion = false;
+    [Tooltip("Add extra speed for the locomotion movement, keep this value at 0 if you want to use only root motion speed.")]
+    public float freeWalkSpeed = 2.5f;
+    [Tooltip("Add extra speed for the locomotion movement, keep this value at 0 if you want to use only root motion speed.")]
+    public float freeRunningSpeed = 3f;
+    [Tooltip("Add extra speed for the locomotion movement, keep this value at 0 if you want to use only root motion speed.")]
+    public float freeSprintSpeed = 4f;
+    [Tooltip("Add extra speed for the strafe movement, keep this value at 0 if you want to use only root motion speed.")]
+    public float strafeWalkSpeed = 2.5f;
+    [Tooltip("Add extra speed for the locomotion movement, keep this value at 0 if you want to use only root motion speed.")]
+    public float strafeRunningSpeed = 3f;
+    [Tooltip("Add extra speed for the locomotion movement, keep this value at 0 if you want to use only root motion speed.")]
+    public float strafeSprintSpeed = 4f;
+
+    [Header("--- Grounded Setup ---")]
+
+    [Tooltip("ADJUST IN PLAY MODE - Offset height limit for sters - GREY Raycast in front of the legs")]
+    public float stepOffsetEnd = 0.45f;
+    [Tooltip("ADJUST IN PLAY MODE - Offset height origin for sters, make sure to keep slight above the floor - GREY Raycast in front of the legs")]
+    public float stepOffsetStart = 0.05f;
+    [Tooltip("Higher value will result jittering on ramps, lower values will have difficulty on steps")]
+    public float stepSmooth = 4f;
+    [Tooltip("Max angle to walk")]
+    [SerializeField]
+    protected float slopeLimit = 45f;
+    [Tooltip("Apply extra gravity when the character is not grounded")]
+    [SerializeField]
+    protected float extraGravity = -10f;
+    protected float groundDistance;
+    public RaycastHit groundHit;
 
     private NetworkPlayerAnimationLogic animation_handler_script;
     private NetworkPlayerCombatHandler combat_handler_script;
     private NetworkPlayerInventory networkPlayerInventory;
     private NetworkPlayerStats stats;
-
-    Vector3 next_position;
-    //--------------------------------RAGDOLL --------------- tutorial v=RrWrnp2DLD8 ------------------------
+    #endregion
 
 
+    #region Actions
 
-    private void Awake()
+    // movement bools
+    [HideInInspector]
+    public bool
+        isGrounded,
+        isStrafing,
+        isSprinting,
+        isSliding;
+
+    // action bools
+    [HideInInspector]
+    public bool
+        isJumping;
+
+    protected void RemoveComponents()
     {
-        anim = GetComponent<Animator>();
-        rigidbody = GetComponent<Rigidbody>();
+        if (_capsuleCollider != null) Destroy(_capsuleCollider);
+        if (_rigidbody != null) Destroy(_rigidbody);
+        if (animator != null) Destroy(animator);
+        var comps = GetComponents<MonoBehaviour>();
+        for (int i = 0; i < comps.Length; i++)
+        {
+            Destroy(comps[i]);
+        }
+    }
+
+    #endregion
+
+    #region Direction Variables
+    [HideInInspector]
+    public Vector3 targetDirection;
+    protected Quaternion targetRotation;
+    [HideInInspector]
+    public Quaternion freeRotation;
+    [HideInInspector]
+    public bool keepDirection;
+
+    #endregion
+
+    #region Components               
+
+    [HideInInspector]
+    public Animator animator;                                   // access the Animator component
+    [HideInInspector]
+    public Rigidbody _rigidbody;                                // access the Rigidbody component
+    [HideInInspector]
+    public PhysicMaterial maxFrictionPhysics, frictionPhysics, slippyPhysics;       // create PhysicMaterial for the Rigidbody
+    [HideInInspector]
+    public CapsuleCollider _capsuleCollider;                    // access CapsuleCollider information
+
+    #endregion
+
+    #region Hide Variables
+
+    [HideInInspector]
+    public float colliderHeight;                        // storage capsule collider extra information                
+    [HideInInspector]
+    public Vector2 input;                               // generate input for the controller        
+    [HideInInspector]
+    public float speed, direction, verticalVelocity;    // general variables to the locomotion
+    [HideInInspector]
+    public float velocity;                              // velocity to apply to rigidbody  
+    
+    private bool isCrouched;
+
+    #endregion
+
+    protected virtual void Start()
+    {
+        // access components
+        animator = GetComponent<Animator>();
+
+        // slides the character through walls and edges
+        frictionPhysics = new PhysicMaterial();
+        frictionPhysics.name = "frictionPhysics";
+        frictionPhysics.staticFriction = .25f;
+        frictionPhysics.dynamicFriction = .25f;
+        frictionPhysics.frictionCombine = PhysicMaterialCombine.Multiply;
+
+        // prevents the collider from slipping on ramps
+        maxFrictionPhysics = new PhysicMaterial();
+        maxFrictionPhysics.name = "maxFrictionPhysics";
+        maxFrictionPhysics.staticFriction = 1f;
+        maxFrictionPhysics.dynamicFriction = 1f;
+        maxFrictionPhysics.frictionCombine = PhysicMaterialCombine.Maximum;
+
+        // air physics 
+        slippyPhysics = new PhysicMaterial();
+        slippyPhysics.name = "slippyPhysics";
+        slippyPhysics.staticFriction = 0f;
+        slippyPhysics.dynamicFriction = 0f;
+        slippyPhysics.frictionCombine = PhysicMaterialCombine.Minimum;
+
+        // rigidbody info
+        _rigidbody = GetComponent<Rigidbody>();
+
+        // capsule collider info
+        _capsuleCollider = GetComponent<CapsuleCollider>();
+
         combat_handler_script = GetComponent<NetworkPlayerCombatHandler>();
         networkPlayerInventory = GetComponent<NetworkPlayerInventory>();
         stats = GetComponent<NetworkPlayerStats>();
     }
 
-    private void Update()
+    protected virtual void LateUpdate()
+    {		    
+        InputHandle();                      // update input methods
+        UpdateCameraStates();               // update camera states
+    }
+
+    protected virtual void FixedUpdate()
     {
-        if (networkObject == null) return;
-        if (!networkObject.IsOwner) return;
-        if (!stats.downed)//dvakrat je tale check. zato da ce je downan v zraku se zmer pade na tla in ne lebdi v zrak
+        AirControl();
+        //CameraInput();
+    }
+
+    protected virtual void Update()
+    {
+        UpdateMotor();                   // call ThirdPersonMotor methods               
+        UpdateAnimator();                // call ThirdPersonAnimator methods		               
+    }
+
+    protected virtual void UpdateCameraStates()
+    {
+        /*
+        // CAMERA STATE - you can change the CameraState here, the bool means if you want lerp of not, make sure to use the same CameraState String that you named on TPCameraListData
+        if (tpCamera == null)
         {
-            if (Input.GetButtonDown("Dodge") && !stats.inDodge && this.isGrounded && !in_a_jump)
+            tpCamera = FindObjectOfType<vThirdPersonCamera>();
+            if (tpCamera == null)
+                return;
+            if (tpCamera)
             {
-                if (GetComponent<NetworkPlayerAnimationLogic>().isDodgeAllowed())
-                {
-                    Debug.Log("Dodge started");
-                    handle_dodge_start();
-                }
+                tpCamera.SetMainTarget(this.transform);
+                tpCamera.Init();
             }
+        }*/
+    }
+
+    protected virtual void InputHandle()
+    {
+        ExitGameInput();
+        //CameraInput();
+
+        if (!lockMovement)
+        {
+            MoveCharacter();
+            SprintInput();
+            CrouchedInput();
+
+            JumpInput();
         }
     }
 
-    private void FixedUpdate()
-    { //CE DELAMO KAKSNE EMOTE MORAMO ZAKLENT OPCIJO DA SE LAHKO PLAYER PREMIKA!!! SICER SE ZJEBE GROUND DETECTION
+    public virtual void UpdateMotor()
+    {
+        CheckGround();
+        ControlJumpBehaviour();
+        ControlLocomotion();
+    }
 
-        // If we are not the owner of this network object then we should
-        // move this cube to the position/rotation dictated by the owner
-        if (networkObject == null)
+    protected virtual void ExitGameInput()
+    {
+        // just a example to quit the application 
+        if (Input.GetKeyDown(KeyCode.Escape))
         {
-            Debug.LogError("networkObject is null.");
-            return;
-        }
-        if (!networkObject.IsOwner)
-        {
-
-
-            transform.position = networkObject.position;
-            transform.rotation = networkObject.rotation;
-
-            if (!rigidbody.isKinematic) rigidbody.isKinematic = true; //clipping issues
-            if (rigidbody.detectCollisions) rigidbody.detectCollisions = false;
-            return;
-        }
-        if (animation_handler_script == null) { animation_handler_script = GetComponent<NetworkPlayerAnimationLogic>(); }
-        /*
-        if (do_ragdoll)//ko bo dejanska smrt
-        {
-
-            GetComponent<UMA.Dynamics.UMAPhysicsAvatar>().ragdolled = true;
-            networkObject.SendRpc(RPC_RAGDOLL, Receivers.Others);
-
-            return;//najbrz spawnat box z playerjevimi itemi pa mrde kamero okol vrtet kej tazga
-        }
-
-        */
-        next_position = transform.position;
-        if (!stats.downed && !stats.dead)//dvakrat je tale check. zato da ce je downan v zraku se zmer pade na tla in ne lebdi v zrak
-        {
-            if (stats.inDodge)
-            {
-                //Debug.Log("dodging "+this.dodge_direction);
-
-                next_position = transform.position;
-
-                speed = normal_speed;
-                speed = speed * dodge_speed_modifier;
-
-                Vector3 dirVector = (transform.forward).normalized * speed * Time.fixedDeltaTime;
-
-                if (dodge_direction == 1)
-                    dirVector = (transform.right * (-1)).normalized * speed * Time.fixedDeltaTime;
-                else if (dodge_direction == 2)
-                    dirVector = (transform.right * 1).normalized * speed * Time.fixedDeltaTime;
-                else if (dodge_direction == 3)
-                    dirVector = (transform.forward * (-1)).normalized * speed * Time.fixedDeltaTime;
-
-                next_position += dirVector;
-
-
-                if (!networkPlayerInventory.panel_inventory.activeSelf)//ce nimamo odprt inventorij - to je samo za horizontalno premikanje miske. vertikalno je nekje drugje
-                {
-                    Quaternion turnAngle = Quaternion.AngleAxis(Input.GetAxis("Mouse X") * GetComponent<player_camera_handler>().mouse_sensitivity_multiplier, Vector3.up);
-                    transform.eulerAngles = transform.eulerAngles + turnAngle.eulerAngles;
-                }
-
-
-
-
-
-            }
+            if (!Cursor.visible)
+                Cursor.visible = true;
             else
-            {
-
-                crouched = anim.GetBool("crouched");
-                speed = normal_speed;
-
-                if (crouched) speed = speed * crouched_modifier;
-
-
-                //---------------------------------------------------DA TE MAL POSLOWA K NAPADAS Z WEAPONOM----------------------------------------------
-                if (combat_handler_script.in_attack_animation)
-                {
-                    if (combat_handler_script.index_of_currently_selected_weapon_from_equipped_weapons == 2) speed *= light_weapon_speed_modifier;
-                }
-                //----------------------------------------------------------------------------------------------------------------------------------------
-
-                next_position = transform.position;
-
-                Vector3 dirVector = (transform.forward * Input.GetAxis("Vertical") + transform.right * Input.GetAxis("Horizontal")).normalized * speed * Time.fixedDeltaTime;
-                if (Input.GetButton("Sprint") && Input.GetAxis("Vertical") > 0)
-                    dirVector *= sprint_modifier;
-
-                next_position += dirVector;
-
-                if (!networkPlayerInventory.panel_inventory.activeSelf)//ce nimamo odprt inventorij - to je samo za horizontalno premikanje miske. vertikalno je nekje drugje
-                {
-                    Quaternion turnAngle = Quaternion.AngleAxis(Input.GetAxis("Mouse X") * GetComponent<player_camera_handler>().mouse_sensitivity_multiplier, Vector3.up);
-                    transform.eulerAngles = transform.eulerAngles + turnAngle.eulerAngles;
-                }
-
-                check_ground_raycast(distance_from_center_raycast);
-            }
-            //gravity
-            //if(!isGrounded)
-            rigidbody.AddForce(Vector3.up * Physics.gravity.y * 2, ForceMode.Acceleration);
-
-
-            if (Input.GetAxis("Jump") > 0.01f && isGrounded && !in_a_jump && !stats.inDodge) // && isGrounded??? isGrounded je trenutno se mal buggy
-            {
-                //jump();
-                //Debug.Log(Vector3.up * 6.3f);
-
-                rigidbody.AddForce(Vector3.up * visina_skoka * 2, ForceMode.VelocityChange);
-                StartCoroutine(lock_jumping(0.7f));
-            }
-            /*
-            Vector3 point_on_ground = get_capsulecasted_position_downward_from_chest();
-            int state_of_vertical=check_ground(point_on_ground);
-            next_position=apply_gravity(next_position,point_on_ground,state_of_vertical);
-            */
-
+                Application.Quit();
         }
-        else if (stats.dead)
-        {//ubistvu nek wisp k leti po zraku
-            speed = normal_speed + sprint_modifier;
-            Vector3 dirVector = (Camera.main.transform.forward * Input.GetAxis("Vertical") + Camera.main.transform.right * Input.GetAxis("Horizontal")).normalized * speed * Time.fixedDeltaTime;
+    }
 
-            Quaternion turnAngle = Quaternion.AngleAxis(Input.GetAxis("Mouse X") * GetComponent<player_camera_handler>().mouse_sensitivity_multiplier, Vector3.up);
-            transform.eulerAngles = transform.eulerAngles + turnAngle.eulerAngles;
-            next_position += dirVector;
+    protected virtual void MoveCharacter()
+    {
+        input.x = Input.GetAxis(horizontalInput);
+        input.y = Input.GetAxis(verticallInput);
+    }
+
+
+    protected virtual void SprintInput()
+    {
+        if (Input.GetButtonDown("Sprint"))
+            isSprinting=true;
+        else if (Input.GetButtonUp("Sprint"))
+            isSprinting = false;
+    }
+    protected virtual void CrouchedInput()
+    {
+        if (Input.GetButtonDown("Crouch"))
+            isCrouched = true;
+        else if (Input.GetButtonUp("Crouch"))
+            isCrouched = false;
+    }
+
+    protected virtual void JumpInput()
+    {
+        if (Input.GetButtonDown("Jump"))
+        {
+            // conditions to do this action
+            bool jumpConditions = isGrounded && !isJumping;
+            // return if jumpCondigions is false
+            if (!jumpConditions) return;
+            // trigger jump behaviour
+            jumpCounter = jumpTimer;
+            isJumping = true;
+            // trigger jump animations            
+            if (_rigidbody.velocity.magnitude < 1)
+                animator.CrossFadeInFixedTime("Jump", 0.1f);
+            else
+                animator.CrossFadeInFixedTime("JumpMove", 0.2f);
         }
-
-        rigidbody.MovePosition(next_position);
-        //transform.position = next_position;
-        networkObject.position = transform.position;
-        networkObject.rotation = transform.rotation;
     }
 
-
-    private void check_ground_raycast(float distance_from_center)
+    public void AirControl()
     {
-        bool b = Physics.Raycast(transform.position, Vector3.down, dolzina_za_ground_check_raycast);
+        if (isGrounded) return;
+        if (!jumpFwdCondition) return;
 
-        if (!b) b = Physics.Raycast(transform.position + transform.forward * distance_from_center, Vector3.down, dolzina_za_ground_check_raycast);
-        if (!b) b = Physics.Raycast(transform.position - transform.forward * distance_from_center, Vector3.down, dolzina_za_ground_check_raycast);
-        if (!b) b = Physics.Raycast(transform.position + transform.right * distance_from_center, Vector3.down, dolzina_za_ground_check_raycast);
-        if (!b) b = Physics.Raycast(transform.position - transform.right * distance_from_center, Vector3.down, dolzina_za_ground_check_raycast);
+        var velY = transform.forward * jumpForward * speed;
+        velY.y = _rigidbody.velocity.y;
+        var velX = transform.right * jumpForward * direction;
+        velX.x = _rigidbody.velocity.x;
 
-        isGrounded = b;
-        anim.SetBool("grounded", b);
-
-    }
-
-    IEnumerator lock_jumping(float t)//sends vertical and horizontal speed to network
-    {
-        in_a_jump = true;
-        anim.SetTrigger("jump");
-        yield return new WaitForSeconds(t);
-        in_a_jump = false;
-
-    }
-
-    public override void setDodge(RpcArgs args)//mrde preimenovat v player death pa izpisat ksno stvar playerjim. mogoce gor desno kdo je koga ubiu alk pa kej dunno.
-    {
-        int smer = args.GetNext<int>();
-
-        /*
-         if(networkObject.isServer){
-        //anticheat al pa kej. glede na visino od tal pa take fore 
+        if (jumpAirControl)
+        {
+                var vel = transform.forward * (jumpForward * speed);
+                _rigidbody.velocity = new Vector3(vel.x, _rigidbody.velocity.y, vel.z);
         }
-         */
-
-
-        stats.inDodge = true;
-        this.dodge_direction = smer;
-        GetComponent<NetworkPlayerAnimationLogic>().handle_dodge_start(this.dodge_direction);
+        else
+        {
+            var vel = transform.forward * (jumpForward);
+            _rigidbody.velocity = new Vector3(vel.x, _rigidbody.velocity.y, vel.z);
+        }
     }
 
-    private void handle_dodge_start()
+    protected bool jumpFwdCondition
     {
-        stats.inDodge = true;
-
-        this.dodge_direction = 0;
-        if (Input.GetAxis("Horizontal") < 0) this.dodge_direction = 1;
-        else if (Input.GetAxis("Horizontal") > 0) this.dodge_direction = 2;
-        else if (Input.GetAxis("Vertical") < 0) this.dodge_direction = 3;
-        GetComponent<NetworkPlayerAnimationLogic>().handle_dodge_start(this.dodge_direction);
-
-        networkObject.SendRpc(RPC_SET_DODGE, Receivers.OthersProximity, this.dodge_direction);
+        get
+        {
+            Vector3 p1 = transform.position + _capsuleCollider.center + Vector3.up * -_capsuleCollider.height * 0.5F;
+            Vector3 p2 = p1 + Vector3.up * _capsuleCollider.height;
+            return Physics.CapsuleCastAll(p1, p2, _capsuleCollider.radius * 0.5f, transform.forward, 0.6f, groundLayer).Length == 0;
+        }
     }
 
-    public void handleDodgeEnd()
-    {//animacija poklice tole metodo na vsah clientih da resetirajo vse kar je povezano z dodganjem
-        stats.inDodge = false;
-        //Debug.Log("dodge parameters cleared");
+    public virtual void UpdateAnimator()
+    {
+        if (animator == null || !animator.enabled) return;
+
+        animator.SetBool("IsGrounded", isGrounded);
+        animator.SetBool("crouched", isCrouched);
+        animator.SetFloat("GroundDistance", groundDistance);
+
+        //if (!isGrounded)
+        animator.SetFloat("walking_vertical", verticalVelocity);
+        animator.SetFloat("walking_horizontal", verticalVelocity);
+
+        // fre movement get the input 0 to 1
+        animator.SetFloat("InputVertical", speed, 0.1f, Time.deltaTime);
     }
-
-
-    /* void OnCollisionEnter(Collision collision)
-     {
-         Debug.Log("GROUNDED!");
-         if (collision.gameObject.tag != ("Player") && Physics.Raycast(transform.position, Vector3.down,0.4f))
-         {
-             isGrounded = true;
-             anim.SetBool("grounded", true);
-         }
-     }
-     // This function is a callback for when the collider is no longer in contact with a previously collided object.
-     void OnCollisionExit(Collision collision)
-     {
-         Debug.Log("NOT GROUNDED!");
-         if (collision.gameObject.tag != ("Player"))
-         {
-             isGrounded = false;
-             anim.SetBool("grounded", false);
-         }
-     }
-
-     void OnCollisionStay(Collision collisionInfo)
-     {
-         if (collisionInfo.collider.gameObject.tag != ("Player") && Physics.Raycast(transform.position, Vector3.down, 0.4f))
-         {
-             isGrounded = true;
-             anim.SetBool("grounded", true);
-         }
-     }
-     */
 
 }
