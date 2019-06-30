@@ -5,6 +5,10 @@ using BeardedManStudios.Forge.Networking;
 using System;
 using System.Collections;
 
+
+/// <summary>
+/// INVECTOR FREE ASSET
+/// </summary>
 public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
 {
 
@@ -67,7 +71,7 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
     [Tooltip("Add extra speed for the locomotion movement, keep this value at 0 if you want to use only root motion speed.")]
     public float freeRunningSpeed = 3f;
     [Tooltip("Add extra speed for the locomotion movement, keep this value at 0 if you want to use only root motion speed.")]
-    public float freeSprintSpeed = 4f;
+    public float freeCrouchedSpeed = 0.5f;
     [Tooltip("Add extra speed for the strafe movement, keep this value at 0 if you want to use only root motion speed.")]
     public float strafeWalkSpeed = 2.5f;
     [Tooltip("Add extra speed for the locomotion movement, keep this value at 0 if you want to use only root motion speed.")]
@@ -164,6 +168,8 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
     public float velocity;                              // velocity to apply to rigidbody  
     
     private bool isCrouched;
+    private int dodge_direction;
+    private object tpCamera;
 
     #endregion
 
@@ -205,21 +211,45 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
     }
 
     protected virtual void LateUpdate()
-    {		    
-        InputHandle();                      // update input methods
-        UpdateCameraStates();               // update camera states
+    {
+        if (networkObject.IsOwner)
+        {
+            InputHandle();                      // update input methods
+                                                //UpdateCameraStates();               // update camera states
+        }
     }
 
     protected virtual void FixedUpdate()
     {
-        AirControl();
-        //CameraInput();
+        if (networkObject.IsOwner)
+        {
+            AirControl();
+
+            CameraInput();
+        }
+    }
+
+    private bool CameraRotationAllowed()
+    {
+        if (networkPlayerInventory.panel_inventory.activeSelf) return false;
+        return true;
     }
 
     protected virtual void Update()
     {
-        UpdateMotor();                   // call ThirdPersonMotor methods               
-        UpdateAnimator();                // call ThirdPersonAnimator methods		               
+        if (networkObject.IsOwner)
+        {
+            UpdateMotor();                   // call ThirdPersonMotor methods               
+            UpdateAnimator();                // call ThirdPersonAnimator methods	
+        }
+        else {
+            transform.position = networkObject.position;
+            transform.rotation = networkObject.rotation;
+
+            if (!_rigidbody.isKinematic) _rigidbody.isKinematic = true; //clipping issues
+            if (_rigidbody.detectCollisions) _rigidbody.detectCollisions = false;
+            return;
+        }
     }
 
     protected virtual void UpdateCameraStates()
@@ -239,6 +269,16 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
         }*/
     }
 
+    protected virtual void CameraInput()
+    {
+        if (!CameraRotationAllowed()) return;
+        var X = Input.GetAxis(rotateCameraXInput);
+        Quaternion turnAngle = Quaternion.AngleAxis(Input.GetAxis("Mouse X") * GetComponent<player_camera_handler>().mouse_sensitivity_multiplier, Vector3.up);
+        transform.eulerAngles = transform.eulerAngles + turnAngle.eulerAngles;
+
+
+    }
+
     protected virtual void InputHandle()
     {
         ExitGameInput();
@@ -249,16 +289,19 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
             MoveCharacter();
             SprintInput();
             CrouchedInput();
-
             JumpInput();
         }
     }
 
     public virtual void UpdateMotor()
     {
+        
         CheckGround();
         ControlJumpBehaviour();
         ControlLocomotion();
+        ControlSpeed();
+
+
     }
 
     protected virtual void ExitGameInput()
@@ -314,6 +357,174 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
         }
     }
 
+
+
+    public virtual void UpdateAnimator()
+    {
+        if (animator == null || !animator.enabled) return;
+
+        animator.SetBool("IsGrounded", isGrounded);
+        animator.SetBool("crouched", isCrouched);
+        animator.SetFloat("GroundDistance", groundDistance);
+
+        //if (!isGrounded)
+        animator.SetFloat("walking_vertical", verticalVelocity);
+        animator.SetFloat("walking_horizontal", verticalVelocity);
+
+        // fre movement get the input 0 to 1
+        animator.SetFloat("InputVertical", speed, 0.1f, Time.deltaTime);
+    }
+
+
+    #region Ground Check
+
+    void CheckGround()
+    {
+        CheckGroundDistance();
+
+        // change the physics material to very slip when not grounded or maxFriction when is
+        if (isGrounded && input == Vector2.zero)
+            _capsuleCollider.material = maxFrictionPhysics;
+        else if (isGrounded && input != Vector2.zero)
+            _capsuleCollider.material = frictionPhysics;
+        else
+            _capsuleCollider.material = slippyPhysics;
+
+        var magVel = (float)System.Math.Round(new Vector3(_rigidbody.velocity.x, 0, _rigidbody.velocity.z).magnitude, 2);
+        magVel = Mathf.Clamp(magVel, 0, 1);
+
+        var groundCheckDistance = groundMinDistance;
+        if (magVel > 0.25f) groundCheckDistance = groundMaxDistance;
+
+        // clear the checkground to free the character to attack on air                
+        var onStep = StepOffset();
+
+        if (groundDistance <= 0.05f)
+        {
+            isGrounded = true;
+            Sliding();
+        }
+        else
+        {
+            if (groundDistance >= groundCheckDistance)
+            {
+                isGrounded = false;
+                // check vertical velocity
+                verticalVelocity = _rigidbody.velocity.y;
+                // apply extra gravity when falling
+                if (!onStep && !isJumping)
+                    _rigidbody.AddForce(transform.up * extraGravity * Time.deltaTime, ForceMode.VelocityChange);
+            }
+            else if (!onStep && !isJumping)
+            {
+                _rigidbody.AddForce(transform.up * (extraGravity * 2 * Time.deltaTime), ForceMode.VelocityChange);
+            }
+        }
+    }
+
+    void CheckGroundDistance()
+    {
+        if (_capsuleCollider != null)
+        {
+            // radius of the SphereCast
+            float radius = _capsuleCollider.radius * 0.9f;
+            var dist = 10f;
+            // position of the SphereCast origin starting at the base of the capsule
+            Vector3 pos = transform.position + Vector3.up * (_capsuleCollider.radius);
+            // ray for RayCast
+            Ray ray1 = new Ray(transform.position + new Vector3(0, colliderHeight / 2, 0), Vector3.down);
+            // ray for SphereCast
+            Ray ray2 = new Ray(pos, -Vector3.up);
+            // raycast for check the ground distance
+            if (Physics.Raycast(ray1, out groundHit, colliderHeight / 2 + 2f, groundLayer))
+                dist = transform.position.y - groundHit.point.y;
+            // sphere cast around the base of the capsule to check the ground distance
+            if (Physics.SphereCast(ray2, radius, out groundHit, _capsuleCollider.radius + 2f, groundLayer))
+            {
+                // check if sphereCast distance is small than the ray cast distance
+                if (dist > (groundHit.distance - _capsuleCollider.radius * 0.1f))
+                    dist = (groundHit.distance - _capsuleCollider.radius * 0.1f);
+            }
+            groundDistance = (float)System.Math.Round(dist, 2);
+        }
+    }
+
+    float GroundAngle()
+    {
+        var groundAngle = Vector3.Angle(groundHit.normal, Vector3.up);
+        return groundAngle;
+    }
+
+    void Sliding()
+    {
+        var onStep = StepOffset();
+        var groundAngleTwo = 0f;
+        RaycastHit hitinfo;
+        Ray ray = new Ray(transform.position, -transform.up);
+
+        if (Physics.Raycast(ray, out hitinfo, 1f, groundLayer))
+        {
+            groundAngleTwo = Vector3.Angle(Vector3.up, hitinfo.normal);
+        }
+
+        if (GroundAngle() > slopeLimit + 1f && GroundAngle() <= 85 &&
+            groundAngleTwo > slopeLimit + 1f && groundAngleTwo <= 85 &&
+            groundDistance <= 0.05f && !onStep)
+        {
+            isSliding = true;
+            isGrounded = false;
+            var slideVelocity = (GroundAngle() - slopeLimit) * 2f;
+            slideVelocity = Mathf.Clamp(slideVelocity, 0, 10);
+            _rigidbody.velocity = new Vector3(_rigidbody.velocity.x, -slideVelocity, _rigidbody.velocity.z);
+        }
+        else
+        {
+            isSliding = false;
+            isGrounded = true;
+        }
+    }
+
+    bool StepOffset()
+    {
+        if (input.sqrMagnitude < 0.1 || !isGrounded) return false;
+
+        var _hit = new RaycastHit();
+        var _movementDirection = isStrafing && input.magnitude > 0 ? (transform.right * input.x + transform.forward * input.y).normalized : transform.forward;
+        Ray rayStep = new Ray((transform.position + new Vector3(0, stepOffsetEnd, 0) + _movementDirection * ((_capsuleCollider).radius + 0.05f)), Vector3.down);
+
+        if (Physics.Raycast(rayStep, out _hit, stepOffsetEnd - stepOffsetStart, groundLayer) && !_hit.collider.isTrigger)
+        {
+            if (_hit.point.y >= (transform.position.y) && _hit.point.y <= (transform.position.y + stepOffsetEnd))
+            {
+                var _speed = isStrafing ? Mathf.Clamp(input.magnitude, 0, 1) : speed;
+                var velocityDirection = isStrafing ? (_hit.point - transform.position) : (_hit.point - transform.position).normalized;
+                _rigidbody.velocity = velocityDirection * stepSmooth * (_speed * (velocity > 1 ? velocity : 1));
+                return true;
+            }
+        }
+        return false;
+    }
+
+    #endregion
+
+    #region Jump Methods
+
+    protected void ControlJumpBehaviour()
+    {
+        if (!isJumping) return;
+
+        jumpCounter -= Time.deltaTime;
+        if (jumpCounter <= 0)
+        {
+            jumpCounter = 0;
+            isJumping = false;
+        }
+        // apply extra force to the jump height   
+        var vel = _rigidbody.velocity;
+        vel.y = jumpHeight;
+        _rigidbody.velocity = vel;
+    }
+
     public void AirControl()
     {
         if (isGrounded) return;
@@ -326,8 +537,8 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
 
         if (jumpAirControl)
         {
-                var vel = transform.forward * (jumpForward * speed);
-                _rigidbody.velocity = new Vector3(vel.x, _rigidbody.velocity.y, vel.z);
+            var vel = transform.forward * (jumpForward * speed);
+            _rigidbody.velocity = new Vector3(vel.x, _rigidbody.velocity.y, vel.z);
         }
         else
         {
@@ -346,20 +557,125 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
         }
     }
 
-    public virtual void UpdateAnimator()
+
+    #endregion
+
+    #region Locomotion 
+
+    protected bool freeLocomotionConditions
     {
-        if (animator == null || !animator.enabled) return;
-
-        animator.SetBool("IsGrounded", isGrounded);
-        animator.SetBool("crouched", isCrouched);
-        animator.SetFloat("GroundDistance", groundDistance);
-
-        //if (!isGrounded)
-        animator.SetFloat("walking_vertical", verticalVelocity);
-        animator.SetFloat("walking_horizontal", verticalVelocity);
-
-        // fre movement get the input 0 to 1
-        animator.SetFloat("InputVertical", speed, 0.1f, Time.deltaTime);
+        get
+        {
+            if (locomotionType.Equals(LocomotionType.OnlyStrafe)) isStrafing = true;
+            return !isStrafing && !locomotionType.Equals(LocomotionType.OnlyStrafe) || locomotionType.Equals(LocomotionType.OnlyFree);
+        }
     }
 
+    void ControlLocomotion()
+    {
+        //if (freeLocomotionConditions)
+            FreeMovement();     // free directional movement
+        //else
+            //StrafeMovement();   // move forward, backwards, strafe left and right
+    }
+
+    void StrafeMovement()
+    {
+        var _speed = Mathf.Clamp(input.y, -1f, 1f);
+        var _direction = Mathf.Clamp(input.x, -1f, 1f);
+        speed = _speed;
+        direction = _direction;
+        if (isSprinting) speed += 0.5f;
+        if (direction >= 0.7 || direction <= -0.7 || speed <= 0.1) isSprinting = false;
+    }
+
+    public virtual void FreeMovement()
+    {
+        if (input != Vector2.zero && targetDirection.magnitude > 0.1f)
+        {
+            Vector3 lookDirection = targetDirection.normalized;
+            freeRotation = Quaternion.LookRotation(lookDirection, transform.up);
+            var diferenceRotation = freeRotation.eulerAngles.y - transform.eulerAngles.y;
+            var eulerY = transform.eulerAngles.y;
+
+            // apply free directional rotation while not turning180 animations
+            if (isGrounded || (!isGrounded && jumpAirControl))
+            {
+                if (diferenceRotation < 0 || diferenceRotation > 0) eulerY = freeRotation.eulerAngles.y;
+                var euler = new Vector3(transform.eulerAngles.x, eulerY, transform.eulerAngles.z);
+                transform.rotation = Quaternion.Lerp(transform.rotation, Quaternion.Euler(euler), freeRotationSpeed * Time.deltaTime);
+            }
+        }
+
+    }
+    protected void ControlSpeed()
+    {
+        if (Time.deltaTime == 0) return;//??
+
+        // set speed to both vertical and horizontal inputs
+        speed = Mathf.Abs(input.x) + Mathf.Abs(input.y);
+        speed = Mathf.Clamp(speed, 0, 1f);
+
+        float new_speed = speed * freeWalkSpeed;
+
+        if (isSprinting) new_speed= speed *freeRunningSpeed;
+        if (isCrouched) new_speed = speed * freeCrouchedSpeed;
+
+        var velY = transform.forward * velocity * speed;
+        velY.y = _rigidbody.velocity.y;
+        var velX = transform.right * velocity * direction;
+        velX.x = _rigidbody.velocity.x;
+
+       // if (isStrafing)
+       // {
+        Vector3 v = (transform.TransformDirection(new Vector3(input.x, 0, input.y)));
+        v = Vector3.Normalize(v) * new_speed;
+        v.y = _rigidbody.velocity.y;
+        _rigidbody.velocity = Vector3.Lerp(_rigidbody.velocity, v, 20f * Time.deltaTime);
+      //  }
+      //  else
+      //  {
+        //    _rigidbody.velocity = velY;
+       //     _rigidbody.AddForce(transform.forward * (velocity * speed) * Time.deltaTime, ForceMode.VelocityChange);
+      //  }
+        
+    }
+
+    #endregion
+
+
+    public override void setDodge(RpcArgs args)//mrde preimenovat v player death pa izpisat ksno stvar playerjim. mogoce gor desno kdo je koga ubiu alk pa kej dunno.
+    {
+        int smer = args.GetNext<int>();
+
+        /*
+         if(networkObject.isServer){
+        //anticheat al pa kej. glede na visino od tal pa take fore 
+        }
+         */
+
+
+        stats.inDodge = true;
+        this.dodge_direction = smer;
+        GetComponent<NetworkPlayerAnimationLogic>().handle_dodge_start(this.dodge_direction);
+    }
+
+    private void handle_dodge_start()
+    {
+        stats.inDodge = true;
+
+        this.dodge_direction = 0;
+        if (Input.GetAxis("Horizontal") < 0) this.dodge_direction = 1;//pretvort na karkoli ze ta skripta uporabla
+        else if (Input.GetAxis("Horizontal") > 0) this.dodge_direction = 2;//pretvort na karkoli ze ta skripta uporabla
+        else if (Input.GetAxis("Vertical") < 0) this.dodge_direction = 3;//pretvort na karkoli ze ta skripta uporabla
+        GetComponent<NetworkPlayerAnimationLogic>().handle_dodge_start(this.dodge_direction);
+
+        networkObject.SendRpc(RPC_SET_DODGE, Receivers.OthersProximity, this.dodge_direction);
+    }
+
+    public void handleDodgeEnd()
+    {//animacija poklice tole metodo na vsah clientih da resetirajo vse kar je povezano z dodganjem
+        stats.inDodge = false;
+        //Debug.Log("dodge parameters cleared");
+    }
 }

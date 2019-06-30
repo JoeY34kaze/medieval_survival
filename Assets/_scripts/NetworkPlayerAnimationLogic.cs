@@ -84,9 +84,9 @@ public class NetworkPlayerAnimationLogic : NetworkPlayerAnimationBehavior
             StartCoroutine("UpdateNetworkPlayerWalkingAnimations");
         }
 
-        if (Input.GetButtonDown("Toggle_Crouch")) {
+        if (Input.GetButtonDown("Crouch")) {
             //Debug.Log("Crouch!!");
-            toggle_Update_Crouched_State_Owner();
+            Update_Crouched_State_Owner();
         }
 
 
@@ -117,7 +117,7 @@ public class NetworkPlayerAnimationLogic : NetworkPlayerAnimationBehavior
         
     }
 
-    private void toggle_Update_Crouched_State_Owner() {
+    private void Update_Crouched_State_Owner() {
         bool current_status = anim.GetBool("crouched");
         anim.SetBool("crouched", !current_status);
 
