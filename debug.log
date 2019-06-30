@@ -1,0 +1,2 @@
+[0629/143719.848:ERROR:filesystem_win.cc(148)] DeleteFile C:\Users\joe\AppData\Local\BraveSoftware\Brave-Browser\User Data\Crashpad\reports\bf21917f-c44b-4425-b313-7a0d86eadef3.dmp: The process cannot access the file because it is being used by another process. (0x20)
+[0629/143721.283:ERROR:registration_protocol_win.cc(84)] TransactNamedPipe: The pipe has been ended. (0x6D)

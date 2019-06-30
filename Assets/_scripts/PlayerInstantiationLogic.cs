@@ -5,7 +5,7 @@ public class PlayerInstantiationLogic : MonoBehaviour {
 
     private void Start()
     {
-        NetworkManager.Instance.InstantiateNetworkPlayerStats(0,new Vector3(-4f,2f,6.09f));
+        NetworkManager.Instance.InstantiateNetworkPlayerStats(0,new Vector3(313,36,561));
 
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;

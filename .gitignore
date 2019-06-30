@@ -25,6 +25,17 @@ Assets/OffScreenIndicator.meta
 Assets/CorcraStudio/
 Assets/_fileToIgnore/
 Assets/UMA/
+
+#village files
+Assets/_TerrainAutoUpgrade/
+Assets/_TerrainAutoUpgrade
+Assets/Medieval Set_Update/
+Assets/Medieval Set_Update
+Assets/Medieval village
+Assets/Medieval village/
+Assets/Standard Assets
+Assets/Standard Assets/
+
 # Visual Studio cache directory
 .vs/
 
