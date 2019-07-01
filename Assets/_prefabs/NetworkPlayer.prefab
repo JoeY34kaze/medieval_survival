@@ -4424,15 +4424,15 @@ MonoBehaviour:
   lockMovement: 0
   freeRotationSpeed: 10
   strafeRotationSpeed: 10
-  jumpAirControl: 1
-  jumpTimer: 0.2
+  jumpAirControl: 0
+  jumpTimer: 0.1
   jumpCounter: 0
-  jumpForward: 3
+  jumpForward: 2
   jumpHeight: 4
   useRootMotion: 0
-  freeWalkSpeed: 3
+  freeWalkSpeed: 2
   freeRunningSpeed: 5
-  freeSprintSpeed: 7
+  freeCrouchedSpeed: 1
   strafeWalkSpeed: 3
   strafeRunningSpeed: 5
   strafeSprintSpeed: 7

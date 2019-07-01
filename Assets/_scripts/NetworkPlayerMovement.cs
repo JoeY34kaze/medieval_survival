@@ -100,6 +100,8 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
     private NetworkPlayerCombatHandler combat_handler_script;
     private NetworkPlayerInventory networkPlayerInventory;
     private NetworkPlayerStats stats;
+
+    private Vector3 jump_vector_start;
     #endregion
 
 
@@ -170,6 +172,7 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
     private bool isCrouched;
     private int dodge_direction;
     private object tpCamera;
+    private NetworkPlayerAnimationLogic animation_logic_script;
 
     #endregion
 
@@ -208,6 +211,7 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
         combat_handler_script = GetComponent<NetworkPlayerCombatHandler>();
         networkPlayerInventory = GetComponent<NetworkPlayerInventory>();
         stats = GetComponent<NetworkPlayerStats>();
+        animation_logic_script = GetComponent<NetworkPlayerAnimationLogic>();
     }
 
     protected virtual void LateUpdate()
@@ -295,7 +299,7 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
 
     public virtual void UpdateMotor()
     {
-        
+       // Debug.Log("motor");
         CheckGround();
         ControlJumpBehaviour();
         ControlLocomotion();
@@ -349,11 +353,16 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
             // trigger jump behaviour
             jumpCounter = jumpTimer;
             isJumping = true;
-            // trigger jump animations            
-            if (_rigidbody.velocity.magnitude < 1)
-                animator.CrossFadeInFixedTime("Jump", 0.1f);
-            else
-                animator.CrossFadeInFixedTime("JumpMove", 0.2f);
+            this.jump_vector_start = transform.TransformVector(_rigidbody.velocity);
+
+
+            // trigger jump animations
+            animation_logic_script.handle_start_of_jump_owner();
+
+            //if (_rigidbody.velocity.magnitude < 1)
+            //animator.CrossFadeInFixedTime("Jump", 0.1f);
+            //else
+            //animator.CrossFadeInFixedTime("JumpMove", 0.2f);
         }
     }
 
@@ -361,18 +370,10 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
 
     public virtual void UpdateAnimator()
     {
-        if (animator == null || !animator.enabled) return;
-
-        animator.SetBool("IsGrounded", isGrounded);
-        animator.SetBool("crouched", isCrouched);
-        animator.SetFloat("GroundDistance", groundDistance);
-
-        //if (!isGrounded)
-        animator.SetFloat("walking_vertical", verticalVelocity);
-        animator.SetFloat("walking_horizontal", verticalVelocity);
-
-        // fre movement get the input 0 to 1
-        animator.SetFloat("InputVertical", speed, 0.1f, Time.deltaTime);
+        if (animation_logic_script==null) return;
+        animation_logic_script.setGrounded(isGrounded);
+        animation_logic_script.setCrouched(isCrouched);
+       
     }
 
 
@@ -509,7 +510,7 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
 
     #region Jump Methods
 
-    protected void ControlJumpBehaviour()
+    protected void ControlJumpBehaviour()//klice se ob pritisku space
     {
         if (!isJumping) return;
 
@@ -525,26 +526,26 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
         _rigidbody.velocity = vel;
     }
 
-    public void AirControl()
+    public void AirControl()//tle je dajansko premikanje v skoku
     {
         if (isGrounded) return;
-        if (!jumpFwdCondition) return;
+        if (!jumpFwdCondition) return;//??
 
-        var velY = transform.forward * jumpForward * speed;
-        velY.y = _rigidbody.velocity.y;
-        var velX = transform.right * jumpForward * direction;
-        velX.x = _rigidbody.velocity.x;
+        //var velY = transform.forward * jumpForward * speed;
+        //velY.y = _rigidbody.velocity.y;
+        //var velX = transform.right * jumpForward * direction;
+        //velX.x = _rigidbody.velocity.x;
 
-        if (jumpAirControl)
-        {
-            var vel = transform.forward * (jumpForward * speed);
-            _rigidbody.velocity = new Vector3(vel.x, _rigidbody.velocity.y, vel.z);
-        }
-        else
-        {
-            var vel = transform.forward * (jumpForward);
-            _rigidbody.velocity = new Vector3(vel.x, _rigidbody.velocity.y, vel.z);
-        }
+        //if (jumpAirControl)
+        //{
+        //    var vel = transform.forward * (jumpForward * speed);
+        //    _rigidbody.velocity = new Vector3(vel.x, _rigidbody.velocity.y, vel.z);
+        //}
+        //else
+        //{
+        //var vel = _rigidbody.velocity;//transform.forward * (jumpForward);
+        //    _rigidbody.velocity = new Vector3(vel.x, _rigidbody.velocity.y, vel.z);
+        //}
     }
 
     protected bool jumpFwdCondition
@@ -610,7 +611,8 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
     }
     protected void ControlSpeed()
     {
-        if (Time.deltaTime == 0) return;//??
+        //Debug.Log("control_speed");
+        if (Time.deltaTime == 0) return;
 
         // set speed to both vertical and horizontal inputs
         speed = Mathf.Abs(input.x) + Mathf.Abs(input.y);
@@ -621,17 +623,50 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
         if (isSprinting) new_speed= speed *freeRunningSpeed;
         if (isCrouched) new_speed = speed * freeCrouchedSpeed;
 
-        var velY = transform.forward * velocity * speed;
+        Vector3 velY = transform.forward * velocity * speed;
+        
         velY.y = _rigidbody.velocity.y;
         var velX = transform.right * velocity * direction;
         velX.x = _rigidbody.velocity.x;
 
-       // if (isStrafing)
-       // {
-        Vector3 v = (transform.TransformDirection(new Vector3(input.x, 0, input.y)));
-        v = Vector3.Normalize(v) * new_speed;
-        v.y = _rigidbody.velocity.y;
-        _rigidbody.velocity = Vector3.Lerp(_rigidbody.velocity, v, 20f * Time.deltaTime);
+        // if (isStrafing)
+        // {
+        //if (isGrounded)
+        //{
+            
+            Vector3 v = (transform.TransformDirection(new Vector3(input.x, 0, input.y)));
+        //Debug.Log(  Vector3.Angle(transform.forward, v));
+        float angle_from_forward = Vector3.Angle(transform.forward, v);
+        float angle_penalty = 1.0f;
+        if (!isCrouched)
+        {
+            if (angle_from_forward >= 0 && angle_from_forward < 60)
+            {//diagonala naprej
+                angle_penalty = 0.85f;
+            }
+            else if (angle_from_forward >= 60 && angle_from_forward < 110)
+            {
+                angle_penalty = 0.75f;
+            }
+            else if (angle_from_forward >= 110)
+            {
+                angle_penalty = 0.5f;
+            }
+        }
+        v = Vector3.Normalize(v) * new_speed*angle_penalty;
+            v.y = _rigidbody.velocity.y;
+            _rigidbody.velocity = Vector3.Lerp(_rigidbody.velocity, v, 20f * Time.deltaTime);
+        //}
+       // else {
+            //Vector3 v = transform.InverseTransformVector(this.jump_vector_start);
+
+           // Debug.Log(this.jump_vector_start+"  ||  "+v+" -- NOT GROUNDED");
+
+           // v = Vector3.Normalize(v) * new_speed;
+            
+            //v.y = _rigidbody.velocity.y;
+            //_rigidbody.velocity = Vector3.Lerp(_rigidbody.velocity, v, 20f * Time.deltaTime);
+       // }
       //  }
       //  else
       //  {

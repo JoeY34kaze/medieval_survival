@@ -126,7 +126,7 @@ public class NetworkPlayerAnimationLogic : NetworkPlayerAnimationBehavior
 
     //----------------------------------KLICANO IZ DRUGIH SCRIPT KER IMA VEZE Z ANIMACIJO -------------------------------
 
-    internal void handle_start_of_jump_owner()
+    public void handle_start_of_jump_owner()
     {
         if (!networkObject.IsOwner) return;//this can never happen anyway but it doesnt hurt.
         //setup everything locally.
@@ -208,5 +208,14 @@ public class NetworkPlayerAnimationLogic : NetworkPlayerAnimationBehavior
     {
         anim.SetTrigger("dodge");
         anim.SetInteger("dodge_direction",direction);
+    }
+
+    internal void setGrounded(bool isGrounded)
+    {
+        anim.SetBool("grounded", isGrounded);
+    }
+
+    internal void setCrouched(bool b) {
+        anim.SetBool("crouched", b);
     }
 }
