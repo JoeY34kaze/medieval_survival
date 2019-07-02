@@ -88,7 +88,7 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
 
                 Debug.DrawRay(player_cam.position, player_cam.forward * 10, Color.blue);
 
-                //Debug.Log("raycast : "+hit.collider.name);
+                Debug.Log("raycast : "+hit.collider.name);
 
                 Interactable interactable = hit.collider.GetComponent<Interactable>();
                 if (interactable == null) interactable = hit.collider.GetComponentInParent<Interactable>();//je collider popravlen zarad neujemanja pivota ker je blender ziva nocna mora
@@ -142,6 +142,9 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
                             {
                                 ((Interactible_ArmorStand)interactable).local_player_interaction_swap_request(stats.server_id);
                             }
+
+                            if (interactable is Interactable_door)
+                                interactable.localPlayer_interaction_request(0);
 
                         }
                         else if (Input.GetButton("Interact") && this.time_pressed_interaction > 0 && time_passed_interaction(150f) && !(Input.GetButton("Alert") || this.time_pressed_alert > 0))

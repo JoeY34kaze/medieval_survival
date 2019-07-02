@@ -104,4 +104,19 @@ public class Interactable : Interactable_objectBehavior
     {
         throw new NotImplementedException();
     }
+
+    internal virtual void localPlayer_interaction_request(int v)
+    {
+        throw new NotImplementedException();
+    }
+
+    public override void DoorInteractionRequest(RpcArgs args)
+    {
+        throw new NotImplementedException();
+    }
+
+    public override void DoorStateUpdate(RpcArgs args)
+    {
+        throw new NotImplementedException();
+    }
 }
