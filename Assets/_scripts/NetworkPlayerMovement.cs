@@ -42,6 +42,8 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
     [Header("--- Locomotion Setup ---")]
 
     public LocomotionType locomotionType = LocomotionType.FreeWithStrafe;
+    private bool isDodging;
+    private Vector3 dodgeVector;
     [Tooltip("lock the player movement")]
     public bool lockMovement;
     [Tooltip("Speed of the rotation on free directional movement")]
@@ -72,12 +74,8 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
     public float freeRunningSpeed = 3f;
     [Tooltip("Add extra speed for the locomotion movement, keep this value at 0 if you want to use only root motion speed.")]
     public float freeCrouchedSpeed = 0.5f;
-    [Tooltip("Add extra speed for the strafe movement, keep this value at 0 if you want to use only root motion speed.")]
-    public float strafeWalkSpeed = 2.5f;
-    [Tooltip("Add extra speed for the locomotion movement, keep this value at 0 if you want to use only root motion speed.")]
-    public float strafeRunningSpeed = 3f;
-    [Tooltip("Add extra speed for the locomotion movement, keep this value at 0 if you want to use only root motion speed.")]
-    public float strafeSprintSpeed = 4f;
+    [Tooltip("Speed of the dodge movement.")]
+    public float dodgeSpeed = 5f;
 
     [Header("--- Grounded Setup ---")]
 
@@ -294,12 +292,15 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
             SprintInput();
             CrouchedInput();
             JumpInput();
+            DodgeInput();
         }
     }
+
 
     public virtual void UpdateMotor()
     {
        // Debug.Log("motor");
+       
         CheckGround();
         ControlJumpBehaviour();
         ControlLocomotion();
@@ -326,6 +327,7 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
         input.y = Input.GetAxis(verticallInput);
     }
 
+    #region Input
 
     protected virtual void SprintInput()
     {
@@ -365,8 +367,15 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
             //animator.CrossFadeInFixedTime("JumpMove", 0.2f);
         }
     }
+    private void DodgeInput()
+    {
+        if (Input.GetButtonDown("Dodge") && isGrounded && !isDodging && !lockMovement)
+        {
+            handle_dodge_start();
+        }
+    }
 
-
+#endregion
 
     public virtual void UpdateAnimator()
     {
@@ -526,7 +535,7 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
         _rigidbody.velocity = vel;
     }
 
-    public void AirControl()//tle je dajansko premikanje v skoku
+    public void AirControl()
     {
         if (isGrounded) return;
         if (!jumpFwdCondition) return;//??
@@ -592,7 +601,7 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
 
     public virtual void FreeMovement()
     {
-        if (input != Vector2.zero && targetDirection.magnitude > 0.1f)
+        if (input != Vector2.zero && targetDirection.magnitude > 0.1f &&!isDodging)
         {
             Vector3 lookDirection = targetDirection.normalized;
             freeRotation = Quaternion.LookRotation(lookDirection, transform.up);
@@ -614,48 +623,67 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
         //Debug.Log("control_speed");
         if (Time.deltaTime == 0) return;
 
-        // set speed to both vertical and horizontal inputs
-        speed = Mathf.Abs(input.x) + Mathf.Abs(input.y);
-        speed = Mathf.Clamp(speed, 0, 1f);
-
-        float new_speed = speed * freeWalkSpeed;
-
-        if (isSprinting) new_speed= speed *freeRunningSpeed;
-        if (isCrouched) new_speed = speed * freeCrouchedSpeed;
-
-        Vector3 velY = transform.forward * velocity * speed;
-        
-        velY.y = _rigidbody.velocity.y;
-        var velX = transform.right * velocity * direction;
-        velX.x = _rigidbody.velocity.x;
-
-        // if (isStrafing)
-        // {
-        //if (isGrounded)
-        //{
-            
-            Vector3 v = (transform.TransformDirection(new Vector3(input.x, 0, input.y)));
-        //Debug.Log(  Vector3.Angle(transform.forward, v));
-        float angle_from_forward = Vector3.Angle(transform.forward, v);
-        float angle_penalty = 1.0f;
-        if (!isCrouched)
+        if (!isDodging)
         {
-            if (angle_from_forward >= 0 && angle_from_forward < 60)
-            {//diagonala naprej
-                angle_penalty = 0.85f;
-            }
-            else if (angle_from_forward >= 60 && angle_from_forward < 110)
+            // set speed to both vertical and horizontal inputs
+            speed = Mathf.Abs(input.x) + Mathf.Abs(input.y);
+            speed = Mathf.Clamp(speed, 0, 1f);
+
+            float new_speed = speed * freeWalkSpeed;
+
+            if (isSprinting) new_speed = speed * freeRunningSpeed;
+            if (isCrouched) new_speed = speed * freeCrouchedSpeed;
+
+            Vector3 velY = transform.forward * velocity * speed;
+
+            velY.y = _rigidbody.velocity.y;
+            var velX = transform.right * velocity * direction;
+            velX.x = _rigidbody.velocity.x;
+
+            // if (isStrafing)
+            // {
+            //if (isGrounded)
+            //{
+
+            Vector3 v = (transform.TransformDirection(new Vector3(input.x, 0, input.y)));
+            //Debug.Log(  Vector3.Angle(transform.forward, v));
+            float angle_from_forward = Vector3.Angle(transform.forward, v);
+            float angle_penalty = 1.0f;
+            if (!isCrouched)
             {
-                angle_penalty = 0.75f;
+                if (angle_from_forward >= 0 && angle_from_forward < 60)
+                {//diagonala naprej
+                    angle_penalty = 0.85f;
+                }
+                else if (angle_from_forward >= 60 && angle_from_forward < 110)
+                {
+                    angle_penalty = 0.75f;
+                }
+                else if (angle_from_forward >= 110)
+                {
+                    angle_penalty = 0.5f;
+                }
             }
-            else if (angle_from_forward >= 110)
-            {
-                angle_penalty = 0.5f;
-            }
-        }
-        v = Vector3.Normalize(v) * new_speed*angle_penalty;
+            v = Vector3.Normalize(v) * new_speed * angle_penalty;
             v.y = _rigidbody.velocity.y;
             _rigidbody.velocity = Vector3.Lerp(_rigidbody.velocity, v, 20f * Time.deltaTime);
+        }
+        else {//is dodging
+            Debug.Log("dodging - controlSpeed");
+            float new_speed = dodgeSpeed;
+
+            Vector3 velY = transform.forward * velocity * speed;
+
+            velY.y = _rigidbody.velocity.y;
+            var velX = transform.right * velocity * direction;
+            velX.x = _rigidbody.velocity.x;
+
+            Vector3 v = dodgeVector;
+            //Debug.Log(  Vector3.Angle(transform.forward, v));
+            v =v * new_speed;
+            v.y = _rigidbody.velocity.y;
+            _rigidbody.velocity = Vector3.Lerp(_rigidbody.velocity, v, 20f * Time.deltaTime);
+        }
         //}
        // else {
             //Vector3 v = transform.InverseTransformVector(this.jump_vector_start);
@@ -678,6 +706,9 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
 
     #endregion
 
+    #region Dodge
+
+
 
     public override void setDodge(RpcArgs args)//mrde preimenovat v player death pa izpisat ksno stvar playerjim. mogoce gor desno kdo je koga ubiu alk pa kej dunno.
     {
@@ -690,14 +721,21 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
          */
 
 
-        stats.inDodge = true;
+        //stats.inDodge = true;
+        isDodging = true;
         this.dodge_direction = smer;
         GetComponent<NetworkPlayerAnimationLogic>().handle_dodge_start(this.dodge_direction);
     }
 
     private void handle_dodge_start()
     {
-        stats.inDodge = true;
+        
+
+
+        Debug.Log("Dodge start..");
+        isDodging = true;
+        //lockMovement = true;
+        
 
         this.dodge_direction = 0;
         if (Input.GetAxis("Horizontal") < 0) this.dodge_direction = 1;//pretvort na karkoli ze ta skripta uporabla
@@ -705,12 +743,33 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
         else if (Input.GetAxis("Vertical") < 0) this.dodge_direction = 3;//pretvort na karkoli ze ta skripta uporabla
         GetComponent<NetworkPlayerAnimationLogic>().handle_dodge_start(this.dodge_direction);
 
+        dodgeVector = transform.forward;
+        switch (dodge_direction) {//to damo u control speed da ga mece v to smer
+            case 1: dodgeVector = -transform.right;
+                break;
+            case 2:
+                dodgeVector = transform.right;
+                break;
+            case 3:
+                dodgeVector = -transform.forward;
+                break;
+            default:
+                break;
+        }
+
         networkObject.SendRpc(RPC_SET_DODGE, Receivers.OthersProximity, this.dodge_direction);
     }
 
     public void handleDodgeEnd()
     {//animacija poklice tole metodo na vsah clientih da resetirajo vse kar je povezano z dodganjem
-        stats.inDodge = false;
+        //stats.inDodge = false;
+        Debug.Log("Dodge end");
+        isDodging = false;
+        //if(networkObject.IsOwner)
+            //lockMovement = false;
         //Debug.Log("dodge parameters cleared");
+        GetComponent<NetworkPlayerAnimationLogic>().handle_dodge_end();
     }
+
+    #endregion
 }

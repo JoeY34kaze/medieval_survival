@@ -14,6 +14,8 @@ public class NetworkPlayerAnimationLogic : NetworkPlayerAnimationBehavior
     public Transform chest;
     public Transform _camera_framework;
     private NetworkPlayerStats stats;
+
+    private bool hookChestRotation=true;
     // ---------------------------------FUNCTIONS-------------------------------------
     void Awake()
     {
@@ -101,16 +103,18 @@ public class NetworkPlayerAnimationLogic : NetworkPlayerAnimationBehavior
 
     private void LateUpdate()
     {
-        if (!stats.downed) {
-            if (networkObject.IsOwner)
-            {
-                chestRotation = _camera_framework.rotation;
-                networkObject.chestRotation = chestRotation;
-            }
-            else
-            {
-                chestRotation = networkObject.chestRotation;
-            }
+        if (hookChestRotation)
+            if (!stats.downed) {
+                if (networkObject.IsOwner)
+                {
+                
+                    chestRotation = _camera_framework.rotation;
+                    networkObject.chestRotation = chestRotation;
+                }
+                else
+                {
+                    chestRotation = networkObject.chestRotation;
+                }
             chest.rotation = chestRotation * Quaternion.Euler(new Vector3(0, 0, -90));
         }
 
@@ -207,7 +211,21 @@ public class NetworkPlayerAnimationLogic : NetworkPlayerAnimationBehavior
     internal void handle_dodge_start(int direction)
     {
         anim.SetTrigger("dodge");
-        anim.SetInteger("dodge_direction",direction);
+        anim.SetInteger("dodge_direction", direction);
+        anim.SetInteger("combat_mode", 0);//duplicated
+        anim.SetLayerWeight(1, 0);//combat layer
+
+        //release chest rotation from camera
+        hookChestRotation = false;
+    }
+
+    internal void handle_dodge_end()
+    {
+        anim.SetLayerWeight(anim.GetLayerIndex("combat_layer"), 1);
+        anim.SetInteger("combat_mode", 0);//duplicated
+
+        //hook chest rotation back to camera
+        hookChestRotation = true;
     }
 
     internal void setGrounded(bool isGrounded)

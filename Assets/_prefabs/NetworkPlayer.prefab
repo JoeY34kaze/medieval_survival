@@ -4433,9 +4433,7 @@ MonoBehaviour:
   freeWalkSpeed: 2
   freeRunningSpeed: 5
   freeCrouchedSpeed: 1
-  strafeWalkSpeed: 3
-  strafeRunningSpeed: 5
-  strafeSprintSpeed: 7
+  dodgeSpeed: 7
   stepOffsetEnd: 0.45
   stepOffsetStart: 0.05
   stepSmooth: 4
