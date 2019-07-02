@@ -21,6 +21,12 @@ AnimatorController:
     m_DefaultInt: 0
     m_DefaultBool: 0
     m_Controller: {fileID: 0}
+  - m_Name: attack_1
+    m_Type: 9
+    m_DefaultFloat: 0
+    m_DefaultInt: 0
+    m_DefaultBool: 0
+    m_Controller: {fileID: 0}
   - m_Name: walking_horizontal
     m_Type: 1
     m_DefaultFloat: 0
@@ -29,12 +35,6 @@ AnimatorController:
     m_Controller: {fileID: 0}
   - m_Name: combat_blocking
     m_Type: 4
-    m_DefaultFloat: 0
-    m_DefaultInt: 0
-    m_DefaultBool: 0
-    m_Controller: {fileID: 0}
-  - m_Name: attack_1
-    m_Type: 9
     m_DefaultFloat: 0
     m_DefaultInt: 0
     m_DefaultBool: 0
@@ -201,7 +201,7 @@ BlendTree:
     m_Motion: {fileID: 7400000, guid: 3132a6e2e39b1ff4ba29770b949a9655, type: 2}
     m_Threshold: 1
     m_Position: {x: 0, y: -1}
-    m_TimeScale: -1
+    m_TimeScale: -0.6
     m_CycleOffset: 0
     m_DirectBlendParameter: Blend
     m_Mirror: 0
@@ -209,7 +209,7 @@ BlendTree:
     m_Motion: {fileID: 7400000, guid: e9fd788661d354640a69d819c9076088, type: 2}
     m_Threshold: 2
     m_Position: {x: -1, y: 0}
-    m_TimeScale: -1
+    m_TimeScale: -0.75
     m_CycleOffset: 0
     m_DirectBlendParameter: walking_forward
     m_Mirror: 0
@@ -217,7 +217,7 @@ BlendTree:
     m_Motion: {fileID: 7400000, guid: e9fd788661d354640a69d819c9076088, type: 2}
     m_Threshold: 3
     m_Position: {x: 1, y: 0}
-    m_TimeScale: 1
+    m_TimeScale: 0.75
     m_CycleOffset: 0
     m_DirectBlendParameter: walking_forward
     m_Mirror: 0
