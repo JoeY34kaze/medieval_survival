@@ -409,12 +409,12 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
         // clear the checkground to free the character to attack on air                
         var onStep = StepOffset();
 
-        Debug.Log("ground dist: "+groundDistance);
+        //Debug.Log("ground dist: "+groundDistance);
 
         if (groundDistance <= 0.15f)
         {
             isGrounded = true;
-            if(test1)Sliding();
+            //if(test1)Sliding();
         }
         else
         {
@@ -442,7 +442,7 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
             float radius = _capsuleCollider.radius * 0.9f;
             var dist = 10f;
             // position of the SphereCast origin starting at the base of the capsule
-            Vector3 pos = transform.position + Vector3.up * (_capsuleCollider.radius+ _capsuleCollider.radius/2);
+            Vector3 pos = transform.position + Vector3.up * (_capsuleCollider.radius);
             // ray for RayCast
             Ray ray1 = new Ray(transform.position + new Vector3(0, colliderHeight / 2, 0), Vector3.down);
             // ray for SphereCast
@@ -480,19 +480,19 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
             groundAngleTwo = Vector3.Angle(Vector3.up, hitinfo.normal);
         }
         
-        Debug.Log("ground angle : " + currentGroundAngle + " groundAngle2 :"+groundAngleTwo+ " GroundDistance: "+groundDistance);
+        //Debug.Log("ground angle : " + currentGroundAngle + " groundAngle2 :"+groundAngleTwo+ " GroundDistance: "+groundDistance);
 
-        /* if (GroundAngle() > slopeLimit + 1f && GroundAngle() <= 85 &&
-             groundAngleTwo > slopeLimit + 1f && groundAngleTwo <= 85 &&
-             groundDistance <= 0.05f && !onStep)*/
-        if (currentGroundAngle > slopeLimit &&      groundDistance <= 0.15f && !onStep)
+         if (GroundAngle() > slopeLimit  && GroundAngle() <= 85 &&
+             groundAngleTwo > slopeLimit && groundAngleTwo <= 85 &&
+             groundDistance <= 0.05f && !onStep)
+        //if (currentGroundAngle > slopeLimit &&      groundDistance <= 0.15f && !onStep)
         {
             isSliding = true;
             isGrounded = false;
             var slideVelocity = (currentGroundAngle - slopeLimit) * 2f;
             slideVelocity = Mathf.Clamp(slideVelocity, 0, 10);
             sliding_velocity = new Vector3(_rigidbody.velocity.x, -slideVelocity, _rigidbody.velocity.z);//doda v premikanje znotraj speddControl
-            
+            _rigidbody.velocity = sliding_velocity;
         }
         else
         {
@@ -633,13 +633,6 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
             Vector3 velY = transform.forward * velocity * speed;
 
             velY.y = _rigidbody.velocity.y;
-            var velX = transform.right * velocity * direction;
-            velX.x = _rigidbody.velocity.x;
-
-            // if (isStrafing)
-            // {
-            //if (isGrounded)
-            //{
 
             Vector3 v = (transform.TransformDirection(new Vector3(input.x, 0, input.y)));
             //Debug.Log(  Vector3.Angle(transform.forward, v));
@@ -663,38 +656,53 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
             v = Vector3.Normalize(v) * new_speed * angle_penalty;
             v.y = _rigidbody.velocity.y;
 
-            Vector3 prejsnje_stanje = _rigidbody.velocity;
-            if (currentGroundAngle >= slopeLimit)//TODO: pogledat v ktero smer se premikamo in ce se premikamo dol po slopu mu omogocmo spreminjanje velocity-a
-            {
-                v.x = 0;
-                v.z = 0;
+            //_rigidbody.velocity = velY;
+            //_rigidbody.AddForce(v * Time.deltaTime, ForceMode.VelocityChange);
+            
+            if (GroundAngle()<=slopeLimit && GetAngle_MovementVector_and_groundNormal(v) < (90 + slopeLimit))//prva preveri kje stojimo, druga preveri ce se premikamo v hrib al ce gremo dol
+                _rigidbody.velocity = v;
+            else 
+                _rigidbody.velocity = new Vector3(0, extraGravity, 0);
 
-                prejsnje_stanje.x = 0;
-                prejsnje_stanje.z = 0;
-            }
 
-            if(isSliding)
-                v = v + sliding_velocity;
+            // Vector3 prejsnje_stanje = _rigidbody.velocity;
+            //   if (currentGroundAngle >= slopeLimit)//TODO: pogledat v ktero smer se premikamo in ce se premikamo dol po slopu mu omogocmo spreminjanje velocity-a
+            //   {
+            //       v.x = 0;
+            //       v.z = 0;
 
-            _rigidbody.velocity = Vector3.Lerp(prejsnje_stanje, v, 20f * Time.deltaTime);
+                //       prejsnje_stanje.x = 0;
+                //       prejsnje_stanje.z = 0;
+                //   }
+
+                //  if(isSliding)
+                //      v = v + sliding_velocity;
+
+                //_rigidbody.velocity = Vector3.Lerp(prejsnje_stanje, v, 20f * Time.deltaTime);
         }
         else {//is dodging
             Debug.Log("dodging - controlSpeed");
             float new_speed = dodgeSpeed;
 
-            Vector3 velY = transform.forward * velocity * speed;
+            //Vector3 velY = transform.forward * velocity * speed;
 
-            velY.y = _rigidbody.velocity.y;
-            var velX = transform.right * velocity * direction;
-            velX.x = _rigidbody.velocity.x;
+            //velY.y = _rigidbody.velocity.y;
 
             Vector3 v = dodgeVector;
             //Debug.Log(  Vector3.Angle(transform.forward, v));
             v =v * new_speed;
             v.y = _rigidbody.velocity.y;
-            if (isSliding)
-                v = v + sliding_velocity;
-            _rigidbody.velocity = Vector3.Lerp(_rigidbody.velocity, v, 20f * Time.deltaTime);
+
+
+            if ( GetAngle_MovementVector_and_groundNormal(v) < (90 + slopeLimit))//preveri ce se premikamo v hrib al ce gremo dol
+                _rigidbody.velocity = v;
+            else
+                _rigidbody.velocity = new Vector3(0, extraGravity, 0);
+
+            //if (isSliding)
+            //   v = v + sliding_velocity;
+            //_rigidbody.velocity = Vector3.Lerp(_rigidbody.velocity, v, 20f * Time.deltaTime);
+
         }
         //}
        // else {
@@ -715,6 +723,31 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
       //  }
         
     }
+
+    /// <summary>
+    /// raycastej z sredine collkiderja dol. dobis tocko na terenu/objektu, dobis normalo, zracunas kot med normalo in vektorjem premikanja, ce je manjsi od 90 gremo dol, sicer gremo po hribu gor
+    /// </summary>
+    /// <returns></returns>
+    private float GetAngle_MovementVector_and_groundNormal(Vector3 v) {
+        Vector3 movement_direction = new Vector3(v.x,0,v.z).normalized;
+        RaycastHit hitinfo;
+        Ray ray = new Ray(transform.position, -transform.up);
+        if (Physics.Raycast(ray, out hitinfo, 1f, groundLayer))
+        {
+            //groundAngleTwo = Vector3.Angle(Vector3.up, hitinfo.normal);
+            float angle = Vector3.Angle(movement_direction, hitinfo.normal.normalized);
+            Debug.Log("check downhill : " + angle);
+
+            Debug.DrawRay(transform.position,movement_direction, Color.black);
+            Debug.DrawRay(transform.position,- transform.up, Color.blue);
+            Debug.DrawRay(hitinfo.point,hitinfo.normal, Color.red);
+
+            return angle;
+        }
+        Debug.LogWarning("Couldnt get data for ground slope");
+        return 0;
+    }
+
 
     #endregion
 
