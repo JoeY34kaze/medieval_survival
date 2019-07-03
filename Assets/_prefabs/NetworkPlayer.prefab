@@ -4411,6 +4411,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 225dc11a4eca7804b814e384e39eb786, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  test1: 1
   horizontalInput: Horizontal
   verticallInput: Vertical
   rotateCameraXInput: Mouse X
@@ -4420,7 +4421,6 @@ MonoBehaviour:
     m_Bits: 1
   groundMinDistance: 0.2
   groundMaxDistance: 0.5
-  locomotionType: 2
   lockMovement: 0
   freeRotationSpeed: 10
   strafeRotationSpeed: 10
@@ -4429,7 +4429,6 @@ MonoBehaviour:
   jumpCounter: 0
   jumpForward: 2
   jumpHeight: 4
-  useRootMotion: 0
   freeWalkSpeed: 2
   freeRunningSpeed: 5
   freeCrouchedSpeed: 1
@@ -4437,7 +4436,7 @@ MonoBehaviour:
   stepOffsetEnd: 0.45
   stepOffsetStart: 0.05
   stepSmooth: 4
-  slopeLimit: 60
+  slopeLimit: 45
   extraGravity: -10
   isGrounded: 0
   isStrafing: 0

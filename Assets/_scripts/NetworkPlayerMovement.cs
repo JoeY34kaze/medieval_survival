@@ -11,7 +11,7 @@ using System.Collections;
 /// </summary>
 public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
 {
-
+    public bool test1 = true;
     public string horizontalInput = "Horizontal";
     public string verticallInput = "Vertical";
 
@@ -32,18 +32,13 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
 
     #region Character Variables
 
-    public enum LocomotionType
-    {
-        FreeWithStrafe,
-        OnlyStrafe,
-        OnlyFree
-    }
+
 
     [Header("--- Locomotion Setup ---")]
 
-    public LocomotionType locomotionType = LocomotionType.FreeWithStrafe;
     private bool isDodging;
     private Vector3 dodgeVector;
+
     [Tooltip("lock the player movement")]
     public bool lockMovement;
     [Tooltip("Speed of the rotation on free directional movement")]
@@ -66,8 +61,7 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
     public float jumpHeight = 4f;
 
     [Header("--- Movement Speed ---")]
-    [Tooltip("Check to drive the character using RootMotion of the animation")]
-    public bool useRootMotion = false;
+
     [Tooltip("Add extra speed for the locomotion movement, keep this value at 0 if you want to use only root motion speed.")]
     public float freeWalkSpeed = 2.5f;
     [Tooltip("Add extra speed for the locomotion movement, keep this value at 0 if you want to use only root motion speed.")]
@@ -79,7 +73,7 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
 
     [Header("--- Grounded Setup ---")]
 
-    [Tooltip("ADJUST IN PLAY MODE - Offset height limit for sters - GREY Raycast in front of the legs")]
+    [Tooltip("ADJUST IN PLAY MODE - Offset height limit for stairs - GREY Raycast in front of the legs")]
     public float stepOffsetEnd = 0.45f;
     [Tooltip("ADJUST IN PLAY MODE - Offset height origin for sters, make sure to keep slight above the floor - GREY Raycast in front of the legs")]
     public float stepOffsetStart = 0.05f;
@@ -93,6 +87,7 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
     protected float extraGravity = -10f;
     protected float groundDistance;
     public RaycastHit groundHit;
+    private float currentGroundAngle=0f;
 
     private NetworkPlayerAnimationLogic animation_handler_script;
     private NetworkPlayerCombatHandler combat_handler_script;
@@ -171,6 +166,7 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
     private int dodge_direction;
     private object tpCamera;
     private NetworkPlayerAnimationLogic animation_logic_script;
+    private Vector3 sliding_velocity;
 
     #endregion
 
@@ -283,6 +279,8 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
 
     protected virtual void InputHandle()
     {
+        
+
         ExitGameInput();
         //CameraInput();
 
@@ -392,6 +390,8 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
     {
         CheckGroundDistance();
 
+        currentGroundAngle = GroundAngle();
+
         // change the physics material to very slip when not grounded or maxFriction when is
         if (isGrounded && input == Vector2.zero)
             _capsuleCollider.material = maxFrictionPhysics;
@@ -409,10 +409,12 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
         // clear the checkground to free the character to attack on air                
         var onStep = StepOffset();
 
-        if (groundDistance <= 0.05f)
+        Debug.Log("ground dist: "+groundDistance);
+
+        if (groundDistance <= 0.15f)
         {
             isGrounded = true;
-            Sliding();
+            if(test1)Sliding();
         }
         else
         {
@@ -440,7 +442,7 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
             float radius = _capsuleCollider.radius * 0.9f;
             var dist = 10f;
             // position of the SphereCast origin starting at the base of the capsule
-            Vector3 pos = transform.position + Vector3.up * (_capsuleCollider.radius);
+            Vector3 pos = transform.position + Vector3.up * (_capsuleCollider.radius+ _capsuleCollider.radius/2);
             // ray for RayCast
             Ray ray1 = new Ray(transform.position + new Vector3(0, colliderHeight / 2, 0), Vector3.down);
             // ray for SphereCast
@@ -461,7 +463,8 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
 
     float GroundAngle()
     {
-        var groundAngle = Vector3.Angle(groundHit.normal, Vector3.up);
+        float groundAngle = Vector3.Angle(groundHit.normal, Vector3.up);
+       
         return groundAngle;
     }
 
@@ -476,16 +479,20 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
         {
             groundAngleTwo = Vector3.Angle(Vector3.up, hitinfo.normal);
         }
+        
+        Debug.Log("ground angle : " + currentGroundAngle + " groundAngle2 :"+groundAngleTwo+ " GroundDistance: "+groundDistance);
 
-        if (GroundAngle() > slopeLimit + 1f && GroundAngle() <= 85 &&
-            groundAngleTwo > slopeLimit + 1f && groundAngleTwo <= 85 &&
-            groundDistance <= 0.05f && !onStep)
+        /* if (GroundAngle() > slopeLimit + 1f && GroundAngle() <= 85 &&
+             groundAngleTwo > slopeLimit + 1f && groundAngleTwo <= 85 &&
+             groundDistance <= 0.05f && !onStep)*/
+        if (currentGroundAngle > slopeLimit &&      groundDistance <= 0.15f && !onStep)
         {
             isSliding = true;
             isGrounded = false;
-            var slideVelocity = (GroundAngle() - slopeLimit) * 2f;
+            var slideVelocity = (currentGroundAngle - slopeLimit) * 2f;
             slideVelocity = Mathf.Clamp(slideVelocity, 0, 10);
-            _rigidbody.velocity = new Vector3(_rigidbody.velocity.x, -slideVelocity, _rigidbody.velocity.z);
+            sliding_velocity = new Vector3(_rigidbody.velocity.x, -slideVelocity, _rigidbody.velocity.z);//doda v premikanje znotraj speddControl
+            
         }
         else
         {
@@ -572,21 +579,10 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
 
     #region Locomotion 
 
-    protected bool freeLocomotionConditions
-    {
-        get
-        {
-            if (locomotionType.Equals(LocomotionType.OnlyStrafe)) isStrafing = true;
-            return !isStrafing && !locomotionType.Equals(LocomotionType.OnlyStrafe) || locomotionType.Equals(LocomotionType.OnlyFree);
-        }
-    }
 
     void ControlLocomotion()
     {
-        //if (freeLocomotionConditions)
             FreeMovement();     // free directional movement
-        //else
-            //StrafeMovement();   // move forward, backwards, strafe left and right
     }
 
     void StrafeMovement()
@@ -666,7 +662,21 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
             }
             v = Vector3.Normalize(v) * new_speed * angle_penalty;
             v.y = _rigidbody.velocity.y;
-            _rigidbody.velocity = Vector3.Lerp(_rigidbody.velocity, v, 20f * Time.deltaTime);
+
+            Vector3 prejsnje_stanje = _rigidbody.velocity;
+            if (currentGroundAngle >= slopeLimit)//TODO: pogledat v ktero smer se premikamo in ce se premikamo dol po slopu mu omogocmo spreminjanje velocity-a
+            {
+                v.x = 0;
+                v.z = 0;
+
+                prejsnje_stanje.x = 0;
+                prejsnje_stanje.z = 0;
+            }
+
+            if(isSliding)
+                v = v + sliding_velocity;
+
+            _rigidbody.velocity = Vector3.Lerp(prejsnje_stanje, v, 20f * Time.deltaTime);
         }
         else {//is dodging
             Debug.Log("dodging - controlSpeed");
@@ -682,6 +692,8 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
             //Debug.Log(  Vector3.Angle(transform.forward, v));
             v =v * new_speed;
             v.y = _rigidbody.velocity.y;
+            if (isSliding)
+                v = v + sliding_velocity;
             _rigidbody.velocity = Vector3.Lerp(_rigidbody.velocity, v, 20f * Time.deltaTime);
         }
         //}

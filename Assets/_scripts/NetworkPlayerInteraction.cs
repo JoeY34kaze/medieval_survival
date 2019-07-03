@@ -88,7 +88,7 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
 
                 Debug.DrawRay(player_cam.position, player_cam.forward * 10, Color.blue);
 
-                Debug.Log("raycast : "+hit.collider.name);
+                //Debug.Log("raycast : "+hit.collider.name);
 
                 Interactable interactable = hit.collider.GetComponent<Interactable>();
                 if (interactable == null) interactable = hit.collider.GetComponentInParent<Interactable>();//je collider popravlen zarad neujemanja pivota ker je blender ziva nocna mora
