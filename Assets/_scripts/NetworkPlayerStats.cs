@@ -21,6 +21,7 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
     public uint server_id = 5;
     public NetWorker myNetWorker;
     public Text player_name;
+    public Text Guild_name;
 
     public float head_damage_multiplier = 1.5f;
     public float torso_damage_multiplier = 1.0f;

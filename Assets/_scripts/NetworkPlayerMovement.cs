@@ -681,7 +681,7 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
                 //_rigidbody.velocity = Vector3.Lerp(prejsnje_stanje, v, 20f * Time.deltaTime);
         }
         else {//is dodging
-            Debug.Log("dodging - controlSpeed");
+            //Debug.Log("dodging - controlSpeed");
             float new_speed = dodgeSpeed;
 
             //Vector3 velY = transform.forward * velocity * speed;
@@ -736,7 +736,7 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
         {
             //groundAngleTwo = Vector3.Angle(Vector3.up, hitinfo.normal);
             float angle = Vector3.Angle(movement_direction, hitinfo.normal.normalized);
-            Debug.Log("check downhill : " + angle);
+            //Debug.Log("check downhill : " + angle);
 
             Debug.DrawRay(transform.position,movement_direction, Color.black);
             Debug.DrawRay(transform.position,- transform.up, Color.blue);
