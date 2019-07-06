@@ -27,7 +27,7 @@ public class Interactable_player : Interactable
         if (!networkObject.IsServer) return;
 
         uint reviver = args.GetNext<uint>();
-        uint downed_server_id = GetComponent<NetworkPlayerStats>().server_id;
+        uint downed_server_id = GetComponent<NetworkPlayerStats>().Get_server_id();
         Debug.Log("Server: ReviveDownedPlayerRequest :" + reviver + " -> (" + downed_server_id);
 
         //-----------------antihack checks  (distance, raycast za fov, take stvari)
@@ -36,7 +36,7 @@ public class Interactable_player : Interactable
         Transform d = GetComponent<Transform>();
         if (Vector3.Distance(a.position, d.position) > max_distance)
         {
-            Debug.LogError("ANTIHACK! : Reviving. Players:" + reviver + " -> (" + downed_server_id + " | " + GetComponent<NetworkPlayerStats>().server_id + ")");
+            Debug.LogError("ANTIHACK! : Reviving. Players:" + reviver + " -> (" + downed_server_id + " | " + GetComponent<NetworkPlayerStats>().Get_server_id() + ")");
             return;
         }
         //------------------------
@@ -48,7 +48,7 @@ public class Interactable_player : Interactable
 
     public override void ReviveDownedPlayerResponse(RpcArgs args)
     {
-        Debug.Log(" ReviveDownedPlayersponse : (" + args.Info.SendingPlayer.NetworkId + " | " + GetComponent<NetworkPlayerStats>().server_id + ")");
+        Debug.Log(" ReviveDownedPlayersponse : (" + args.Info.SendingPlayer.NetworkId + " | " + GetComponent<NetworkPlayerStats>().Get_server_id() + ")");
         GetComponent<NetworkPlayerStats>().handle_player_pickup();
     }
     /*

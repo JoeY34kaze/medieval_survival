@@ -103,6 +103,7 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
         }
 
         if (networkPlayerInventory.panel_inventory.activeSelf) return false; //odprt inventorij
+        if (stats.guild_modification_panel.activeSelf) return false;
         if (this.radial_menu.activeSelf) return false;
 
         return true;

@@ -93,7 +93,7 @@ public class local_team_panel_handler : MonoBehaviour
                 float max = s.max_health;
                 float current = s.health;
                 p.transform.GetChild(0).GetChild(0).GetComponent<Image>().fillAmount = current / (max);
-                p.transform.GetChild(0).GetChild(0).GetChild(0).GetComponent<Text>().text = s.player_name.text;
+                p.transform.GetChild(0).GetChild(0).GetChild(0).GetComponent<Text>().text = s.player_displayed_name.text;
                 p.GetComponent<team_memeber_panel_helper>().init(my_boys[i]);
             }
         }
@@ -119,7 +119,7 @@ public class local_team_panel_handler : MonoBehaviour
         Debug.Log(targetNetworkId);
         foreach (GameObject p in GameObject.FindGameObjectsWithTag("Player"))
         {//very fucking inefficient ampak uno k je spodej nedela. nevem kaj je fora une kode ker networker,NetworkObjects niso playerji, so networkani objekti k drzijo playerje in njihova posizija znotraj lista se spreminja. kojikurac
-            if (p.GetComponent<NetworkPlayerStats>().server_id == targetNetworkId) return p;
+            if (p.GetComponent<NetworkPlayerStats>().Get_server_id() == targetNetworkId) return p;
         }
         Debug.Log("TARGET PLAYER NOT FOUND!");
         // NetworkBehavior networkBehavior = (NetworkBehavior)NetworkManager.Instance.Networker.NetworkObjects[(uint)targetNetworkId].AttachedBehavior;

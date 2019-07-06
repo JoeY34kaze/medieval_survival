@@ -16,8 +16,8 @@ public class panel_team_invite_handler : MonoBehaviour
 
     public void init(GameObject player_other)
     {
-        info.text = "You are being invited to team by : " + player_other.GetComponent<NetworkPlayerStats>().player_name;
-        this.id_other = player_other.GetComponent<NetworkPlayerStats>().server_id;
+        info.text = "You are being invited to team by : " + player_other.GetComponent<NetworkPlayerStats>().player_displayed_name;
+        this.id_other = player_other.GetComponent<NetworkPlayerStats>().Get_server_id();
         GetComponent<RectTransform>().offsetMin = new Vector2(0, 0);
         GetComponent<RectTransform>().offsetMax = new Vector2(0, 0);
         StartCoroutine(Timer());

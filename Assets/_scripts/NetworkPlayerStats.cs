@@ -11,6 +11,8 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
 {
     public bool test = false;
 
+    public string playerName="Janez Kranjski";
+
     public bool inDodge = false;
     public bool downed = false;
     public bool dead = false;
@@ -18,10 +20,10 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
     public float health = 255;//for debug purposes, its not being called from any other script that i made, its public just so that i can see it easier in inspector
     public Image healthBar;
 
-    public uint server_id = 5;
+    //private uint server_id = 5;
     public NetWorker myNetWorker;
-    public Text player_name;
-    public Text Guild_name;
+    public Text player_displayed_name;
+    public Text inventory_guild_name;
 
     public float head_damage_multiplier = 1.5f;
     public float torso_damage_multiplier = 1.0f;
@@ -39,15 +41,114 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
     public local_team_panel_handler team_panel;
 
     private uint[] team; //array networkId-jev team memberjev. server vedno hrani to vrednost za vse playerje. drugi dobijo samo update od serverja
+
+
     private List<uint> already_processed_inviters;
     private bool team_invite_pending = false;
 
     public Transform soul;
+
+    public string name_guild="no guild yet";
+    public string tag_guild="no tag yet";
+    public Color color_guild=Color.red;
+    public byte[] image_guild;
+
+    public GameObject guild_modification_panel;
+
+    public Text guild_name_input;
+    public Text guild_tag_input;
+    public Text guild_color_input;
+
+    private void Start()
+    {
+        this.npi = GetComponent<NetworkPlayerInventory>();
+    }
+
+    protected override void NetworkStart()
+    {
+        base.NetworkStart();
+        // TODO:  Your initialization code that relies on network setup for this object goes here
+        myNetWorker = NetworkManager.Instance.Networker;//GameObject.Find("NetworkManager(Clone)").GetComponent<NetworkManager>().Networker;
+        //networkObject.SendRpc(RPC_UPDATE_ALL_PLAYER_ID, Receivers.Server);
+        //this.server_id = myNetWorker.Me.NetworkId; -- SAMO ZA DEBUGGING CE BO TREBA POGLEDAT V INSPEKTORJU ID AL PA KEJ
+        this.playerName = "Janez Kranjski";
+        updateDisplayName();
+        if (networkObject.IsOwner)
+        {
+
+            healthBar = GameObject.Find("health_fg").GetComponent<Image>();
+            transform.Find("canvas_player_overhead").gameObject.SetActive(false);
+            FloatingTextController.Initialize();
+            reticle_hit_controller.Initialize();
+        }
+
+    }
+
+    public void Update()
+    {
+        if (networkObject == null)
+        {
+            // Debug.LogError("networkObject is null.");
+            return;
+        }
+        if (myNetWorker == null)
+        {
+            if (GameObject.Find("NetworkManager(Clone)") != null)
+            {
+                myNetWorker = GameObject.Find("NetworkManager(Clone)").GetComponent<NetworkManager>().Networker;
+            }
+        }
+
+        if (networkObject.IsServer && Input.GetKeyDown(KeyCode.X))
+        {
+            // Debug.Log("Spawning uma");
+            spawn_UMA_body(transform.position, get_UMA_to_string(), 0);
+
+        }
+
+        if (Input.GetButtonDown("Interact") && this.dead && networkObject.IsOwner)
+        {
+            networkObject.SendRpc(RPC_RESPAWN_REQUEST, Receivers.Server);
+        }
+
+        if (Input.GetButtonDown("Interact") && networkObject.IsOwner)
+        {
+            Debug.Log(this.dead);
+        }
+
+        if (Input.GetKeyDown(KeyCode.Escape) && networkObject.IsOwner)
+        {
+            handleEscapePressed();
+        }
+
+        /*  if (this.test) {
+              this.health = 0;
+              handle_0_hp();
+          }*/
+
+    }
+
+    private void handleEscapePressed()
+    {
+        //ce je odprto ksno okno ga zapri, sicer prikaz main menu
+        if (guild_modification_panel.activeSelf || npi.panel_inventory.activeSelf)
+        {
+            showGuildModificationPanel(false, null);
+            npi.panel_inventory.SetActive(false);//nevem kaj se nrdi z itemi lol..
+            Cursor.lockState = CursorLockMode.Locked;
+            Cursor.visible = false;
+        }
+        else {
+            Debug.LogWarning("trying to show main menu but i dont have anything yet");
+        }
+    }
+
     /*
-     HOW DAMAGE WORKS RIGHT NOW:
-     na serverju se detektira hit. trenutno edina skripta ki to dela je Weapon_Collider_handler, ki poklice tole metodo. ta metoda izracuna nov health od tega k je bil napaden. to vrednost poslje
-     napadenmu playerju da si poupdejta health. ta player pol ko si je updejtov health poslje nov rpc vsem drugim da nj si nastavijo njegov health na njegov health. tud server(i can see how this is bad ampak za prototip me ne skrbi.)
-         */
+HOW DAMAGE WORKS RIGHT NOW:
+na serverju se detektira hit. trenutno edina skripta ki to dela je Weapon_Collider_handler, ki poklice tole metodo. ta metoda izracuna nov health od tega k je bil napaden. to vrednost poslje
+napadenmu playerju da si poupdejta health. ta player pol ko si je updejtov health poslje nov rpc vsem drugim da nj si nastavijo njegov health na njegov health. tud server(i can see how this is bad ampak za prototip me ne skrbi.)
+*/
+
     public uint[] getTeam() {
         return this.team;
     }
@@ -56,7 +157,7 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
     {
         
         //tag je za tag colliderja. coll_0 = headshot, coll_1 = body/torso, coll2=arms/legs
-        networkObject.SendRpc(RPC_UPDATE_ALL_PLAYER_ID, Receivers.Server);
+        //networkObject.SendRpc(RPC_UPDATE_ALL_PLAYER_ID, Receivers.Server);
         if (networkObject.IsServer)
         {
             if (this.dead) return;
@@ -157,6 +258,21 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
         }
     }
 
+    internal uint Get_server_id()
+    {
+        if (myNetWorker != null) return myNetWorker.Me.NetworkId;
+        else return NetworkManager.Instance.Networker.Me.NetworkId;
+    }
+
+    internal void SendGuildUpdate(string name, string tag, Color color, byte[] image)
+    {
+        if (networkObject.IsServer) {
+            if (image == null) image = new byte[25];        
+            networkObject.SendRpc(RPC_GUILD_UPDATE, Receivers.All, name, tag, color,image);
+        }
+    }
+
+
     private void handle_death_player(uint player_id)//samo na serverju
     {
         if (!networkObject.IsServer) return;
@@ -185,61 +301,16 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
 
         return true;
     }
-    protected override void NetworkStart()
+
+
+    private void updateDisplayName()
     {
-        base.NetworkStart();
-        // TODO:  Your initialization code that relies on network setup for this object goes here
-        myNetWorker = GameObject.Find("NetworkManager(Clone)").GetComponent<NetworkManager>().Networker;
-        networkObject.SendRpc(RPC_UPDATE_ALL_PLAYER_ID, Receivers.Server);
-        if (networkObject.IsOwner)
-        {
-
-            healthBar = GameObject.Find("health_fg").GetComponent<Image>();
-            transform.Find("canvas_player_overhead").gameObject.SetActive(false);
-            FloatingTextController.Initialize();
-            reticle_hit_controller.Initialize();
-        }
-
+        Debug.Log(Get_server_id());
+        Debug.Log(this.playerName);
+        Debug.Log(this.tag_guild);
+        this.player_displayed_name.text = Get_server_id() + " - " + this.playerName + " [ " + this.tag_guild + " ]";
     }
 
-
-    public void Update()
-    {
-        if (networkObject == null)
-        {
-           // Debug.LogError("networkObject is null.");
-            return;
-        }
-        if (myNetWorker == null)
-        {
-            if (GameObject.Find("NetworkManager(Clone)") != null)
-            {
-                myNetWorker = GameObject.Find("NetworkManager(Clone)").GetComponent<NetworkManager>().Networker;
-            }
-        }
-
-        if (networkObject.IsServer && Input.GetKeyDown(KeyCode.X))
-        {
-            // Debug.Log("Spawning uma");
-            spawn_UMA_body(transform.position, get_UMA_to_string(), 0);
-
-        }
-
-        if (Input.GetButtonDown("Interact") && this.dead && networkObject.IsOwner) {
-            networkObject.SendRpc(RPC_RESPAWN_REQUEST, Receivers.Server);
-        }
-
-        if (Input.GetButtonDown("Interact") && networkObject.IsOwner) {
-            Debug.Log(this.dead);
-        }
-
-
-        /*  if (this.test) {
-              this.health = 0;
-              handle_0_hp();
-          }*/
-
-    }
 
     private void spawn_UMA_body(Vector3 pos, string data, uint player_id)//nevem kam nj bi drgac dau. lh bi naredu svojo skripto ampak je tud to mal retardiran ker rabs pol networking zrihtat...
     {
@@ -294,7 +365,7 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
 
 
     //--------------------RPC
-
+    /*
     public override void updateAllPlayerId(RpcArgs args)//server updejta id-je vseh playerjev. to se zgodi vedno kose sconnecta nov player gor, mogl bi se tud ko se kdo disconnecta ampak ni se to
     {
         if (networkObject.IsServer)
@@ -316,7 +387,10 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
     {
         if (!networkObject.IsOwner) { return; }
         this.server_id = args.GetNext<uint>();
-        this.player_name.text = this.server_id + "";
+
+        string n = "jok";
+
+        this.player_displayed_name.text =   this.server_id+" - "+this.playerName + " [ " + this.tag_guild + " ]";
         //Debug.Log("changing id to" + this.server_id);
         networkObject.SendRpc(RPC_UPDATE_OTHER_CLIENT_ID, Receivers.Others, this.server_id);
     }
@@ -324,10 +398,10 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
     public override void updateOtherClientId(RpcArgs args)
     {
         this.server_id = args.GetNext<uint>();
-        this.player_name.text = this.server_id + "";
+        this.player_displayed_name.text = this.server_id + " - " + this.playerName + " [ "+this.tag_guild+" ]";
         //Debug.Log("changing id to" + this.server_id);
     }
-
+    */
 
     /// <summary>
     /// server poklice da se nastav health na skripti. klice se na vsah skriptah, tud an serverju
@@ -355,7 +429,7 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
         string tag = args.GetNext<string>();
         if (!tag.Equals("block_player") && !tag.Equals("revive")) GameObject.Instantiate(this.sound_effects_on_player[0]);//tag ni od objekta al pa kej. je samo kot parameter da se ve, da smo pobral cloveka
         this.healthBar.fillAmount = this.health / (this.max_health);
-        FindByid(NetworkManager.Instance.Networker.Me.NetworkId).GetComponent<NetworkPlayerStats>().team_panel.refreshHp(this.server_id, this.healthBar.fillAmount);
+        FindByid(NetworkManager.Instance.Networker.Me.NetworkId).GetComponent<NetworkPlayerStats>().team_panel.refreshHp(Get_server_id(), this.healthBar.fillAmount);
         
         //}
     }
@@ -387,7 +461,7 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
         local_setDrawingPlayer(true);
 
         if (networkObject.IsServer)//server nastima vsem health
-            set_player_health(max_health/2, this.server_id);
+            set_player_health(max_health/2, Get_server_id());
 
     }
 
@@ -561,7 +635,7 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
     private void serverSide_send_full_team_notification(uint other)
     {
         if (networkObject.IsServer)
-            FindByid(other).GetComponent<NetworkPlayerStats>().send_full_team_notification_to_owner(this.server_id);
+            FindByid(other).GetComponent<NetworkPlayerStats>().send_full_team_notification_to_owner(Get_server_id());
 
     }
 
@@ -643,7 +717,7 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
         foreach (GameObject p in GameObject.FindGameObjectsWithTag("Player"))
         {//very fucking inefficient ampak uno k je spodej nedela. nevem kaj je fora une kode ker networker,NetworkObjects niso playerji, so networkani objekti k drzijo playerje in njihova posizija znotraj lista se spreminja. kojikurac
         //    Debug.Log(p.GetComponent<NetworkPlayerStats>().server_id);
-            if (p.GetComponent<NetworkPlayerStats>().server_id == targetNetworkId) return p;
+            if (p.GetComponent<NetworkPlayerStats>().Get_server_id() == targetNetworkId) return p;
         }
         Debug.Log("TARGET PLAYER NOT FOUND!");
         // NetworkBehavior networkBehavior = (NetworkBehavior)NetworkManager.Instance.Networker.NetworkObjects[(uint)targetNetworkId].AttachedBehavior;
@@ -804,4 +878,34 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
 
         }
     }
+
+    public override void GuildUpdate(RpcArgs args)
+    {
+        if (args.Info.SendingPlayer.NetworkId == 0) {
+            this.name_guild = args.GetNext<string>();
+            this.tag_guild = args.GetNext<string>();
+            this.color_guild = args.GetNext<Color>();
+            this.image_guild = args.GetNext<byte[]>();
+
+            //samo ownerju se nastav ime v inventoriju. drugi nimajo sploh canvasa
+            if (networkObject.IsOwner) {this.inventory_guild_name.text = this.name_guild; }
+
+            // vsi nastavjo
+            updateDisplayName();
+        }
+    }
+
+    internal void showGuildModificationPanel(bool b,NetworkGuildManager ngm)
+    {
+        if (b && ngm!=null) {
+            if (ngm.name_guild == null) ngm.name_guild = this.guild_name_input;
+            if (ngm.tag_guild == null) ngm.tag_guild = this.guild_tag_input;
+            if (ngm.color_guild == null) ngm.color_guild = this.guild_color_input;
+        }
+        this.guild_modification_panel.SetActive(b);
+        if(npi!=null)if(npi.panel_inventory!=null)if(npi.panel_inventory.activeSelf)npi.panel_inventory.SetActive(false);
+
+    }
+
+    
 }

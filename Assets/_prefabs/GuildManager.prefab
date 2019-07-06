@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 5449284050390073433}
   - component: {fileID: 5449284050390073432}
   m_Layer: 0
-  m_Name: ManagerGuild
+  m_Name: GuildManager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -43,3 +43,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7dd64a1155302a24e8e3e55b8c5b0d96, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  GuildModificationPanel: {fileID: 0}
+  localPlayer: {fileID: 0}
+  name_guild: {fileID: 0}
+  tag_guild: {fileID: 0}
+  color_guild: {fileID: 0}

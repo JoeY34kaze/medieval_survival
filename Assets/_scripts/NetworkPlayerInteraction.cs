@@ -50,7 +50,7 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
         foreach (GameObject p in GameObject.FindGameObjectsWithTag("Player"))
         {//very fucking inefficient ampak uno k je spodej nedela. nevem kaj je fora une kode ker networker,NetworkObjects niso playerji, so networkani objekti k drzijo playerje in njihova posizija znotraj lista se spreminja. kojikurac
          //    Debug.Log(p.GetComponent<NetworkPlayerStats>().server_id);
-            if (p.GetComponent<NetworkPlayerStats>().server_id == targetNetworkId) return p;
+            if (p.GetComponent<NetworkPlayerStats>().Get_server_id() == targetNetworkId) return p;
         }
         Debug.Log("TARGET PLAYER NOT FOUND!");
         // NetworkBehavior networkBehavior = (NetworkBehavior)NetworkManager.Instance.Networker.NetworkObjects[(uint)targetNetworkId].AttachedBehavior;
@@ -132,7 +132,7 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
                             this.time_pressed_interaction = 0;
                             //Debug.Log("quick press" + (time_released - this.time_pressed));
                             if (interactable is ItemPickup)//pobere item
-                                interactable.interact(stats.server_id);
+                                interactable.interact(stats.Get_server_id());
 
                             if (interactable is Interactable_Backpack)//pobere backpack
                                                                       //this.menu.show_backpack_interaction_menu(interactable.gameObject);
@@ -140,7 +140,7 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
 
                             if (interactable is Interactible_ArmorStand)
                             {
-                                ((Interactible_ArmorStand)interactable).local_player_interaction_swap_request(stats.server_id);
+                                ((Interactible_ArmorStand)interactable).local_player_interaction_swap_request(stats.Get_server_id());
                             }
 
                             if (interactable is Interactable_door)
@@ -157,7 +157,7 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
                             {
                                 // -----------------------------------------    Inventory item / weapon /gear ---------------------------------------------------
                                 if (interactable is ItemPickup)
-                                    interactable.interact(stats.server_id);//full inventory se mora handlat drugje
+                                    interactable.interact(stats.Get_server_id());//full inventory se mora handlat drugje
                                                                            //-------------------------------------------  player ---------------------------------------------------------------
                                 if (interactable is Interactable_player)
                                 {
@@ -247,36 +247,36 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
     //                                                                                       -----------------Player interactions--------------------
     internal void local_player_interaction_execution_request(GameObject target)
     {
-        target.GetComponent<Interactable_player>().local_player_execution_request(stats.server_id);
+        target.GetComponent<Interactable_player>().local_player_execution_request(stats.Get_server_id());
     }
 
     internal void local_player_interaction_tieup_request(GameObject target)
     {
-        target.GetComponent<Interactable_player>().local_player_tieup_request(stats.server_id);
+        target.GetComponent<Interactable_player>().local_player_tieup_request(stats.Get_server_id());
     }
 
     internal void local_player_interaction_steal_request(GameObject target)
     {
-        target.GetComponent<Interactable_player>().local_player_steal_request(stats.server_id);
+        target.GetComponent<Interactable_player>().local_player_steal_request(stats.Get_server_id());
     }
 
     internal void local_player_interaction_pickup_request(GameObject target)
     {
         //klice downan player, poda id of playerja kter ga pobira
-        target.GetComponent<Interactable_player>().local_player_pickup_request(stats.server_id);
+        target.GetComponent<Interactable_player>().local_player_pickup_request(stats.Get_server_id());
     }
 
     //------------HEALTHY PLAYER-------------
 
     internal void local_player_interaction_guild_invite_request(GameObject target)
     {
-        target.GetComponent<Interactable_player>().local_player_guild_invite_request(stats.server_id);
+        target.GetComponent<Interactable_player>().local_player_guild_invite_request(stats.Get_server_id());
     }
 
     internal void local_player_interaction_team_invite_request(GameObject target)
     {
         // target.GetComponent<Interactable_player>().local_player_team_invite_request(stats.server_id);tole zbrisat ker ta shit negre tukej
-        stats.localTeamInviteRequest(target.GetComponent<NetworkPlayerStats>().server_id);
+        stats.localTeamInviteRequest(target.GetComponent<NetworkPlayerStats>().Get_server_id());
 
     }
 
@@ -284,62 +284,62 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
 
     internal void local_armor_stand_interaction_ranged_request(GameObject target)
     {
-        target.GetComponent<Interactible_ArmorStand>().local_player_interaction_ranged_request(stats.server_id);
+        target.GetComponent<Interactible_ArmorStand>().local_player_interaction_ranged_request(stats.Get_server_id());
     }
 
     internal void local_armor_stand_interaction_shield_request(GameObject target)
     {
-        target.GetComponent<Interactible_ArmorStand>().local_player_interaction_shield_request(stats.server_id);
+        target.GetComponent<Interactible_ArmorStand>().local_player_interaction_shield_request(stats.Get_server_id());
     }
 
     internal void local_armor_stand_interaction_weapon1_request(GameObject target)
     {
-        target.GetComponent<Interactible_ArmorStand>().local_player_interaction_weapon1_request(stats.server_id);
+        target.GetComponent<Interactible_ArmorStand>().local_player_interaction_weapon1_request(stats.Get_server_id());
     }
 
     internal void local_armor_stand_interaction_weapon0_request(GameObject target)
     {
-        target.GetComponent<Interactible_ArmorStand>().local_player_interaction_weapon0_request(stats.server_id);
+        target.GetComponent<Interactible_ArmorStand>().local_player_interaction_weapon0_request(stats.Get_server_id());
     }
 
     internal void local_armor_stand_interaction_feet_request(GameObject target)
     {
-        target.GetComponent<Interactible_ArmorStand>().local_player_interaction_feet_request(stats.server_id);
+        target.GetComponent<Interactible_ArmorStand>().local_player_interaction_feet_request(stats.Get_server_id());
     }
 
     internal void local_armor_stand_interaction_legs_request(GameObject target)
     {
-        target.GetComponent<Interactible_ArmorStand>().local_player_interaction_legs_request(stats.server_id);
+        target.GetComponent<Interactible_ArmorStand>().local_player_interaction_legs_request(stats.Get_server_id());
     }
 
     internal void local_armor_stand_interaction_hands_request(GameObject target)
     {
-        target.GetComponent<Interactible_ArmorStand>().local_player_interaction_hands_request(stats.server_id);
+        target.GetComponent<Interactible_ArmorStand>().local_player_interaction_hands_request(stats.Get_server_id());
     }
 
     internal void local_armor_stand_interaction_chest_request(GameObject target)
     {
-        target.GetComponent<Interactible_ArmorStand>().local_player_interaction_chest_request(stats.server_id);
+        target.GetComponent<Interactible_ArmorStand>().local_player_interaction_chest_request(stats.Get_server_id());
     }
 
     internal void local_armor_stand_interaction_helmet_request(GameObject target)
     {
-        target.GetComponent<Interactible_ArmorStand>().local_player_interaction_helmet_request(stats.server_id);
+        target.GetComponent<Interactible_ArmorStand>().local_player_interaction_helmet_request(stats.Get_server_id());
     }
 
     internal void local_armor_stand_interaction_give_all_request(GameObject target)
     {
-        target.GetComponent<Interactible_ArmorStand>().local_player_interaction_give_all_request(stats.server_id, networkPlayerInventory);
+        target.GetComponent<Interactible_ArmorStand>().local_player_interaction_give_all_request(stats.Get_server_id(), networkPlayerInventory);
     }
 
     internal void local_armor_stand_interaction_take_all_request(GameObject target)
     {
-        target.GetComponent<Interactible_ArmorStand>().local_player_interaction_get_all_request(stats.server_id, networkPlayerInventory);
+        target.GetComponent<Interactible_ArmorStand>().local_player_interaction_get_all_request(stats.Get_server_id(), networkPlayerInventory);
     }
 
     internal void local_armor_stand_interaction_swap_request(GameObject target)
     {
-        target.GetComponent<Interactible_ArmorStand>().local_player_interaction_swap_request(stats.server_id);
+        target.GetComponent<Interactible_ArmorStand>().local_player_interaction_swap_request(stats.Get_server_id());
     }
 
     internal void local_backpack_interaction_equip_request(GameObject target)

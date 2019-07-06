@@ -230,6 +230,7 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
     private bool CameraRotationAllowed()
     {
         if (networkPlayerInventory.panel_inventory.activeSelf) return false;
+        if (stats.guild_modification_panel.activeSelf) return false;
         return true;
     }
 
@@ -239,6 +240,8 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
         {
             UpdateMotor();                   // call ThirdPersonMotor methods               
             UpdateAnimator();                // call ThirdPersonAnimator methods	
+            networkObject.position = transform.position;
+            networkObject.rotation = transform.rotation;
         }
         else {
             transform.position = networkObject.position;

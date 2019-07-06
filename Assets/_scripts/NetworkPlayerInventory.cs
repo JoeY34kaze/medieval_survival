@@ -547,7 +547,10 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
 
         if (Input.GetButtonDown("Inventory"))
         {
-        panel_inventory.SetActive(!panel_inventory.activeSelf);
+            if(GetComponent<NetworkPlayerStats>().guild_modification_panel.activeSelf)
+                GetComponent<NetworkPlayerStats>().showGuildModificationPanel(false, null);
+
+            panel_inventory.SetActive(!panel_inventory.activeSelf);
             if (onItemChangedCallback != null)
                 onItemChangedCallback.Invoke();
             else

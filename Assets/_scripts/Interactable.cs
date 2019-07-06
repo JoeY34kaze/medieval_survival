@@ -55,7 +55,7 @@ public class Interactable : Interactable_objectBehavior
         Debug.Log("interactable.findplayerById");
         Debug.Log(targetNetworkId);
         foreach(GameObject p in GameObject.FindGameObjectsWithTag("Player")){//very fucking inefficient ampak uno k je spodej nedela. nevem kaj je fora une kode ker networker,NetworkObjects niso playerji, so networkani objekti k drzijo playerje in njihova posizija znotraj lista se spreminja. kojikurac
-            if (p.GetComponent<NetworkPlayerStats>().server_id == targetNetworkId) return p;
+            if (p.GetComponent<NetworkPlayerStats>().Get_server_id() == targetNetworkId) return p;
         }
         Debug.Log("TARGET PLAYER NOT FOUND!");
        // NetworkBehavior networkBehavior = (NetworkBehavior)NetworkManager.Instance.Networker.NetworkObjects[(uint)targetNetworkId].AttachedBehavior;
