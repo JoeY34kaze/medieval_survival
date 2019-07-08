@@ -10,7 +10,7 @@ public class armor_stand_local : MonoBehaviour
     void Start()
     {
         DynamicCharacterAvatar dyn = GetComponent<DynamicCharacterAvatar>();
-        Debug.Log(dyn.characterColors);
+        //Debug.Log(dyn.characterColors);
     }
 
 }

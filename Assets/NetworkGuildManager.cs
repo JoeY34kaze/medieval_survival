@@ -31,7 +31,7 @@ public class NetworkGuildManager : NetworkGuildManagerBehavior
         }
         localPlayer = FindByid(NetworkManager.Instance.Networker.Me.NetworkId);//?? i guess it should work. mrde bols da player pogleda pa poveze z druge strani..
         
-        networkObject.SendRpc(RPC_REQUEST_GUILD_AFFILIATION, Receivers.Server, NetworkManager.Instance.Networker.Me.NetworkId);
+        //networkObject.SendRpc(RPC_REQUEST_GUILD_AFFILIATION, Receivers.Server, NetworkManager.Instance.Networker.Me.NetworkId); tega nebo tle. ko se connecta server pogleda ce ze obstaa njemu pripadajoc objekt in ga poupdejta, sicer nrdit nov guild.
     }
 
 
@@ -85,13 +85,14 @@ public class NetworkGuildManager : NetworkGuildManagerBehavior
 
     public GameObject FindByid(uint targetNetworkId) //koda kopširana v network_body.cs in Interactable.cs
     {
-        Debug.Log("interactable.findplayerById");
+        //Debug.Log("interactable.findplayerById");
         //Debug.Log(targetNetworkId);
-        foreach (GameObject p in GameObject.FindGameObjectsWithTag("Player"))
-        {//very fucking inefficient ampak uno k je spodej nedela. nevem kaj je fora une kode ker networker,NetworkObjects niso playerji, so networkani objekti k drzijo playerje in njihova posizija znotraj lista se spreminja. kojikurac
-         //    Debug.Log(p.GetComponent<NetworkPlayerStats>().server_id);
-            if (p.GetComponent<NetworkPlayerStats>().Get_server_id() == targetNetworkId) return p;
-        }
+        GameObject[] players = GameObject.FindGameObjectsWithTag("Player");
+        foreach (GameObject p in players)
+            {//very fucking inefficient ampak uno k je spodej nedela. nevem kaj je fora une kode ker networker,NetworkObjects niso playerji, so networkani objekti k drzijo playerje in njihova posizija znotraj lista se spreminja. kojikurac
+             //    Debug.Log(p.GetComponent<NetworkPlayerStats>().server_id);
+                if (p.GetComponent<NetworkPlayerStats>().Get_server_id() == targetNetworkId) return p;
+            }
         Debug.Log("TARGET PLAYER NOT FOUND!");
         // NetworkBehavior networkBehavior = (NetworkBehavior)NetworkManager.Instance.Networker.NetworkObjects[(uint)targetNetworkId].AttachedBehavior;
         // GameObject obj = networkBehavior.gameObject;
@@ -99,6 +100,8 @@ public class NetworkGuildManager : NetworkGuildManagerBehavior
 
         return null;
     }
+
+
 
     /// <summary>
     /// updejta ali ustvari guild. po operaciji poslje updejte vsem objektom po networki, ki rabjo updejt stanja.(vsi playerji za ime recimo)
@@ -147,14 +150,50 @@ public class NetworkGuildManager : NetworkGuildManagerBehavior
                 //networkObject.SendRpc(sendingPlayer, RPC_GUILD_MODIFICATION_RESPONSE, asker, g.name, g.tag, g.color, g.image);
 
                 //zdj mormo vse updejtat pa sinhronizirat kar je povezan z tem guildom. zaenkrat dodamo tag zravn imena playerja.
-                NetworkPlayerStats ms = FindByid(member).GetComponent<NetworkPlayerStats>();
-                if (ms != null)
-                    ms.SendGuildUpdate(g.name, g.tag, g.color, g.image);
-                else
-                    Debug.LogError("MS IS NULL. COULDNT UPDATE OR CREATE GUILD!");
+                GameObject pl = FindByid(member);
+                if (pl != null)
+                {
+                    NetworkPlayerStats ms = pl.GetComponent<NetworkPlayerStats>();
+                    if (ms != null)
+                        ms.SendGuildUpdate(g.name, g.tag, g.color, g.image);
+                    else
+                    {
+                        Debug.LogError("MS IS NULL. COULDNT UPDATE OR CREATE GUILD!");
+                        StartCoroutine(sendGuildModifiedResponsePending(member, g));
+                    }
+                }
+                else {
+                    Debug.LogError("PL IS NULL. COULDNT UPDATE OR CREATE GUILD!");
+                    StartCoroutine(sendGuildModifiedResponsePending(member, g));
+                }
             }
         }
             
+    }
+
+    IEnumerator sendGuildModifiedResponsePending(uint member, Guild g)
+    {
+        if (networkObject.IsServer)
+        {
+            bool sent = false;
+            while (!sent)
+            {
+                GameObject pl = FindByid(member);
+                if (pl != null)
+                {
+                    NetworkPlayerStats ms = pl.GetComponent<NetworkPlayerStats>();
+                    if (ms != null)
+                    {
+                        ms.SendGuildUpdate(g.name, g.tag, g.color, g.image);
+                        sent = true;
+                    }
+                    else
+                        Debug.LogError("MS IS NULL. COULDNT UPDATE OR CREATE GUILD!");
+                }
+                yield return new WaitForSeconds(2);
+            }
+        }
+        
     }
 
     /*
@@ -198,6 +237,7 @@ public class NetworkGuildManager : NetworkGuildManagerBehavior
             sendGuildModifiedResponse(g);
         }
     }
+
 
     private Guild CreateGuild(uint gm, string name, string tag, Color c, byte[] image)
     {

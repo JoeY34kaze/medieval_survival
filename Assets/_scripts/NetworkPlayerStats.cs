@@ -59,9 +59,13 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
     public Text guild_tag_input;
     public Text guild_color_input;
 
+    private Queue<NetworkingPlayer> acceptedAndNotUpdatedPlayers;
+    private bool AcceptedPlayerHandlingPending = false;
+
     private void Start()
     {
         this.npi = GetComponent<NetworkPlayerInventory>();
+        acceptedAndNotUpdatedPlayers = new Queue<NetworkingPlayer>();
     }
 
     protected override void NetworkStart()
@@ -71,8 +75,8 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
         myNetWorker = NetworkManager.Instance.Networker;//GameObject.Find("NetworkManager(Clone)").GetComponent<NetworkManager>().Networker;
         //networkObject.SendRpc(RPC_UPDATE_ALL_PLAYER_ID, Receivers.Server);
         //this.server_id = myNetWorker.Me.NetworkId; -- SAMO ZA DEBUGGING CE BO TREBA POGLEDAT V INSPEKTORJU ID AL PA KEJ
-        this.playerName = "Janez Kranjski";
-        updateDisplayName();
+        //this.playerName = "Janez Kranjski";
+        //updateDisplayName();
         if (networkObject.IsOwner)
         {
 
@@ -81,7 +85,7 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
             FloatingTextController.Initialize();
             reticle_hit_controller.Initialize();
         }
-
+        NetworkManager.Instance.Networker.playerAccepted += PlayerAccepted;
     }
 
     public void Update()
@@ -125,8 +129,15 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
               this.health = 0;
               handle_0_hp();
           }*/
+        if(networkObject.IsServer)
+            if (this.acceptedAndNotUpdatedPlayers.Count > 0 && !AcceptedPlayerHandlingPending) {//updejtej playerja k je na vrhu vrste
+                this.AcceptedPlayerHandlingPending = true;
+                StartCoroutine(HandleAcceptedPlayersData(2f));
+            
+            }
 
     }
+
 
     private void handleEscapePressed()
     {
@@ -260,14 +271,14 @@ napadenmu playerju da si poupdejta health. ta player pol ko si je updejtov healt
 
     internal uint Get_server_id()
     {
-        if (myNetWorker != null) return myNetWorker.Me.NetworkId;
-        else return NetworkManager.Instance.Networker.Me.NetworkId;
+        return networkObject.Owner.NetworkId;
     }
 
     internal void SendGuildUpdate(string name, string tag, Color color, byte[] image)
     {
         if (networkObject.IsServer) {
-            if (image == null) image = new byte[25];        
+            if (image == null) image = new byte[25];
+            if (tag == null) tag = "asd";
             networkObject.SendRpc(RPC_GUILD_UPDATE, Receivers.All, name, tag, color,image);
         }
     }
@@ -305,9 +316,8 @@ napadenmu playerju da si poupdejta health. ta player pol ko si je updejtov healt
 
     private void updateDisplayName()
     {
-        Debug.Log(Get_server_id());
-        Debug.Log(this.playerName);
-        Debug.Log(this.tag_guild);
+        Debug.Log("updating display name ="+ Get_server_id() + " - " + this.playerName + " [ " + this.tag_guild + " ]");
+
         this.player_displayed_name.text = Get_server_id() + " - " + this.playerName + " [ " + this.tag_guild + " ]";
     }
 
@@ -907,5 +917,76 @@ napadenmu playerju da si poupdejta health. ta player pol ko si je updejtov healt
 
     }
 
-    
+    /// <summary>
+    /// player poslov update ker se je ta objekt spawnov na serverju ( player) zaenkrat mu samo nastavi ime, ksnej bo treba dodat VSE. sleeper UMA bo bil in ko se player connecta dobi v tej metodi vse iteme, statse, pozicijo itd.
+    /// </summary>
+    /// <param name="args"></param>
+    public override void ReceivePersonalDataOnConnection(RpcArgs args)
+    {
+        
+        if (args.Info.SendingPlayer.NetworkId == 0) {
+            Debug.Log("Client: Updating player data with server side data.");
+            this.playerName = args.GetNext<string>();
+            updateDisplayName();
+        }
+    }
+
+    /// <summary>
+    /// Fired when the player has been officially accepted by the server and now is the time you are able to start sending your messages to this player.
+    /// </summary>
+    /// <param name="player"></param>
+    /// <param name="sender"></param>
+    private void PlayerAccepted(NetworkingPlayer player, NetWorker sender)//nevem tocn kaj nam networker pomaga tbh..
+    {
+        if (networkObject.IsServer)
+        {
+            Debug.Log("SERVER : player was accepted to server : " + player.NetworkId + " - updating players data.");
+
+            //kaj ce bi mel logiko connectanja in disconnectanja nrjeno tko da ko se prvic sconnecta se ne nrdi skor nc, ko se dc-ja se njegov objekt samo disabla ampak ne zbrise.
+            //ko se player reconnecta - se na podlagi njegovga steam id-ja poisce ce ze obstaja njegov objekt v spilu.
+            //ce obstaja se njegov trenutni objekt ubije in preveze vso logiko (ownership, camero) na ta najdeni objekt.
+
+            //ownerju povej da naj prevzame ta objekt. drugim verjetno ni treba nic povedat ker se bojo animacije avtomatsko pohendlale zarad akcij ownerja. tko nekak k conan exiles.
+
+            //UnityMainThreadDispatcher.Instance().Enqueue(PushToMainThreadPlayerAcceptedData(player,"JEBAC"));
+            this.acceptedAndNotUpdatedPlayers.Enqueue(player);
+        }
+    }
+
+    public IEnumerator HandleAcceptedPlayersData(float time_delay)
+    {
+        if (networkObject.IsServer)
+        {
+            yield return new WaitForSeconds(time_delay);
+            Debug.Log("This is executed from the main thread");
+
+            NetworkingPlayer p = this.acceptedAndNotUpdatedPlayers.Dequeue();
+            GameObject obj = FindByid(p.NetworkId);
+            if (obj != null)
+            {
+                NetworkPlayerStats stats = obj.GetComponent<NetworkPlayerStats>();
+                if (stats != null)
+                {
+                    stats.ServerSendOnAcceptedData("JEBAC");
+
+                }
+                else
+                {
+                    this.acceptedAndNotUpdatedPlayers.Enqueue(p);//ker je failal pohendlat ga mormo pohendlat ksnej enkat.
+                }
+            }
+            else
+            {
+                this.acceptedAndNotUpdatedPlayers.Enqueue(p);//ker je failal pohendlat ga mormo pohendlat ksnej enkat.
+            }
+
+        }
+        yield return null;
+    }
+
+    private void ServerSendOnAcceptedData(string name) {
+        networkObject.SendRpc(RPC_RECEIVE_PERSONAL_DATA_ON_CONNECTION, Receivers.All,name);
+    }
+
+
 }
