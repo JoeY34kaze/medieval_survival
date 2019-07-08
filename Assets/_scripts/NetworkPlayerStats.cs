@@ -86,6 +86,8 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
             reticle_hit_controller.Initialize();
         }
         NetworkManager.Instance.Networker.playerAccepted += PlayerAccepted;
+
+        StartCoroutine(RequestUpdateFromEveryoneDelayed(2));//pozene coroutine, ki vsem network objektom, kateri imajo karkoli da se rab rocno sinhronizirat na clientih, ki so se ravnokar povezal, poslje rpc s katerim signalizira, da nj mu poslejo nazaj podatke s katerimi bo nastavu trenutno stanje objekta.
     }
 
     public void Update()
@@ -979,7 +981,7 @@ napadenmu playerju da si poupdejta health. ta player pol ko si je updejtov healt
             {
                 this.acceptedAndNotUpdatedPlayers.Enqueue(p);//ker je failal pohendlat ga mormo pohendlat ksnej enkat.
             }
-
+            AcceptedPlayerHandlingPending = false;
         }
         yield return null;
     }
@@ -988,5 +990,66 @@ napadenmu playerju da si poupdejta health. ta player pol ko si je updejtov healt
         networkObject.SendRpc(RPC_RECEIVE_PERSONAL_DATA_ON_CONNECTION, Receivers.All,name);
     }
 
+    public IEnumerator RequestUpdateFromEveryoneDelayed(float time_delay) {
+        yield return new WaitForSeconds(time_delay);
 
+        //vsem network objektim poslji zahtevo da poslejo podatke
+        if (networkObject.IsOwner)
+        {
+            //pejt cez vse playerje in poslji requeste za vse podatke z njihovih skript
+            foreach (GameObject p in GameObject.FindGameObjectsWithTag("Player"))
+            {
+                if (p.GetComponent<NetworkPlayerStats>().Equals(this)) continue;
+                NetworkPlayerStats st = p.GetComponent<NetworkPlayerStats>();
+                st.SendGetALL();
+
+                //TODO
+                //nrdit se za VSE ostale skripte
+            }
+        }
+    }
+
+    internal void SendGetALL() {
+        networkObject.SendRpc(RPC_GET_ALL, Receivers.Server);
+    }
+    /// <summary>
+    /// dobi remote player. poslje sendAll z vsemi podatki
+    /// </summary>
+    /// <param name="args"></param>
+    public override void GetAll(RpcArgs args)
+    {
+        if(networkObject.IsServer)
+            ServerSendAll();
+    }
+
+    private void ServerSendAll() {
+        if (!networkObject.IsServer) return;
+        //kar se tice guilda nrdimo kr guild update.
+        SendGuildUpdate(this.name_guild, this.tag_guild, this.color_guild, this.image_guild);
+        //health
+        networkObject.SendRpc(RPC_REFRESH_HEALTH, Receivers.All, this.health);
+
+        //ostalo
+        networkObject.SendRpc(RPC_SEND_ALL, Receivers.All, this.playerName, this.downed, this.dead);
+    }
+
+    /// <summary>
+    /// dobi player kot odgovor z vsemi podatki
+    /// </summary>
+    /// <param name="args"></param>
+    public override void SendAll(RpcArgs args)
+    {
+        if (args.Info.SendingPlayer.NetworkId == 0) {
+            this.playerName=args.GetNext<string>();
+            this.downed = args.GetNext<bool>();
+            this.dead = args.GetNext<bool>();
+            updateDisplayName();
+        }
+    }
+
+    public override void RefreshHealth(RpcArgs args)
+    {
+        if (args.Info.SendingPlayer.NetworkId == 0)
+            this.health = args.GetNext<float>();
+    }
 }
