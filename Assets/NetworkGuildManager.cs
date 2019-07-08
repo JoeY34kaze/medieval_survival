@@ -60,7 +60,7 @@ public class NetworkGuildManager : NetworkGuildManagerBehavior
         byte[] image_byte = new byte[25];
         ///image nekak dobit
         ///
-        /*
+        
         if (this.name_guild != null)
             if (this.name_guild.text != "")
                 name = this.name_guild.text;
@@ -73,7 +73,7 @@ public class NetworkGuildManager : NetworkGuildManagerBehavior
 
         //nekej nrdit za image..
 
-        */
+        
 
         localPlayer.GetComponent<NetworkPlayerStats>().showGuildModificationPanel(false, this);
 
@@ -137,7 +137,7 @@ public class NetworkGuildManager : NetworkGuildManagerBehavior
             }
             else {
                 //create guild
-                g=CreateGuild(args.Info.SendingPlayer.NetworkId, FindByid(args.Info.SendingPlayer.NetworkId).GetComponent<NetworkPlayerStats>().name + "'s Guild", "", Color.gray, null);
+                g=CreateGuild(args.Info.SendingPlayer.NetworkId, FindByid(args.Info.SendingPlayer.NetworkId).GetComponent<NetworkPlayerStats>().name + "'s Guild", "", Color.gray, null); treba nrdit tko kot sm mislu zutrej., koda je ubistvu nrjena samo na pol!!! AndroidJavaObject boze
             }
 
             sendGuildModifiedResponse(g);
