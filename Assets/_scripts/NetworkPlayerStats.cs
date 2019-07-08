@@ -151,6 +151,10 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
 
     }
 
+    public void OnSubmitModifiedGuildDataClick() {
+        GameObject.FindGameObjectWithTag("GuildManager").GetComponent<NetworkGuildManager>().OnModifyGuildConfirmClick();
+    }
+
 
     private void handleEscapePressed()
     {
