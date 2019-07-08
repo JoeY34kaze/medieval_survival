@@ -10,6 +10,7 @@ TagManager:
   - weapon_player
   - block_player
   - static_object
+  - GuildManager
   layers:
   - Default
   - TransparentFX

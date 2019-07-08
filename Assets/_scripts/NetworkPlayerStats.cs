@@ -61,6 +61,7 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
 
     private Queue<NetworkingPlayer> acceptedAndNotUpdatedPlayers;
     private bool AcceptedPlayerHandlingPending = false;
+    public GameObject serverSide_guildManager;
 
     private void Start()
     {
@@ -88,6 +89,10 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
         NetworkManager.Instance.Networker.playerAccepted += PlayerAccepted;
 
         StartCoroutine(RequestUpdateFromEveryoneDelayed(2));//pozene coroutine, ki vsem network objektom, kateri imajo karkoli da se rab rocno sinhronizirat na clientih, ki so se ravnokar povezal, poslje rpc s katerim signalizira, da nj mu poslejo nazaj podatke s katerimi bo nastavu trenutno stanje objekta.
+        if (networkObject.IsServer) {
+            NetworkGuildManagerBehavior beh = NetworkManager.Instance.InstantiateNetworkGuildManager();
+            this.serverSide_guildManager = beh.gameObject;
+        }
     }
 
     public void Update()

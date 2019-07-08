@@ -28,6 +28,7 @@ public class NetworkGuildManager : NetworkGuildManagerBehavior
             //load guilds from database or something...
             //if null
             if(this.guilds==null)this.guilds = new List<Guild>();
+            networkObject.TakeOwnership();
         }
         localPlayer = FindByid(NetworkManager.Instance.Networker.Me.NetworkId);//?? i guess it should work. mrde bols da player pogleda pa poveze z druge strani..
         
@@ -58,6 +59,8 @@ public class NetworkGuildManager : NetworkGuildManagerBehavior
         Color color=Color.blue;
         byte[] image_byte = new byte[25];
         ///image nekak dobit
+        ///
+        /*
         if (this.name_guild != null)
             if (this.name_guild.text != "")
                 name = this.name_guild.text;
@@ -70,6 +73,7 @@ public class NetworkGuildManager : NetworkGuildManagerBehavior
 
         //nekej nrdit za image..
 
+        */
 
         localPlayer.GetComponent<NetworkPlayerStats>().showGuildModificationPanel(false, this);
 
