@@ -547,8 +547,8 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
 
         if (Input.GetButtonDown("Inventory"))
         {
-            if(GetComponent<NetworkPlayerStats>().guild_modification_panel.activeSelf)
-                GetComponent<NetworkPlayerStats>().showGuildModificationPanel(false, null);
+            if (GetComponent<NetworkPlayerStats>().guild_modification_panel.activeSelf) return;
+                //GetComponent<NetworkPlayerStats>().showGuildModificationPanel(false, null);
 
             panel_inventory.SetActive(!panel_inventory.activeSelf);
             if (onItemChangedCallback != null)
@@ -995,7 +995,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
     public void sendNetworkUpdate(bool inv, bool loadout) //LOADOUT JE SAMO ZA UMA OBLEKE!!!!!!
     {
         if (!networkObject.IsServer) { Debug.LogError("client poskusa posiljat networkupdate k je samo od serverja.."); return; }
-        if (inv)
+        if (inv)//no security risk since its always sent to owner
         {
             short i0, i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, i14, i15, i16, i17, i18, i19;
 
@@ -1222,6 +1222,8 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
                 cunt++;
         return cunt;
     }
+
+
 
     internal void instantiateDroppedItem(Item item, int quantity, Vector3 camera_vector, Vector3 camera_forward) // instantiate it when dropped - zapakiral v rpc da se poslje vseskup na server
     {
@@ -1491,5 +1493,21 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
 
         if (onLoadoutChangedCallback != null)//najbrz nepotrebno ker se itak klice senkat v rpcju. optimizacija ksnej
             onLoadoutChangedCallback.Invoke();
+    }
+
+    /// <summary>
+    /// localni player tukej poslje rpc serverju da nj mu poslje updejt stanja tega objekta
+    /// </summary>
+    internal void SendGetALL()
+    {
+        networkObject.SendRpc(RPC_GET_ALL, Receivers.Server);
+    }
+
+    public override void GetAll(RpcArgs args)
+    {
+        if (networkObject.IsServer) {
+            //naceloma je treba poslat samo args.info.sendingPlayer - optimize later
+            sendNetworkUpdate(false,true);
+        }
     }
 }

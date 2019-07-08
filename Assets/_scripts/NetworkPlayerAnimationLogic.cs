@@ -15,7 +15,7 @@ public class NetworkPlayerAnimationLogic : NetworkPlayerAnimationBehavior
     public Transform _camera_framework;
     private NetworkPlayerStats stats;
 
-    private bool hookChestRotation=true;
+    public bool hookChestRotation=true;
     // ---------------------------------FUNCTIONS-------------------------------------
     void Awake()
     {
@@ -93,13 +93,13 @@ public class NetworkPlayerAnimationLogic : NetworkPlayerAnimationBehavior
 
 
     }
-
+    /*
     internal bool isDodgeAllowed()
     {
         if (anim.GetCurrentAnimatorStateInfo(0).IsName("movement") || anim.GetCurrentAnimatorStateInfo(0).IsName("crouched_movement"))
             return true;
         return false;
-    }
+    }*/
 
     private void LateUpdate()
     {
@@ -134,12 +134,12 @@ public class NetworkPlayerAnimationLogic : NetworkPlayerAnimationBehavior
     {
         if (!networkObject.IsOwner) return;//this can never happen anyway but it doesnt hurt.
         //setup everything locally.
-        anim.SetTrigger("jump");
+        anim.SetBool("jump",true);
         //broadcast it to remote objects
         networkObject.SendRpc(RPC_NETWORK_START_JUMP_REMOTE, Receivers.OthersProximity);
     }
 
-    internal void handle_end_of_jump_owner()
+    internal void handle_end_of_jump_owner()//??
     {
         if (!networkObject.IsOwner) return;
         anim.SetTrigger("land");
@@ -174,7 +174,7 @@ public class NetworkPlayerAnimationLogic : NetworkPlayerAnimationBehavior
     public override void NetworkStartJumpRemote(RpcArgs args)
     {
         if (networkObject.IsOwner) return;
-        anim.SetTrigger("jump");
+        anim.SetBool("jump",true);
     }
 
     public override void NetworkLandJumpRemote(RpcArgs args)
@@ -228,12 +228,43 @@ public class NetworkPlayerAnimationLogic : NetworkPlayerAnimationBehavior
         hookChestRotation = true;
     }
 
-    internal void setGrounded(bool isGrounded)
+    internal void setJump(bool st)
     {
-        anim.SetBool("grounded", isGrounded);
+        bool prej = anim.GetBool("grounded");
+        anim.SetBool("jump", st);
+        if (prej && !st)//we landed
+            if(networkObject.IsOwner)
+                handle_end_of_jump_owner();
+        
     }
 
     internal void setCrouched(bool b) {
         anim.SetBool("crouched", b);
+    }
+
+    /// <summary>
+    /// lokalni player v tej metodi poslje rpc serverju da nj mu da podatke o tej skripti
+    /// </summary>
+    internal void SendGetALL()
+    {
+        networkObject.SendRpc(RPC_GET_ALL, Receivers.Server);
+    }
+
+    public override void GetAll(RpcArgs args)
+    {
+        if (networkObject.IsServer) {
+            networkObject.SendRpc(args.Info.SendingPlayer, RPC_SEND_ALL, anim.GetInteger("combat_mode"), anim.GetBool("combat_blocking"), anim.GetBool("crouched"), anim.GetInteger("weapon_animation_class"), anim.GetBool("downed"));
+        }
+    }
+
+    public override void SendAll(RpcArgs args)
+    {
+        if (args.Info.SendingPlayer.NetworkId == 0) {
+            anim.SetInteger("combat_mode", args.GetNext<int>());
+            anim.SetBool("combat_blocking", args.GetNext<bool>());
+            anim.SetBool("crouched", args.GetNext<bool>());
+            anim.SetInteger("weapon_animation_class", args.GetNext<int>());
+            anim.SetBool("downed", args.GetNext<bool>());
+        }
     }
 }

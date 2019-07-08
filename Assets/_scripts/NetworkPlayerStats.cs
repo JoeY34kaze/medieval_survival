@@ -127,6 +127,12 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
             handleEscapePressed();
         }
 
+        if (this.guild_modification_panel.activeSelf) {
+            if (!Cursor.visible) Cursor.visible = true;
+            if (Cursor.lockState != CursorLockMode.None) Cursor.lockState = CursorLockMode.None;
+
+        }
+
         /*  if (this.test) {
               this.health = 0;
               handle_0_hp();
@@ -917,6 +923,9 @@ napadenmu playerju da si poupdejta health. ta player pol ko si je updejtov healt
         this.guild_modification_panel.SetActive(b);
         if(npi!=null)if(npi.panel_inventory!=null)if(npi.panel_inventory.activeSelf)npi.panel_inventory.SetActive(false);
 
+        GetComponent<NetworkPlayerAnimationLogic>().hookChestRotation = !b;
+        GetComponent<NetworkPlayerMovement>().lockMovement = b;
+        GetComponent<player_camera_handler>().lockCamera = b;
     }
 
     /// <summary>
@@ -1003,7 +1012,23 @@ napadenmu playerju da si poupdejta health. ta player pol ko si je updejtov healt
                 NetworkPlayerStats st = p.GetComponent<NetworkPlayerStats>();
                 st.SendGetALL();
 
+
+                //uma dna
+
+                //movement ?
+
+                //animation logic ? - mrde bi kr vsa stanja iz animatorja poslov cez pa je
+                p.GetComponent<NetworkPlayerAnimationLogic>().SendGetALL();//mislm d je
+
+                //combatHandler
+                p.GetComponent<NetworkPlayerCombatHandler>().SendGetALL();//mislm d je
+                //inventory
+                p.GetComponent<NetworkPlayerInventory>().SendGetALL();//mislm d je
+
+
                 //TODO
+                /*
+             */
                 //nrdit se za VSE ostale skripte
             }
         }

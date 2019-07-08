@@ -17,7 +17,7 @@ public class player_camera_handler : NetworkPlayerCameraHandlerBehavior
 
     public Camera player_cam;
     private NetworkPlayerInventory networkPlayerInventory;
-
+    public bool lockCamera = false;
 
     private void Awake()
     {
@@ -45,6 +45,7 @@ public class player_camera_handler : NetworkPlayerCameraHandlerBehavior
             return;
         }
         if (!networkObject.IsOwner) return;
+        if (lockCamera) return;
         if (networkPlayerInventory.panel_inventory.activeSelf) return;
 
 

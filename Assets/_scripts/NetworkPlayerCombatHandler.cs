@@ -333,7 +333,7 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
 
     private void check_and_handle_combat_mode()
     {
-        if (Input.GetButtonDown("Change combat mode"))
+        if (Input.GetButtonDown("Change combat mode") && is_allowed_to_attack_local())
         {
             Debug.Log("client: sending change combat mode request");
             networkObject.SendRpc(RPC_CHANGE_COMBAT_MODE_REQUEST, Receivers.Server);
@@ -604,5 +604,27 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
             draw_current_weapon();
         }
 
+    }
+
+    internal void SendGetALL()
+    {
+        networkObject.SendRpc(RPC_GET_ALL, Receivers.Server);
+    }
+
+    public override void GetAll(RpcArgs args)
+    {
+        if (networkObject.IsServer) {
+            networkObject.SendRpc(args.Info.SendingPlayer, RPC_SEND_ALL, (byte)this.combat_mode, this.blocking, this.index_of_currently_selected_weapon_from_equipped_weapons);
+        }
+    }
+
+    public override void SendAll(RpcArgs args)
+    {
+        if (args.Info.SendingPlayer.NetworkId == 0) {
+            this.combat_mode = (byte)args.GetNext<int>();
+            this.blocking = args.GetNext<bool>();
+            this.index_of_currently_selected_weapon_from_equipped_weapons = args.GetNext<int>();
+            refresh_in_hand();
+        }
     }
 }

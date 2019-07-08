@@ -101,7 +101,7 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
     #region Actions
 
     // movement bools
-    [HideInInspector]
+    //[HideInInspector]
     public bool
         isGrounded,
         isStrafing,
@@ -109,7 +109,7 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
         isSliding;
 
     // action bools
-    [HideInInspector]
+    //[HideInInspector]
     public bool
         isJumping;
 
@@ -380,8 +380,8 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
 
     public virtual void UpdateAnimator()
     {
-        if (animation_logic_script==null) return;
-        animation_logic_script.setGrounded(isGrounded);
+        if (animation_logic_script == null) animation_logic_script = GetComponent<NetworkPlayerAnimationLogic>();
+        animation_logic_script.setJump(!isGrounded);
         animation_logic_script.setCrouched(isCrouched);
        
     }
