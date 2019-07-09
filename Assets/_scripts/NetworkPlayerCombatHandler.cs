@@ -614,7 +614,7 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
     public override void GetAll(RpcArgs args)
     {
         if (networkObject.IsServer) {
-            networkObject.SendRpc(args.Info.SendingPlayer, RPC_SEND_ALL, (byte)this.combat_mode, this.blocking, this.index_of_currently_selected_weapon_from_equipped_weapons);
+            networkObject.SendRpc(args.Info.SendingPlayer, RPC_SEND_ALL, (int)this.combat_mode, this.blocking, this.index_of_currently_selected_weapon_from_equipped_weapons);
         }
     }
 

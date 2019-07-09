@@ -141,8 +141,8 @@ public class NetworkPlayerAnimationLogic : NetworkPlayerAnimationBehavior
 
     internal void handle_end_of_jump_owner()//??
     {
-        if (!networkObject.IsOwner) return;
-        anim.SetTrigger("land");
+        //if (!networkObject.IsOwner) return;
+        //anim.SetTrigger("land");
 
         networkObject.SendRpc(RPC_NETWORK_LAND_JUMP_REMOTE, Receivers.OthersProximity);
     }
@@ -180,7 +180,7 @@ public class NetworkPlayerAnimationLogic : NetworkPlayerAnimationBehavior
     public override void NetworkLandJumpRemote(RpcArgs args)
     {
         if (networkObject.IsOwner) return;
-        anim.SetTrigger("land");
+        this.setJump(false);
     }
 
     internal void handle_downed_start()
@@ -228,11 +228,11 @@ public class NetworkPlayerAnimationLogic : NetworkPlayerAnimationBehavior
         hookChestRotation = true;
     }
 
-    internal void setJump(bool st)
+    internal void setJump(bool inAir)
     {
-        bool prej = anim.GetBool("grounded");
-        anim.SetBool("jump", st);
-        if (prej && !st)//we landed
+        bool prej = anim.GetBool("jump");
+        anim.SetBool("jump", inAir);
+        if (prej && !inAir)//we landed
             if(networkObject.IsOwner)
                 handle_end_of_jump_owner();
         

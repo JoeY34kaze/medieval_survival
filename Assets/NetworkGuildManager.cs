@@ -137,7 +137,7 @@ public class NetworkGuildManager : NetworkGuildManagerBehavior
             }
             else {
                 //create guild
-                g=CreateGuild(args.Info.SendingPlayer.NetworkId, FindByid(args.Info.SendingPlayer.NetworkId).GetComponent<NetworkPlayerStats>().name + "'s Guild", "", Color.gray, null); treba nrdit tko kot sm mislu zutrej., koda je ubistvu nrjena samo na pol!!! AndroidJavaObject boze
+                g=CreateGuild(args.Info.SendingPlayer.NetworkId, FindByid(args.Info.SendingPlayer.NetworkId).GetComponent<NetworkPlayerStats>().name + "'s Guild", "", Color.gray, null);
             }
 
             sendGuildModifiedResponse(g);
@@ -243,7 +243,7 @@ public class NetworkGuildManager : NetworkGuildManagerBehavior
     }
 
 
-    private Guild CreateGuild(uint gm, string name, string tag, Color c, byte[] image)
+    public Guild CreateGuild(uint gm, string name, string tag, Color c, byte[] image)
     {
         Guild g = new Guild(gm, name, tag, c, image);
         if (this.guilds == null) this.guilds = new List<Guild>();
@@ -251,7 +251,7 @@ public class NetworkGuildManager : NetworkGuildManagerBehavior
         return g;
     }
 
-    private Guild findPlayersGuild(uint p) {
+    public Guild findPlayersGuild(uint p) {
         if (this.guilds != null)
             if(this.guilds.Count>0)
                 foreach (Guild g in this.guilds) {

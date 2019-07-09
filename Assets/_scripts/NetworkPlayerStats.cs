@@ -131,12 +131,12 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
         {
             handleEscapePressed();
         }
+        if(networkObject.IsOwner)
+            if (this.guild_modification_panel.activeSelf) {
+                if (!Cursor.visible) Cursor.visible = true;
+                if (Cursor.lockState != CursorLockMode.None) Cursor.lockState = CursorLockMode.None;
 
-        if (this.guild_modification_panel.activeSelf) {
-            if (!Cursor.visible) Cursor.visible = true;
-            if (Cursor.lockState != CursorLockMode.None) Cursor.lockState = CursorLockMode.None;
-
-        }
+            }
 
         /*  if (this.test) {
               this.health = 0;
@@ -289,6 +289,14 @@ napadenmu playerju da si poupdejta health. ta player pol ko si je updejtov healt
     internal uint Get_server_id()
     {
         return networkObject.Owner.NetworkId;
+    }
+
+    internal void SendGuildUpdate(NetworkGuildManager.Guild g)
+    {
+        if (networkObject.IsServer)
+        {
+            this.SendGuildUpdate(g.name, g.tag, g.color, g.image);
+        }
     }
 
     internal void SendGuildUpdate(string name, string tag, Color color, byte[] image)
@@ -948,6 +956,7 @@ napadenmu playerju da si poupdejta health. ta player pol ko si je updejtov healt
             Debug.Log("Client: Updating player data with server side data.");
             this.playerName = args.GetNext<string>();
             updateDisplayName();
+            
         }
     }
 
@@ -1004,8 +1013,22 @@ napadenmu playerju da si poupdejta health. ta player pol ko si je updejtov healt
         yield return null;
     }
 
+    /// <summary>
+    /// metoda poslje vse podatke, ki jih player rabi dobit da prevzame mesto objekta, katerga je prej spialal. zaenkrat se ne dela ker je treba povezat se na steamworks da bomo s tam zahteval id na podlagi cesar autenticiramo istovetnost. ce najdemo id match mu poslemo data
+    /// </summary>
+    /// <param name="name"></param>
     private void ServerSendOnAcceptedData(string name) {
-        networkObject.SendRpc(RPC_RECEIVE_PERSONAL_DATA_ON_CONNECTION, Receivers.All,name);
+
+        networkObject.SendRpc(RPC_RECEIVE_PERSONAL_DATA_ON_CONNECTION, Receivers.All,name); //stats variables pa take fore
+
+        NetworkGuildManager.Guild playersGuild = null;
+        //players_guild = NetworkGuildManager.findPlayersGuild(this.GetSteamworksID());
+        if (playersGuild == null) {
+            playersGuild = GameObject.FindGameObjectWithTag("GuildManager").GetComponent<NetworkGuildManager>().CreateGuild(networkObject.Owner.NetworkId, networkObject.Owner.NetworkId + "'s clan", networkObject.Owner.NetworkId + "-S", Color.gray, new byte[25]);
+            if (playersGuild != null) {
+                SendGuildUpdate(playersGuild.name, playersGuild.tag, playersGuild.color, playersGuild.image);
+            }
+        }
     }
 
     public IEnumerator RequestUpdateFromEveryoneDelayed(float time_delay) {
