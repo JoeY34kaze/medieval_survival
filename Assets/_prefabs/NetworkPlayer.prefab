@@ -15598,6 +15598,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   team_invite_panel: {fileID: 6995376778805785654, guid: 665b5bf3ddd10d14394dd6bd5f6c79a7,
     type: 3}
+  guild_invite_panel: {fileID: 6995376778805785654, guid: 75b8983fc5c571d4cb960271132aa258,
+    type: 3}
 --- !u!225 &6255335181684024748
 CanvasGroup:
   m_ObjectHideFlags: 0

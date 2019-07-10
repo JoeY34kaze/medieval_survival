@@ -399,44 +399,6 @@ napadenmu playerju da si poupdejta health. ta player pol ko si je updejtov healt
 
 
 
-    //--------------------RPC
-    /*
-    public override void updateAllPlayerId(RpcArgs args)//server updejta id-je vseh playerjev. to se zgodi vedno kose sconnecta nov player gor, mogl bi se tud ko se kdo disconnecta ampak ni se to
-    {
-        if (networkObject.IsServer)
-        {
-            //Debug.Log("Updating player id's");
-            lock (myNetWorker.Players)
-            {
-                NetworkingPlayer[] players = myNetWorker.Players.ToArray();
-                for (int i = 0; i < players.Length; i++)
-                {
-                    //Debug.Log("id = "+ players[i].NetworkId);
-                    networkObject.SendRpc(players[i], RPC_UPDATE_PLAYER_ID, players[i].NetworkId);//networkId je unikaten na serverju, ni pa unikaten za cliente ker vsakmu kaze da je 0. neda se spreminjat tko da sm naredu nov field
-                }
-            }
-        }
-    }
-
-    public override void updatePlayerId(RpcArgs args)
-    {
-        if (!networkObject.IsOwner) { return; }
-        this.server_id = args.GetNext<uint>();
-
-        string n = "jok";
-
-        this.player_displayed_name.text =   this.server_id+" - "+this.playerName + " [ " + this.tag_guild + " ]";
-        //Debug.Log("changing id to" + this.server_id);
-        networkObject.SendRpc(RPC_UPDATE_OTHER_CLIENT_ID, Receivers.Others, this.server_id);
-    }
-
-    public override void updateOtherClientId(RpcArgs args)
-    {
-        this.server_id = args.GetNext<uint>();
-        this.player_displayed_name.text = this.server_id + " - " + this.playerName + " [ "+this.tag_guild+" ]";
-        //Debug.Log("changing id to" + this.server_id);
-    }
-    */
 
     /// <summary>
     /// server poklice da se nastav health na skripti. klice se na vsah skriptah, tud an serverju

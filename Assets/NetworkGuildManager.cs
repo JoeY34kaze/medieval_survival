@@ -14,11 +14,17 @@ public class NetworkGuildManager : NetworkGuildManagerBehavior
 {
 
     public GameObject localPlayer;
+
+
     public Text name_guild;
     public Text tag_guild;
     public Text color_guild;
 
     public List<Guild> guilds;
+
+    private bool guild_invite_pending = false;
+
+    private decicions_handler_ui decision_handler;
 
     protected override void NetworkStart()
     {
@@ -31,7 +37,7 @@ public class NetworkGuildManager : NetworkGuildManagerBehavior
             networkObject.TakeOwnership();
         }
         localPlayer = FindByid(NetworkManager.Instance.Networker.Me.NetworkId);//?? i guess it should work. mrde bols da player pogleda pa poveze z druge strani..
-        
+        this.decision_handler = localPlayer.GetComponentInChildren<decicions_handler_ui>();
         //networkObject.SendRpc(RPC_REQUEST_GUILD_AFFILIATION, Receivers.Server, NetworkManager.Instance.Networker.Me.NetworkId); tega nebo tle. ko se connecta server pogleda ce ze obstaa njemu pripadajoc objekt in ga poupdejta, sicer nrdit nov guild.
     }
 
@@ -163,7 +169,7 @@ public class NetworkGuildManager : NetworkGuildManagerBehavior
                     else
                     {
                         Debug.LogError("MS IS NULL. COULDNT UPDATE OR CREATE GUILD!");
-                        StartCoroutine(sendGuildModifiedResponsePending(member, g));
+                        StartCoroutine(sendGuildModifiedResponsePending(member, g));//coroutine se zazene ker ucas nemormo poslat playerju ker se player se kreira medtem ko ga na networku ze sprejme. probably not the best :)
                     }
                 }
                 else {
@@ -177,10 +183,11 @@ public class NetworkGuildManager : NetworkGuildManagerBehavior
 
     IEnumerator sendGuildModifiedResponsePending(uint member, Guild g)
     {
+        int i = 0;
         if (networkObject.IsServer)
         {
             bool sent = false;
-            while (!sent)
+            while (!sent && (i++<60))//caka max 4 minute
             {
                 GameObject pl = FindByid(member);
                 if (pl != null)
@@ -261,7 +268,115 @@ public class NetworkGuildManager : NetworkGuildManagerBehavior
         return null;
     }
 
-    public class Guild {
+    
+
+    /// <summary>
+    /// klice gm, posle serverju da hoce invitat plebejca u guild
+    /// </summary>
+    /// <param name="plebejec"></param>
+    internal void localSendGuildInvite(uint plebejec)
+    {
+        networkObject.SendRpc(RPC_REQUEST_SEND_GUILD_INVITE, Receivers.Server, plebejec);
+    }
+
+    /// <summary>
+    /// dobi server od gm-ja, parameter je id playerja k ga gm invita. ce je vse legit se poslje povabilo plebejcu
+    /// </summary>
+    /// <param name="args"></param>
+    public override void RequestSendGuildInvite(RpcArgs args)
+    {
+        if (networkObject.IsServer) {
+            uint pleb = args.GetNext<uint>();
+            uint gm = args.Info.SendingPlayer.NetworkId;
+            Guild g = getGuildFromMember(gm);
+            Guild g2 = getGuildFromMember(pleb);
+            if (g != null && (g2==null || g2.members.Count==1)) {//samo guild master lahko invita in samo ce player ni ze u guildu lahko invita
+                if (g.guildMaster == gm) {//lahko poslje invite naprej
+                    networkObject.SendRpc(NetworkManager.Instance.Networker.GetPlayerById(pleb), RPC_SEND_GUILD_INVITE_TO_CANDIDATE, gm, g.name);
+                }
+            }
+        }
+    }
+
+    /// <summary>
+    /// vrne guild katerga je member
+    /// </summary>
+    /// <param name="player_id"></param>
+    /// <returns></returns>
+    private Guild getGuildFromMember(uint player_id)
+    {
+        foreach (Guild g in this.guilds) {
+            if (g.isMember(player_id)) return g;
+        }
+        return null;
+    }
+
+    /// <summary>
+    /// dobi kandidat od serverja. odpre se mu panela, kjer pise kdo ga je invitov kam, lahko sprejme ali zavrne invite.
+    /// </summary>
+    /// <param name="args"></param>
+    public override void SendGuildInviteToCandidate(RpcArgs args)
+    {
+        if (args.Info.SendingPlayer.NetworkId == 0 && !guild_invite_pending) {
+            uint gm = args.GetNext<uint>();
+            string guild_name = args.GetNext<string>();
+
+            //narisi panelo enako kot za team invite
+            guild_invite_pending = true;
+
+            this.decision_handler.draw_guild_invite_decision(FindByid(gm).GetComponent<NetworkPlayerStats>().playerName,guild_name,gm,this);
+
+
+
+
+
+
+        }
+    }
+    /// <summary>
+    /// sprozi se na plebejcu z skripte panel_guild_invite_handler, ko klikne na gumb ali ko potece timer. poslje response serverju
+    /// </summary>
+    /// <param name="gm"></param>
+    /// <param name="v"></param>
+    internal void LocalGuildRequestResponse(uint gm, bool v)
+    {
+        guild_invite_pending = false;
+        networkObject.SendRpc(RPC_GUILD_INVITE_RESPONSE, Receivers.Server, gm, v);
+    }
+
+    /// <summary>
+    /// dobi server od plebejca, ce je sprejel in ce je vse legit se ga doda u guild in poslje updejt guilda vsem playerjem
+    /// </summary>
+    /// <param name="args"></param>
+    public override void GuildInviteResponse(RpcArgs args)
+    {
+        if (networkObject.IsServer) {
+            uint from = args.Info.SendingPlayer.NetworkId;
+            uint gm = args.GetNext<uint>();
+            bool status = args.GetNext<bool>();
+            if (isGuildInvitationResponseValid()) {
+                Guild g = getGuildFromMember(gm);
+                if (g != null) {
+                    g.addMember(from);
+                    sendGuildModifiedResponse(g);
+                }
+
+            }
+        }
+
+    }
+    /// <summary>
+    /// SECURITY FEATURE - preverit mora ce je valid, magari da se shrani ko gm pposlje invite, da se caka response od dolocenga playerja za tega gm-ja. sicer lahko kr en retard poslje response in ga vrze u guild lol
+    /// </summary>
+    /// <returns></returns>
+    private bool isGuildInvitationResponseValid()
+    {
+        Debug.LogWarning("not implementetd!");
+        return true;
+    }
+
+    public class Guild
+    {
         public int id;
         public string name;
         public string tag;
@@ -285,18 +400,21 @@ public class NetworkGuildManager : NetworkGuildManagerBehavior
             //id??
         }
 
-        public void updateInfo(string name, string tag, Color c, byte[] image) {
+        public void updateInfo(string name, string tag, Color c, byte[] image)
+        {
             this.name = name;
             this.tag = tag;
             this.color = c;
             this.image = image;
         }
 
-        public void addMember(uint i) {
+        public void addMember(uint i)
+        {
             if (!isMember(i))
                 members.Add(i);
         }
-        public void removeMember(uint i) {
+        public void removeMember(uint i)
+        {
             if (i == guildMaster) return;//cannot remove gm
             members.Remove(i);
         }
