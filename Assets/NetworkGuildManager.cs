@@ -23,10 +23,11 @@ public class NetworkGuildManager : NetworkGuildManagerBehavior
 
     public List<Guild> guilds;
 
-    private bool guild_invite_pending = false;
+    public List<uint[]> valid_invites;
 
     private decicions_handler_ui decision_handler;
     private panel_guild_handler pgh;
+    public NetworkPlayerStats localStats;
 
     #endregion
 
@@ -40,12 +41,28 @@ public class NetworkGuildManager : NetworkGuildManagerBehavior
             //if null
             if(this.guilds==null)this.guilds = new List<Guild>();
             networkObject.TakeOwnership();
+            this.valid_invites = new List<uint[]>();
         }
         localPlayer = FindByid(NetworkManager.Instance.Networker.Me.NetworkId);//?? i guess it should work. mrde bols da player pogleda pa poveze z druge strani..
-        this.decision_handler = localPlayer.GetComponentInChildren<decicions_handler_ui>();
-        this.pgh = localPlayer.GetComponent<NetworkPlayerStats>().GetPGH();
+        this.decision_handler = this.localPlayer.GetComponentInChildren<decicions_handler_ui>();
+        this.localStats = this.localPlayer.GetComponent<NetworkPlayerStats>();
+        this.pgh = this.localStats.GetPGH();
+        this.name_guild = this.localStats.guild_name_input;
+        this.tag_guild = this.localStats.guild_tag_input;
+
+        if (this.localStats == null || this.decision_handler == null || this.localPlayer == null) StartCoroutine(LinkStatsDelayed(2));
     }
 
+    private IEnumerator LinkStatsDelayed(float t) {
+        yield return new WaitForSeconds(t);
+        if (this.localStats == null) {
+            this.decision_handler = this.localPlayer.GetComponentInChildren<decicions_handler_ui>();
+            this.localStats = this.localPlayer.GetComponent<NetworkPlayerStats>();
+            this.pgh = this.localStats.GetPGH();
+            this.name_guild = this.localStats.guild_name_input;
+            this.tag_guild = this.localStats.guild_tag_input;
+        }
+    } 
 
 
     #endregion
@@ -118,7 +135,8 @@ public class NetworkGuildManager : NetworkGuildManagerBehavior
     {
         Debug.Log("Modification CLICKED");
         if (localPlayer == null) localPlayer = FindByid(NetworkManager.Instance.Networker.Me.NetworkId);
-        localPlayer.GetComponent<NetworkPlayerStats>().showGuildModificationPanel(true, this);
+        if (this.localStats == null) { Debug.LogError("jz sm prizadet"); localPlayer.GetComponent<NetworkPlayerStats>().showGuildModificationPanel(true, this); this.localStats = localPlayer.GetComponent<NetworkPlayerStats>(); }
+        else { this.localStats.showGuildModificationPanel(true, this); }
 
     }
 
@@ -126,28 +144,29 @@ public class NetworkGuildManager : NetworkGuildManagerBehavior
 
         Debug.Log("SUBMITTING GUILD CHANGE");
 
-        string name="RETARDOS";
-        string tag="RET";
-        Color color=Color.blue;
+        string name="Invalid";
+        string tag="-1";
+        Color color=Color.gray;
         byte[] image_byte = new byte[25];
         ///image nekak dobit
         ///
-        
+        if (this.name_guild == null) this.name_guild = this.localStats.guild_name_input;
+        if (this.tag_guild == null) this.tag_guild = this.localStats.guild_tag_input;
         if (this.name_guild != null)
             if (this.name_guild.text != "")
                 name = this.name_guild.text;
         if (this.tag_guild != null)
             if (this.tag_guild.text != "")
-                name = this.tag_guild.text;
-        if (this.color_guild != null)
-            if (this.color_guild.text != "")
-                color = IfValidColorReturnColor(this.color_guild.text, color);
+                tag = this.tag_guild.text;
+        //if (this.color_guild != null)
+        //  if (this.color_guild.text != "")
+        //    color = IfValidColorReturnColor(this.color_guild.text, color);
 
         //nekej nrdit za image..
 
-        
 
-        localPlayer.GetComponent<NetworkPlayerStats>().showGuildModificationPanel(false, this);
+
+        this.localStats.showGuildModificationPanel(false, this);
 
 
         networkObject.SendRpc(RPC_CREATE_OR_MODIFY_GUILD_REQUEST, Receivers.Server, name, tag, color, image_byte);
@@ -286,13 +305,32 @@ public class NetworkGuildManager : NetworkGuildManagerBehavior
         this.pgh = pgh;
     }
 
+    private void AddToValidInvites(uint gm, uint pleb) {
+        uint[] inv = new uint[2];
+        inv[0] = gm;
+        inv[1] = pleb;
+        this.valid_invites.Add(inv);
+    }
+
+    private bool ConsumeValidInvite(uint gm, uint pleb) {
+
+        foreach (uint[] u in this.valid_invites) {
+            if (u[0] == gm && u[1] == pleb) {
+                this.valid_invites.Remove(u);
+                return true;
+            }
+        }
+        return false;
+
+    }
+
     #endregion
 
     #region MEMBER_PANEL
 
     internal void toggleMemberPanel()
     {
-        if (this.pgh == null) this.pgh = localPlayer.GetComponent<NetworkPlayerStats>().GetPGH();
+        if (this.pgh == null) this.pgh = this.localStats.GetPGH();
         bool next = !this.pgh.gameObject.activeSelf;
         this.pgh.Clear();//pobrise prejsne memberje
         this.pgh.gameObject.SetActive(!this.pgh.gameObject.activeSelf);
@@ -466,6 +504,7 @@ public class NetworkGuildManager : NetworkGuildManagerBehavior
             Guild g2 = getGuildFromMember(pleb);
             if (g != null && (g2==null || g2.members.Count==1)) {//samo guild master lahko invita in samo ce player ni ze u guildu lahko invita
                 if (g.guildMaster == gm) {//lahko poslje invite naprej
+                    AddToValidInvites(gm, pleb);
                     networkObject.SendRpc(NetworkManager.Instance.Networker.GetPlayerById(pleb), RPC_SEND_GUILD_INVITE_TO_CANDIDATE, gm, g.name);
                 }
             }
@@ -512,7 +551,7 @@ public class NetworkGuildManager : NetworkGuildManagerBehavior
             uint from = args.Info.SendingPlayer.NetworkId;
             uint gm = args.GetNext<uint>();
             bool status = args.GetNext<bool>();
-            if (isGuildInvitationResponseValid())
+            if (isGuildInvitationResponseValid(gm, from))
             {
                 Guild g = getGuildFromMember(gm);
                 if (g != null)
@@ -528,6 +567,9 @@ public class NetworkGuildManager : NetworkGuildManagerBehavior
                 }
 
             }
+            else {
+                //invalid join response.
+            }
         }
 
     }
@@ -536,10 +578,9 @@ public class NetworkGuildManager : NetworkGuildManagerBehavior
     /// SECURITY FEATURE - preverit mora ce je valid, magari da se shrani ko gm pposlje invite, da se caka response od dolocenga playerja za tega gm-ja. sicer lahko kr en retard poslje response in ga vrze u guild lol
     /// </summary>
     /// <returns></returns>
-    private bool isGuildInvitationResponseValid()
+    private bool isGuildInvitationResponseValid(uint gm, uint pleb)
     {
-        Debug.LogWarning("not implementetd!");
-        return true;
+        return ConsumeValidInvite(gm, pleb);
     }
 
     public override void GuildMembersUpdate(RpcArgs args)
