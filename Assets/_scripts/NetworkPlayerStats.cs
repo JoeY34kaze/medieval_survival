@@ -50,6 +50,12 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
 
     public string name_guild="no guild yet";
     public string tag_guild="no tag yet";
+
+    internal panel_guild_handler GetPGH()
+    {
+        return this.panelGuildMemberHandler;
+    }
+
     public Color color_guild=Color.red;
     public byte[] image_guild;
 
@@ -62,6 +68,7 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
     private Queue<NetworkingPlayer> acceptedAndNotUpdatedPlayers;
     private bool AcceptedPlayerHandlingPending = false;
     public GameObject serverSide_guildManager;
+    public panel_guild_handler panelGuildMemberHandler;
 
     private void Start()
     {
@@ -89,14 +96,22 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
         NetworkManager.Instance.Networker.playerAccepted += PlayerAccepted;
 
         StartCoroutine(RequestUpdateFromEveryoneDelayed(2));//pozene coroutine, ki vsem network objektom, kateri imajo karkoli da se rab rocno sinhronizirat na clientih, ki so se ravnokar povezal, poslje rpc s katerim signalizira, da nj mu poslejo nazaj podatke s katerimi bo nastavu trenutno stanje objekta.
-        if (networkObject.IsServer) {
+        if (networkObject.IsServer && networkObject.IsOwner) {
             NetworkGuildManagerBehavior beh = NetworkManager.Instance.InstantiateNetworkGuildManager();
             this.serverSide_guildManager = beh.gameObject;
+            StartCoroutine(serverPlayerInitDelayer(1));
         }
+    }
+
+    public IEnumerator serverPlayerInitDelayer(float t) {
+        yield return new WaitForSeconds(t);
+
+        ServerSendOnAcceptedData("SERVER");
     }
 
     public void Update()
     {
+
         if (networkObject == null)
         {
             // Debug.LogError("networkObject is null.");
@@ -131,6 +146,15 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
         {
             handleEscapePressed();
         }
+
+        if (Input.GetButtonDown("Guild") && networkObject.IsOwner) {
+            //zapri inventorij, zapri guildModification, ??
+
+            if (npi.panel_inventory.activeSelf) npi.panel_inventory.SetActive(false);
+            if (this.guild_modification_panel.activeSelf) this.guild_modification_panel.SetActive(false);
+            GameObject.FindGameObjectWithTag("GuildManager").GetComponent<NetworkGuildManager>().toggleMemberPanel();
+        }
+
         if(networkObject.IsOwner)
             if (this.guild_modification_panel.activeSelf) {
                 if (!Cursor.visible) Cursor.visible = true;

@@ -481,7 +481,7 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
 
     private void draw_current_weapon()
     {
-        Debug.Log("drawing current weapon");
+        //Debug.Log("drawing current weapon");
         disable_all_possible_equipped_weapons();
         int id2 = this.equipped_weapons[index_of_currently_selected_weapon_from_equipped_weapons];
         foreach (Transform c in weapon_slot) {
