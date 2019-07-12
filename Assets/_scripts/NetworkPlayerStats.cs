@@ -332,6 +332,15 @@ napadenmu playerju da si poupdejta health. ta player pol ko si je updejtov healt
         }
     }
 
+    internal void SendGuildUpdateToPlayer(NetworkingPlayer p,string name, string tag, Color color, byte[] image)
+    {
+        if (networkObject.IsServer)
+        {
+            if (image == null) image = new byte[25];
+            if (tag == null) tag = "asd";
+            networkObject.SendRpc(p,RPC_GUILD_UPDATE, name, tag, color, image);
+        }
+    }
 
     private void handle_death_player(uint player_id)//samo na serverju
     {
@@ -1017,67 +1026,49 @@ napadenmu playerju da si poupdejta health. ta player pol ko si je updejtov healt
         }
     }
 
+    /// <summary>
+    /// klice owner. zatezi serverju da nj mu poslje podatke za vsak objekt
+    /// </summary>
+    /// <param name="time_delay"></param>
+    /// <returns></returns>
     public IEnumerator RequestUpdateFromEveryoneDelayed(float time_delay) {
         yield return new WaitForSeconds(time_delay);
 
         //vsem network objektim poslji zahtevo da poslejo podatke
         if (networkObject.IsOwner)
-        {
-            //pejt cez vse playerje in poslji requeste za vse podatke z njihovih skript
-            foreach (GameObject p in GameObject.FindGameObjectsWithTag("Player"))
-            {
-                if (p.GetComponent<NetworkPlayerStats>().Equals(this)) continue;
-                NetworkPlayerStats st = p.GetComponent<NetworkPlayerStats>();
-                st.SendGetALL();
-
-
-                //uma dna
-
-                //movement ?
-
-                //animation logic ? - mrde bi kr vsa stanja iz animatorja poslov cez pa je
-                p.GetComponent<NetworkPlayerAnimationLogic>().SendGetALL();//mislm d je
-
-                //combatHandler
-                p.GetComponent<NetworkPlayerCombatHandler>().SendGetALL();//mislm d je
-                //inventory
-                p.GetComponent<NetworkPlayerInventory>().SendGetALL();//mislm d je
-
-
-                //TODO
-                /*
-             */
-                //nrdit se za VSE ostale skripte
-            }
-        }
+            SendGetALL();
     }
 
     internal void SendGetALL() {
         networkObject.SendRpc(RPC_GET_ALL, Receivers.Server);
     }
     /// <summary>
-    /// dobi remote player. poslje sendAll z vsemi podatki
+    /// dobi server. klice VSE skripte V SCENI synchronizerja da pohendlajo sinhronizacijo novga playerja
     /// </summary>
     /// <param name="args"></param>
     public override void GetAll(RpcArgs args)
     {
-        if(networkObject.IsServer)
-            ServerSendAll();
+        if (networkObject.IsServer)
+        {
+            foreach (NetworkStartupSynchronizer synchronizer in UnityEngine.Object.FindObjectsOfType<NetworkStartupSynchronizer>()){
+                synchronizer.SendDataToStartingClient(args.Info.SendingPlayer);
+            }
+        }
     }
 
-    private void ServerSendAll() {
+    public void ServerSendAll(NetworkingPlayer p) {
         if (!networkObject.IsServer) return;
-        //kar se tice guilda nrdimo kr guild update.
-        SendGuildUpdate(this.name_guild, this.tag_guild, this.color_guild, this.image_guild);
-        //health
-        networkObject.SendRpc(RPC_REFRESH_HEALTH, Receivers.All, this.health);
 
+        //kar se tice guilda nrdimo kr guild update.
+        SendGuildUpdateToPlayer(p,this.name_guild, this.tag_guild, this.color_guild, this.image_guild);
+        //health
+        networkObject.SendRpc(p, RPC_REFRESH_HEALTH, this.health);
         //ostalo
-        networkObject.SendRpc(RPC_SEND_ALL, Receivers.All, this.playerName, this.downed, this.dead);
+        networkObject.SendRpc(p,RPC_SEND_ALL, this.playerName, this.downed, this.dead);
     }
 
     /// <summary>
-    /// dobi player kot odgovor z vsemi podatki
+    /// player dobi podatke od NetworkPlayerStats skripte ki mu se manjklajo za sinhronizacijo
     /// </summary>
     /// <param name="args"></param>
     public override void SendAll(RpcArgs args)

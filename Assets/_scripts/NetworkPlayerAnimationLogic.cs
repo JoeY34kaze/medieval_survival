@@ -242,21 +242,6 @@ public class NetworkPlayerAnimationLogic : NetworkPlayerAnimationBehavior
         anim.SetBool("crouched", b);
     }
 
-    /// <summary>
-    /// lokalni player v tej metodi poslje rpc serverju da nj mu da podatke o tej skripti
-    /// </summary>
-    internal void SendGetALL()
-    {
-        networkObject.SendRpc(RPC_GET_ALL, Receivers.Server);
-    }
-
-    public override void GetAll(RpcArgs args)
-    {
-        if (networkObject.IsServer) {
-            networkObject.SendRpc(args.Info.SendingPlayer, RPC_SEND_ALL, anim.GetInteger("combat_mode"), anim.GetBool("combat_blocking"), anim.GetBool("crouched"), anim.GetInteger("weapon_animation_class"), anim.GetBool("downed"));
-        }
-    }
-
     public override void SendAll(RpcArgs args)
     {
         if (args.Info.SendingPlayer.NetworkId == 0) {
@@ -265,6 +250,13 @@ public class NetworkPlayerAnimationLogic : NetworkPlayerAnimationBehavior
             anim.SetBool("crouched", args.GetNext<bool>());
             anim.SetInteger("weapon_animation_class", args.GetNext<int>());
             anim.SetBool("downed", args.GetNext<bool>());
+        }
+    }
+
+    public void ServerSendAll(NetworkingPlayer p) {
+        if (networkObject.IsServer)
+        {
+            networkObject.SendRpc(p, RPC_SEND_ALL, anim.GetInteger("combat_mode"), anim.GetBool("combat_blocking"), anim.GetBool("crouched"), anim.GetInteger("weapon_animation_class"), anim.GetBool("downed"));
         }
     }
 }

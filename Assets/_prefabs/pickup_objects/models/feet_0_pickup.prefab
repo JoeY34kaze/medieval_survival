@@ -15,6 +15,7 @@ GameObject:
   - component: {fileID: 8177615201710966632}
   - component: {fileID: 46859396937507536}
   - component: {fileID: 4942040832227175709}
+  - component: {fileID: 8339199411111715100}
   m_Layer: 11
   m_Name: feet_0_pickup
   m_TagString: Untagged
@@ -67,6 +68,7 @@ MonoBehaviour:
   i: {fileID: 11400000, guid: 96a3aa864f4799640a0c386af1d54947, type: 2}
   quantity: 1
   stackable: 0
+  original_material: {fileID: 0}
 --- !u!114 &6889269024969079552
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -139,3 +141,15 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 72.12988, y: 32.29411, z: 21.022507}
   m_Center: {x: 0.0000019073486, y: 2.341949, z: 9.006424}
+--- !u!114 &8339199411111715100
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 694931151034629152}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fdc48a4a539a6a742a7fe7d89733e0ac, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 

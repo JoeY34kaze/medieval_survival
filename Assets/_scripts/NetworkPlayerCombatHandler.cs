@@ -46,6 +46,8 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
         }
     }
 
+
+
     public int[] equipped_weapons;//weaponi k so u loadoutu od playerja
 
     public int index_of_currently_selected_weapon_from_equipped_weapons = 0;
@@ -606,17 +608,6 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
 
     }
 
-    internal void SendGetALL()
-    {
-        networkObject.SendRpc(RPC_GET_ALL, Receivers.Server);
-    }
-
-    public override void GetAll(RpcArgs args)
-    {
-        if (networkObject.IsServer) {
-            networkObject.SendRpc(args.Info.SendingPlayer, RPC_SEND_ALL, (int)this.combat_mode, this.blocking, this.index_of_currently_selected_weapon_from_equipped_weapons);
-        }
-    }
 
     public override void SendAll(RpcArgs args)
     {
@@ -625,6 +616,14 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
             this.blocking = args.GetNext<bool>();
             this.index_of_currently_selected_weapon_from_equipped_weapons = args.GetNext<int>();
             refresh_in_hand();
+        }
+    }
+
+    internal void ServerSendAll(NetworkingPlayer p)
+    {
+        if (networkObject.IsServer)
+        {
+            networkObject.SendRpc(p, RPC_SEND_ALL, (int)this.combat_mode, this.blocking, this.index_of_currently_selected_weapon_from_equipped_weapons);
         }
     }
 }

@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 274690716}
   - component: {fileID: 274690715}
   - component: {fileID: 274690714}
+  - component: {fileID: 2284377567212091590}
   m_Layer: 11
   m_Name: shield_steel_pickup
   m_TagString: Untagged
@@ -108,6 +109,18 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 0.65922886, y: 0.6257074, z: 0.1129899}
   m_Center: {x: -0.18898317, y: 0.23404777, z: 0.39534163}
+--- !u!114 &2284377567212091590
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 274690713}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fdc48a4a539a6a742a7fe7d89733e0ac, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &2497596019052330858
 GameObject:
   m_ObjectHideFlags: 0

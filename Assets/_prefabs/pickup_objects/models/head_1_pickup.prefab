@@ -15,6 +15,7 @@ GameObject:
   - component: {fileID: 7542170373393430913}
   - component: {fileID: 4486898387406757646}
   - component: {fileID: 4423134890687814819}
+  - component: {fileID: 3334358369726066669}
   m_Layer: 11
   m_Name: head_1_pickup
   m_TagString: Untagged
@@ -67,6 +68,7 @@ MonoBehaviour:
   i: {fileID: 11400000, guid: 6c76839e8306e2c478e99ec60215f572, type: 2}
   quantity: 1
   stackable: 0
+  original_material: {fileID: 0}
 --- !u!114 &8516558765865390965
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -139,3 +141,15 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 0.239411, y: 0.27884996, z: 0.30651802}
   m_Center: {x: 0.0015118271, y: 1.9398351, z: -0.0061619654}
+--- !u!114 &3334358369726066669
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6186035793259989556}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fdc48a4a539a6a742a7fe7d89733e0ac, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 

@@ -15,6 +15,7 @@ GameObject:
   - component: {fileID: 6578769114924819152}
   - component: {fileID: 736351408702290809}
   - component: {fileID: 1728892680198612933}
+  - component: {fileID: 4101179580395254181}
   m_Layer: 11
   m_Name: Mace_1_pickup
   m_TagString: Untagged
@@ -125,6 +126,7 @@ MonoBehaviour:
   i: {fileID: 11400000, guid: ec9ba1a80627d5b4295ab26233400721, type: 2}
   quantity: 1
   stackable: 0
+  original_material: {fileID: 0}
 --- !u!114 &1728892680198612933
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -139,3 +141,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   item_allows_interaction: 1
   item_waiting_for_destruction: 0
+--- !u!114 &4101179580395254181
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1939998621894806}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fdc48a4a539a6a742a7fe7d89733e0ac, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 

@@ -15,6 +15,7 @@ GameObject:
   - component: {fileID: 3161609424266415851}
   - component: {fileID: 4423354189138127493}
   - component: {fileID: 1380785991644753362}
+  - component: {fileID: 2593165981218678348}
   m_Layer: 11
   m_Name: shield_wood_pickup
   m_TagString: Untagged
@@ -112,6 +113,7 @@ MonoBehaviour:
   i: {fileID: 11400000, guid: f39e5ee31f03c14479e1ecc7cbfbfe9e, type: 2}
   quantity: 1
   stackable: 0
+  original_material: {fileID: 0}
 --- !u!114 &4423354189138127493
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -139,3 +141,15 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 1.63727, y: 1.63727, z: 0.15342343}
   m_Center: {x: 0, y: 0, z: -0.00019018725}
+--- !u!114 &2593165981218678348
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4970497545351922653}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fdc48a4a539a6a742a7fe7d89733e0ac, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 

@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 1339188503083759639}
   - component: {fileID: 6268253990856471906}
   - component: {fileID: 7282125089516517828}
+  - component: {fileID: 5188313998372470829}
   m_Layer: 11
   m_Name: Axe1_pickup
   m_TagString: Untagged
@@ -79,6 +80,7 @@ MonoBehaviour:
   i: {fileID: 11400000, guid: aefb49ea94e55ae4d91809916ca159cc, type: 2}
   quantity: 1
   stackable: 0
+  original_material: {fileID: 0}
 --- !u!114 &7282125089516517828
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -93,6 +95,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   item_allows_interaction: 1
   item_waiting_for_destruction: 0
+--- !u!114 &5188313998372470829
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 481997453617132335}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fdc48a4a539a6a742a7fe7d89733e0ac, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1311198107679707851
 GameObject:
   m_ObjectHideFlags: 0

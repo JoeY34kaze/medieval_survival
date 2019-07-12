@@ -34,6 +34,9 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
     public InventorySlotLoadout loadout_feet;
     public InventorySlotLoadout loadout_ranged;
     public InventorySlotLoadout loadout_weapon_0;
+
+
+
     public InventorySlotLoadout loadout_weapon_1;
     public InventorySlotLoadout loadout_shield;
 
@@ -992,6 +995,131 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         this.backpack_inventory.localPlayerBackpackToBackpackRequest(index1, index2);
     }
 
+
+    public void sendNetworkUpdateToPlayer(NetworkingPlayer p, bool inv, bool loadout) {
+        if (!networkObject.IsServer) { Debug.LogError("client poskusa posiljat networkupdate k je samo od serverja.."); return; }
+        if (inv)//no security risk since its always sent to owner
+        {
+            short i0, i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, i14, i15, i16, i17, i18, i19;
+
+
+
+            if (this.items[0] == null) i0 = -1;
+            else i0 = (short)this.items[0].id;
+
+            if (this.items[1] == null) i1 = -1;
+            else i1 = (short)this.items[1].id;
+
+            if (this.items[2] == null) i2 = -1;
+            else i2 = (short)this.items[2].id;
+
+            if (this.items[3] == null) i3 = -1;
+            else i3 = (short)this.items[3].id;
+
+            if (this.items[4] == null) i4 = -1;
+            else i4 = (short)this.items[4].id;
+
+            if (this.items[5] == null) i5 = -1;
+            else i5 = (short)this.items[5].id;
+
+            if (this.items[6] == null) i6 = -1;
+            else i6 = (short)this.items[6].id;
+
+            if (this.items[7] == null) i7 = -1;
+            else i7 = (short)this.items[7].id;
+
+            if (this.items[8] == null) i8 = -1;
+            else i8 = (short)this.items[8].id;
+
+            if (this.items[9] == null) i9 = -1;
+            else i9 = (short)this.items[9].id;
+
+            if (this.items[10] == null) i10 = -1;
+            else i10 = (short)this.items[10].id;
+
+            if (this.items[11] == null) i11 = -1;
+            else i11 = (short)this.items[11].id;
+
+            if (this.items[12] == null) i12 = -1;
+            else i12 = (short)this.items[12].id;
+
+            if (this.items[13] == null) i13 = -1;
+            else i13 = (short)this.items[13].id;
+
+            if (this.items[14] == null) i14 = -1;
+            else i14 = (short)this.items[14].id;
+
+            if (this.items[15] == null) i15 = -1;
+            else i15 = (short)this.items[15].id;
+
+            if (this.items[16] == null) i16 = -1;
+            else i16 = (short)this.items[16].id;
+
+            if (this.items[17] == null) i17 = -1;
+            else i17 = (short)this.items[17].id;
+
+            if (this.items[18] == null) i18 = -1;
+            else i18 = (short)this.items[18].id;
+
+            if (this.items[19] == null) i19 = -1;
+            else i19 = (short)this.items[19].id;
+
+            //poslat ownerju
+
+            //Debug.Log(" personal inventory rpc SEND: owner server id: " + GetComponent<NetworkPlayerStats>().server_id + " | networkId : " + networkObject.Owner.NetworkId);
+            networkObject.SendRpc(p,RPC_SEND_PERSONAL_INVENTORY_UPDATE,
+                i0,
+                i1,
+                i2,
+                i3,
+                i4,
+                i5,
+                i6,
+                i7,
+                i8,
+                i9,
+                i10,
+                i11,
+                i12,
+                i13,
+                i14,
+                i15,
+                i16,
+                i17,
+                i18,
+                i19);
+        }
+
+        if (loadout)
+        {
+            short l0 = -1, l1 = -1, l2 = -1, l3 = -1, l4 = -1, l5 = -1, l6 = -1, l7 = -1, l8 = -1, l9 = -1;
+
+            if (this.head != null) l0 = (short)this.head.id;
+            if (this.chest != null) l1 = (short)this.chest.id;
+            if (this.hands != null) l2 = (short)this.hands.id;
+            if (this.legs != null) l3 = (short)this.legs.id;
+            if (this.feet != null) l4 = (short)this.feet.id;
+
+            if (this.ranged != null) l5 = (short)this.ranged.id;//NE DELA - BO TREBA UPDEJTAT. ZAENKRAT SE UPORABLA GetComponent<NetworkPlayerCombatHandler>().update_equipped_weapons();   KER JE BLO ZE PREJ IMPLEMENTIRAN!!
+            if (this.weapon_0 != null) l6 = (short)this.weapon_0.id;//NE DELA - BO TREBA UPDEJTAT. ZAENKRAT SE UPORABLA GetComponent<NetworkPlayerCombatHandler>().update_equipped_weapons();   KER JE BLO ZE PREJ IMPLEMENTIRAN!!
+            if (this.weapon_1 != null) l7 = (short)this.weapon_1.id;//NE DELA - BO TREBA UPDEJTAT. ZAENKRAT SE UPORABLA GetComponent<NetworkPlayerCombatHandler>().update_equipped_weapons();   KER JE BLO ZE PREJ IMPLEMENTIRAN!!
+            if (this.shield != null) l8 = (short)this.shield.id;//NE DELA - BO TREBA UPDEJTAT. ZAENKRAT SE UPORABLA GetComponent<NetworkPlayerCombatHandler>().update_equipped_weapons();   KER JE BLO ZE PREJ IMPLEMENTIRAN!!
+
+            if (this.backpack != null) l9 = (short)this.backpack.id;
+
+            // GetComponent<NetworkPlayerCombatHandler>().send_network_update_weapons();//weapon trenutno equipan pa shield
+
+            //mogoce zamenjat z proximity. nevem ce sicer ker gear morjo vidt vsi da nebo prletu lokalno en nagex k je u resnic do konca pogearan
+            networkObject.SendRpc(p,RPC_SEND_LOADOUT_UPDATE,
+                l0, l1, l2, l3, l4, l5, l6, l7, l8, l9
+                );
+
+            if (onLoadoutChangedCallback != null)
+                onLoadoutChangedCallback.Invoke();
+        }
+    }
+
+
     public void sendNetworkUpdate(bool inv, bool loadout) //LOADOUT JE SAMO ZA UMA OBLEKE!!!!!!
     {
         if (!networkObject.IsServer) { Debug.LogError("client poskusa posiljat networkupdate k je samo od serverja.."); return; }
@@ -1495,19 +1623,12 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
             onLoadoutChangedCallback.Invoke();
     }
 
-    /// <summary>
-    /// localni player tukej poslje rpc serverju da nj mu poslje updejt stanja tega objekta
-    /// </summary>
-    internal void SendGetALL()
+    internal void ServerSendAll(NetworkingPlayer p)
     {
-        networkObject.SendRpc(RPC_GET_ALL, Receivers.Server);
-    }
-
-    public override void GetAll(RpcArgs args)
-    {
-        if (networkObject.IsServer) {
+        if (networkObject.IsServer)
+        {
             //naceloma je treba poslat samo args.info.sendingPlayer - optimize later
-            sendNetworkUpdate(false,true);
+            sendNetworkUpdateToPlayer(p, false, true);
         }
     }
 }

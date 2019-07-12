@@ -15,6 +15,7 @@ GameObject:
   - component: {fileID: 6521818459738564137}
   - component: {fileID: 6521818459738564134}
   - component: {fileID: 6521818459738564135}
+  - component: {fileID: 3371174573660398894}
   m_Layer: 11
   m_Name: head_2_pickup
   m_TagString: Untagged
@@ -125,6 +126,7 @@ MonoBehaviour:
   i: {fileID: 11400000, guid: b413be1c7f1ea0a49905b4675bffc467, type: 2}
   quantity: 1
   stackable: 0
+  original_material: {fileID: 0}
 --- !u!114 &6521818459738564135
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -139,3 +141,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   item_allows_interaction: 1
   item_waiting_for_destruction: 0
+--- !u!114 &3371174573660398894
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6521818459738564131}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fdc48a4a539a6a742a7fe7d89733e0ac, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 

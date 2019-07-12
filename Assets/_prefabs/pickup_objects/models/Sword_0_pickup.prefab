@@ -15,6 +15,7 @@ GameObject:
   - component: {fileID: 8315477535074730763}
   - component: {fileID: 1018491488475594786}
   - component: {fileID: 8742838695704053859}
+  - component: {fileID: 2379380834701450031}
   m_Layer: 11
   m_Name: Sword_0_pickup
   m_TagString: Untagged
@@ -139,3 +140,16 @@ MonoBehaviour:
   i: {fileID: 11400000, guid: 1e6680dd9cef3914fb0d6e58a50e7b5d, type: 2}
   quantity: 1
   stackable: 0
+  original_material: {fileID: 0}
+--- !u!114 &2379380834701450031
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1190600162460664}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fdc48a4a539a6a742a7fe7d89733e0ac, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 

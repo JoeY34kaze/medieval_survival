@@ -15,6 +15,7 @@ GameObject:
   - component: {fileID: 3896814374220688788}
   - component: {fileID: 3896814374220688791}
   - component: {fileID: 2194842480245215820}
+  - component: {fileID: 4468916588368737301}
   m_Layer: 11
   m_Name: feet_1_pickup
   m_TagString: Untagged
@@ -109,6 +110,7 @@ MonoBehaviour:
   i: {fileID: 11400000, guid: 5270ad2cf649dc945863405f222a06cd, type: 2}
   quantity: 1
   stackable: 0
+  original_material: {fileID: 0}
 --- !u!114 &3896814374220688791
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -139,3 +141,15 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 1
+--- !u!114 &4468916588368737301
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3896814374220688793}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fdc48a4a539a6a742a7fe7d89733e0ac, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 

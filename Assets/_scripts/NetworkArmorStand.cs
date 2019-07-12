@@ -12,18 +12,21 @@ public class NetworkArmorStand : NetworkArmorStandBehavior
 
 
     private DynamicCharacterAvatar avatar;
-    /*
-    public Collider collider_head;
-    public Collider collider_chest;
-    public Collider collider_hands;
-    public Collider collider_legs;
-    public Collider collider_feet;
 
-    public Collider collider_weapon_0;
-    public Collider collider_weapon_1;
-    public Collider collider_shield;
-    public Collider collider_ranged; //empty ker nimamo ranged weaponov
-    */
+
+
+    /*
+public Collider collider_head;
+public Collider collider_chest;
+public Collider collider_hands;
+public Collider collider_legs;
+public Collider collider_feet;
+
+public Collider collider_weapon_0;
+public Collider collider_weapon_1;
+public Collider collider_shield;
+public Collider collider_ranged; //empty ker nimamo ranged weaponov
+*/
 
 
 
@@ -879,5 +882,14 @@ public class NetworkArmorStand : NetworkArmorStandBehavior
             w.transform.localRotation = Quaternion.identity;
         }
 
+    }
+    /// <summary>
+    /// klice NetowrkStartupSynchronizer da poslje povatke o tem objektu playerju, ki se je ravnokar sconnectal na server
+    /// </summary>
+    /// <param name="p"></param>
+    internal void ServerSendAllToPlayer(NetworkingPlayer p)
+    {
+        if(networkObject.IsServer)
+         networkObject.SendRpc(p,RPC_ARMOR_STAND_REFRESH, this.head, this.chest, this.hands, this.legs, this.feet, this.weapon_0, this.weapon_1, this.shield, this.ranged);
     }
 }
