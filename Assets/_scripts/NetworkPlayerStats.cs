@@ -69,11 +69,13 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
     private bool AcceptedPlayerHandlingPending = false;
     public GameObject serverSide_guildManager;
     public panel_guild_handler panelGuildMemberHandler;
+    private Queue<NetworkingPlayer> disconnectedAndNotSavedPlayers;
 
     private void Start()
     {
         this.npi = GetComponent<NetworkPlayerInventory>();
         acceptedAndNotUpdatedPlayers = new Queue<NetworkingPlayer>();
+        this.disconnectedAndNotSavedPlayers = new Queue<NetworkingPlayer>();
     }
 
     protected override void NetworkStart()
@@ -170,13 +172,19 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
               this.health = 0;
               handle_0_hp();
           }*/
-        if(networkObject.IsServer)
-            if (this.acceptedAndNotUpdatedPlayers.Count > 0 && !AcceptedPlayerHandlingPending) {//updejtej playerja k je na vrhu vrste
+        if (networkObject.IsServer)
+        {
+            if (this.acceptedAndNotUpdatedPlayers.Count > 0 && !AcceptedPlayerHandlingPending)
+            {//updejtej playerja k je na vrhu vrste
                 this.AcceptedPlayerHandlingPending = true;
-                StartCoroutine(HandleAcceptedPlayersData(2f));
-            
+                StartCoroutine(HandleAcceptedPlayersData(3f));
+
             }
 
+            if (this.disconnectedAndNotSavedPlayers.Count > 0) {
+                    StartCoroutine(HandleDisconnectedPlayerSaveCoroutine());
+            }
+        }
     }
 
     public void OnSubmitModifiedGuildDataClick() {
@@ -1004,36 +1012,116 @@ napadenmu playerju da si poupdejta health. ta player pol ko si je updejtov healt
         yield return null;
     }
 
-    /// <summary>
-    /// metoda poisce podatke o tem playerju, ki se je ravnokar sconnectal na server. updejta objekt z temi podatki na serverju, server poskrbi za sinhronizacijo po omrezju
-    /// </summary>
-    /// <param name="name"></param>
-    private void ServerSendOnAcceptedData() {
+    
+    public IEnumerator HandleDisconnectedPlayerSaveCoroutine()
+    {
+        if (networkObject.IsServer)
+        {
+            
+            Debug.Log("This is executed from the main thread?");
+
+            NetworkingPlayer p = this.disconnectedAndNotSavedPlayers.Dequeue();
+            GameObject obj = FindByid(p.NetworkId);
+            if (obj != null)
+            {
+
+                Debug.Log("SERVER : player was Disconnected : " + p.NetworkId);
+                NetworkPlayerStats s = obj.GetComponent<NetworkPlayerStats>();
+
+                
+
+                if (s != null)
+                {
+                //shrani v PlayerManagerja
+                PlayerManager.Instance.SavePlayerState(s.GetPlayerState());
+
+                //ubije ta networkObjekt
+                s.kill();
+
+            }
+                else
+                {
+                    this.acceptedAndNotUpdatedPlayers.Enqueue(p);//ker je failal pohendlat ga mormo pohendlat ksnej enkat.
+                }
+            }
+            else
+            {
+                this.acceptedAndNotUpdatedPlayers.Enqueue(p);//ker je failal pohendlat ga mormo pohendlat ksnej enkat.
+            }
+            AcceptedPlayerHandlingPending = false;
+        }
+        yield return null;
+    }
+
+
+            
+
+
+
+/// <summary>
+/// metoda poisce podatke o tem playerju, ki se je ravnokar sconnectal na server. updejta objekt z temi podatki na serverju, server poskrbi za sinhronizacijo po omrezju
+/// </summary>
+/// <param name="name"></param>
+private void ServerSendOnAcceptedData() {
         PlayerManager.PlayerState saved_playerState = PlayerManager.Instance.PopPlayerState(Get_server_id());//hacky. PlayerManager bo treba dat na singleton..
 
 
         //serverju bo treba poslat drug data. vsi nesmejo dobit podatkov o inventoriju recimo. samo server ga mora.. bomo podatke k jih rab samo server met zapisal direkt pa je
-        networkObject.SendRpc(RPC_RECEIVE_PERSONAL_DATA_ON_CONNECTION,Receivers.All,
-            saved_playerState.position,
-            saved_playerState.rotation,
-            saved_playerState.playerName,
-            saved_playerState.dead,
-            saved_playerState.health,
-            saved_playerState.head.id,
-            saved_playerState.chest.id,
-            saved_playerState.hands.id,
-            saved_playerState.legs.id,
-            saved_playerState.feet.id,
-            saved_playerState.ranged.id,
-            saved_playerState.weapon_0.id,
-            saved_playerState.weapon_1.id,
-            saved_playerState.shield.id,
-            saved_playerState.backpack.id
-            );//nevem kaj nrdit z backpackom....
+        if (saved_playerState != null)
+        {
 
-        this.npi.items = saved_playerState.items;
+            int head = -1; if (saved_playerState.head != null) head = saved_playerState.head.id;
+            int chest = -1; if (saved_playerState.chest != null) chest = saved_playerState.chest.id;
+            int hands = -1; if (saved_playerState.hands != null) hands = saved_playerState.hands.id;
+            int legs = -1; if (saved_playerState.legs != null) legs = saved_playerState.legs.id;
+            int feet = -1; if (saved_playerState.feet != null) feet = saved_playerState.feet.id;
 
+            int ranged = -1; if (saved_playerState.ranged != null) ranged = saved_playerState.ranged.id;
+            int weapon0 = -1; if (saved_playerState.weapon_0 != null) weapon0 = saved_playerState.weapon_0.id;
+            int weapon1 = -1; if (saved_playerState.weapon_1 != null) weapon1 = saved_playerState.weapon_1.id;
+            int shield = -1; if (saved_playerState.shield != null) shield = saved_playerState.shield.id;
+            int backpack = -1; if (saved_playerState.backpack != null) backpack = saved_playerState.backpack.id;
 
+            networkObject.SendRpc(RPC_RECEIVE_PERSONAL_DATA_ON_CONNECTION, Receivers.All,
+                saved_playerState.position,
+                saved_playerState.rotation,
+                saved_playerState.playerName,
+                saved_playerState.dead,
+                saved_playerState.health,
+                head,
+                chest,
+                hands,
+                legs,
+                feet,
+                ranged,
+                weapon0,
+                weapon1,
+                shield,
+                backpack
+                );//nevem kaj nrdit z backpackom....
+
+            this.npi.items = saved_playerState.items;
+
+        }
+        else {//NOV PLAYER
+            networkObject.SendRpc(RPC_RECEIVE_PERSONAL_DATA_ON_CONNECTION, Receivers.All,
+                new Vector3(302, 43, 557),
+                transform.rotation,
+                "New Player",
+                false,
+                255f,
+                -1,
+                -1,
+                -1,
+                -1,
+                -1,
+                -1,
+                -1,
+                -1,
+                -1,
+                -1
+                );
+        }
         //ce ne dobimo nobenga guilda z updejta bomo ustvarli novga.
 
 
@@ -1160,10 +1248,14 @@ napadenmu playerju da si poupdejta health. ta player pol ko si je updejtov healt
     {
         if (networkObject.IsServer)
         {
-            Debug.Log("SERVER : player was Disconnected : " + player.NetworkId);
-
-            //shrani v PlayerManagerja
-            PlayerManager.Instance.SavePlayerState(FindByid(player.NetworkId).GetComponent<NetworkPlayerStats>().GetPlayerState());
+            Debug.Log("SERVER : player was Disconnected : " + player.NetworkId+"adding to queue for disconnection handling");
+            this.disconnectedAndNotSavedPlayers.Enqueue(player);
+            Debug.Log("SERVER : player was Disconnected : " + player.NetworkId + "adding to queue for disconnection handling");
+        }
+    }
+    public void kill() {
+        if (networkObject.IsServer) {
+            networkObject.Destroy();
         }
     }
 
