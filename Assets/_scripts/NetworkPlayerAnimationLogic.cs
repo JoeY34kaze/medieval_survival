@@ -90,7 +90,11 @@ public class NetworkPlayerAnimationLogic : NetworkPlayerAnimationBehavior
             //Debug.Log("Crouch!!");
             Update_Crouched_State_Owner();
         }
-
+        if (Input.GetButtonUp("Crouch"))
+        {
+            //Debug.Log("Crouch!!");
+            Update_Crouched_State_Owner();
+        }
 
     }
     /*

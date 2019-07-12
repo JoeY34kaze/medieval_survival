@@ -346,6 +346,28 @@ public class NetworkGuildManager : NetworkGuildManagerBehavior
         }
     }
 
+    internal void SetMemberPanel(bool v)
+    {
+        if (!v)
+        {
+            if (this.pgh == null) this.pgh = this.localStats.GetPGH();
+            bool next = !this.pgh.gameObject.activeSelf;
+            this.pgh.Clear();//pobrise prejsne memberje
+            this.pgh.gameObject.SetActive(!this.pgh.gameObject.activeSelf);
+            Cursor.lockState = CursorLockMode.Locked;
+            Cursor.visible = false;
+        }
+        else {
+            if (this.pgh == null) this.pgh = this.localStats.GetPGH();
+            bool next = !this.pgh.gameObject.activeSelf;
+            this.pgh.Clear();//pobrise prejsne memberje
+            this.pgh.gameObject.SetActive(!this.pgh.gameObject.activeSelf);
+            Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = true;
+            localGetMembersRequest();
+        }
+    }
+
     private void localGetMembersRequest()
     {
         networkObject.SendRpc(RPC_GET_GUILD_MEMBERS_REQUEST, Receivers.Server);

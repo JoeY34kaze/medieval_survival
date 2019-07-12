@@ -70,6 +70,7 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
     public GameObject serverSide_guildManager;
     public panel_guild_handler panelGuildMemberHandler;
     private Queue<NetworkingPlayer> disconnectedAndNotSavedPlayers;
+    private float original_capsule_collider_height;
 
     private void Start()
     {
@@ -117,6 +118,10 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
 
     public void Update()
     {
+        if (test) {
+            test = false;
+            networkObject.SendRpc(RPC_SET_HEALTH, Receivers.All, 0f, "coll_0");
+        }
 
         if (networkObject == null)
         {
@@ -153,11 +158,11 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
             handleEscapePressed();
         }
 
-        if (Input.GetButtonDown("Guild") && networkObject.IsOwner) {
+        if (Input.GetButtonDown("Guild") && networkObject.IsOwner && !this.guild_modification_panel.activeSelf) {
             //zapri inventorij, zapri guildModification, ??
 
             if (npi.panel_inventory.activeSelf) npi.panel_inventory.SetActive(false);
-            if (this.guild_modification_panel.activeSelf) this.guild_modification_panel.SetActive(false);
+            
             GameObject.FindGameObjectWithTag("GuildManager").GetComponent<NetworkGuildManager>().toggleMemberPanel();
         }
 
@@ -199,6 +204,7 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
         {
             showGuildModificationPanel(false, null);
             npi.panel_inventory.SetActive(false);//nevem kaj se nrdi z itemi lol..
+            GameObject.FindGameObjectWithTag("GuildManager").GetComponent<NetworkGuildManager>().SetMemberPanel(false);
             Cursor.lockState = CursorLockMode.Locked;
             Cursor.visible = false;
         }
@@ -433,13 +439,16 @@ napadenmu playerju da si poupdejta health. ta player pol ko si je updejtov healt
         if(GetComponent<NetworkPlayerInventory>().backpackSpot.GetComponentInChildren<NetworkBackpack>())
             GetComponent<NetworkPlayerInventory>().backpackSpot.GetComponentInChildren<NetworkBackpack>().local_server_BackpackUnequip();
 
-
+        GetComponent<Rigidbody>().useGravity = true;
+        this.original_capsule_collider_height=GetComponent<CapsuleCollider>().height;
+        GetComponent<CapsuleCollider>().height = 0;
     }
 
     public void handle_player_pickup() {
         this.downed = false;
         GetComponent<NetworkPlayerAnimationLogic>().handle_player_revived();// z tlele k smo smo dobil lahko samo pobiranje igralca. execution bomo klical z drugje in takrat damo na false
-
+        GetComponent<Rigidbody>().useGravity = false;
+        GetComponent<CapsuleCollider>().height = this.original_capsule_collider_height;
     }
 
 

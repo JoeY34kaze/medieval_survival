@@ -287,7 +287,7 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
         ExitGameInput();
         //CameraInput();
 
-        if (!lockMovement)
+        if (!lockMovement && !stats.downed)
         {
             MoveCharacter();
             SprintInput();
