@@ -92,8 +92,12 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
             transform.Find("canvas_player_overhead").gameObject.SetActive(false);
             FloatingTextController.Initialize();
             reticle_hit_controller.Initialize();
+            if (networkObject.IsServer) {
+                NetworkManager.Instance.Networker.playerAccepted += PlayerAccepted;
+                NetworkManager.Instance.Networker.playerDisconnected += OnPlayerDisconnected;
+            }
         }
-        NetworkManager.Instance.Networker.playerAccepted += PlayerAccepted;
+       
 
         StartCoroutine(RequestUpdateFromEveryoneDelayed(2));//pozene coroutine, ki vsem network objektom, kateri imajo karkoli da se rab rocno sinhronizirat na clientih, ki so se ravnokar povezal, poslje rpc s katerim signalizira, da nj mu poslejo nazaj podatke s katerimi bo nastavu trenutno stanje objekta.
         if (networkObject.IsServer && networkObject.IsOwner) {
@@ -106,7 +110,7 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
     public IEnumerator serverPlayerInitDelayer(float t) {
         yield return new WaitForSeconds(t);
 
-        ServerSendOnAcceptedData("SERVER");
+        ServerSendOnAcceptedData();
     }
 
     public void Update()
@@ -940,20 +944,7 @@ napadenmu playerju da si poupdejta health. ta player pol ko si je updejtov healt
         GetComponent<player_camera_handler>().lockCamera = b;
     }
 
-    /// <summary>
-    /// player poslov update ker se je ta objekt spawnov na serverju ( player) zaenkrat mu samo nastavi ime, ksnej bo treba dodat VSE. sleeper UMA bo bil in ko se player connecta dobi v tej metodi vse iteme, statse, pozicijo itd.
-    /// </summary>
-    /// <param name="args"></param>
-    public override void ReceivePersonalDataOnConnection(RpcArgs args)
-    {
-        
-        if (args.Info.SendingPlayer.NetworkId == 0) {
-            Debug.Log("Client: Updating player data with server side data.");
-            this.playerName = args.GetNext<string>();
-            updateDisplayName();
-            
-        }
-    }
+
 
     /// <summary>
     /// Fired when the player has been officially accepted by the server and now is the time you are able to start sending your messages to this player.
@@ -977,6 +968,11 @@ napadenmu playerju da si poupdejta health. ta player pol ko si je updejtov healt
         }
     }
 
+    /// <summary>
+    /// sprozi se, ko se player sconnecta na server. Ker je unity mal prizadet dela to tko da gre pogledat ce kter player caka v vrsti za updejt, vzame enga in klice metodo na njegovem objektu da nj poskrbi za dejanski updejt
+    /// </summary>
+    /// <param name="time_delay"></param>
+    /// <returns></returns>
     public IEnumerator HandleAcceptedPlayersData(float time_delay)
     {
         if (networkObject.IsServer)
@@ -991,7 +987,7 @@ napadenmu playerju da si poupdejta health. ta player pol ko si je updejtov healt
                 NetworkPlayerStats stats = obj.GetComponent<NetworkPlayerStats>();
                 if (stats != null)
                 {
-                    stats.ServerSendOnAcceptedData("JEBAC");
+                    stats.ServerSendOnAcceptedData();//this is wherer the amgic happens
 
                 }
                 else
@@ -1009,12 +1005,37 @@ napadenmu playerju da si poupdejta health. ta player pol ko si je updejtov healt
     }
 
     /// <summary>
-    /// metoda poslje vse podatke, ki jih player rabi dobit da prevzame mesto objekta, katerga je prej spialal. zaenkrat se ne dela ker je treba povezat se na steamworks da bomo s tam zahteval id na podlagi cesar autenticiramo istovetnost. ce najdemo id match mu poslemo data
+    /// metoda poisce podatke o tem playerju, ki se je ravnokar sconnectal na server. updejta objekt z temi podatki na serverju, server poskrbi za sinhronizacijo po omrezju
     /// </summary>
     /// <param name="name"></param>
-    private void ServerSendOnAcceptedData(string name) {
+    private void ServerSendOnAcceptedData() {
+        PlayerManager.PlayerState saved_playerState = PlayerManager.Instance.PopPlayerState(Get_server_id());//hacky. PlayerManager bo treba dat na singleton..
 
-        networkObject.SendRpc(RPC_RECEIVE_PERSONAL_DATA_ON_CONNECTION, Receivers.All,name); //stats variables pa take fore
+
+        //serverju bo treba poslat drug data. vsi nesmejo dobit podatkov o inventoriju recimo. samo server ga mora.. bomo podatke k jih rab samo server met zapisal direkt pa je
+        networkObject.SendRpc(RPC_RECEIVE_PERSONAL_DATA_ON_CONNECTION,Receivers.All,
+            saved_playerState.position,
+            saved_playerState.rotation,
+            saved_playerState.playerName,
+            saved_playerState.dead,
+            saved_playerState.health,
+            saved_playerState.head.id,
+            saved_playerState.chest.id,
+            saved_playerState.hands.id,
+            saved_playerState.legs.id,
+            saved_playerState.feet.id,
+            saved_playerState.ranged.id,
+            saved_playerState.weapon_0.id,
+            saved_playerState.weapon_1.id,
+            saved_playerState.shield.id,
+            saved_playerState.backpack.id
+            );//nevem kaj nrdit z backpackom....
+
+        this.npi.items = saved_playerState.items;
+
+
+        //ce ne dobimo nobenga guilda z updejta bomo ustvarli novga.
+
 
         NetworkGuildManager.Guild playersGuild = null;
         //players_guild = NetworkGuildManager.findPlayersGuild(this.GetSteamworksID());
@@ -1023,6 +1044,44 @@ napadenmu playerju da si poupdejta health. ta player pol ko si je updejtov healt
             if (playersGuild != null) {
                 SendGuildUpdate(playersGuild.name, playersGuild.tag, playersGuild.color, playersGuild.image);
             }
+        }
+    }
+
+    /// <summary>
+    /// sprozi se na vsah clientih za ta objekt. poslje server vsem podatke o tem objektu. ta objekt se je ravnokar REconnectal na server in to je bilo njegovo prejsnje stanje.
+    /// </summary>
+    /// <param name="args"></param>
+    public override void ReceivePersonalDataOnConnection(RpcArgs args)
+    {
+
+        if (args.Info.SendingPlayer.NetworkId == 0)
+        {
+            Debug.Log("Client: Updating player data with server side data.");
+
+            transform.position = args.GetNext<Vector3>();
+            transform.rotation = args.GetNext<Quaternion>();
+            this.playerName = args.GetNext<string>();
+            this.dead = args.GetNext<bool>();
+            this.health = args.GetNext<float>();
+
+            this.npi.SetLoadoutItem(Mapper.instance.getItemById(args.GetNext<int>()), 0);
+            this.npi.SetLoadoutItem(Mapper.instance.getItemById(args.GetNext<int>()), 0);
+            this.npi.SetLoadoutItem(Mapper.instance.getItemById(args.GetNext<int>()), 0);
+            this.npi.SetLoadoutItem(Mapper.instance.getItemById(args.GetNext<int>()), 0);
+            this.npi.SetLoadoutItem(Mapper.instance.getItemById(args.GetNext<int>()), 0);
+
+            this.npi.SetLoadoutItem(Mapper.instance.getItemById(args.GetNext<int>()), 0);
+            this.npi.SetLoadoutItem(Mapper.instance.getItemById(args.GetNext<int>()), 0);
+            this.npi.SetLoadoutItem(Mapper.instance.getItemById(args.GetNext<int>()), 1);//WEAPON 1
+            this.npi.SetLoadoutItem(Mapper.instance.getItemById(args.GetNext<int>()), 0);
+            this.npi.SetLoadoutItem(Mapper.instance.getItemById(args.GetNext<int>()), 0);//Backpack??
+
+
+
+            updateDisplayName();
+            this.npi.refresh_UMA_equipped_gear();
+            GetComponent<NetworkPlayerCombatHandler>().update_equipped_weapons();
+
         }
     }
 
@@ -1056,6 +1115,10 @@ napadenmu playerju da si poupdejta health. ta player pol ko si je updejtov healt
         }
     }
 
+    /// <summary>
+    /// tole je narobe se mi zdi. mogl bi poslat vsem ne samo njemu
+    /// </summary>
+    /// <param name="p"></param>
     public void ServerSendAll(NetworkingPlayer p) {
         if (!networkObject.IsServer) return;
 
@@ -1085,5 +1148,53 @@ napadenmu playerju da si poupdejta health. ta player pol ko si je updejtov healt
     {
         if (args.Info.SendingPlayer.NetworkId == 0)
             this.health = args.GetNext<float>();
+    }
+
+
+    /// <summary>
+    /// Fired when the player has been officially accepted by the server and now is the time you are able to start sending your messages to this player.
+    /// </summary>
+    /// <param name="player"></param>
+    /// <param name="sender"></param>
+    private void OnPlayerDisconnected(NetworkingPlayer player, NetWorker sender)//nevem tocn kaj nam networker pomaga tbh..
+    {
+        if (networkObject.IsServer)
+        {
+            Debug.Log("SERVER : player was Disconnected : " + player.NetworkId);
+
+            //shrani v PlayerManagerja
+            PlayerManager.Instance.SavePlayerState(FindByid(player.NetworkId).GetComponent<NetworkPlayerStats>().GetPlayerState());
+        }
+    }
+
+    /// <summary>
+    /// nrdi objekt playerstate k se shrani v playermanagerja in se poslje ob reconnectu za updejt njegovega stanja
+    /// </summary>
+    /// <returns></returns>
+    public PlayerManager.PlayerState GetPlayerState() {
+        PlayerManager.PlayerState ps = new PlayerManager.PlayerState(Get_server_id());
+
+        //nafilamo podatke
+        Debug.Log("GetPlayerState()- creating data.");
+        ps.position = transform.position;
+        ps.rotation = transform.rotation;
+        ps.playerName = playerName;
+        ps.dead = dead;
+        ps.health = health;
+
+
+        ps.items = npi.items;
+        ps.head=npi.getHeadItem();
+        ps.chest = npi.getChestItem();
+        ps.hands = npi.getHandsItem();
+        ps.legs = npi.getLegsItem();
+        ps.feet = npi.getFeetItem();
+        ps.ranged = npi.getRangedItem();
+        ps.weapon_0 = npi.getWeapon_0Item();
+        ps.weapon_1 = npi.getWeapon_1Item();
+        ps.shield = npi.getShieldItem();
+        ps.backpack = npi.getBackpackItem();
+
+        return ps;
     }
 }

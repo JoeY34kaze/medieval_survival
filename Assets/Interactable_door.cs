@@ -15,9 +15,18 @@ public class Interactable_door : Interactable
     //public uint owner_guild_id = 0;//0 pomen da so od serverja in loh vsak odpre. mesta pa tko
 
     private Animator anim;
+
+    private Material glow;
+    public Material original_material;
+    private MeshRenderer renderer;
     private void Start()
     {
         this.anim = GetComponent<Animator>();
+        if (this.renderer == null) this.renderer = GetComponent<MeshRenderer>();
+        if (this.renderer == null) this.renderer = GetComponentInChildren<MeshRenderer>();
+
+        this.glow = (Material)Resources.Load("Glow_green", typeof(Material));
+        this.original_material = this.renderer.material;
     }
 
     protected override void NetworkStart()
@@ -105,5 +114,27 @@ public class Interactable_door : Interactable
                 OpenDoor();
             }
         }
+    }
+
+    public override void setMaterialGlow()
+    {
+        if (this.renderer == null) this.renderer = GetComponent<MeshRenderer>();
+        if (this.renderer == null) this.renderer = GetComponentInChildren<MeshRenderer>();
+
+        if (this.renderer != null)
+            this.renderer.material = this.glow;
+        else {
+            this.renderer = GetComponent<MeshRenderer>();
+            if (this.renderer == null) this.renderer = GetComponentInChildren<MeshRenderer>();
+            if (this.renderer != null)
+                this.renderer.material = this.glow;
+        }
+    }
+
+    public override void resetMaterial()
+    {
+        if (this.renderer == null) this.renderer = GetComponent<MeshRenderer>();
+        if (this.renderer == null) this.renderer = GetComponentInChildren<MeshRenderer>();
+        this.renderer.material = this.original_material;
     }
 }

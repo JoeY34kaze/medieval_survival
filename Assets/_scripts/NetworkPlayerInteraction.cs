@@ -110,7 +110,7 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
 
                          */
 
-                        if (interactable is ItemPickup && interactable != this.recent_interactable)
+                        if ((interactable is ItemPickup || interactable is Interactable_door) && interactable != this.recent_interactable)
                         {
                             interactable.setMaterialGlow();
                             if (this.recent_interactable != null)

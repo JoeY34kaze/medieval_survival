@@ -93,7 +93,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
     }
 
 
-    void refresh_UMA_equipped_gear()
+    public void refresh_UMA_equipped_gear()
     {
         if (avatar == null) return;
             avatar.ClearSlots();
@@ -269,7 +269,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
     {
         return this.ranged;
     }
-    internal Item getBackpack() {
+    internal Item getBackpackItem() {
         return this.backpack;
     }
 
