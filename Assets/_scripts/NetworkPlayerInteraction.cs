@@ -248,6 +248,7 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
     internal void local_player_interaction_execution_request(GameObject target)
     {
         target.GetComponent<Interactable_player>().local_player_execution_request(stats.Get_server_id());
+        GetComponent<NetworkPlayerAnimationLogic>().BeginExecution();//ubistvu ze zacne animacijo
     }
 
     internal void local_player_interaction_tieup_request(GameObject target)

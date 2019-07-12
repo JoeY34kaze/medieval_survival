@@ -72,8 +72,8 @@ public class Interactable_player : Interactable
         throw new NotImplementedException();
     }
 
-    internal void local_player_execution_request(uint server_id)
+    internal void local_player_execution_request(uint server_id_agresorja)
     {
-        throw new NotImplementedException();
+        GetComponent<NetworkPlayerStats>().localPlayerExecutionRequest(server_id_agresorja);
     }
 }

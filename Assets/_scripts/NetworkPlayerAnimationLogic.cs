@@ -3,6 +3,7 @@ using UnityEngine;
 using BeardedManStudios.Forge.Networking.Generated;
 using BeardedManStudios.Forge.Networking;
 using System;
+using BeardedManStudios.Forge.Networking.Unity;
 
 public class NetworkPlayerAnimationLogic : NetworkPlayerAnimationBehavior
 {
@@ -262,5 +263,28 @@ public class NetworkPlayerAnimationLogic : NetworkPlayerAnimationBehavior
         {
             networkObject.SendRpc(p, RPC_SEND_ALL, anim.GetInteger("combat_mode"), anim.GetBool("combat_blocking"), anim.GetBool("crouched"), anim.GetInteger("weapon_animation_class"), anim.GetBool("downed"));
         }
+    }
+
+    public void BeginExecution() {
+        //Debug.Log(NetworkManager.Instance.Networker.Me.NetworkId + " " + networkObject.Owner.NetworkId);
+        networkObject.SendRpc(RPC_NETWORK_EXECUTION_UPDATE, Receivers.All);
+    }
+
+    public override void NetworkExecutionUpdate(RpcArgs args)
+    {
+        //if (args.Info.SendingPlayer.NetworkId == networkObject.Owner.NetworkId)
+        //{
+            anim.SetTrigger("execution");
+            anim.SetInteger("combat_mode", 0);//duplicated
+            anim.SetLayerWeight(1, 0);//combat layer
+        //}
+    }
+
+    /// <summary>
+    /// klice se na vseh, resetira tezo animacijske maske za combat
+    /// </summary>
+    public void ResetWeight() {
+        //anim.SetInteger("combat_mode", 0);//duplicated
+        anim.SetLayerWeight(1, 1);//combat layer
     }
 }

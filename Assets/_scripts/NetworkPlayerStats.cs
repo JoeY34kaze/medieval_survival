@@ -72,6 +72,8 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
     private Queue<NetworkingPlayer> disconnectedAndNotSavedPlayers;
     private float original_capsule_collider_height;
 
+    private NetworkPlayerStats executionTarget;
+
     private void Start()
     {
         this.npi = GetComponent<NetworkPlayerInventory>();
@@ -109,6 +111,8 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
             StartCoroutine(serverPlayerInitDelayer(1));
         }
     }
+
+
 
     public IEnumerator serverPlayerInitDelayer(float t) {
         yield return new WaitForSeconds(t);
@@ -510,6 +514,9 @@ napadenmu playerju da si poupdejta health. ta player pol ko si je updejtov healt
         this.dead = false;
 
         local_setDrawingPlayer(true);
+
+        GetComponent<Rigidbody>().useGravity = false;
+        GetComponent<CapsuleCollider>().height = this.original_capsule_collider_height;
 
         if (networkObject.IsServer)//server nastima vsem health
             set_player_health(max_health/2, Get_server_id());
@@ -1297,5 +1304,28 @@ private void ServerSendOnAcceptedData() {
         ps.backpack = npi.getBackpackItem();
 
         return ps;
+    }
+
+    internal void localPlayerExecutionRequest(uint server_id_agresorja)
+    {
+        networkObject.SendRpc(RPC_EXECUTION_REQUEST, Receivers.Server, server_id_agresorja, 1f);//1f je cas animacije. naceloma bi mogl dat animator.getcurrentAnimation.getLengthOfCurrentAnimation al pa nekej nevem kaj je..
+    }
+
+    public override void ExecutionRequest(RpcArgs args)
+    {
+        if (!networkObject.IsServer) return;
+        //nek security check i guess
+        GameObject passive = gameObject;
+        GameObject agressor = FindByid(args.GetNext<uint>());
+        float time_delay = args.GetNext<float>();
+
+        if (Vector3.Distance(passive.transform.position, agressor.transform.position) < 2f && this.downed) {
+
+            StartCoroutine(ExecutionDelayed(time_delay));
+        }
+    }
+    private IEnumerator ExecutionDelayed(float t) {
+        yield return new WaitForSeconds(t);
+        handle_death_player(Get_server_id());
     }
 }
