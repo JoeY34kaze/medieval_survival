@@ -43,6 +43,9 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
 
     public InventorySlotLoadout loadout_backpack;//ni loadout item ubistvu. logika je cist locena ker je prioriteta da se backpack lahko cimlazje fukne dol. tle ga mam samo za izrisovanje v inventorij panel
 
+    public InventorySlotBar[] bar_slots;
+    public Item[] bar_items;
+
     private Item head;
     private Item chest;
 
@@ -66,7 +69,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
     private Camera c;
     public Transform backpackSpot; //tukaj se parenta backpack
     public backpack_local_panel_handler backpackPanel;
-
+    public panel_bar_handler barPanel;
     private void Start()
     {
         this.avatar = GetComponent<DynamicCharacterAvatar>();
@@ -301,7 +304,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
                 else return false;
             }
             else {//nikjer ni blo placa. rust u tem primeru spawna item nazaj, ampak mi lahko recemo simpl da ga ne pobere.
-                return false;
+                
             }
         }
 
@@ -763,6 +766,15 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
             loadout_backpack.AddItem(this.backpack);
         else
             loadout_backpack.ClearSlot();
+
+        //Update bar slots
+
+        for (int i = 0; i < this.bar_slots.Length; i++) { 
+            if (this.bar_items[i] != null)
+                bar_slots[i].AddItem(this.bar_items[i]);
+            else
+                bar_slots[i].ClearSlot();
+        }
     }
 
 
@@ -1189,10 +1201,46 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
             if (this.items[19] == null) i19 = -1;
             else i19 = (short)this.items[19].id;
 
+            //posljemo tud barData ownerju!!
+            short b0, b1, b2, b3, b4, b5, b6, b7, b8, b9;
+
+            if (this.bar_items[0] == null) b0 = -1;
+            else b0 = (short)this.bar_items[0].id;
+
+            if (this.bar_items[1] == null) b1 = -1;
+            else b1 = (short)this.bar_items[1].id;
+
+            if (this.bar_items[1] == null) b1 = -1;
+            else b1 = (short)this.bar_items[1].id;
+
+            if (this.bar_items[2] == null) b2 = -1;
+            else b2 = (short)this.bar_items[2].id;
+
+            if (this.bar_items[3] == null) b3 = -1;
+            else b3 = (short)this.bar_items[3].id;
+
+            if (this.bar_items[4] == null) b4 = -1;
+            else b4 = (short)this.bar_items[4].id;
+
+            if (this.bar_items[5] == null) b5 = -1;
+            else b5 = (short)this.bar_items[5].id;
+
+            if (this.bar_items[6] == null) b6 = -1;
+            else b6 = (short)this.bar_items[6].id;
+
+            if (this.bar_items[7] == null) b7 = -1;
+            else b7 = (short)this.bar_items[7].id;
+
+            if (this.bar_items[8] == null) b8 = -1;
+            else b8 = (short)this.bar_items[8].id;
+
+            if (this.bar_items[9] == null) b9 = -1;
+            else b9 = (short)this.bar_items[9].id;
+
             //poslat ownerju
 
             //Debug.Log(" personal inventory rpc SEND: owner server id: " + GetComponent<NetworkPlayerStats>().server_id + " | networkId : " + networkObject.Owner.NetworkId);
-            networkObject.SendRpc(RPC_SEND_PERSONAL_INVENTORY_UPDATE,Receivers.Owner,
+            networkObject.SendRpc(RPC_SEND_PERSONAL_INVENTORY_UPDATE, Receivers.Owner,
                 i0,
                 i1,
                 i2,
@@ -1212,7 +1260,17 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
                 i16,
                 i17,
                 i18,
-                i19);
+                i19,
+                b0,
+                b1,
+                b2,
+                b3,
+                b4,
+                b5,
+                b6,
+                b7,
+                b8,
+                b9);
         }
 
         if (loadout)
@@ -1252,12 +1310,19 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
 
 
 
-
+        //inventory
         for (int i = 0; i < 20; i++)
         {
             short item_id = args.GetNext<short>();
             this.items[i] = Mapper.instance.getItemById((int)item_id);
         }
+        //bar
+        for (int i = 0; i < 10; i++)
+        {
+            short item_id = args.GetNext<short>();
+            this.bar_items[i] = Mapper.instance.getItemById((int)item_id);
+        }
+
         if (onLoadoutChangedCallback != null)
             onLoadoutChangedCallback.Invoke();
         if (onItemChangedCallback != null)
