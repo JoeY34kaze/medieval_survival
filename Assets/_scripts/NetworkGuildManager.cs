@@ -31,6 +31,28 @@ public class NetworkGuildManager : NetworkGuildManagerBehavior
 
     #endregion
 
+    #region SINGLETON PATTERN
+    public static NetworkGuildManager _instance;
+    public static NetworkGuildManager Instance
+    {
+        get
+        {
+            if (_instance == null)
+            {
+                _instance = GameObject.FindObjectOfType<NetworkGuildManager>();
+
+                if (_instance == null)
+                {
+                    NetworkGuildManagerBehavior beh = NetworkManager.Instance.InstantiateNetworkGuildManager();
+                    _instance = beh.gameObject.GetComponent<NetworkGuildManager>();
+                }
+            }
+
+            return _instance;
+        }
+    }
+    #endregion
+
     #region UNITY_METHODS
     protected override void NetworkStart()
     {
@@ -127,6 +149,11 @@ public class NetworkGuildManager : NetworkGuildManagerBehavior
         }
     }
 
+    internal void Init()
+    {
+        
+    }
+
     #endregion
 
     #region MODIFY_GUILD
@@ -189,7 +216,7 @@ public class NetworkGuildManager : NetworkGuildManagerBehavior
 
 
             Guild g = null;
-            if ((g = findPlayersGuild(requester)) != null)
+            if ((g = getGuildFromNetworkId(requester)) != null)
             {
                 if (g.guildMaster == requester)
                 {
@@ -394,7 +421,7 @@ public class NetworkGuildManager : NetworkGuildManagerBehavior
         return g;
     }
 
-    public Guild findPlayersGuild(uint p) {
+    public Guild getGuildFromNetworkId(uint p) {
         if (this.guilds != null)
             if(this.guilds.Count>0)
                 foreach (Guild g in this.guilds) {
@@ -630,6 +657,19 @@ public class NetworkGuildManager : NetworkGuildManagerBehavior
             }
         }
 
+    }
+
+    internal void RefreshPlayersNetworkId(uint previousNetworkId, uint v)
+    {
+        Guild g = getGuildFromNetworkId(previousNetworkId);
+        for(int i = 0; i < g.members.Count; i++) { 
+            if (g.members[i] == previousNetworkId) g.members[i] = v;
+            break;
+        }
+
+        if (g.guildMaster == previousNetworkId) g.guildMaster = v;
+
+        sendGuildModifiedResponse(g);
     }
 
     #endregion

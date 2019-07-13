@@ -90,7 +90,7 @@ public class PlayerManager : MonoBehaviour
         //umaData
 
         //guild ??
-
+        public NetworkGuildManager.Guild guild;
         //team
         //public uint[] team;
         //??

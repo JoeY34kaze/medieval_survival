@@ -106,8 +106,7 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
 
         StartCoroutine(RequestUpdateFromEveryoneDelayed(2));//pozene coroutine, ki vsem network objektom, kateri imajo karkoli da se rab rocno sinhronizirat na clientih, ki so se ravnokar povezal, poslje rpc s katerim signalizira, da nj mu poslejo nazaj podatke s katerimi bo nastavu trenutno stanje objekta.
         if (networkObject.IsServer && networkObject.IsOwner) {
-            NetworkGuildManagerBehavior beh = NetworkManager.Instance.InstantiateNetworkGuildManager();
-            this.serverSide_guildManager = beh.gameObject;
+            NetworkGuildManager.Instance.Init();
             StartCoroutine(serverPlayerInitDelayer(1));
         }
     }
@@ -1117,6 +1116,8 @@ private void ServerSendOnAcceptedData() {
                 );//nevem kaj nrdit z backpackom....
 
             this.npi.items = saved_playerState.items;
+            NetworkGuildManager.Instance.RefreshPlayersNetworkId(saved_playerState.previousNetworkId,Get_server_id());
+
 
         }
         else {//NOV PLAYER
@@ -1141,7 +1142,7 @@ private void ServerSendOnAcceptedData() {
         //ce ne dobimo nobenga guilda z updejta bomo ustvarli novga.
 
 
-        NetworkGuildManager.Guild playersGuild = null;
+        NetworkGuildManager.Guild playersGuild = NetworkGuildManager.Instance.getGuildFromNetworkId(Get_server_id());
         //players_guild = NetworkGuildManager.findPlayersGuild(this.GetSteamworksID());
         if (playersGuild == null) {
             playersGuild = GameObject.FindGameObjectWithTag("GuildManager").GetComponent<NetworkGuildManager>().CreateGuild(networkObject.Owner.NetworkId, networkObject.Owner.NetworkId + "'s clan", networkObject.Owner.NetworkId + "-S", Color.gray, new byte[25]);
@@ -1303,6 +1304,7 @@ private void ServerSendOnAcceptedData() {
         ps.shield = npi.getShieldItem();
         ps.backpack = npi.getBackpackItem();
 
+        ps.guild = NetworkGuildManager.Instance.getGuildFromNetworkId(Get_server_id());
         return ps;
     }
 
