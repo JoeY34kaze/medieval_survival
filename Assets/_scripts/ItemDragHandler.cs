@@ -16,16 +16,18 @@ public class ItemDragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, I
         //if (transform.root.GetComponent<NetworkPlayerInventory>().draggedItemParent == null)
         npi.draggedItemParent = transform.parent;
         npi.draggedParent_sibling_index = transform.GetSiblingIndex();
+
         if (transform.GetComponent<InventorySlot>() is InventorySlotPersonal) {
             transform.SetAsFirstSibling();
+            
         }
         //hierarhijo zrihtat ker je unity ui prizadet
         transform.parent.parent.SetAsFirstSibling();//tole menja loadout panel in inventory panel. 
-
+        transform.parent.parent.parent.SetAsFirstSibling();
         //pofiksat hierarhijo se za personal inventorij in loadout ker sicer ne detecta ker je unity ui prizadet
         transform.parent.SetAsFirstSibling();
 
-        //Debug.Log("start drag " + transform.parent.name);
+        Debug.Log("start drag " + transform.parent.name + " | " + npi.draggedItemParent.name);
     }
 
     public void OnDrag(PointerEventData eventData)
@@ -36,7 +38,7 @@ public class ItemDragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, I
 
     public void OnEndDrag(PointerEventData eventData)
     {
-        //Debug.Log("end drag "+transform.parent.name);
+        Debug.Log("end drag -"+transform.parent.name);
         if (transform.GetComponent<InventorySlot>() is InventorySlotPersonal)
         {
             transform.SetSiblingIndex(npi.draggedParent_sibling_index);

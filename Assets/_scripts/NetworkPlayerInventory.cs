@@ -13,6 +13,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
     public Transform draggedItemParent = null;//mrde bolsa resitev obstaja ker nemaram statikov uporablat ampak lej. dela
     internal NetworkBackpack backpack_inventory;
     public int draggedParent_sibling_index = -1;
+    public int draggedParent_parent_sibling_index = -1;
 
     public int space = 20; // kao space inventorija
     public Item[] items = new Item[20]; // seznam itemov, ubistvu inventorij
@@ -80,6 +81,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         items = new Item[slots.Length];
         this.combatHandler = GetComponent<NetworkPlayerCombatHandler>();
     }
+
 
 
     protected override void NetworkStart()
@@ -537,6 +539,30 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
                 break;
         }
         return ret;
+    }
+
+    /// <summary>
+    /// povozi kar je blo prej not
+    /// </summary>
+    /// <param name="b"></param>
+    /// <param name="bar_index"></param>
+    internal void setBarItem(Item b, int bar_index)
+    {
+        if (bar_index < this.bar_items.Length)
+        {
+            this.bar_items[bar_index]=b;
+        }
+    }
+
+    internal Item popBarItem(int bar_index)
+    {
+        if (bar_index < this.bar_items.Length) {
+            Item r = this.bar_items[bar_index];
+            this.bar_items[bar_index] = null;
+            return r;
+        }
+        Debug.LogError("Size mismatch");
+        return null;
     }
 
     void Update()
@@ -1717,4 +1743,94 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         }
     }
     #endregion
+
+    internal void handleBackpackToBar(RectTransform invSlot)
+    {
+        backpack_inventory.localPlayerBackpackToBarRequest(getIndexFromName(this.draggedItemParent.name), getIndexFromName(invSlot.name));
+
+    }
+
+    internal void handleBarToBackpack(RectTransform invSlot)
+    {
+        backpack_inventory.localPlayerBarToBackpackRequest(getIndexFromName(invSlot.name), getIndexFromName(this.draggedItemParent.name));
+    }
+
+
+    internal void handleBarToBar(RectTransform invSlot)
+    {
+        if (networkObject.IsOwner)
+            networkObject.SendRpc(RPC_BAR_TO_BAR_REQUEST, Receivers.Server, getIndexFromName(invSlot.name), getIndexFromName(this.draggedItemParent.name));
+    }
+
+    internal void handleBarToPersonal(RectTransform invSlot)
+    {
+        if (networkObject.IsOwner)
+            networkObject.SendRpc(RPC_BAR_TO_PERSONAL_REQUEST, Receivers.Server, getIndexFromName(invSlot.name), getIndexFromName(this.draggedItemParent.name));
+    }
+
+    internal void handlePersonalToBar(RectTransform invSlot)
+    {
+        if (networkObject.IsOwner)
+            networkObject.SendRpc(RPC_PERSONAL_TO_BAR_REQUEST, Receivers.Server, getIndexFromName(invSlot.name), getIndexFromName(this.draggedItemParent.name));
+    }
+
+    public override void PersonalToBarRequest(RpcArgs args)//bar, personal
+    {
+        if (networkObject.IsServer && args.Info.SendingPlayer.NetworkId == networkObject.Owner.NetworkId) {
+            int bar_index = args.GetNext<int>();
+            int inv_index = args.GetNext<int>();
+
+            if (this.items[inv_index] != null)
+            {
+                if (NetworkBackpack.itemAllowedOnBar(this.items[inv_index].type))
+                {
+                    Item b = popPersonalItem(inv_index);
+                    Item i = popBarItem(bar_index);
+
+                    setBarItem(b, bar_index);
+                    setPersonalItem(i,inv_index);
+
+                    sendNetworkUpdate(true, false);
+                }//za inventorij/bar
+                else
+                {
+                    Debug.LogError("Item not allowed on bar");
+                }
+            }
+        }
+    }
+
+    public override void BarToPersonalRequest(RpcArgs args)//bar, personal
+    {
+        if (networkObject.IsServer && args.Info.SendingPlayer.NetworkId == networkObject.Owner.NetworkId)
+        {
+            int inv_index = args.GetNext<int>();
+            int bar_index = args.GetNext<int>();
+            if (this.bar_items[bar_index] != null)
+            {
+                    Item b = popPersonalItem(inv_index);
+                    Item i = popBarItem(bar_index);
+                    setBarItem(b, bar_index);
+                    setPersonalItem(i, inv_index);
+                    sendNetworkUpdate(true, false);
+            }
+        }
+
+    }
+
+    public override void BarToBarRequest(RpcArgs args)
+    {
+        if (networkObject.IsServer && args.Info.SendingPlayer.NetworkId == networkObject.Owner.NetworkId)
+        {
+            int a = args.GetNext<int>();
+            int b = args.GetNext<int>();
+
+            Item x = popBarItem(a);
+            setBarItem(popBarItem(b),a);
+            setBarItem(x, b);
+            sendNetworkUpdate(true, false);
+
+        }
+
+    }
 }

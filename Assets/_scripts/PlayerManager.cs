@@ -52,6 +52,7 @@ public class PlayerManager : MonoBehaviour
     /// <param name="networkId"></param>
     /// <returns></returns>
     public PlayerState PopPlayerState(uint networkId) {
+        if(_playerStates!=null)
         if (_playerStates.Count > 0) {
             PlayerState r = _playerStates[0];
             _playerStates.Remove(r);

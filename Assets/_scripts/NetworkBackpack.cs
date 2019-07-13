@@ -349,6 +349,7 @@ public class NetworkBackpack : NetworkBackpackBehavior
         }
     }
 
+
     internal void localPlayerRequestBackpackToLoadout(int index_backpack)//za obratno vbom naredu nov rpc ker bom poslov string k j eitem type
     {
         if (networkObject.IsOwner) {
@@ -375,5 +376,75 @@ public class NetworkBackpack : NetworkBackpackBehavior
         if (networkObject.IsOwner) {
             networkObject.SendRpc(RPC_BACKPACK_SWAP_ITEMS_REQUEST, Receivers.Server, index1, index2);
         }
+    }
+
+    public override void BackpackToBarRequest(RpcArgs args)
+    {
+        if (networkObject.IsServer && args.Info.SendingPlayer.NetworkId == networkObject.Owner.NetworkId)
+        {
+            int back_index = args.GetNext<int>();
+            int bar_index = args.GetNext<int>();
+
+            if (this.nci.items[back_index] != null)
+            {
+                if (itemAllowedOnBar(this.nci.items[back_index].type))
+                {
+                    Item b = this.nci.popItem(back_index);
+                    Item i = this.npi.popBarItem(bar_index);
+
+                    this.npi.setBarItem(b, bar_index);
+                    this.nci.setItem(back_index, i);
+
+                    sendItemsUpdate();//za backpack
+                    this.npi.sendNetworkUpdate(true, false);
+                }//za inventorij/bar
+                else {
+                    Debug.LogError("Item not allowed on bar");
+                }
+            }
+        }
+
+    }
+
+    public override void BarToBackpackRequest(RpcArgs args)
+    {
+        if (networkObject.IsServer && args.Info.SendingPlayer.NetworkId == networkObject.Owner.NetworkId)
+        {
+            int back_index = args.GetNext<int>();
+            int bar_index = args.GetNext<int>();
+
+            if (npi.bar_items[bar_index]!=null)
+            {
+                //if (itemAllowedOnBar(this.nci.items[back_index].type))
+                //{
+                    Item b = this.nci.popItem(back_index);
+                    Item i = this.npi.popBarItem(bar_index);
+
+                    this.npi.setBarItem(b, bar_index);
+                    this.nci.setItem(back_index, i);
+
+                    sendItemsUpdate();//za backpack
+                    this.npi.sendNetworkUpdate(true, false); }//za inventorij/bar
+            //}
+        }
+
+    }
+
+    public static bool itemAllowedOnBar(Item.Type type)
+    {
+        if (type == Item.Type.weapon || type == Item.Type.ranged || type == Item.Type.shield || type == Item.Type.head || type == Item.Type.chest || type == Item.Type.hands || type == Item.Type.legs || type == Item.Type.feet || type == Item.Type.backpack) return false;
+        return true;
+    }
+
+    internal void localPlayerBackpackToBarRequest(int back, int bar)//do tle dela
+    {
+        if (networkObject.IsOwner)
+            networkObject.SendRpc(RPC_BACKPACK_TO_BAR_REQUEST, Receivers.Server, back, bar);
+    }
+
+    internal void localPlayerBarToBackpackRequest(int back, int bar)
+    {
+        if (networkObject.IsOwner)
+            networkObject.SendRpc(RPC_BAR_TO_BACKPACK_REQUEST, Receivers.Server, back, bar);
     }
 }

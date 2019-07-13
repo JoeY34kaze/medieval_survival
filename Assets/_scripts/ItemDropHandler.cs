@@ -18,7 +18,7 @@ public class ItemDropHandler : MonoBehaviour, IDropHandler , IPointerClickHandle
     public void OnDrop(PointerEventData eventData)
     {
         RectTransform invSlot = transform as RectTransform;
-
+        Debug.Log("dropped "+invSlot.name);
         if (GetComponent<InventorySlot>().GetItem() != null) {//ce smo potegnil backpack loh sam vrzemo na tla. nemors ga dat u inventorij k ni tak item
             if (GetComponent<InventorySlot>().GetItem().type == Item.Type.backpack)
             {
@@ -32,19 +32,29 @@ public class ItemDropHandler : MonoBehaviour, IDropHandler , IPointerClickHandle
             //Debug.Log(networkPlayerInventory.draggedItemParent.name+"'s child was dropped on " + invSlot.name+" ");
             InventorySlot to = invSlot.GetComponent<InventorySlot>();
             //koda se bo malo podvajala ker bi sicer biu prevelik clusterfuck od metode
-            InventorySlot inventorySlot = networkPlayerInventory.draggedItemParent.GetComponent<InventorySlot>();
-            if ((inventorySlot is InventorySlotPersonal || inventorySlot is InventorySlotLoadout) && !(to is InventorySlotBackpack))
+            InventorySlot from = networkPlayerInventory.draggedItemParent.GetComponent<InventorySlot>();
+            if ((from is InventorySlotPersonal || from is InventorySlotLoadout) && ((to is InventorySlotLoadout) || (to is InventorySlotPersonal)))//vsa interakcija med loadoutom in personal inventorijem. una velika metoda v npi
                 networkPlayerInventory.handleInventorySlotOnDragDropEvent(invSlot, null, false);
-            else if (inventorySlot is InventorySlotLoadout && to is InventorySlotBackpack)
+            else if (from is InventorySlotLoadout && to is InventorySlotBackpack)
                 networkPlayerInventory.handleLoadoutToBackpackDrag(invSlot);
-            else if (inventorySlot is InventorySlotPersonal && to is InventorySlotBackpack)
+            else if (from is InventorySlotPersonal && to is InventorySlotBackpack)
                 networkPlayerInventory.handlePersonalToBackpackDrag(invSlot);
-            else if (inventorySlot is InventorySlotBackpack && to is InventorySlotPersonal)
+            else if (from is InventorySlotBackpack && to is InventorySlotPersonal)
                 networkPlayerInventory.handleBackpackToPersonalDrag(invSlot);
-            else if (inventorySlot is InventorySlotBackpack && to is InventorySlotBackpack)
+            else if (from is InventorySlotBackpack && to is InventorySlotBackpack)
                 networkPlayerInventory.handleBackpackToBackpack(invSlot);
-            else if (inventorySlot is InventorySlotBackpack)
+            else if (from is InventorySlotBackpack && to is InventorySlotBar)
+                networkPlayerInventory.handleBackpackToBar(invSlot);
+            else if (from is InventorySlotBar && to is InventorySlotBackpack)
+                networkPlayerInventory.handleBarToBackpack(invSlot);
+            else if (from is InventorySlotBackpack)
                 networkPlayerInventory.handleBackpackSlotOnDragDropEvent(invSlot, null);
+            else if (from is InventorySlotPersonal && to is InventorySlotBar)
+                networkPlayerInventory.handlePersonalToBar(invSlot);
+            else if (from is InventorySlotBar && to is InventorySlotPersonal)
+                networkPlayerInventory.handleBarToPersonal(invSlot);
+            else if (from is InventorySlotBar && to is InventorySlotBar)
+                networkPlayerInventory.handleBarToBar(invSlot);
         }
         else
         {//smo dropal nekam tko da mora past na tla. gremo prevert s kje smo potegnil
