@@ -11,6 +11,7 @@ TagManager:
   - block_player
   - static_object
   - GuildManager
+  - resource
   layers:
   - Default
   - TransparentFX

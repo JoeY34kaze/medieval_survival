@@ -1,23 +1,12 @@
-﻿using System;
-using BeardedManStudios.Forge.Networking;
-using BeardedManStudios.Forge.Networking.Generated;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class Weapon_collider_handler : MonoBehaviour
 {
     public Item item;
+
+    
     void OnTriggerEnter(Collider other)//nima networkobjekta. ce je server se preverja v stats.
     {
-       // Debug.Log("HIT - " + other.gameObject.name);
-       // if (this.player == null || this.player_stats == null) {
-           // Debug.Log("player or player_stats is null");
-        //    return; }
-        //if (!gameObject.GetComponent<collision_lock>().available) {
-           // Debug.Log("Collision lock prevents collision handling!");
-         //   return; }
-
-        //print(player_stats.server_id+"   -   "+player_stats.player_name.text+" Collision detected with trigger object " + other.transform.root.gameObject.GetComponent<NetworkPlayerStats>().server_id +" - "+ other.gameObject.GetComponent<NetworkPlayerStats>().player_name.text);
-        //if (other.transform.root.gameObject.Equals(player)) { Debug.Log("Im hitting myself."); }
         if (other.transform.root.name.Equals("NetworkPlayer(Clone)") && !other.transform.root.gameObject.Equals(transform.root.gameObject) && !other.transform.name.Equals("NetworkPlayer(Clone)")) {//ce je player && ce ni moj player && ce ni playerjev movement collider(kter je samo za movement)
 
 
@@ -36,14 +25,14 @@ public class Weapon_collider_handler : MonoBehaviour
         }
         
     }
-
+    
     public void set_offensive_colliders(bool b) { //BUG NETWORKOBJECT JE NULL
        // Debug.Log("--------->" + b);
         GetComponent<Collider>().enabled = b;
     }
 
 
-
+    
    
 
 
@@ -62,9 +51,9 @@ public class Weapon_collider_handler : MonoBehaviour
 
 
 
+    /*
 
-
-    /*  void OnCollisionEnter(Collision collisionInfo)
+     void OnCollisionEnter(Collision collisionInfo)
       {
           print("Detected collision between " + gameObject.name + " and " + collisionInfo.collider.name);
           print("There are " + collisionInfo.contacts.Length + " point(s) of contacts");
@@ -96,6 +85,6 @@ public class Weapon_collider_handler : MonoBehaviour
       {
           print(gameObject.name + " and trigger object " + other.name + " are no longer colliding");
       }
-      */
-
+      
+    */
 }

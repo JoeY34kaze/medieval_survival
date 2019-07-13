@@ -17,4 +17,7 @@ public class Item : ScriptableObject
     public GameObject prefab_pickup;
     public  int weapon_animation_class;//za switchanje po animatorju iz not_in_combat state na primern idle state. 0-unarmed, 2-1h sword, 3-1h shield
     public string recipeName; //recept za uma equipat
+    public int stone_gather_rate;
+    public int wood_gather_rate;
+    public int flesh_gather_rate;
 }

@@ -20,6 +20,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
     public OnItemChanged onItemChangedCallback;
 
     public GameObject panel_inventory; //celotna panela za inventorij, to se izrise ko prtisnes "i"
+
     public Transform[] panel_personalInventorySlots;
     InventorySlotPersonal[] slots;  // predstavlajo slote v inventoriju, vsak drzi en item. 
 
@@ -197,7 +198,6 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
                 }
                 break;
             default:
-                r = null;
                 break;
         }
         if (onItemChangedCallback != null  && networkObject.IsServer)//ker se nkol ne izvede na clientu ta metoda in server itak nebo nkol vidu inventorija od drugih na ekranu.. probably
@@ -1631,4 +1631,25 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
             sendNetworkUpdateToPlayer(p, false, true);
         }
     }
+
+    #region Gathering
+    internal void requestResourceHitServer(gathering_tool_collider_handler gathering_tool_collider_handler, GameObject gameObject)
+    {
+        if (networkObject.IsServer) {
+            if (Vector3.Distance(gathering_tool_collider_handler.transform.root.position, gameObject.transform.position) < 3f) {//mal security-a i guess
+                Debug.Log("We hit a resource!");
+                //ugotov z ktermu itemom smo udarli
+                Item i = gathering_tool_collider_handler.item;
+                if (i.type == Item.Type.tool)
+                {
+                    //dob vn resource - na podlagi gathering rate-a od tega itema
+
+                    //znizej hp resourca i guess - nrdimo networkObject? probably bo treba
+
+                    //dodaj resource v inventorij nekak - pohendla se network
+                }
+            }
+        }
+    }
+    #endregion
 }
