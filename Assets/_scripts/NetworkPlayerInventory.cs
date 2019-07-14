@@ -98,6 +98,16 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         networkObject.SendRpc(RPC_REQUEST_LOADOUT_ON_CONNECT, Receivers.Server);//owner poslje na server. server poslje vsem networkUpdate. pomoje lahko ponucamo samo en rpc za to ker so razlicni naslovniki
     }
 
+    /// <summary>
+    /// vrne item, ki je na tem mestu ampak ga ne zbrise. za get+delete = pop
+    /// </summary>
+    /// <param name="v"></param>
+    /// <returns></returns>
+    internal Item GetBarItem(int v)
+    {
+        if (v == -1) return null;
+        return this.bar_items[v];
+    }
 
     public void refresh_UMA_equipped_gear()
     {

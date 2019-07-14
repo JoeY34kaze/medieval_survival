@@ -12,6 +12,7 @@ TagManager:
   - static_object
   - GuildManager
   - resource
+  - tool
   layers:
   - Default
   - TransparentFX

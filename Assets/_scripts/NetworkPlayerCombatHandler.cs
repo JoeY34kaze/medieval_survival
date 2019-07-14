@@ -15,7 +15,7 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
         get { return this.combat_mode; }
         set { this.combat_mode = value; }
     }
-
+    private panel_bar_handler bar_handler;
     public bool in_attack_animation = false;
     private Animator animator;
     private player_local_locks player_local_locks;
@@ -46,7 +46,7 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
         }
     }
 
-
+    private NetworkPlayerNeutralStateHandler neutralStateHandler;
 
     public int[] equipped_weapons;//weaponi k so u loadoutu od playerja
 
@@ -77,7 +77,8 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
         stats = GetComponent<NetworkPlayerStats>();
         networkPlayerInventory = GetComponent<NetworkPlayerInventory>();
         //this.radial_menu = transform.GetComponentInChildren<RMF_RadialMenu>().gameObject; -treba dat v start ker sicer crkne k ni se vse nrjen
-
+        this.bar_handler = GetComponentInChildren<panel_bar_handler>();
+        this.neutralStateHandler = GetComponent<NetworkPlayerNeutralStateHandler>();
         initialize_weapons();
     }
 
@@ -339,26 +340,7 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
         {
             Debug.Log("client: sending change combat mode request");
             networkObject.SendRpc(RPC_CHANGE_COMBAT_MODE_REQUEST, Receivers.Server);
-            /*
-            if (Combat_mode == 0)
-            {
-                Combat_mode = 1;
-                if (networkObject.IsOwner)
-                {
-
-                    refresh_in_hand();
-                }
-            }
-            else
-            {
-                Combat_mode = 0;//tole ksnej stlacmo v delegata da loh klicemo evente
-                reset_all_combat_related_animator_parameters();
-                disable_all_possible_equipped_weapons();
-                place_shield_on_back();
-            }*/
         }
-
-        //if (animator.GetInteger("combat_mode") != (int)Combat_mode) animator.SetInteger("combat_mode", (int)Combat_mode);
 
     }
 
@@ -374,19 +356,6 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
             weapon_slot.GetChild(i).gameObject.SetActive(false);
         
     }
-
-    /// <summary>
-    /// tole je da se weapon enabla takoj ko gre player v combat mode
-    /// </summary>
-   /* private void enable_current_weapon()
-    {
-        if (!networkObject.IsOwner) return;
-
-        weapon_slot.GetChild(this.equipped_weapons[index_of_currently_selected_weapon_from_equipped_weapons]).gameObject.SetActive(true);
-
-        networkObject.SendRpc(RPC_CHANGE_CURRENT_WEAPON, Receivers.OthersProximity, this.equipped_weapons[index_of_currently_selected_weapon_from_equipped_weapons], -1);
-    }
-    */
 
     private void handle_animations_from_rpcs()//sprozi se samo za remote playerje da jim pohendla parametre v animatorju
     {
@@ -597,11 +566,14 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
             reset_all_combat_related_animator_parameters();//legacy
             place_shield_on_back();
             //disable_all_possible_equipped_weapons();
+            neutralStateHandler.NeutralStateSetup();
         }
         else {
             
             animator.SetInteger("combat_mode", 1);
             animator.SetInteger("weapon_animation_class", getWeaponClassForAnimator(equipped_weapons[this.index_of_currently_selected_weapon_from_equipped_weapons]));
+
+            neutralStateHandler.CombatStateSetup();
 
             draw_current_weapon();
         }
