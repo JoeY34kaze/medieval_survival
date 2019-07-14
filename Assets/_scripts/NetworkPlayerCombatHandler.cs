@@ -51,6 +51,9 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
     public int[] equipped_weapons;//weaponi k so u loadoutu od playerja
 
     public int index_of_currently_selected_weapon_from_equipped_weapons = 0;
+    internal int hotbar_index_of_shield;
+    internal int hotbar_index_of_weapon;
+    internal int hotbar_index_of_ranged;
 
     //---------------------------------------------------------------------------------------DELEGATES------------------------------------------------------------
     public delegate void On_Current_Weapon_Variable_Change_Delegate(int newVal);
@@ -82,12 +85,27 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
         initialize_weapons();
     }
 
+    internal Item GetCurrentlyActiveWeapon()
+    {
+        throw new NotImplementedException();
+    }
+
+    internal Item GetCurrentlyActiveShield()
+    {
+        throw new NotImplementedException();
+    }
+
     protected override void NetworkStart()
     {
         base.NetworkStart();
         this.Current_weapon_change_event += On_Current_weapon_changed; //registriramo delegata ceprav ga ubistvu nerabmo vec ker koda ni vec tolk zapletena
 
         //poslji request da nj updejta characterja tko kot je na serverju
+    }
+
+    internal Item GetCurrentlyActiveRanged()
+    {
+        throw new NotImplementedException();
     }
 
     private void initialize_weapons() {
@@ -242,11 +260,6 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
         //Debug.Log("updating equipped weapons");
         // this.equipped_weapons[0] = 0;//unarmed
         // this.equipped_weapons[1] = 1;//unarmed block
-
-        this.equipped_weapons[2] = networkPlayerInventory.GetWeapon0();
-        this.equipped_weapons[3] = networkPlayerInventory.GetWeapon1();
-        this.equipped_weapons[4] = networkPlayerInventory.GetRanged();
-        this.currently_equipped_shield = networkPlayerInventory.GetShield();
 
         refresh_in_hand();
 

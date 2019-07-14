@@ -14,22 +14,6 @@ public class NetworkArmorStand : NetworkArmorStandBehavior
     private DynamicCharacterAvatar avatar;
 
 
-
-    /*
-public Collider collider_head;
-public Collider collider_chest;
-public Collider collider_hands;
-public Collider collider_legs;
-public Collider collider_feet;
-
-public Collider collider_weapon_0;
-public Collider collider_weapon_1;
-public Collider collider_shield;
-public Collider collider_ranged; //empty ker nimamo ranged weaponov
-*/
-
-
-
     public int head = -1;
     public int chest = -1;
     public int hands = -1;
@@ -37,7 +21,6 @@ public Collider collider_ranged; //empty ker nimamo ranged weaponov
     public int feet = -1;
 
     public int weapon_0 = -1;
-    public int weapon_1 = -1;
     public int shield = -1;
     public int ranged = -1; //empty ker nimamo ranged weaponov
 
@@ -93,16 +76,13 @@ public Collider collider_ranged; //empty ker nimamo ranged weaponov
                 if (this.feet == -1 && npi.getFeetItem() == null) return false;
                 break;
             case 5://wep0
-                if (this.weapon_0 == -1 && npi.getWeapon_0Item() == null) return false;
-                break;
-            case 6://wep1
-                if (this.weapon_1 == -1 && npi.getWeapon_1Item() == null) return false;
+                if (this.weapon_0 == -1 && npi.GetWeaponItemInHand() == null) return false;
                 break;
             case 7://shield
-                if (this.shield == -1 && npi.getShieldItem() == null) return false;
+                if (this.shield == -1 && npi.GetShieldItemInHand() == null) return false;
                 break;
             case 8://ranged
-                if (this.ranged == -1 && npi.getRangedItem() == null) return false;
+                if (this.ranged == -1 && npi.GetRangedItemInHand() == null) return false;
                 break;
             default:
                 Debug.LogError("request for armor stand interaction is locally found to be valid");
@@ -196,16 +176,16 @@ public Collider collider_ranged; //empty ker nimamo ranged weaponov
                     if (npi.getHeadItem() != null)
                     {
                         //perform swap
-                        Item loadout_item = npi.PopItemLoadout(Item.Type.head, 0);
+                        Item loadout_item = npi.PopItemLoadout(Item.Type.head);
                         Item onStand = Mapper.instance.getItemById(this.head);
                         this.head = loadout_item.id;
-                        npi.SetLoadoutItem(onStand, 0);
+                        npi.SetLoadoutItem(onStand);
                     }
                     else
                     {
                         //equip item from stand
                         Item onStand = Mapper.instance.getItemById(this.head);
-                        npi.SetLoadoutItem(onStand, 0);
+                        npi.SetLoadoutItem(onStand);
                         this.head = -1;
                     }
                 }
@@ -214,7 +194,7 @@ public Collider collider_ranged; //empty ker nimamo ranged weaponov
                     if (npi.getHeadItem() != null)
                     {
                         //place equipped item on stand
-                        Item loadout_item = npi.PopItemLoadout(Item.Type.head, 0);//pohendla tud removanje itema
+                        Item loadout_item = npi.PopItemLoadout(Item.Type.head);//pohendla tud removanje itema
                         this.head = loadout_item.id;
                     }
                     else
@@ -231,16 +211,16 @@ public Collider collider_ranged; //empty ker nimamo ranged weaponov
                     if (npi.getChestItem() != null)
                     {
                         //perform swap
-                        Item loadout_item = npi.PopItemLoadout(Item.Type.chest, 0);
+                        Item loadout_item = npi.PopItemLoadout(Item.Type.chest);
                         Item onStand = Mapper.instance.getItemById(this.chest);
                         this.chest = loadout_item.id;
-                        npi.SetLoadoutItem(onStand, 0);
+                        npi.SetLoadoutItem(onStand);
                     }
                     else
                     {
                         //equip item from stand
                         Item onStand = Mapper.instance.getItemById(this.chest);
-                        npi.SetLoadoutItem(onStand, 0);
+                        npi.SetLoadoutItem(onStand);
                         this.chest = -1;
                     }
                 }
@@ -249,7 +229,7 @@ public Collider collider_ranged; //empty ker nimamo ranged weaponov
                     if (npi.getChestItem() != null)
                     {
                         //place equipped item on stand
-                        Item loadout_item = npi.PopItemLoadout(Item.Type.chest, 0);//pohendla tud removanje itema
+                        Item loadout_item = npi.PopItemLoadout(Item.Type.chest);//pohendla tud removanje itema
                         this.chest = loadout_item.id;
                     }
                     else
@@ -265,16 +245,16 @@ public Collider collider_ranged; //empty ker nimamo ranged weaponov
                     if (npi.getHandsItem() != null)
                     {
                         //perform swap
-                        Item loadout_item = npi.PopItemLoadout(Item.Type.hands, 0);
+                        Item loadout_item = npi.PopItemLoadout(Item.Type.hands);
                         Item onStand = Mapper.instance.getItemById(this.hands);
                         this.hands = loadout_item.id;
-                        npi.SetLoadoutItem(onStand, 0);
+                        npi.SetLoadoutItem(onStand);
                     }
                     else
                     {
                         //equip item from stand
                         Item onStand = Mapper.instance.getItemById(this.hands);
-                        npi.SetLoadoutItem(onStand, 0);
+                        npi.SetLoadoutItem(onStand);
                         this.hands = -1;
                     }
                 }
@@ -283,7 +263,7 @@ public Collider collider_ranged; //empty ker nimamo ranged weaponov
                     if (npi.getHandsItem() != null)
                     {
                         //place equipped item on stand
-                        Item loadout_item = npi.PopItemLoadout(Item.Type.hands, 0);//pohendla tud removanje itema
+                        Item loadout_item = npi.PopItemLoadout(Item.Type.hands);//pohendla tud removanje itema
                         this.hands = loadout_item.id;
                     }
                     else
@@ -299,16 +279,16 @@ public Collider collider_ranged; //empty ker nimamo ranged weaponov
                     if (npi.getLegsItem() != null)
                     {
                         //perform swap
-                        Item loadout_item = npi.PopItemLoadout(Item.Type.legs, 0);
+                        Item loadout_item = npi.PopItemLoadout(Item.Type.legs);
                         Item onStand = Mapper.instance.getItemById(this.legs);
                         this.legs = loadout_item.id;
-                        npi.SetLoadoutItem(onStand, 0);
+                        npi.SetLoadoutItem(onStand);
                     }
                     else
                     {
                         //equip item from stand
                         Item onStand = Mapper.instance.getItemById(this.legs);
-                        npi.SetLoadoutItem(onStand, 0);
+                        npi.SetLoadoutItem(onStand);
                         this.legs = -1;
                     }
                 }
@@ -317,7 +297,7 @@ public Collider collider_ranged; //empty ker nimamo ranged weaponov
                     if (npi.getLegsItem() != null)
                     {
                         //place equipped item on stand
-                        Item loadout_item = npi.PopItemLoadout(Item.Type.legs, 0);//pohendla tud removanje itema
+                        Item loadout_item = npi.PopItemLoadout(Item.Type.legs);//pohendla tud removanje itema
                         this.legs = loadout_item.id;
                     }
                     else
@@ -333,16 +313,16 @@ public Collider collider_ranged; //empty ker nimamo ranged weaponov
                     if (npi.getFeetItem() != null)
                     {
                         //perform swap
-                        Item loadout_item = npi.PopItemLoadout(Item.Type.feet, 0);
+                        Item loadout_item = npi.PopItemLoadout(Item.Type.feet);
                         Item onStand = Mapper.instance.getItemById(this.feet);
                         this.feet = loadout_item.id;
-                        npi.SetLoadoutItem(onStand, 0);
+                        npi.SetLoadoutItem(onStand);
                     }
                     else
                     {
                         //equip item from stand
                         Item onStand = Mapper.instance.getItemById(this.feet);
-                        npi.SetLoadoutItem(onStand, 0);
+                        npi.SetLoadoutItem(onStand);
                         this.feet = -1;
                     }
                 }
@@ -351,7 +331,7 @@ public Collider collider_ranged; //empty ker nimamo ranged weaponov
                     if (npi.getFeetItem() != null)
                     {
                         //place equipped item on stand
-                        Item loadout_item = npi.PopItemLoadout(Item.Type.feet, 0);//pohendla tud removanje itema
+                        Item loadout_item = npi.PopItemLoadout(Item.Type.feet);//pohendla tud removanje itema
                         this.feet = loadout_item.id;
                     }
                     else
@@ -364,137 +344,68 @@ public Collider collider_ranged; //empty ker nimamo ranged weaponov
             case 5:
                 if (this.weapon_0 != -1)
                 {
-                    if (npi.getWeapon_0Item() != null)
+                    if (npi.hasBarSpace() || npi.hasInventorySpace() || npi.hasBackpackSpace())
                     {
-                        //perform swap
-                        Item loadout_item = npi.PopItemLoadout(Item.Type.weapon, 0);
+                        //take the weapon into inventory
+
                         Item onStand = Mapper.instance.getItemById(this.weapon_0);
-                        this.weapon_0 = loadout_item.id;
-                        npi.SetLoadoutItem(onStand, 0);
-                    }
-                    else
-                    {
-                        //equip item from stand
-                        Item onStand = Mapper.instance.getItemById(this.weapon_0);
-                        npi.SetLoadoutItem(onStand, 0);
                         this.weapon_0 = -1;
-                    }
+                        npi.tryToAddItem(onStand);
+                    } 
                 }
                 else
                 {
-                    if (npi.getWeapon_0Item() != null)
+                    if (npi.GetWeaponItemInHand() != null)
                     {
                         //place equipped item on stand
-                        Item loadout_item = npi.PopItemLoadout(Item.Type.weapon, 0);//pohendla tud removanje itema
-                        this.weapon_0 = loadout_item.id;
-                    }
-                    else
-                    {
-                        //return because nothing can happen
-
-                    }
-                }
-                break;
-            case 6:
-                if (this.weapon_1 != -1)
-                {
-                    if (npi.getWeapon_1Item() != null)
-                    {
-                        //perform swap
-                        Item loadout_item = npi.PopItemLoadout(Item.Type.weapon, 1);
-                        Item onStand = Mapper.instance.getItemById(this.weapon_1);
-                        this.weapon_1 = loadout_item.id;
-                        npi.SetLoadoutItem(onStand, 1);
-                    }
-                    else
-                    {
-                        //equip item from stand
-                        Item onStand = Mapper.instance.getItemById(this.weapon_1);
-                        npi.SetLoadoutItem(onStand, 1);
-                        this.weapon_1 = -1;
-                    }
-                }
-                else
-                {
-                    if (npi.getWeapon_1Item() != null)
-                    {
-                        //place equipped item on stand
-                        Item loadout_item = npi.PopItemLoadout(Item.Type.weapon, 1);//pohendla tud removanje itema
-                        this.weapon_1 = loadout_item.id;
-                    }
-                    else
-                    {
-                        //return because nothing can happen
-
+                        Item players_equipped_weapon = npi.PopWeaponItemInHand();//pobere z hotbara
+                        this.weapon_0 = players_equipped_weapon.id;
                     }
                 }
                 break;
             case 7:
                 if (this.shield != -1)
                 {
-                    if (npi.getShieldItem() != null)
+                    if (npi.hasBarSpace() || npi.hasInventorySpace() || npi.hasBackpackSpace())
                     {
                         //perform swap
-                        Item loadout_item = npi.PopItemLoadout(Item.Type.shield, 0);
+
                         Item onStand = Mapper.instance.getItemById(this.shield);
-                        this.shield = loadout_item.id;
-                        npi.SetLoadoutItem(onStand, 0);
-                    }
-                    else
-                    {
-                        //equip item from stand
-                        Item onStand = Mapper.instance.getItemById(this.shield);
-                        npi.SetLoadoutItem(onStand, 0);
                         this.shield = -1;
+                        npi.tryToAddItem(onStand);
                     }
                 }
                 else
                 {
-                    if (npi.getShieldItem() != null)
+                    if (npi.GetShieldItemInHand() != null)
                     {
                         //place equipped item on stand
-                        Item loadout_item = npi.PopItemLoadout(Item.Type.shield, 0);//pohendla tud removanje itema
-                        this.shield = loadout_item.id;
+                        Item currentlyActiveShield = npi.PopShieldItemInHand();//pohendla tud removanje itema
+                        this.shield = currentlyActiveShield.id;
                     }
-                    else
-                    {
-                        //return because nothing can happen
 
-                    }
                 }
                 break;
             case 8:
                 if (this.ranged != -1)
                 {
-                    if (npi.getRangedItem() != null)
+                    if(npi.hasBarSpace() || npi.hasInventorySpace() || npi.hasBackpackSpace())
                     {
-                        //perform swap
-                        Item loadout_item = npi.PopItemLoadout(Item.Type.ranged, 0);
+
                         Item onStand = Mapper.instance.getItemById(this.ranged);
-                        this.ranged = loadout_item.id;
-                        npi.SetLoadoutItem(onStand, 0);
-                    }
-                    else
-                    {
-                        //equip item from stand
-                        Item onStand = Mapper.instance.getItemById(this.ranged);
-                        npi.SetLoadoutItem(onStand, 0);
                         this.ranged = -1;
+                        npi.tryToAddItem(onStand);
                     }
                 }
                 else
                 {
-                    if (npi.getRangedItem() != null)
+                    if (npi.GetRangedItemInHand() != null)
                     {
                         //place equipped item on stand
-                        Item loadout_item = npi.PopItemLoadout(Item.Type.ranged, 0);//pohendla tud removanje itema
-                        this.ranged = loadout_item.id;
+                        Item currentlyActiveRanged = npi.PopRangedItemInHand();//pohendla tud removanje itema
+                        this.ranged = currentlyActiveRanged.id;
                     }
-                    else
-                    {
-                        //return because nothing can happen
 
-                    }
                 }
                 break;
             default:
@@ -502,7 +413,7 @@ public Collider collider_ranged; //empty ker nimamo ranged weaponov
                 break;
         }
         npi.sendNetworkUpdate(false, true);
-        networkObject.SendRpc(RPC_ARMOR_STAND_REFRESH, Receivers.All, this.head, this.chest, this.hands, this.legs, this.feet, this.weapon_0, this.weapon_1, this.shield, this.ranged);
+        networkObject.SendRpc(RPC_ARMOR_STAND_REFRESH, Receivers.All, this.head, this.chest, this.hands, this.legs, this.feet, this.weapon_0, -1, this.shield, this.ranged);
     }
 
 
@@ -515,7 +426,7 @@ public Collider collider_ranged; //empty ker nimamo ranged weaponov
     {
         if (!networkObject.IsServer) return;
 
-        networkObject.SendRpc(args.Info.SendingPlayer, RPC_ARMOR_STAND_REFRESH, this.head, this.chest, this.hands, this.legs, this.feet, this.weapon_0, this.weapon_1, this.shield, this.ranged);
+        networkObject.SendRpc(args.Info.SendingPlayer, RPC_ARMOR_STAND_REFRESH, this.head, this.chest, this.hands, this.legs, this.feet, this.weapon_0, -1, this.shield, this.ranged);
     }
 
     /// <summary>
@@ -545,7 +456,7 @@ public Collider collider_ranged; //empty ker nimamo ranged weaponov
         }
 
         npi.sendNetworkUpdate(false, true);
-        networkObject.SendRpc(RPC_ARMOR_STAND_REFRESH, Receivers.All, this.head, this.chest, this.hands, this.legs, this.feet, this.weapon_0, this.weapon_1, this.shield, this.ranged);
+        networkObject.SendRpc(RPC_ARMOR_STAND_REFRESH, Receivers.All, this.head, this.chest, this.hands, this.legs, this.feet, this.weapon_0, -1, this.shield, this.ranged);
     }
 
     private void take_all_missing(uint server_id, NetworkPlayerInventory npi)
@@ -555,7 +466,7 @@ public Collider collider_ranged; //empty ker nimamo ranged weaponov
         {
             if (this.head != -1)
             {
-                npi.SetLoadoutItem(Mapper.instance.getItemById(this.head), 0);
+                npi.SetLoadoutItem(Mapper.instance.getItemById(this.head));
                 this.head = -1;
             }
         }
@@ -565,7 +476,7 @@ public Collider collider_ranged; //empty ker nimamo ranged weaponov
         {
             if (this.chest != -1)
             {
-                npi.SetLoadoutItem(Mapper.instance.getItemById(this.chest), 0);
+                npi.SetLoadoutItem(Mapper.instance.getItemById(this.chest));
                 this.chest = -1;
             }
         }
@@ -575,7 +486,7 @@ public Collider collider_ranged; //empty ker nimamo ranged weaponov
         {
             if (this.hands != -1)
             {
-                npi.SetLoadoutItem(Mapper.instance.getItemById(this.hands), 0);
+                npi.SetLoadoutItem(Mapper.instance.getItemById(this.hands));
                 this.hands = -1;
             }
         }
@@ -585,7 +496,7 @@ public Collider collider_ranged; //empty ker nimamo ranged weaponov
         {
             if (this.legs != -1)
             {
-                npi.SetLoadoutItem(Mapper.instance.getItemById(this.legs), 0);
+                npi.SetLoadoutItem(Mapper.instance.getItemById(this.legs));
                 this.legs = -1;
             }
         }
@@ -594,46 +505,65 @@ public Collider collider_ranged; //empty ker nimamo ranged weaponov
         {
             if (this.feet != -1)
             {
-                npi.SetLoadoutItem(Mapper.instance.getItemById(this.feet), 0);
+                npi.SetLoadoutItem(Mapper.instance.getItemById(this.feet));
                 this.feet = -1;
             }
         }
 
-
-        if (npi.getWeapon_0Item() == null)
+        if (this.weapon_0 != -1)
         {
-            if (this.weapon_0 != -1)
+            if (npi.hasBarSpace())
             {
-                npi.SetLoadoutItem(Mapper.instance.getItemById(this.weapon_0), 0);
+                npi.BarAddFirst(Mapper.instance.getItemById(this.weapon_0));
+                this.weapon_0 = -1;
+            }
+            else if (npi.hasInventorySpace())
+            {
+                npi.AddFirst(Mapper.instance.getItemById(this.weapon_0), 1);
+                this.weapon_0 = -1;
+            }
+            else if (npi.hasBackpackSpace()) {
+                npi.backpack_inventory.AddFirst(Mapper.instance.getItemById(this.weapon_0));
                 this.weapon_0 = -1;
             }
         }
 
-        if (npi.getWeapon_1Item() == null)
+
+
+        if (this.shield != -1)
         {
-            if (this.weapon_1 != -1)
+            if (npi.hasBarSpace())
             {
-                npi.SetLoadoutItem(Mapper.instance.getItemById(this.weapon_1), 0);
-                this.weapon_1 = -1;
+                npi.BarAddFirst(Mapper.instance.getItemById(this.shield));
+                this.shield = -1;
             }
-        }
-
-
-        if (npi.getShieldItem() == null)
-        {
-            if (this.shield != -1)
+            else if (npi.hasInventorySpace())
             {
-                npi.SetLoadoutItem(Mapper.instance.getItemById(this.shield), 0);
+                npi.AddFirst(Mapper.instance.getItemById(this.shield), 1);
+                this.shield = -1;
+            }
+            else if (npi.hasBackpackSpace())
+            {
+                npi.backpack_inventory.AddFirst(Mapper.instance.getItemById(this.shield));
                 this.shield = -1;
             }
         }
 
-
-        if (npi.getRangedItem() == null)
+        if (this.ranged != -1)
         {
-            if (this.ranged != -1)
+            if (npi.hasBarSpace())
             {
-                npi.SetLoadoutItem(Mapper.instance.getItemById(this.ranged), 0);
+                npi.BarAddFirst(Mapper.instance.getItemById(this.ranged));
+                this.ranged = -1;
+            }
+            else if (npi.hasInventorySpace())
+            {
+                npi.AddFirst(Mapper.instance.getItemById(this.ranged), 1);
+                this.ranged = -1;
+            }
+            else if (npi.hasBackpackSpace())
+            {
+                npi.backpack_inventory.AddFirst(Mapper.instance.getItemById(this.ranged));
                 this.ranged = -1;
             }
         }
@@ -646,56 +576,50 @@ public Collider collider_ranged; //empty ker nimamo ranged weaponov
 
         if (this.head == -1)
         {//samo pogleda, nc ne spremeni
-            loadout_item = npi.PopItemLoadout(Item.Type.head, 0);//lahko vrne null
+            loadout_item = npi.PopItemLoadout(Item.Type.head);//lahko vrne null
             if (loadout_item != null) this.head = loadout_item.id;
         }
 
         //chest
         if (this.chest == -1)
         {//samo pogleda, nc ne spremeni
-            loadout_item = npi.PopItemLoadout(Item.Type.chest, 0);//lahko vrne null
+            loadout_item = npi.PopItemLoadout(Item.Type.chest);//lahko vrne null
             if (loadout_item != null) this.chest = loadout_item.id;
         }
         //hands
         if (this.hands == -1)
         {//samo pogleda, nc ne spremeni
-            loadout_item = npi.PopItemLoadout(Item.Type.hands, 0);//lahko vrne null
+            loadout_item = npi.PopItemLoadout(Item.Type.hands);//lahko vrne null
             if (loadout_item != null) this.hands = loadout_item.id;
         }
         //legs
         if (this.legs == -1)
         {//samo pogleda, nc ne spremeni
-            loadout_item = npi.PopItemLoadout(Item.Type.legs, 0);//lahko vrne null
+            loadout_item = npi.PopItemLoadout(Item.Type.legs);//lahko vrne null
             if (loadout_item != null) this.legs = loadout_item.id;
         }
         //feet
         if (this.feet == -1)
         {//samo pogleda, nc ne spremeni
-            loadout_item = npi.PopItemLoadout(Item.Type.feet, 0);//lahko vrne null
+            loadout_item = npi.PopItemLoadout(Item.Type.feet);//lahko vrne null
             if (loadout_item != null) this.feet = loadout_item.id;
         }
         //wep0
         if (this.weapon_0 == -1)
         {//samo pogleda, nc ne spremeni
-            loadout_item = npi.PopItemLoadout(Item.Type.weapon, 0);//lahko vrne null
+            loadout_item = npi.PopWeaponItemInHand();//lahko vrne null
             if (loadout_item != null) this.weapon_0 = loadout_item.id;
-        }
-        //wep1
-        if (this.weapon_1 == -1)
-        {//samo pogleda, nc ne spremeni
-            loadout_item = npi.PopItemLoadout(Item.Type.weapon, 1);//lahko vrne null
-            if (loadout_item != null) this.weapon_1 = loadout_item.id;
         }
         //shield
         if (this.shield == -1)
         {//samo pogleda, nc ne spremeni
-            loadout_item = npi.PopItemLoadout(Item.Type.shield, 0);//lahko vrne null
+            loadout_item = npi.PopShieldItemInHand();//lahko vrne null
             if (loadout_item != null) this.shield = loadout_item.id;
         }
         //ranged
         if (this.ranged == -1)
         {//samo pogleda, nc ne spremeni
-            loadout_item = npi.PopItemLoadout(Item.Type.ranged, 0);//lahko vrne null
+            loadout_item = npi.PopRangedItemInHand();//lahko vrne null
             if (loadout_item != null) this.ranged = loadout_item.id;
         }
     }
@@ -704,69 +628,59 @@ public Collider collider_ranged; //empty ker nimamo ranged weaponov
     {
 
         //head
-        Item loadout_item = npi.PopItemLoadout(Item.Type.head, 0);//lahko vrne null
+        Item loadout_item = npi.PopItemLoadout(Item.Type.head);//lahko vrne null
         Item onStand = Mapper.instance.getItemById(this.head); //lahko vrne null
         if (loadout_item != null) this.head = loadout_item.id;
         else this.head = -1;
-        if (onStand != null) npi.SetLoadoutItem(onStand, 0);
-        else npi.RemoveItemLoadout(Item.Type.head, 0);
+        if (onStand != null) npi.SetLoadoutItem(onStand);
+        else npi.RemoveItemLoadout(Item.Type.head);
 
         //chest
-        loadout_item = npi.PopItemLoadout(Item.Type.chest, 0);//lahko vrne null
+        loadout_item = npi.PopItemLoadout(Item.Type.chest);//lahko vrne null
         onStand = Mapper.instance.getItemById(this.chest); //lahko vrne null
         if (loadout_item != null) this.chest = loadout_item.id;
         else this.chest = -1;
-        if (onStand != null) npi.SetLoadoutItem(onStand, 0);
-        else npi.RemoveItemLoadout(Item.Type.chest, 0);
+        if (onStand != null) npi.SetLoadoutItem(onStand);
+        else npi.RemoveItemLoadout(Item.Type.chest);
         //hands
-        loadout_item = npi.PopItemLoadout(Item.Type.hands, 0);//lahko vrne null
+        loadout_item = npi.PopItemLoadout(Item.Type.hands);//lahko vrne null
         onStand = Mapper.instance.getItemById(this.hands); //lahko vrne null
         if (loadout_item != null) this.hands = loadout_item.id;
         else this.hands = -1;
-        if (onStand != null) npi.SetLoadoutItem(onStand, 0);
-        else npi.RemoveItemLoadout(Item.Type.hands, 0);
+        if (onStand != null) npi.SetLoadoutItem(onStand);
+        else npi.RemoveItemLoadout(Item.Type.hands);
         //legs
-        loadout_item = npi.PopItemLoadout(Item.Type.legs, 0);//lahko vrne null
+        loadout_item = npi.PopItemLoadout(Item.Type.legs);//lahko vrne null
         onStand = Mapper.instance.getItemById(this.legs); //lahko vrne null
         if (loadout_item != null) this.legs = loadout_item.id;
         else this.legs = -1;
-        if (onStand != null) npi.SetLoadoutItem(onStand, 0);
-        else npi.RemoveItemLoadout(Item.Type.legs, 0);
+        if (onStand != null) npi.SetLoadoutItem(onStand);
+        else npi.RemoveItemLoadout(Item.Type.legs);
         //feet
-        loadout_item = npi.PopItemLoadout(Item.Type.feet, 0);//lahko vrne null
+        loadout_item = npi.PopItemLoadout(Item.Type.feet);//lahko vrne null
         onStand = Mapper.instance.getItemById(this.feet); //lahko vrne null
         if (loadout_item != null) this.feet = loadout_item.id;
         else this.feet = -1;
-        if (onStand != null) npi.SetLoadoutItem(onStand, 0);
-        else npi.RemoveItemLoadout(Item.Type.feet, 0);
+        if (onStand != null) npi.SetLoadoutItem(onStand);
+        else npi.RemoveItemLoadout(Item.Type.feet);
         //wep0
-        loadout_item = npi.PopItemLoadout(Item.Type.weapon, 0);//lahko vrne null
+        loadout_item = npi.PopWeaponItemInHand();//lahko vrne null
         onStand = Mapper.instance.getItemById(this.weapon_0); //lahko vrne null
         if (loadout_item != null) this.weapon_0 = loadout_item.id;
         else this.weapon_0 = -1;
-        if (onStand != null) npi.SetLoadoutItem(onStand, 0);
-        else npi.RemoveItemLoadout(Item.Type.weapon, 0);
-        //wep1
-        loadout_item = npi.PopItemLoadout(Item.Type.weapon, 1);//lahko vrne null
-        onStand = Mapper.instance.getItemById(this.weapon_1); //lahko vrne null
-        if (loadout_item != null) this.weapon_1 = loadout_item.id;
-        else this.weapon_1 = -1;
-        if (onStand != null) npi.SetLoadoutItem(onStand, 1);
-        else npi.RemoveItemLoadout(Item.Type.weapon, 1);
+        if (onStand != null && (npi.hasBarSpace() || npi.hasInventorySpace() || npi.hasBackpackSpace())) npi.tryToAddItem(onStand);
         //shield
-        loadout_item = npi.PopItemLoadout(Item.Type.shield, 0);//lahko vrne null
+        loadout_item = npi.PopShieldItemInHand();//lahko vrne null
         onStand = Mapper.instance.getItemById(this.shield); //lahko vrne null
         if (loadout_item != null) this.shield = loadout_item.id;
         else this.shield = -1;
-        if (onStand != null) npi.SetLoadoutItem(onStand, 0);
-        else npi.RemoveItemLoadout(Item.Type.shield, 0);
+        if (onStand != null && (npi.hasBarSpace() || npi.hasInventorySpace() || npi.hasBackpackSpace())) npi.tryToAddItem(onStand);
         //ranged
-        loadout_item = npi.PopItemLoadout(Item.Type.ranged, 0);//lahko vrne null
+        loadout_item = npi.PopRangedItemInHand();//lahko vrne null
         onStand = Mapper.instance.getItemById(this.ranged); //lahko vrne null
         if (loadout_item != null)this.ranged = loadout_item.id;
         else this.ranged = -1;
-        if (onStand != null) npi.SetLoadoutItem(onStand, 0);
-        else npi.RemoveItemLoadout(Item.Type.ranged, 0);
+        if (onStand != null && (npi.hasBarSpace() || npi.hasInventorySpace() || npi.hasBackpackSpace())) npi.tryToAddItem(onStand);
 
 
     }
@@ -783,7 +697,7 @@ public Collider collider_ranged; //empty ker nimamo ranged weaponov
             this.legs = args.GetNext<int>();
             this.feet = args.GetNext<int>();
             this.weapon_0 = args.GetNext<int>();
-            this.weapon_1 = args.GetNext<int>();
+            int blank = args.GetNext<int>();
             this.shield = args.GetNext<int>();
             this.ranged = args.GetNext<int>();
         }
@@ -831,8 +745,6 @@ public Collider collider_ranged; //empty ker nimamo ranged weaponov
 
 
         show_weapon(this.weapon_0, w0);
-
-        show_weapon(this.weapon_1, w1);
 
         show_weapon(this.shield, sh);
 
@@ -890,6 +802,6 @@ public Collider collider_ranged; //empty ker nimamo ranged weaponov
     internal void ServerSendAllToPlayer(NetworkingPlayer p)
     {
         if(networkObject.IsServer)
-         networkObject.SendRpc(p,RPC_ARMOR_STAND_REFRESH, this.head, this.chest, this.hands, this.legs, this.feet, this.weapon_0, this.weapon_1, this.shield, this.ranged);
+         networkObject.SendRpc(p,RPC_ARMOR_STAND_REFRESH, this.head, this.chest, this.hands, this.legs, this.feet, this.weapon_0, -1, this.shield, this.ranged);
     }
 }

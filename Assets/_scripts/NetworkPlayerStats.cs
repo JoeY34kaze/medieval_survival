@@ -1169,17 +1169,17 @@ private void ServerSendOnAcceptedData() {
             this.dead = args.GetNext<bool>();
             this.health = args.GetNext<float>();
 
-            this.npi.SetLoadoutItem(Mapper.instance.getItemById(args.GetNext<int>()), 0);
-            this.npi.SetLoadoutItem(Mapper.instance.getItemById(args.GetNext<int>()), 0);
-            this.npi.SetLoadoutItem(Mapper.instance.getItemById(args.GetNext<int>()), 0);
-            this.npi.SetLoadoutItem(Mapper.instance.getItemById(args.GetNext<int>()), 0);
-            this.npi.SetLoadoutItem(Mapper.instance.getItemById(args.GetNext<int>()), 0);
+            this.npi.SetLoadoutItem(Mapper.instance.getItemById(args.GetNext<int>()));
+            this.npi.SetLoadoutItem(Mapper.instance.getItemById(args.GetNext<int>()));
+            this.npi.SetLoadoutItem(Mapper.instance.getItemById(args.GetNext<int>()));
+            this.npi.SetLoadoutItem(Mapper.instance.getItemById(args.GetNext<int>()));
+            this.npi.SetLoadoutItem(Mapper.instance.getItemById(args.GetNext<int>()));
 
-            this.npi.SetLoadoutItem(Mapper.instance.getItemById(args.GetNext<int>()), 0);
-            this.npi.SetLoadoutItem(Mapper.instance.getItemById(args.GetNext<int>()), 0);
-            this.npi.SetLoadoutItem(Mapper.instance.getItemById(args.GetNext<int>()), 1);//WEAPON 1
-            this.npi.SetLoadoutItem(Mapper.instance.getItemById(args.GetNext<int>()), 0);
-            this.npi.SetLoadoutItem(Mapper.instance.getItemById(args.GetNext<int>()), 0);//Backpack??
+            int blank = args.GetNext<int>();
+            blank = args.GetNext<int>();
+            blank = args.GetNext<int>();
+            blank = args.GetNext<int>();
+            this.npi.SetLoadoutItem(Mapper.instance.getItemById(args.GetNext<int>()));//Backpack??
 
 
 
@@ -1298,10 +1298,10 @@ private void ServerSendOnAcceptedData() {
         ps.hands = npi.getHandsItem();
         ps.legs = npi.getLegsItem();
         ps.feet = npi.getFeetItem();
-        ps.ranged = npi.getRangedItem();
-        ps.weapon_0 = npi.getWeapon_0Item();
-        ps.weapon_1 = npi.getWeapon_1Item();
-        ps.shield = npi.getShieldItem();
+        ps.ranged = null;
+        ps.weapon_0 = null;
+        ps.weapon_1 = null;
+        ps.shield = null;
         ps.backpack = npi.getBackpackItem();
 
         ps.guild = NetworkGuildManager.Instance.getGuildFromNetworkId(Get_server_id());

@@ -34,14 +34,6 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
     public InventorySlotLoadout loadout_hands;
     public InventorySlotLoadout loadout_legs;
     public InventorySlotLoadout loadout_feet;
-    public InventorySlotLoadout loadout_ranged;
-    public InventorySlotLoadout loadout_weapon_0;
-
-
-
-    public InventorySlotLoadout loadout_weapon_1;
-    public InventorySlotLoadout loadout_shield;
-
     public InventorySlotLoadout loadout_backpack;//ni loadout item ubistvu. logika je cist locena ker je prioriteta da se backpack lahko cimlazje fukne dol. tle ga mam samo za izrisovanje v inventorij panel
 
     public InventorySlotBar[] bar_slots;
@@ -57,14 +49,6 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
 
     public delegate void OnLoadoutChanged();
     public OnLoadoutChanged onLoadoutChangedCallback;
-
-
-    private Item ranged;
-
-
-    public Item weapon_0;
-    public Item weapon_1;
-    private Item shield;
 
     public Item backpack;
     private Camera c;
@@ -97,6 +81,79 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
 
         networkObject.SendRpc(RPC_REQUEST_LOADOUT_ON_CONNECT, Receivers.Server);//owner poslje na server. server poslje vsem networkUpdate. pomoje lahko ponucamo samo en rpc za to ker so razlicni naslovniki
     }
+
+    /// <summary>
+    /// vrne kter weapon ima trenutno v roki. ni nujno da ima ksn weapon sploh v roki mind you.
+    /// </summary>
+    /// <returns></returns>
+    internal Item GetWeaponItemInHand()
+    {
+        return combatHandler.GetCurrentlyActiveWeapon();
+    }
+
+    /// <summary>
+    /// vrne kter shield ima trenutno v roki. ni nujno da ima ksn shield sploh v roki mind you.
+    /// </summary>
+    /// <returns></returns>
+    internal Item GetShieldItemInHand()
+    {
+        return combatHandler.GetCurrentlyActiveShield();
+    }
+
+    /// <summary>
+    /// vrne kter ranged weap ima trenutno v roki. ni nujno da ima ksn ranged sploh v roki mind you.
+    /// </summary>
+    /// <returns></returns>
+    internal Item GetRangedItemInHand()
+    {
+        return combatHandler.GetCurrentlyActiveRanged();
+    }
+
+    /// <summary>
+    /// potegne z hotbara
+    /// </summary>
+    /// <returns>item k smo ga sunli z hotbara</returns>
+    internal Item PopWeaponItemInHand()
+    {
+        if (combatHandler.GetCurrentlyActiveWeapon() != null) {
+            Item i = this.bar_items[combatHandler.hotbar_index_of_weapon];
+            this.bar_items[combatHandler.hotbar_index_of_weapon] = null;
+            return i;
+                }
+        return null;
+    }
+
+    /// <summary>
+    /// potegne z hotbara
+    /// </summary>
+    /// <returns>item k smo ga sunli z hotbara</returns>
+    internal Item PopShieldItemInHand()
+    {
+        if (combatHandler.GetCurrentlyActiveShield() != null)
+        {
+            Item i = this.bar_items[combatHandler.hotbar_index_of_shield];
+            this.bar_items[combatHandler.hotbar_index_of_shield] = null;
+            return i;
+        }
+        return null;
+    }
+
+    /// <summary>
+    /// potegne z hotbara
+    /// </summary>
+    /// <returns>item k smo ga sunli z hotbara</returns>
+    internal Item PopRangedItemInHand()
+    {
+        if (combatHandler.GetCurrentlyActiveRanged() != null)
+        {
+            Item i = this.bar_items[combatHandler.hotbar_index_of_ranged];
+            this.bar_items[combatHandler.hotbar_index_of_ranged] = null;
+            return i;
+        }
+        return null;
+    }
+
+
 
     /// <summary>
     /// vrne item, ki je na tem mestu ampak ga ne zbrise. za get+delete = pop
@@ -186,32 +243,6 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
                     feet = i;
                 }
                 break;
-            case Item.Type.ranged:
-                if (compareGear(ranged, i))
-                {
-                    r = ranged;
-                    ranged = i;
-                }
-                break;
-            case Item.Type.weapon://tole se nobe zmer zamenjal ker tega nocmo. equipa nj se samo ce je slot prazen
-                if (weapon_0 == null)
-                {
-                    weapon_0 = i;
-                    r = null;
-                }
-                else if (weapon_1 == null)
-                {
-                    weapon_1 = i;
-                    r = null;
-                }
-                break;
-            case Item.Type.shield:
-                if (compareGear(shield, i))
-                {
-                    r = shield;
-                    shield = i;
-                }
-                break;
             default:
                 break;
         }
@@ -266,24 +297,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
     {
         return this.feet;
     }
-
-    internal Item getWeapon_0Item()
-    {
-        return this.weapon_0;
-    }
-
-    internal Item getWeapon_1Item()
-    {
-        return this.weapon_1;
-    }
-    internal Item getShieldItem()
-    {
-        return this.shield;
-    }
-    internal Item getRangedItem()
-    {
-        return this.ranged;
-    }
+    
     internal Item getBackpackItem() {
         return this.backpack;
     }
@@ -355,7 +369,13 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         return false;
     }
 
-    public bool SetLoadoutItem(Item i, int index)
+    internal bool hasBarSpace() {
+        foreach (Item i in this.bar_items)
+            if (i == null) return true;
+        return false;
+    }
+
+    public bool SetLoadoutItem(Item i)
     {//nevem zakaj vrne bool
         if (!networkObject.IsServer) { Debug.LogError("client dela stvar od serevrja!"); return false;}
         if (i == null) return false;
@@ -378,18 +398,6 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
             case Item.Type.feet:
                 feet = i;
                 break;
-            case Item.Type.ranged:
-                ranged = i;
-                break;
-            case Item.Type.weapon://tole se nobe zmer zamenjal ker tega nocmo. equipa nj se samo ce je slot prazen
-                if (index == 0)
-                    weapon_0 = i;
-                else
-                    weapon_1 = i;
-                break;
-            case Item.Type.shield:
-                shield = i;
-                break;
             case Item.Type.backpack:
                 backpack = i;
                 break;
@@ -410,7 +418,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         else return false;
     }
 
-    public void RemoveItemLoadout(Item.Type t, int index) {
+    public void RemoveItemLoadout(Item.Type t) {
         switch (t)
         {
             case Item.Type.head:
@@ -428,18 +436,6 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
             case Item.Type.feet:
                 feet = null;
                 break;
-            case Item.Type.ranged:
-                ranged = null;
-                break;
-            case Item.Type.weapon://tole se nobe zmer zamenjal ker tega nocmo. equipa nj se samo ce je slot prazen
-                if (index == 0)
-                    weapon_0 = null;
-                else
-                    weapon_1 = null;
-                break;
-            case Item.Type.shield:
-                shield = null;
-                break;
             case Item.Type.backpack:
                 this.backpack = null;
                 break;
@@ -449,7 +445,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         }
     }
 
-    public Item PopItemLoadout(Item.Type t, int index)
+    public Item PopItemLoadout(Item.Type t)
     {
         Item ret = null;
         switch (t)
@@ -473,26 +469,6 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
             case Item.Type.feet:
                 ret = feet;
                 feet = null;
-                break;
-            case Item.Type.ranged:
-                ret = ranged;
-                ranged = null;
-                break;
-            case Item.Type.weapon://tole se nobe zmer zamenjal ker tega nocmo. equipa nj se samo ce je slot prazen
-                if (index == 0)
-                {
-                    ret = weapon_0;
-                    weapon_0 = null;
-                }
-                else
-                {
-                    ret = weapon_1;
-                    weapon_1 = null;
-                }
-                break;
-            case Item.Type.shield:
-                ret = shield;
-                shield = null;
                 break;
             case Item.Type.backpack:
                 ret = backpack;
@@ -505,7 +481,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         return ret;
     }
 
-    public Item GetItemLoadout(Item.Type t, int index)
+    public Item GetItemLoadout(Item.Type t)
     {
         Item ret = null;
         switch (t)
@@ -525,22 +501,6 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
             case Item.Type.feet:
                 ret = feet;
                 break;
-            case Item.Type.ranged:
-                ret = ranged;
-                break;
-            case Item.Type.weapon://tole se nobe zmer zamenjal ker tega nocmo. equipa nj se samo ce je slot prazen
-                if (index == 0)
-                {
-                    ret = weapon_0;
-                }
-                else
-                {
-                    ret = weapon_1;
-                }
-                break;
-            case Item.Type.shield:
-                ret = shield;
-                break;
             case Item.Type.backpack:
                 ret = backpack;
                 break;
@@ -549,6 +509,22 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
                 break;
         }
         return ret;
+    }
+
+    internal void tryToAddItem(Item onStand)
+    {
+        if (hasBarSpace())
+        {
+            BarAddFirst(onStand);
+        }
+        else if (hasInventorySpace())
+        {
+            AddFirst(onStand, 1);
+        }
+        else if (hasBackpackSpace())
+        {
+            backpack_inventory.AddFirst(onStand);
+        }
     }
 
     /// <summary>
@@ -562,6 +538,24 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         {
             this.bar_items[bar_index]=b;
         }
+    }
+
+    internal void BarAddFirst(Item onStand)
+    {
+        if (networkObject.IsServer) {
+            for (int i = 0; i < this.bar_items.Length; i++) {
+                if(this.bar_items[i]==null)this.bar_items[i] = onStand;
+            }
+        }
+    }
+
+    internal bool hasBackpackSpace()
+    {
+        if (this.backpack_inventory != null) {
+            if (this.backpack_inventory.hasSpace())
+                return true;
+        }
+        return false;
     }
 
     internal Item popBarItem(int bar_index)
@@ -610,30 +604,6 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
                 Cursor.visible = false;
            }
         }
-    }
-
-    internal int GetRanged()
-    {
-        if (this.ranged == null) return 0;//unarmed
-        return this.ranged.id;
-    }
-
-    internal int GetWeapon1()
-    {
-        if (this.weapon_1 == null) return 0;//unarmed
-        return this.weapon_1.id;
-    }
-
-    internal int GetShield()
-    {
-        if (this.shield == null) return 1;//unarmed
-        return this.shield.id;
-    }
-
-    internal int GetWeapon0()
-    {
-        if (this.weapon_0 == null) return 0;//unarmed
-        return this.weapon_0.id;
     }
 
     public void addToPersonalInventory(Item item, int quantity, int index) {
@@ -778,26 +748,6 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         else
             loadout_feet.ClearSlot();
 
-        if (this.ranged != null)
-            loadout_ranged.AddItem(this.ranged);
-        else
-            loadout_ranged.ClearSlot();
-
-        if (this.weapon_0 != null)
-            loadout_weapon_0.AddItem(this.weapon_0);
-        else
-            loadout_weapon_0.ClearSlot();
-
-        if (this.weapon_1 != null)
-            loadout_weapon_1.AddItem(this.weapon_1);
-        else
-            loadout_weapon_1.ClearSlot();
-
-        if (this.shield != null)
-            loadout_shield.AddItem(this.shield);
-        else
-            loadout_shield.ClearSlot();
-
         if (this.backpack != null)
             loadout_backpack.AddItem(this.backpack);
         else
@@ -826,19 +776,12 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
     {
         if (!networkObject.IsOwner) return;
         int loadout_index = 0;
-        if (!rightClick)
-        {
-            loadout_index = getIndexFromName(loa.name);
-        }
-        else {//right click- loa je null
-            if (weapon_0 != null) loadout_index = 1;
-        }
         networkObject.SendRpc(RPC_INVENTORY_TO_LOADOUT_REQUEST, Receivers.Server, loadout_index, this.draggedItemParent.GetComponent<InventorySlotPersonal>().GetItem().type.ToString(), getIndexFromName(this.draggedItemParent.name));
 
 
     }
 
-    private Item PopLoadoutItem(Item.Type t,int index)
+    private Item PopLoadoutItem(Item.Type t)
     {
         if (!networkObject.IsServer) { Debug.LogError("client probava delat stvar k je sam na serverju.."); return null; }
 
@@ -864,26 +807,6 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
             case Item.Type.feet:
                 i= feet;
                 feet = null;
-                break;
-            case Item.Type.ranged:
-                i= ranged;
-                ranged = null;
-                break;
-            case Item.Type.weapon:
-                if (index == 0)
-                {
-                    i = weapon_0;
-                    weapon_0 = null;
-                }
-                else
-                {
-                    i = weapon_1;
-                    weapon_1 = null;
-                }
-                break;
-            case Item.Type.shield:
-                i= shield;
-                shield = null;
                 break;
             default:
                 Debug.LogError("Item type doesnt match anything. shits fucked yo");
@@ -1148,18 +1071,13 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
             if (this.legs != null) l3 = (short)this.legs.id;
             if (this.feet != null) l4 = (short)this.feet.id;
 
-            if (this.ranged != null) l5 = (short)this.ranged.id;//NE DELA - BO TREBA UPDEJTAT. ZAENKRAT SE UPORABLA GetComponent<NetworkPlayerCombatHandler>().update_equipped_weapons();   KER JE BLO ZE PREJ IMPLEMENTIRAN!!
-            if (this.weapon_0 != null) l6 = (short)this.weapon_0.id;//NE DELA - BO TREBA UPDEJTAT. ZAENKRAT SE UPORABLA GetComponent<NetworkPlayerCombatHandler>().update_equipped_weapons();   KER JE BLO ZE PREJ IMPLEMENTIRAN!!
-            if (this.weapon_1 != null) l7 = (short)this.weapon_1.id;//NE DELA - BO TREBA UPDEJTAT. ZAENKRAT SE UPORABLA GetComponent<NetworkPlayerCombatHandler>().update_equipped_weapons();   KER JE BLO ZE PREJ IMPLEMENTIRAN!!
-            if (this.shield != null) l8 = (short)this.shield.id;//NE DELA - BO TREBA UPDEJTAT. ZAENKRAT SE UPORABLA GetComponent<NetworkPlayerCombatHandler>().update_equipped_weapons();   KER JE BLO ZE PREJ IMPLEMENTIRAN!!
-
             if (this.backpack != null) l9 = (short)this.backpack.id;
 
             // GetComponent<NetworkPlayerCombatHandler>().send_network_update_weapons();//weapon trenutno equipan pa shield
 
             //mogoce zamenjat z proximity. nevem ce sicer ker gear morjo vidt vsi da nebo prletu lokalno en nagex k je u resnic do konca pogearan
             networkObject.SendRpc(p,RPC_SEND_LOADOUT_UPDATE,
-                l0, l1, l2, l3, l4, l5, l6, l7, l8, l9
+                l0, l1, l2, l3, l4,l9
                 );
 
             if (onLoadoutChangedCallback != null)
@@ -1318,19 +1236,13 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
             if (this.hands != null) l2 = (short)this.hands.id;
             if (this.legs != null) l3 = (short)this.legs.id;
             if (this.feet != null) l4 = (short)this.feet.id;
-            
-            if (this.ranged != null) l5 = (short)this.ranged.id;//NE DELA - BO TREBA UPDEJTAT. ZAENKRAT SE UPORABLA GetComponent<NetworkPlayerCombatHandler>().update_equipped_weapons();   KER JE BLO ZE PREJ IMPLEMENTIRAN!!
-            if (this.weapon_0 != null) l6 = (short)this.weapon_0.id;//NE DELA - BO TREBA UPDEJTAT. ZAENKRAT SE UPORABLA GetComponent<NetworkPlayerCombatHandler>().update_equipped_weapons();   KER JE BLO ZE PREJ IMPLEMENTIRAN!!
-            if (this.weapon_1 != null) l7 = (short)this.weapon_1.id;//NE DELA - BO TREBA UPDEJTAT. ZAENKRAT SE UPORABLA GetComponent<NetworkPlayerCombatHandler>().update_equipped_weapons();   KER JE BLO ZE PREJ IMPLEMENTIRAN!!
-            if (this.shield != null) l8 = (short)this.shield.id;//NE DELA - BO TREBA UPDEJTAT. ZAENKRAT SE UPORABLA GetComponent<NetworkPlayerCombatHandler>().update_equipped_weapons();   KER JE BLO ZE PREJ IMPLEMENTIRAN!!
-
             if (this.backpack != null) l9 = (short)this.backpack.id;
 
            // GetComponent<NetworkPlayerCombatHandler>().send_network_update_weapons();//weapon trenutno equipan pa shield
 
             //mogoce zamenjat z proximity. nevem ce sicer ker gear morjo vidt vsi da nebo prletu lokalno en nagex k je u resnic do konca pogearan
             networkObject.SendRpc(RPC_SEND_LOADOUT_UPDATE, Receivers.All,
-                l0, l1, l2, l3, l4, l5, l6, l7, l8, l9
+                l0, l1, l2, l3, l4, l9
                 );
 
             if (onLoadoutChangedCallback != null)
@@ -1381,19 +1293,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
 
         this.feet = Mapper.instance.getItemById((int)args.GetNext<short>());
 
-
-        this.ranged = Mapper.instance.getItemById((int)args.GetNext<short>());
-
-        this.weapon_0 = Mapper.instance.getItemById((int)args.GetNext<short>());
-
-        this.weapon_1 = Mapper.instance.getItemById((int)args.GetNext<short>());
-
-        this.shield = Mapper.instance.getItemById((int)args.GetNext<short>());
-
         this.backpack = Mapper.instance.getItemById((int)args.GetNext<short>());
-
-        GetComponent<NetworkPlayerCombatHandler>().update_equipped_weapons();
-
 
         if (onLoadoutChangedCallback != null)
             onLoadoutChangedCallback.Invoke();
@@ -1533,7 +1433,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         int loadout_index = args.GetNext<int>();
         Vector3 camera_vector = args.GetNext<Vector3>();
         Vector3 camera_forward = args.GetNext<Vector3>();
-        Item i = PopLoadoutItem(t, loadout_index);
+        Item i = PopLoadoutItem(t);
         instantiateDroppedItem(i, 1, camera_vector, camera_forward);
 
         if (current_equipped_weapon_was_removed(t, loadout_index))
@@ -1565,13 +1465,13 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         string type_s = args.GetNext<string>();
         Item.Type type = getItemTypefromString(type_s);
         Item loadout_item = null;
-        loadout_item = PopLoadoutItem(type, loadout_index);
+        loadout_item = PopLoadoutItem(type);
 
         int inv_index = args.GetNext<int>();
         Item inventory_item = this.items[inv_index];//poisce item glede na id-ju slota. id dobi z rpc k ga poda z imena tega starsa
 
 
-        if (SetLoadoutItem(inventory_item, loadout_index))//to bo zmer slo cez ker je slot ze prazen. smo ga izpraznli z popom. vrne true ce je item biu valid za nek loadout slot.
+        if (SetLoadoutItem(inventory_item))//to bo zmer slo cez ker je slot ze prazen. smo ga izpraznli z popom. vrne true ce je item biu valid za nek loadout slot.
             Remove(inv_index);
         if (loadout_item != null)
         {//loadout ni bil prazen prej tko da rabmo item dat v inventorij
@@ -1599,7 +1499,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         int loadout_index = args.GetNext<int>();
 
         Item loadout_item = null;
-        loadout_item = PopLoadoutItem(t, loadout_index);
+        loadout_item = PopLoadoutItem(t);
         if (loadout_item == null)
         {
             Debug.LogError("dragged loadout item is null. this is not possible.");
@@ -1619,7 +1519,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
                     if (loadout_item != null)
                     {
                         Add(loadout_item, 1, index);
-                        SetLoadoutItem(inventory_item, loadout_index);
+                        SetLoadoutItem(inventory_item);
                     }
                 }
                 else if (hasInventorySpace()) //ce se ne ujema ga mormo dodat na prvo prazno mesto v inventoriju
@@ -1709,13 +1609,15 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
             onItemChangedCallback.Invoke();//najbrz nepotrebno ker se itak klice senkat v rpcju. optimizacija ksnej
     }
 
+    /// <summary>
+    /// ne obstaja vec ker weaponi niso vec u loadoutu ampak se berejo direkt z hotbara
+    /// </summary>
+    /// <param name="args"></param>
     public override void LoadoutToLoadoutRequest(RpcArgs args)
     {
         if (!networkObject.IsServer || args.Info.SendingPlayer.NetworkId != networkObject.Owner.NetworkId) { Debug.LogError("client dela nekej kar mora server"); return; }
 
-        Item temp = weapon_1;
-        weapon_1 = weapon_0;
-        weapon_0 = temp;
+
 
         //rpc update
         sendNetworkUpdate(false, true);

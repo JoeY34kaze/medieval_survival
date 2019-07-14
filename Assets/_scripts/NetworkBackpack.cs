@@ -92,7 +92,7 @@ public class NetworkBackpack : NetworkBackpackBehavior
                 //lahko pobere
                 //networkObject.AssignOwnership(args.Info.SendingPlayer);
                 NetworkPlayerInventory n = player.GetComponent<NetworkPlayerInventory>();
-                n.SetLoadoutItem(Mapper.instance.getItemById(GetComponent<identifier_helper>().id), 0);//to nrdi samo server..
+                n.SetLoadoutItem(Mapper.instance.getItemById(GetComponent<identifier_helper>().id));//to nrdi samo server..
                 n.sendNetworkUpdate(false, true);
                 sendOwnershipResponse(args.Info.SendingPlayer);
             }
@@ -208,18 +208,18 @@ public class NetworkBackpack : NetworkBackpackBehavior
             //ce je backpack null ga samo not dej, ce je occupied probej nrdit swap, sicer nared nč
             if (this.nci.getItem(back_index) != null)
             {//swap
-                if (this.npi.GetItemLoadout(this.npi.getItemTypefromString(type), loadout_index).type == this.nci.getItem(back_index).type)
+                if (this.npi.GetItemLoadout(this.npi.getItemTypefromString(type)).type == this.nci.getItem(back_index).type)
                 {//ce se itema ujemata, sicer nima smisla
-                    Item l = this.npi.PopItemLoadout(t, loadout_index);
+                    Item l = this.npi.PopItemLoadout(t);
                     Item b = this.nci.popItem(back_index);
                     this.nci.setItem(back_index, l);
-                    this.npi.SetLoadoutItem(b, loadout_index);
+                    this.npi.SetLoadoutItem(b);
                     changed = true;
                 }
             }
             else
             {
-                this.nci.setItem(back_index, this.npi.PopItemLoadout(this.npi.getItemTypefromString(type), loadout_index));//backpack slot je null tko da je vse kul.
+                this.nci.setItem(back_index, this.npi.PopItemLoadout(this.npi.getItemTypefromString(type)));//backpack slot je null tko da je vse kul.
                 changed = true;
             }
 
@@ -296,7 +296,7 @@ public class NetworkBackpack : NetworkBackpackBehavior
             transform.SetParent(null);
             this.owner_id = -1;
             this.owning_player = null;
-            this.npi.RemoveItemLoadout(Item.Type.backpack, 0);
+            this.npi.RemoveItemLoadout(Item.Type.backpack);
             //nastimat nek force da ga nekam vrze? mybe. kodo ze mamo u instantiationu itemov
             if (r.isKinematic) r.isKinematic = false;
             if (!r.detectCollisions) r.detectCollisions = true;
@@ -325,14 +325,10 @@ public class NetworkBackpack : NetworkBackpackBehavior
             Item i = nci.getItem(backpack_index);
             //dob laodout item
             Item load;
-            int weaponIndex = 0;
-            if (i.type == Item.Type.weapon)
-            {
-                if (npi.GetWeapon0() != 0 && npi.GetWeapon1() == 0)//ce ima weapon u main handu pa nima u off handu ga damo v offhand
-                    weaponIndex = 1;
-            }
             
-                load = this.npi.PopItemLoadout(i.type,weaponIndex);
+            
+            
+            load = this.npi.PopItemLoadout(i.type);
 
 
             //nared swap
@@ -355,6 +351,11 @@ public class NetworkBackpack : NetworkBackpackBehavior
         if (networkObject.IsOwner) {
             networkObject.SendRpc(RPC_BACKPACK_TO_LOADOUT_REQUEST, Receivers.Server, index_backpack);
         }
+    }
+
+    internal void AddFirst(Item onStand)
+    {
+        this.nci.putFirst(onStand,1);
     }
 
     internal void localPlayerLoadoutToBackpackRequest(string loadout_type, int weapon_index, int backpack_index)
