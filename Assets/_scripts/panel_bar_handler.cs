@@ -22,10 +22,10 @@ public class panel_bar_handler : MonoBehaviour
     /// <param name="v"></param>
     internal void setSelectedSlot(int v)
     {
-        setSelectedSlot(v, -1);
+        setSelectedSlots(v, -1);
     }
 
-    internal void setSelectedSlot(int v, int z)
+    internal void setSelectedSlots(int v, int z)
     {
         this.selected.Clear();
         for (int i = 0; i < slots.Length; i++)
@@ -44,8 +44,4 @@ public class panel_bar_handler : MonoBehaviour
         }
     }
 
-    internal bool isSelectedIndex(int index)
-    {
-        return this.selected.Contains(index);
-    }
 }

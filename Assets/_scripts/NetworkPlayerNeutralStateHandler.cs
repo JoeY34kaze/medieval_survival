@@ -3,6 +3,7 @@ using BeardedManStudios.Forge.Networking;
 using BeardedManStudios.Forge.Networking.Unity;
 using System;
 using UnityEngine;
+using System.Collections.Generic;
 
 public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandlerBehavior
 {
@@ -12,7 +13,9 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
     private NetworkPlayerInventory npi;
 
     public Transform toolContainerOnHand;
-    
+
+    internal int selected_index = -1;
+    internal int selected_index_shield = -1;
 
     private void Start()
     {
@@ -20,6 +23,7 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
         this.anim_logic = GetComponent<NetworkPlayerAnimationLogic>();
         this.bar_handler = GetComponentInChildren<panel_bar_handler>();
         this.npi = GetComponent<NetworkPlayerInventory>();
+
     }
 
     private void Update()
@@ -99,10 +103,25 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
     /// </summary>
     /// <param name="index"></param>
     internal void localBarSlotSelectionRequest(int index) {
-        if(!bar_handler.isSelectedIndex(index))
-            networkObject.SendRpc(RPC_BAR_SLOT_SELECTION_REQUEST, Receivers.Server, index);
-        else
-            networkObject.SendRpc(RPC_BAR_SLOT_SELECTION_REQUEST, Receivers.Server, -1);
+        networkObject.SendRpc(RPC_BAR_SLOT_SELECTION_REQUEST, Receivers.Server, index);
+
+    }
+
+    /// <summary>
+    /// wrapper ki preprecu null exception pri item.id
+    /// </summary>
+    /// <returns></returns>
+    private int getBarItemIdFromIndex(int id) {
+        Item k = npi.GetBarItem(id);
+        if (k == null) return -1;
+        else return k.id;
+    }
+
+    private Item.Type getBarItemTypeFromIndex(int id)
+    {
+        Item k = npi.GetBarItem(id);
+        if (k == null) return Item.Type.chest;
+        else return k.type;
     }
 
     public override void BarSlotSelectionRequest(RpcArgs args)
@@ -110,27 +129,55 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
         if (networkObject.IsServer && args.Info.SendingPlayer.NetworkId == networkObject.Owner.NetworkId) {
             if (isRequestValid()) {
                 int index = args.GetNext<int>();
+                
                 Item i = npi.GetBarItem(index);
                 if (i != null)
                 {
-                    //vrnt mora response. ownerju vrne drugacn response kot drugim so..
-                    lock (NetworkManager.Instance.Networker.Players)
+
+                    //ce smo dobil id shielda in nimamo equipanga shielda samo equipamo shield
+                    if (getBarItemTypeFromIndex(index) == Item.Type.shield && this.selected_index_shield == -1)
                     {
-                        NetworkManager.Instance.Networker.IteratePlayers((player) =>
-                        {
-                            if (player.NetworkId == networkObject.Owner.NetworkId) //passive target
-                            {
-                                networkObject.SendRpc(RPC_BAR_SLOT_SELECTION_RESPONSE, Receivers.Owner, i.id, index);
-                            }
-                            else {
-                                networkObject.SendRpc(player,RPC_BAR_SLOT_SELECTION_RESPONSE, i.id, -1);
-                            }
-                        });
+                        this.selected_index_shield = index;
                     }
+
+                    //ce mamo izbran shield in smo dobil index shielda mormo disablat samo shield
+                    else if (this.selected_index_shield == index)
+                    {
+                        this.selected_index_shield = -1;
+                    }
+                    //ce mamo izbran shield in smo dobil index druzga shielda mormo zamenjat shield
+                    else if (this.selected_index_shield != -1 && i.type == Item.Type.shield)
+                    {
+                        this.selected_index_shield = index;
+                    }//dobil smo ukaz da nj damo weapon stran
+                    else if (this.selected_index_shield != -1 && this.selected_index == index)
+                    {
+                        this.selected_index = -1;
+                    }
+                    //ce mamo izbran weapon in shield in smo dobil nov weapon mormo zamenjat weapon
+                    else if (this.selected_index_shield != -1 && getBarItemTypeFromIndex(this.selected_index) == Item.Type.weapon && i.type == Item.Type.weapon)
+                    {
+                        this.selected_index = index;
+                    }
+                    //ce smo dobil karkoli druzga mormo disablat shield in karkoli smo mel in poslat samo tisto
+                    else if (this.selected_index == index) {
+                        this.selected_index = -1;
+                    }
+                    else
+                    {
+
+                        this.selected_index = index;
+                    }
+
                 }
-                else {//bar item je null. vrnemo rpc k pove da nj scleara kar ma u handu in scleara na baru. to se nrdi ce prtisne isti bar k ma ze izbran recimo
-                    networkObject.SendRpc(RPC_BAR_SLOT_SELECTION_RESPONSE,Receivers.All, -1, -1);
+                else {
+                    this.selected_index = -1;
+                    //this.selected_index_shield = -1;
                 }
+
+                //tle posljemo zdej rpc
+                //TODO: ownerju poslat druugacn rpc kot drugim, drugi nebi smel vidt indexa ker je to slaba stvar - ESP
+                networkObject.SendRpc(RPC_BAR_SLOT_SELECTION_RESPONSE, Receivers.All, getBarItemIdFromIndex(this.selected_index), this.selected_index, getBarItemIdFromIndex(this.selected_index_shield), selected_index_shield);
             }
         }
     }
@@ -149,14 +196,23 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
         if (args.Info.SendingPlayer.NetworkId == 0) {
             int item_id = args.GetNext<int>();
             int index = args.GetNext<int>();
+
+            int item_id2 = args.GetNext<int>();//za shield rabmo met 2 indexa in tko
+            int index2 = args.GetNext<int>();
+
+            Debug.Log("bar update - " + index);
             if (networkObject.IsOwner)
             {
-                setSelectedItem(Mapper.instance.getItemById(item_id));
-                bar_handler.setSelectedSlot(index);
+                setSelectedItems(Mapper.instance.getItemById(item_id), Mapper.instance.getItemById(item_id2));
+                bar_handler.setSelectedSlots(index,index2);
             }
             else {
-                setSelectedItem(Mapper.instance.getItemById(item_id));
+                setSelectedItems(Mapper.instance.getItemById(item_id), Mapper.instance.getItemById(item_id2));
             }
+
+            //ZA COMBAT MODE - precej neefektivno ker pri menjavi itema na baru se klice dvakrat rpc...........
+            combat_handler.ChangeCombatMode(Mapper.instance.getItemById(item_id));
+            
         }
     }
 
@@ -164,11 +220,34 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
     /// na podlagi tega itema i, ga nastela u roke playerju
     /// </summary>
     /// <param name="i"></param>
-    private void setSelectedItem(Item i) {//item je lahko null
+    private void setSelectedItems(Item i, Item shield) {//item je lahko null
         if(i!=null)Debug.Log("Trying to place " + i.Display_name + " in the hands");
         else Debug.Log("Trying to clear everything currently in the hands");
+        if (i != null)
+        {
+            if (i.type == Item.Type.tool) SetToolSelected(i);
+            else if (i.type == Item.Type.weapon || i.type == Item.Type.ranged)
+            {
+                combat_handler.currently_equipped_weapon_id = i.id;
+            }
+            else Debug.Log("item youre trying to equip cannot be equipped : " + i.Display_name);
+        }
+        else {//clearat vse razen shielda ce je slucajn equipan - bom vrgu u combat handler pa nj se tam jebe
+            SetToolSelected(i);
+            combat_handler.currently_equipped_weapon_id = -1;
+        }
+
+        if (shield != null)
+            combat_handler.currently_equipped_shield_id = shield.id;
+        else 
+            combat_handler.currently_equipped_shield_id = -1;
+        combat_handler.update_equipped_weapons();//weapon in shield
+    }
+
+    private void SetToolSelected(Item i) {
         gathering_tool_collider_handler temp;
-        foreach (Transform child in this.toolContainerOnHand) {
+        foreach (Transform child in this.toolContainerOnHand)
+        {
             temp = child.GetComponent<gathering_tool_collider_handler>();
             if (temp.item != null)
             {
@@ -183,7 +262,8 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
                         child.gameObject.SetActive(false);
                     }
                 }
-                else {//i == null ->clear all
+                else
+                {//i == null ->clear all
                     child.gameObject.SetActive(false);
                 }
             }
@@ -284,5 +364,11 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
             }
         }
         return null;
+    }
+
+    internal bool isNotSelected(int a, int b)
+    {
+        if (a == this.selected_index_shield || a == this.selected_index || b == this.selected_index_shield || b == this.selected_index) return false;
+        return true;
     }
 }

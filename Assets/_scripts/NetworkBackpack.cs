@@ -379,9 +379,10 @@ public class NetworkBackpack : NetworkBackpackBehavior
         {
             int back_index = args.GetNext<int>();
             int bar_index = args.GetNext<int>();
-
-            if (this.nci.items[back_index] != null)
+            if (npi.neutralStateHandler.isNotSelected(bar_index, -1))
             {
+                if (this.nci.items[back_index] != null)
+                {
 
                     Item b = this.nci.popItem(back_index);
                     Item i = this.npi.popBarItem(bar_index);
@@ -391,8 +392,9 @@ public class NetworkBackpack : NetworkBackpackBehavior
 
                     sendBackpackItemsUpdate();//za backpack
                     this.npi.sendNetworkUpdate(true, false);
-          
 
+
+                }
             }
         }
 
@@ -405,10 +407,12 @@ public class NetworkBackpack : NetworkBackpackBehavior
             int back_index = args.GetNext<int>();
             int bar_index = args.GetNext<int>();
 
-            if (npi.bar_items[bar_index]!=null)
+            if (npi.neutralStateHandler.isNotSelected(bar_index, -1))
             {
-                //if (itemAllowedOnBar(this.nci.items[back_index].type))
-                //{
+                if (npi.bar_items[bar_index] != null)
+                {
+                    //if (itemAllowedOnBar(this.nci.items[back_index].type))
+                    //{
                     Item b = this.nci.popItem(back_index);
                     Item i = this.npi.popBarItem(bar_index);
 
@@ -416,8 +420,10 @@ public class NetworkBackpack : NetworkBackpackBehavior
                     this.nci.setItem(back_index, i);
 
                     sendBackpackItemsUpdate();//za backpack
-                    this.npi.sendNetworkUpdate(true, false); }//za inventorij/bar
-            //}
+                    this.npi.sendNetworkUpdate(true, false);
+                }//za inventorij/bar
+                 //}
+            }
         }
 
     }

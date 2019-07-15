@@ -42,9 +42,6 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
 
     private NetworkPlayerNeutralStateHandler neutralStateHandler;
 
-    internal int hotbar_index_of_shield;
-    internal int hotbar_index_of_weapon;
-    internal int hotbar_index_of_ranged;
 
     private int getWeaponClassForAnimator(int weapon_id)//tole bo treba updejtat i guess.
     {
@@ -67,17 +64,32 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
 
     internal Item GetCurrentlyActiveWeapon()
     {
-        throw new NotImplementedException();
+        Item i = Mapper.instance.getItemById(this.currently_equipped_weapon_id);
+        if (i != null) {
+            if (i.type == Item.Type.weapon)
+            {
+                return i;
+            }
+        }
+        return null;
     }
 
     internal Item GetCurrentlyActiveShield()
     {
-        throw new NotImplementedException();
+        return Mapper.instance.getItemById(this.currently_equipped_shield_id);
     }
 
     internal Item GetCurrentlyActiveRanged()
     {
-        throw new NotImplementedException();
+        Item i = Mapper.instance.getItemById(this.currently_equipped_weapon_id);
+        if (i != null)
+        {
+            if (i.type == Item.Type.ranged)
+            {
+                return i;
+            }
+        }
+        return null;
     }
 
 
@@ -91,7 +103,7 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
     /// </summary>
     /// <returns></returns>
     private bool is_allowed_to_attack_local() {
-        if (stats.downed || stats.dead || !player_local_locks.fire1_available)
+        if (stats.downed || stats.dead )
         {
             return false; //Ce je downan da nemora vec napadat pa take fore. to je precej loše ker je na clientu. ksnej bo treba prenest to logiko na server ker tole zjebe ze cheatengine
         }
@@ -113,38 +125,47 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
             return;
         }
 
+        if (Input.GetButtonDown("Fire2")) {
+            Debug.Log("sad");
+            Debug.Log("fire2");
+        }
 
         //input glede menjave orozja pa tega se izvaja v neutralStatehandlerju
-        if (Input.GetMouseButtonDown(0))
+
+        if (this.combat_mode == 1)
         {
-            if (this.combat_mode == 1)
-            {
-                if (hasWeaponSelected()) {
-                    if (Input.GetButtonDown("Fire1") && !this.in_attack_animation)
-                    {
-                        //fire
-                        setup_Fire1_lock();
-                        networkObject.SendRpc(RPC_NETWORK_FIRE1, Receivers.Server);
-                    }
-                    else if (Input.GetButtonDown("Fire2") && !this.in_attack_animation && !this.blocking)
-                    {
-                        //block
-                        networkObject.SendRpc(RPC_NETWORK_FIRE2, Receivers.Server);
-                    }
-                    else if (Input.GetButtonUp("Fire2")) {
-                        //nehov blokirat
-                        networkObject.SendRpc(RPC_NETWORK_FIRE2, Receivers.Server);
-                    }//fejkanje
-                    if (Input.GetButtonDown("Fire2") && this.in_attack_animation)
-                    {
-                        networkObject.SendRpc(RPC_NETWORK_FEIGN, Receivers.Server);
-                    }
-
+            if (hasWeaponSelected()) {
+                if (Input.GetButtonDown("Fire1") && !this.in_attack_animation)
+                {
+                    //fire  --------------------------//ce server nrdi tole tukaj potem faila rpc
+                    if (!networkObject.IsServer) {
+                        if (player_local_locks.fire1_available)
+                            setup_Fire1_lock();
+                        else
+                            return;
+                    }//--------------------------------ce server nrdi tole tukaj potem faila rpc
+                    
+                    networkObject.SendRpc(RPC_NETWORK_FIRE1, Receivers.Server);
                 }
+                else if (Input.GetButtonDown("Fire2") && !this.in_attack_animation && !this.blocking)
+                {
+                    //block
+                    networkObject.SendRpc(RPC_NETWORK_FIRE2, Receivers.Server);
+                }
+                else if (Input.GetButtonUp("Fire2")) {
+                    //nehov blokirat
+                    networkObject.SendRpc(RPC_NETWORK_FIRE2, Receivers.Server);
+                }//fejkanje
+                if (Input.GetButtonDown("Fire2") && this.in_attack_animation)
+                {
+                    networkObject.SendRpc(RPC_NETWORK_FEIGN, Receivers.Server);
+                }
+
             }
-
-
         }
+
+
+        
     }
 
     /// <summary>
@@ -226,9 +247,12 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
 
     IEnumerator StartFire1Lock(float timeout)
     {
-        player_local_locks.fire1_available = false;
-        yield return new WaitForSeconds(timeout);
-        player_local_locks.fire1_available = true;
+        if (networkObject.IsServer)
+        {
+            player_local_locks.fire1_available = false;
+            yield return new WaitForSeconds(timeout);
+            player_local_locks.fire1_available = true;
+        }
     }
 
     private void setup_Fire1_lock()
@@ -257,10 +281,11 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
     /// <summary>
     /// Na serverju se aktivira collider na weaponu s ktermu napadamo. to metodo naj bi klical animation event.
     /// </summary>
-    public void activate_weapon_collider_server()
+    public void activate_weapon_collider_server(int b)
     {
         if (!networkObject.IsServer) return;
         bool active = false;
+        if (b > 0) active = true;
         Debug.Log("Activating colliders  " +  active);
 
         foreach (Transform child in weapon_slot) {
@@ -317,9 +342,11 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
         if (!networkObject.IsServer) return;
         // Debug.Log("server : got change combat mode request");
         int next = 0;
-        if (i!=null) 
-            if(i.type==Item.Type.weapon || i.type==Item.Type.ranged)
-                networkObject.SendRpc(RPC_CHANGE_COMBAT_MODE_RESPONSE, Receivers.All, next);
+        if (i != null)
+            if (i.type == Item.Type.weapon || i.type == Item.Type.ranged)
+                next = 1;
+
+        networkObject.SendRpc(RPC_CHANGE_COMBAT_MODE_RESPONSE, Receivers.All, next);
         
     }
 
@@ -336,15 +363,17 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
         this.combat_mode = (byte)new_mode;
         // Debug.Log("got change combat mode response : "+this.combat_mode + " "+new_mode);
 
-        animator.setCombatState((byte)new_mode);
+        
         if (new_mode == 0)
         {
+            animator.setCombatState((byte)new_mode);
             place_shield_on_back();
             neutralStateHandler.NeutralStateSetup();
         }
         else {
             neutralStateHandler.CombatStateSetup();
             update_equipped_weapons();
+            animator.setCombatState((byte)new_mode);
         }
     }
 
@@ -374,10 +403,10 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
         {
             if(networkObject.IsServer)
             {//do server stuff
-                //colliderje, hit detection vse uglavnem
+             //coolliderji se aktivirajo na animation eventu (activate_weapon_collider_server())
             }
-
             //vsi - animacije
+            animator.setFire1();//animator in inAttackAnimation
         }
 
     }

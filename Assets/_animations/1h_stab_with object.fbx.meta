@@ -444,13 +444,21 @@ ModelImporter:
         floatParameter: 0
         intParameter: 1
         messageOptions: 0
-      - time: 1
+      - time: 0.9634146
         functionName: activate_weapon_collider_server
         data: 
         objectReferenceParameter: {fileID: 11500000, guid: d2c7f9893eced794c9bd82a47f46cdbe,
           type: 3}
         floatParameter: 0
         intParameter: -1
+        messageOptions: 0
+      - time: 1
+        functionName: handleEndOfAttackAnimation
+        data: 
+        objectReferenceParameter: {fileID: 11500000, guid: d2c7f9893eced794c9bd82a47f46cdbe,
+          type: 3}
+        floatParameter: 0
+        intParameter: 0
         messageOptions: 0
       transformMask: []
       maskType: 3

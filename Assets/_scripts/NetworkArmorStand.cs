@@ -412,7 +412,7 @@ public class NetworkArmorStand : NetworkArmorStandBehavior
                 Debug.LogError("collider_index doesnt match anything!");
                 break;
         }
-        npi.sendNetworkUpdate(false, true);
+        npi.sendNetworkUpdate(true, true);
         networkObject.SendRpc(RPC_ARMOR_STAND_REFRESH, Receivers.All, this.head, this.chest, this.hands, this.legs, this.feet, this.weapon_0, -1, this.shield, this.ranged);
     }
 

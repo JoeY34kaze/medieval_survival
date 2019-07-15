@@ -55,6 +55,8 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
     public Transform backpackSpot; //tukaj se parenta backpack
     public backpack_local_panel_handler backpackPanel;
     public panel_bar_handler barPanel;
+    internal NetworkPlayerNeutralStateHandler neutralStateHandler;
+
     private void Start()
     {
         this.avatar = GetComponent<DynamicCharacterAvatar>();
@@ -64,6 +66,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
             slots[i] = panel_personalInventorySlots[i].GetComponent<InventorySlotPersonal>();
         items = new Item[slots.Length];
         this.combatHandler = GetComponent<NetworkPlayerCombatHandler>();
+        this.neutralStateHandler = GetComponent<NetworkPlayerNeutralStateHandler>();
     }
 
 
@@ -110,14 +113,15 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
     }
 
     /// <summary>
-    /// potegne z hotbara
+    /// potegne z hotbara - samo server klice
     /// </summary>
     /// <returns>item k smo ga sunli z hotbara</returns>
     internal Item PopWeaponItemInHand()
     {
+        if (!networkObject.IsServer) return null;
         if (combatHandler.GetCurrentlyActiveWeapon() != null) {
-            Item i = this.bar_items[combatHandler.hotbar_index_of_weapon];
-            this.bar_items[combatHandler.hotbar_index_of_weapon] = null;
+            Item i = this.bar_items[neutralStateHandler.selected_index];
+            this.bar_items[neutralStateHandler.selected_index] = null;
             return i;
                 }
         return null;
@@ -129,10 +133,11 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
     /// <returns>item k smo ga sunli z hotbara</returns>
     internal Item PopShieldItemInHand()
     {
+        if (!networkObject.IsServer) return null;
         if (combatHandler.GetCurrentlyActiveShield() != null)
         {
-            Item i = this.bar_items[combatHandler.hotbar_index_of_shield];
-            this.bar_items[combatHandler.hotbar_index_of_shield] = null;
+            Item i = this.bar_items[neutralStateHandler.selected_index_shield];
+            this.bar_items[neutralStateHandler.selected_index_shield] = null;
             return i;
         }
         return null;
@@ -144,10 +149,11 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
     /// <returns>item k smo ga sunli z hotbara</returns>
     internal Item PopRangedItemInHand()
     {
+        if (!networkObject.IsServer) return null;
         if (combatHandler.GetCurrentlyActiveRanged() != null)
         {
-            Item i = this.bar_items[combatHandler.hotbar_index_of_ranged];
-            this.bar_items[combatHandler.hotbar_index_of_ranged] = null;
+            Item i = this.bar_items[neutralStateHandler.selected_index];
+            this.bar_items[neutralStateHandler.selected_index] = null;
             return i;
         }
         return null;
@@ -321,7 +327,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
             if (resp.type == Item.Type.weapon || resp.type == Item.Type.shield || resp.type == Item.Type.ranged || resp.type == Item.Type.tool) {
                 BarAddFirst(resp);
             }
-            if (hasInventorySpace())
+            else if (hasInventorySpace())
                 AddFirst(resp, quantity);
             else if (this.backpack != null)
             {//ce ima backpack
@@ -537,7 +543,9 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
     {
         if (networkObject.IsServer) {
             for (int i = 0; i < this.bar_items.Length; i++) {
-                if(this.bar_items[i]==null)this.bar_items[i] = onStand;
+                if (this.bar_items[i] == null) { this.bar_items[i] = onStand;
+                    return;
+                }
             }
         }
     }
@@ -1656,17 +1664,20 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
             int bar_index = args.GetNext<int>();
             int inv_index = args.GetNext<int>();
 
-            if (this.items[inv_index] != null)
+            if (neutralStateHandler.isNotSelected(bar_index, -1))
             {
+                if (this.items[inv_index] != null)
+                {
 
-                Item b = popPersonalItem(inv_index);
-                Item i = popBarItem(bar_index);
+                    Item b = popPersonalItem(inv_index);
+                    Item i = popBarItem(bar_index);
 
-                setBarItem(b, bar_index);
-                setPersonalItem(i,inv_index);
+                    setBarItem(b, bar_index);
+                    setPersonalItem(i, inv_index);
 
-                sendNetworkUpdate(true, false);
+                    sendNetworkUpdate(true, false);
 
+                }
             }
         }
     }
@@ -1677,13 +1688,16 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         {
             int inv_index = args.GetNext<int>();
             int bar_index = args.GetNext<int>();
-            if (this.bar_items[bar_index] != null)
+            if (neutralStateHandler.isNotSelected(bar_index, -1))
             {
+                if (this.bar_items[bar_index] != null)
+                {
                     Item b = popPersonalItem(inv_index);
                     Item i = popBarItem(bar_index);
                     setBarItem(b, bar_index);
                     setPersonalItem(i, inv_index);
                     sendNetworkUpdate(true, false);
+                }
             }
         }
 
@@ -1696,11 +1710,12 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
             int a = args.GetNext<int>();
             int b = args.GetNext<int>();
 
-            Item x = popBarItem(a);
-            setBarItem(popBarItem(b),a);
-            setBarItem(x, b);
-            sendNetworkUpdate(true, false);
-
+            if (neutralStateHandler.isNotSelected(a, b)) { //TODO ce je trenutno izbran item je blokiran pri menjavi. spremenit tko da lhako menja ampak se zamenja potem tud index v neutralStateHandlerju
+                Item x = popBarItem(a);
+                setBarItem(popBarItem(b), a);
+                setBarItem(x, b);
+                sendNetworkUpdate(true, false);
+            }
         }
 
     }
