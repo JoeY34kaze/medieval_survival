@@ -318,6 +318,9 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         Item resp = try_to_upgrade_loadout(item);
         if (resp != null)
         {
+            if (resp.type == Item.Type.weapon || resp.type == Item.Type.shield || resp.type == Item.Type.ranged || resp.type == Item.Type.tool) {
+                BarAddFirst(resp);
+            }
             if (hasInventorySpace())
                 AddFirst(resp, quantity);
             else if (this.backpack != null)
@@ -325,23 +328,13 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
                 if (this.backpack_inventory.hasSpace())
                 {
                     this.backpack_inventory.putFirst(resp, quantity);
-                    this.backpack_inventory.sendItemsUpdate();
+                    this.backpack_inventory.sendBackpackItemsUpdate();
                 }
                 else return false;
             }
-            else {//nikjer ni blo placa. rust u tem primeru spawna item nazaj, ampak mi lahko recemo simpl da ga ne pobere.
-                
+            else if(hasBarSpace()) {//nikjer ni blo placa. rust u tem primeru spawna item nazaj, ampak mi lahko recemo simpl da ga ne pobere.
+                BarAddFirst(resp);
             }
-        }
-
-        else
-        {//vse updejtat ker ta funkcija negre cez uno tavelko...
-
-
-            NetworkPlayerCombatHandler n = GetComponent<NetworkPlayerCombatHandler>();
-            //za weapone treba ksnej poskrbet da je server authoritative. rework pending
-            n.update_equipped_weapons();
-            n.setCurrentWeaponToFirstNotEmpty();//poslat rpc ?yes
         }
         sendNetworkUpdate(true, true);//posljemo obojeee optimizacija later
         return true;
@@ -1436,12 +1429,6 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         Item i = PopLoadoutItem(t);
         instantiateDroppedItem(i, 1, camera_vector, camera_forward);
 
-        if (current_equipped_weapon_was_removed(t, loadout_index))
-        {
-            //set current weapon to first non empty.
-            combatHandler.setCurrentWeaponToFirstNotEmpty();
-        }
-
         //rpc update
         sendNetworkUpdate(false, true);
 
@@ -1544,19 +1531,13 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         }
         else if (backpackHasSpace()) {//ce ma plac u backpacku ga dodaj pa sinhronizirej
             this.backpack_inventory.putFirst(loadout_item, 1);
-            this.backpack_inventory.sendItemsUpdate();
+            this.backpack_inventory.sendBackpackItemsUpdate();
         }
         else
         {
             Debug.Log("No Space in inventory and cannot place in inventory! Dropping item instead. we have no camera data though");
             instantiateDroppedItem(loadout_item, 1, transform.position + new Vector3(0, 1, 0), transform.forward);
         }
-
-        if (current_equipped_weapon_was_removed(t, loadout_index)) {
-            //set current weapon to first non empty.
-            combatHandler.setCurrentWeaponToFirstNotEmpty();
-        }
-
         //rpc update
         sendNetworkUpdate(true, true);
 
@@ -1575,23 +1556,6 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         return false;
     }
 
-
-    public bool current_equipped_weapon_was_removed(Item.Type t, int loadout_index)
-    {
-        //get current weapon
-        //0,1 unarmed
-        //2-0
-        //3 -1
-        //4 - ranged slot
-        if (t == Item.Type.weapon) {
-            int index = combatHandler.index_of_currently_selected_weapon_from_equipped_weapons;
-            if ((index - 2) == loadout_index) return true;
-        } else if (t == Item.Type.ranged) {
-            int index = combatHandler.index_of_currently_selected_weapon_from_equipped_weapons;
-            if (index == 4) return true;
-        }
-        return false;
-    }
 
     public override void InventoryToInventoryRequest(RpcArgs args)
     {
@@ -1694,20 +1658,15 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
 
             if (this.items[inv_index] != null)
             {
-                if (NetworkBackpack.itemAllowedOnBar(this.items[inv_index].type))
-                {
-                    Item b = popPersonalItem(inv_index);
-                    Item i = popBarItem(bar_index);
 
-                    setBarItem(b, bar_index);
-                    setPersonalItem(i,inv_index);
+                Item b = popPersonalItem(inv_index);
+                Item i = popBarItem(bar_index);
 
-                    sendNetworkUpdate(true, false);
-                }//za inventorij/bar
-                else
-                {
-                    Debug.LogError("Item not allowed on bar");
-                }
+                setBarItem(b, bar_index);
+                setPersonalItem(i,inv_index);
+
+                sendNetworkUpdate(true, false);
+
             }
         }
     }

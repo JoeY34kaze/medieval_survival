@@ -31,7 +31,7 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
 
     public float block_damage_reduction = 0.025f;  //to bomo pobral z itema
 
-    public float fire1_cooldown = 0.7f;
+    internal float fire1_cooldown = 0.6f;
 
     private NetworkPlayerInventory npi;
 

@@ -274,7 +274,7 @@ public class Interactable_radial_menu : MonoBehaviour
     {
         show_menu(stand);
 
-        this.number_of_elements = 12;
+        this.number_of_elements = 111;
         menu.angleOffset = (360f / this.number_of_elements);
         center_label.text = "Armor Stand";
 
@@ -289,9 +289,8 @@ public class Interactable_radial_menu : MonoBehaviour
         GameObject btn_7 = GameObject.Instantiate(Resources.Load<GameObject>("radial_menu_elements/interaction_armor_stand_feet"));
 
         GameObject btn_8 = GameObject.Instantiate(Resources.Load<GameObject>("radial_menu_elements/interaction_armor_stand_weapon0"));
-        GameObject btn_9 = GameObject.Instantiate(Resources.Load<GameObject>("radial_menu_elements/interaction_armor_stand_weapon1"));
-        GameObject btn_10 = GameObject.Instantiate(Resources.Load<GameObject>("radial_menu_elements/interaction_armor_stand_shield"));
-        GameObject btn_11 = GameObject.Instantiate(Resources.Load<GameObject>("radial_menu_elements/interaction_armor_stand_ranged"));
+        GameObject btn_9 = GameObject.Instantiate(Resources.Load<GameObject>("radial_menu_elements/interaction_armor_stand_shield"));
+        GameObject btn_10 = GameObject.Instantiate(Resources.Load<GameObject>("radial_menu_elements/interaction_armor_stand_ranged"));
 
         menu.elements.Clear();
 
@@ -306,7 +305,6 @@ public class Interactable_radial_menu : MonoBehaviour
         setup_button(btn_8, menu.angleOffset * 8);
         setup_button(btn_9, menu.angleOffset * 9);
         setup_button(btn_10, menu.angleOffset * 10);
-        setup_button(btn_11, menu.angleOffset * 11);
 
         Button button = btn_0.transform.GetComponentInChildren<Button>();
         button.onClick.RemoveAllListeners();
@@ -346,13 +344,9 @@ public class Interactable_radial_menu : MonoBehaviour
 
         button = btn_9.transform.GetComponentInChildren<Button>();
         button.onClick.RemoveAllListeners();
-        button.onClick.AddListener(delegate { armor_stand_interaction_button_weapon1(); });
-
-        button = btn_10.transform.GetComponentInChildren<Button>();
-        button.onClick.RemoveAllListeners();
         button.onClick.AddListener(delegate { armor_stand_interaction_button_shield(); });
 
-        button = btn_11.transform.GetComponentInChildren<Button>();
+        button = btn_10.transform.GetComponentInChildren<Button>();
         button.onClick.RemoveAllListeners();
         button.onClick.AddListener(delegate { armor_stand_interaction_button_ranged(); });
 
@@ -433,12 +427,6 @@ public class Interactable_radial_menu : MonoBehaviour
     {
         hide_radial_menu();
         interaction.local_armor_stand_interaction_shield_request(this.target);
-    }
-
-    private void armor_stand_interaction_button_weapon1()
-    {
-        hide_radial_menu();
-        interaction.local_armor_stand_interaction_weapon1_request(this.target);
     }
 
     private void armor_stand_interaction_button_weapon0()

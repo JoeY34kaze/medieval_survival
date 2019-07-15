@@ -44,11 +44,6 @@ public class Interactible_ArmorStand : Interactable
         nas.local_interaction_request(7, server_id);
     }
 
-    internal void local_player_interaction_weapon1_request(uint server_id)
-    {
-        nas.local_interaction_request(6, server_id);
-    }
-
     internal void local_player_interaction_weapon0_request(uint server_id)
     {
         nas.local_interaction_request(5, server_id);

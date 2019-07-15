@@ -45,7 +45,7 @@ public class NetworkBackpack : NetworkBackpackBehavior
         return null;
     }
 
-    public void sendItemsUpdate() {
+    public void sendBackpackItemsUpdate() {
         if (networkObject.IsServer) {
             networkObject.SendRpc(networkObject.Owner, RPC_BACKPACK_ITEMS_OWNER_RESPONSE, nci.getItemsNetwork());
         }
@@ -134,7 +134,7 @@ public class NetworkBackpack : NetworkBackpackBehavior
         {
             Item i = this.nci.popItem(args.GetNext<int>());
             this.npi.instantiateDroppedItem(i, 1, args.GetNext<Vector3>(), args.GetNext<Vector3>());
-            sendItemsUpdate();
+            sendBackpackItemsUpdate();
         }
 
     }
@@ -170,7 +170,7 @@ public class NetworkBackpack : NetworkBackpackBehavior
     {
         if (networkObject.IsServer && args.Info.SendingPlayer.NetworkId == networkObject.Owner.NetworkId) {
             this.nci.swap(args.GetNext<int>(),args.GetNext<int>());
-            sendItemsUpdate();
+            sendBackpackItemsUpdate();
         }
     }
     /// <summary>
@@ -190,7 +190,7 @@ public class NetworkBackpack : NetworkBackpackBehavior
             this.npi.setPersonalItem(b, inv_index);
             this.nci.setItem(back_index, i);
 
-            sendItemsUpdate();
+            sendBackpackItemsUpdate();
             this.npi.sendNetworkUpdate(true, false);
         }
     }
@@ -202,7 +202,7 @@ public class NetworkBackpack : NetworkBackpackBehavior
             bool changed = false;
             string type = args.GetNext<string>();
             Item.Type t = this.npi.getItemTypefromString(type);
-            int loadout_index = args.GetNext<int>();
+            int blank = args.GetNext<int>();
             int back_index = args.GetNext<int>();
 
             //ce je backpack null ga samo not dej, ce je occupied probej nrdit swap, sicer nared nč
@@ -225,13 +225,7 @@ public class NetworkBackpack : NetworkBackpackBehavior
 
             if (changed) {//ker smo stvari spremenil rabmo sinhronizirat loadout in backpack.
 
-                if (this.npi.current_equipped_weapon_was_removed(t, loadout_index))
-                {
-                    //set current weapon to first non empty.
-                    this.npi.combatHandler.setCurrentWeaponToFirstNotEmpty();
-                }
-
-                this.sendItemsUpdate();
+                this.sendBackpackItemsUpdate();
                 this.npi.sendNetworkUpdate(false, true);
             }
         }
@@ -388,20 +382,17 @@ public class NetworkBackpack : NetworkBackpackBehavior
 
             if (this.nci.items[back_index] != null)
             {
-                if (itemAllowedOnBar(this.nci.items[back_index].type))
-                {
+
                     Item b = this.nci.popItem(back_index);
                     Item i = this.npi.popBarItem(bar_index);
 
                     this.npi.setBarItem(b, bar_index);
                     this.nci.setItem(back_index, i);
 
-                    sendItemsUpdate();//za backpack
+                    sendBackpackItemsUpdate();//za backpack
                     this.npi.sendNetworkUpdate(true, false);
-                }//za inventorij/bar
-                else {
-                    Debug.LogError("Item not allowed on bar");
-                }
+          
+
             }
         }
 
@@ -424,17 +415,11 @@ public class NetworkBackpack : NetworkBackpackBehavior
                     this.npi.setBarItem(b, bar_index);
                     this.nci.setItem(back_index, i);
 
-                    sendItemsUpdate();//za backpack
+                    sendBackpackItemsUpdate();//za backpack
                     this.npi.sendNetworkUpdate(true, false); }//za inventorij/bar
             //}
         }
 
-    }
-
-    public static bool itemAllowedOnBar(Item.Type type)
-    {
-        if (type == Item.Type.weapon || type == Item.Type.ranged || type == Item.Type.shield || type == Item.Type.head || type == Item.Type.chest || type == Item.Type.hands || type == Item.Type.legs || type == Item.Type.feet || type == Item.Type.backpack) return false;
-        return true;
     }
 
     internal void localPlayerBackpackToBarRequest(int back, int bar)//do tle dela

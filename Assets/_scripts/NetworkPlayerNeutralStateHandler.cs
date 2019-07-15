@@ -25,17 +25,18 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
     private void Update()
     {
         if (networkObject.IsOwner) {
-            if (combat_handler.Combat_mode == 0) {//smo v neutralnemu stanju in logiko prevzame naceloma ta skript
+           // if (combat_handler.Combat_mode == 0) {//smo v neutralnemu stanju in logiko prevzame naceloma ta skript
                 if (bar_handler.gameObject.activeSelf) {
-                    checkKeyInputBar();
-                    if (Input.GetMouseButtonDown(0)) {
-                        if (hasToolSelected()) {
+                    checkInputBar();
+                    if (Input.GetButtonDown("Fire1")) {
+                        if (hasToolSelected())//za weapone se checkira v combat handlerju
+                        {
                             ///poslat request da nrdimo swing z tem tool-om
                             networkObject.SendRpc(RPC_TOOL_USAGE_REQUEST, Receivers.Server);
                         }
                     }
                 }
-            }
+           // }
         }
     }
 
@@ -58,33 +59,39 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
     /// <summary>
     /// 1,2,3,4,5,6,7,8,9,0 - tko kot so na tipkovnci!
     /// </summary>
-    private void checkKeyInputBar() {
+    private void checkInputBar() {
         if (Input.GetButtonDown("Bar1")) localBarSlotSelectionRequest(0);
-        if (Input.GetButtonDown("Bar2")) localBarSlotSelectionRequest(1);
-        if (Input.GetButtonDown("Bar3")) localBarSlotSelectionRequest(2);
-        if (Input.GetButtonDown("Bar4")) localBarSlotSelectionRequest(3);
-        if (Input.GetButtonDown("Bar5")) localBarSlotSelectionRequest(4);
-        if (Input.GetButtonDown("Bar6")) localBarSlotSelectionRequest(5);
-        if (Input.GetButtonDown("Bar7")) localBarSlotSelectionRequest(6);
-        if (Input.GetButtonDown("Bar8")) localBarSlotSelectionRequest(7);
-        if (Input.GetButtonDown("Bar9")) localBarSlotSelectionRequest(8);
-        if (Input.GetButtonDown("Bar0")) localBarSlotSelectionRequest(9);
+        else if (Input.GetButtonDown("Bar2")) localBarSlotSelectionRequest(1);
+        else if (Input.GetButtonDown("Bar3")) localBarSlotSelectionRequest(2);
+        else if (Input.GetButtonDown("Bar4")) localBarSlotSelectionRequest(3);
+        else if (Input.GetButtonDown("Bar5")) localBarSlotSelectionRequest(4);
+        else if (Input.GetButtonDown("Bar6")) localBarSlotSelectionRequest(5);
+        else if (Input.GetButtonDown("Bar7")) localBarSlotSelectionRequest(6);
+        else if (Input.GetButtonDown("Bar8")) localBarSlotSelectionRequest(7);
+        else if (Input.GetButtonDown("Bar9")) localBarSlotSelectionRequest(8);
+        else if (Input.GetButtonDown("Bar0")) localBarSlotSelectionRequest(9);
+        else if (Input.GetAxis("Mouse ScrollWheel") > 0f) {
+            //TODO: spisat kodo da manja weapon in ignorira slot ce je gor shield. nocmo da nam med fajtom zamenja shield
+        }
+        else if (Input.GetAxis("Mouse ScrollWheel") < 0f) {
+            //TODO
+            //spisat kodo da manja weapon in ignorira slot ce je gor shield. nocmo da nam med fajtom zamenja shield
+        }
     }
 
 
     internal void NeutralStateSetup()
     {
-        Debug.LogError("not implemented yet");
+        Debug.Log("not implemented yet");
         if (!networkObject.IsOwner) Debug.Log("NeutralStateSetup se klice tudi na clientu! juhu!");
     }
 
     /// <summary>
-    /// disables everything related to this script. fires when player goes into combat state. this means it disables any tool currently in hand, deselects anything currently selected on bar, clears any animations and such
+    /// handles any changes needed for going into combat state
     /// </summary>
     internal void CombatStateSetup()
     {
 
-        bar_handler.setSelectedSlot(-1);
     }
 
     /// <summary>
@@ -92,7 +99,7 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
     /// </summary>
     /// <param name="index"></param>
     internal void localBarSlotSelectionRequest(int index) {
-        if(bar_handler.getSelectedIndex()!=index)
+        if(!bar_handler.isSelectedIndex(index))
             networkObject.SendRpc(RPC_BAR_SLOT_SELECTION_REQUEST, Receivers.Server, index);
         else
             networkObject.SendRpc(RPC_BAR_SLOT_SELECTION_REQUEST, Receivers.Server, -1);

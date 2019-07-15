@@ -294,11 +294,6 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
         target.GetComponent<Interactible_ArmorStand>().local_player_interaction_shield_request(stats.Get_server_id());
     }
 
-    internal void local_armor_stand_interaction_weapon1_request(GameObject target)
-    {
-        target.GetComponent<Interactible_ArmorStand>().local_player_interaction_weapon1_request(stats.Get_server_id());
-    }
-
     internal void local_armor_stand_interaction_weapon0_request(GameObject target)
     {
         target.GetComponent<Interactible_ArmorStand>().local_player_interaction_weapon0_request(stats.Get_server_id());

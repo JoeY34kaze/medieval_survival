@@ -15,6 +15,7 @@ public class NetworkPlayerAnimationLogic : NetworkPlayerAnimationBehavior
     public Transform chest;
     public Transform _camera_framework;
     private NetworkPlayerStats stats;
+    private NetworkPlayerCombatHandler combat_handler;
 
     public bool hookChestRotation=true;
     // ---------------------------------FUNCTIONS-------------------------------------
@@ -22,6 +23,7 @@ public class NetworkPlayerAnimationLogic : NetworkPlayerAnimationBehavior
     {
         anim = gameObject.GetComponent<Animator>();
         stats = GetComponent<NetworkPlayerStats>();
+        combat_handler = GetComponent<NetworkPlayerCombatHandler>();
     }
 
 
@@ -284,7 +286,29 @@ public class NetworkPlayerAnimationLogic : NetworkPlayerAnimationBehavior
     /// klice se na vseh, resetira tezo animacijske maske za combat
     /// </summary>
     public void ResetWeight() {
-        //anim.SetInteger("combat_mode", 0);//duplicated
         anim.SetLayerWeight(1, 1);//combat layer
+    }
+
+    internal void setCombatState(byte new_mode)
+    {
+        anim.SetInteger("combat_mode", new_mode);
+        if (new_mode == 1) setCombatClass(combat_handler.currently_equipped_weapon_id);
+    }
+
+    private void setCombatClass(int weaponId)
+    {
+        Item i = Mapper.instance.getItemById(weaponId);
+        if(i!=null)
+            anim.SetInteger("weapon_animation_class", i.weapon_animation_class);
+    }
+
+    internal void setCombatBlocking(bool v)
+    {
+        anim.SetBool("combat_blocking",v);
+    }
+
+    internal void setFeign()
+    {
+        anim.SetTrigger("feign");
     }
 }

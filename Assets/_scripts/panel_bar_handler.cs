@@ -7,11 +7,11 @@ using UnityEngine.UI;
 public class panel_bar_handler : MonoBehaviour
 {
     public GameObject[] slots;
-    private int selected;
+    private List<int> selected;
 
     private void Start()
     {
-        this.selected = -1;
+        this.selected = new List<int>();
     }
 
 
@@ -22,25 +22,30 @@ public class panel_bar_handler : MonoBehaviour
     /// <param name="v"></param>
     internal void setSelectedSlot(int v)
     {
-        bool clear = true;
-        for (int i = 0; i < slots.Length; i++) {
-            if (i == v)
+        setSelectedSlot(v, -1);
+    }
+
+    internal void setSelectedSlot(int v, int z)
+    {
+        this.selected.Clear();
+        for (int i = 0; i < slots.Length; i++)
+        {
+            if (i == v || i==z)
             {
                 //nared d a je selected
                 slots[i].GetComponent<Image>().color = Color.black;
-                this.selected = v;
-                clear = false;
+                this.selected.Add(i);
             }
-            else {
+            else
+            {
                 //nared da ni selected
                 slots[i].GetComponent<Image>().color = Color.white;
             }
         }
-        if (clear) this.selected = -1;
     }
 
-    internal int getSelectedIndex()
+    internal bool isSelectedIndex(int index)
     {
-        return this.selected;
+        return this.selected.Contains(index);
     }
 }
