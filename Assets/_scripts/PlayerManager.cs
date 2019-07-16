@@ -78,15 +78,14 @@ public class PlayerManager : MonoBehaviour
 
         //inventory ----------------------- poslal se bo samo id (int) nevem kaj nrdit z durability pa takim foram se..
         public Item[] items;
+        public Item[] bar_items;
         public Item head;
         public Item chest;
         public Item hands;
         public Item legs;
         public Item feet;
-        public Item ranged;
-        public Item weapon_0;
-        public Item weapon_1;
-        public Item shield;
+
+
         public Item backpack;
         //umaData
 

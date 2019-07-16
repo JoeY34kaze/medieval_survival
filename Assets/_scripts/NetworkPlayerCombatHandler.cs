@@ -94,8 +94,8 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
 
 
     private void initialize_weapons() {
-        this.currently_equipped_weapon_id = 0;
-        this.currently_equipped_shield_id = 1;
+        this.currently_equipped_weapon_id = -1;
+        this.currently_equipped_shield_id = -1;
     }
 
     /// <summary>

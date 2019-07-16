@@ -274,7 +274,7 @@ public class Interactable_radial_menu : MonoBehaviour
     {
         show_menu(stand);
 
-        this.number_of_elements = 111;
+        this.number_of_elements = 11;
         menu.angleOffset = (360f / this.number_of_elements);
         center_label.text = "Armor Stand";
 

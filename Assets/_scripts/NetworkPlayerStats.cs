@@ -74,11 +74,14 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
 
     private NetworkPlayerStats executionTarget;
 
+    private NetworkPlayerCombatHandler combatStateHandler;
+
     private void Start()
     {
         this.npi = GetComponent<NetworkPlayerInventory>();
         acceptedAndNotUpdatedPlayers = new Queue<NetworkingPlayer>();
         this.disconnectedAndNotSavedPlayers = new Queue<NetworkingPlayer>();
+        combatStateHandler = GetComponent<NetworkPlayerCombatHandler>();
     }
 
     protected override void NetworkStart()
@@ -1091,10 +1094,10 @@ private void ServerSendOnAcceptedData() {
             int legs = -1; if (saved_playerState.legs != null) legs = saved_playerState.legs.id;
             int feet = -1; if (saved_playerState.feet != null) feet = saved_playerState.feet.id;
 
-            int ranged = -1; if (saved_playerState.ranged != null) ranged = saved_playerState.ranged.id;
-            int weapon0 = -1; if (saved_playerState.weapon_0 != null) weapon0 = saved_playerState.weapon_0.id;
-            int weapon1 = -1; if (saved_playerState.weapon_1 != null) weapon1 = saved_playerState.weapon_1.id;
-            int shield = -1; if (saved_playerState.shield != null) shield = saved_playerState.shield.id;
+            //int ranged = -1; if (saved_playerState.ranged != null) ranged = saved_playerState.ranged.id;
+            //int item_selected = -1; if (saved_playerState.item_selected != null) item_selected = saved_playerState.item_selected.id;
+            //int weapon1 = -1; if (saved_playerState.weapon_1 != null) weapon1 = saved_playerState.weapon_1.id;
+            //int shielkd_selected = -1; if (saved_playerState.shield_selected != null) shielkd_selected = saved_playerState.shield_selected.id;
             int backpack = -1; if (saved_playerState.backpack != null) backpack = saved_playerState.backpack.id;
 
             networkObject.SendRpc(RPC_RECEIVE_PERSONAL_DATA_ON_CONNECTION, Receivers.All,
@@ -1108,19 +1111,19 @@ private void ServerSendOnAcceptedData() {
                 hands,
                 legs,
                 feet,
-                ranged,
-                weapon0,
-                weapon1,
-                shield,
+                //item_selected,
+                //shielkd_selected,
                 backpack
                 );//nevem kaj nrdit z backpackom....
 
             this.npi.items = saved_playerState.items;
+            this.npi.bar_items = saved_playerState.bar_items;
             NetworkGuildManager.Instance.RefreshPlayersNetworkId(saved_playerState.previousNetworkId,Get_server_id());
 
 
         }
-        else {//NOV PLAYER
+        else {//NOV PLAYER - nerab dobit nbenga updejta
+            /*
             networkObject.SendRpc(RPC_RECEIVE_PERSONAL_DATA_ON_CONNECTION, Receivers.All,
                 new Vector3(302, 43, 557),
                 transform.rotation,
@@ -1132,12 +1135,9 @@ private void ServerSendOnAcceptedData() {
                 -1,
                 -1,
                 -1,
-                -1,
-                -1,
-                -1,
-                -1,
                 -1
                 );
+                */
         }
         //ce ne dobimo nobenga guilda z updejta bomo ustvarli novga.
 
@@ -1175,7 +1175,7 @@ private void ServerSendOnAcceptedData() {
             this.npi.SetLoadoutItem(Mapper.instance.getItemById(args.GetNext<int>()));
             this.npi.SetLoadoutItem(Mapper.instance.getItemById(args.GetNext<int>()));
 
-            int blank = args.GetNext<int>();
+            int blank = args.GetNext<int>();//
             blank = args.GetNext<int>();
             blank = args.GetNext<int>();
             blank = args.GetNext<int>();
@@ -1221,7 +1221,7 @@ private void ServerSendOnAcceptedData() {
     }
 
     /// <summary>
-    /// tole je narobe se mi zdi. mogl bi poslat vsem ne samo njemu
+    /// sprozi se, ko se player sconnecta na server. poskrbi, da se playerju prinesejo pravilni podatki o njegovem characterju. moral bi poskrbet tud da drugi vidjo njegovga characterja updejtano normalno
     /// </summary>
     /// <param name="p"></param>
     public void ServerSendAll(NetworkingPlayer p) {
@@ -1233,6 +1233,7 @@ private void ServerSendOnAcceptedData() {
         networkObject.SendRpc(p, RPC_REFRESH_HEALTH, this.health);
         //ostalo
         networkObject.SendRpc(p,RPC_SEND_ALL, this.playerName, this.downed, this.dead);
+
     }
 
     /// <summary>
@@ -1298,10 +1299,8 @@ private void ServerSendOnAcceptedData() {
         ps.hands = npi.getHandsItem();
         ps.legs = npi.getLegsItem();
         ps.feet = npi.getFeetItem();
-        ps.ranged = null;
-        ps.weapon_0 = null;
-        ps.weapon_1 = null;
-        ps.shield = null;
+        //ps.item_selected = null;//spawna se brez weapona v roki.
+        //ps.shield_selected = null;
         ps.backpack = npi.getBackpackItem();
 
         ps.guild = NetworkGuildManager.Instance.getGuildFromNetworkId(Get_server_id());

@@ -371,4 +371,13 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
         if (a == this.selected_index_shield || a == this.selected_index || b == this.selected_index_shield || b == this.selected_index) return false;
         return true;
     }
+
+    internal void ClearActiveWeapons()
+    {
+        if (networkObject.IsServer) {
+            this.selected_index = -1;
+            this.selected_index_shield = -1;
+            networkObject.SendRpc(RPC_BAR_SLOT_SELECTION_RESPONSE, Receivers.All, -1, -1, -1, -1);
+        }
+    }
 }

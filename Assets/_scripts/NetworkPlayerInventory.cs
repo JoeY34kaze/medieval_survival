@@ -1226,6 +1226,8 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
                 b7,
                 b8,
                 b9);
+
+            
         }
 
         if (loadout)
@@ -1249,6 +1251,47 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
             if (onLoadoutChangedCallback != null)
                 onLoadoutChangedCallback.Invoke();
         }
+
+        if (SelectedWeaponIsNotInHotbar()) neutralStateHandler.ClearActiveWeapons();
+    }
+
+    private bool SelectedWeaponIsNotInHotbar()
+    {
+        if (combatHandler == null) combatHandler=GetComponent<NetworkPlayerCombatHandler>();
+        int activeItem = -1;
+        if (combatHandler.GetCurrentlyActiveWeapon() != null) activeItem = combatHandler.GetCurrentlyActiveWeapon().id;
+        if (combatHandler.GetCurrentlyActiveRanged() != null) activeItem = combatHandler.GetCurrentlyActiveRanged().id;
+
+        int activeShield= -1;
+        if (combatHandler.GetCurrentlyActiveShield() != null) activeShield = combatHandler.GetCurrentlyActiveShield().id;
+
+        bool zamenjan_shield = false;
+        bool zamenjan_item = false;
+        if (neutralStateHandler.selected_index > -1)
+        {
+            if (bar_items[neutralStateHandler.selected_index] == null && activeItem != -1)
+            {
+                zamenjan_item = true;
+            }
+            else if (bar_items[neutralStateHandler.selected_index] != null)
+                if (bar_items[neutralStateHandler.selected_index].id != activeItem)
+                    zamenjan_item = true;
+        }
+        if (neutralStateHandler.selected_index_shield > -1)
+        {
+            if (bar_items[neutralStateHandler.selected_index_shield] == null && activeShield != -1)
+            {
+                zamenjan_shield = true;
+            }
+            else if (bar_items[neutralStateHandler.selected_index_shield] != null)
+                if (bar_items[neutralStateHandler.selected_index_shield].id != activeShield)
+                    zamenjan_shield = true;
+        }
+        if (zamenjan_shield || zamenjan_item) {
+            //mormo poslat vsem da nj sinhronizirajo active item. - zunej te metode
+            return true;
+        }
+        return false;
     }
 
     public override void SendPersonalInventoryUpdate(RpcArgs args)
@@ -1271,6 +1314,9 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
             short item_id = args.GetNext<short>();
             this.bar_items[i] = Mapper.instance.getItemById((int)item_id);
         }
+
+        //ce smo zarad armor standa povozil trenutno equippan weapon mormo to updejtat..
+        combatHandler.update_equipped_weapons();
 
         if (onLoadoutChangedCallback != null)
             onLoadoutChangedCallback.Invoke();
