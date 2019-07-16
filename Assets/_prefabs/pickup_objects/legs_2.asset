@@ -14,6 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Display_name: Pants Steel
   type: 4
+  quantity: 0
   icon: {fileID: 21300000, guid: 34a2fb4ca5833c2449791d7de91908c1, type: 3}
   damage: 0
   size: 0
@@ -22,4 +23,7 @@ MonoBehaviour:
   prefab_pickup: {fileID: 4601069242401603006, guid: 992254de1dfeaef4ba8c4e47f6dcf5d3,
     type: 3}
   weapon_animation_class: 0
-  recipeName: legs_2
+  uma_item_recipe_name: legs_2
+  stone_gather_rate: 0
+  wood_gather_rate: 0
+  flesh_gather_rate: 0

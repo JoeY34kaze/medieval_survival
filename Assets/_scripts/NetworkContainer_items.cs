@@ -12,7 +12,7 @@ using UnityEngine;
 public class NetworkContainer_items : NetworkContainerBehavior
 {
     private int size;
-    public Item[] items;//samo id ni zadost ker v prihodnosti bo treba hrant tud kolicino in ali durability itemov.
+    public Predmet[] predmeti;//samo id ni zadost ker v prihodnosti bo treba hrant tud kolicino in ali durability itemov.
 
     internal int Getsize()
     {
@@ -30,53 +30,52 @@ public class NetworkContainer_items : NetworkContainerBehavior
     public void init(int size)
     {
         this.size = size;
-        this.items = new Item[this.size];
+        this.predmeti = new Predmet[this.size];
         for (int i = 0; i < this.size; i++)
-            this.items[i] = null;
+            this.predmeti[i] = null;
     }
 
-    public Item getItem(int index) {
+    public Predmet getPredmet(int index) {
         //if (networkObject.IsServer || networkObject.IsOwner)
-            return this.items[index];
+            return this.predmeti[index];
         //return null;
     }
 
-    public void setItem(int index, Item i) {
+    public void setPredmet(int index, Predmet i) {
         if (networkObject.IsServer) {
-            if (getItem(index) != null)
+            if (getPredmet(index) != null)
                 Debug.Log("Overwriting an item in NetworkContainer with another item. I hope you know what you are doing.");
-            this.items[index] = i;
+            this.predmeti[index] = i;
         }
     }
 
-    public Item popItem(int index) {
+    public Predmet popPredmet(int index) {
         if (networkObject.IsServer)
         {
-            Item i = getItem(index);
-            this.items[index] = null;
-            return i;
+            return (this.predmeti[index] == null) ? null : this.predmeti[index];
         }
         throw new NotImplementedException();//ce ni server se tole nemore sprozit.
     }
 
+    //vrne stevilo teh itemov znotraj tega inventorija. pogleda predmet.quantity
     public int getNumberofItems(int id) {
         if (!networkObject.IsServer) return -1;
         int c = 0;
-        foreach (Item i in this.items)
+        foreach (Predmet i in this.predmeti)
             if(i!=null)
-                if (i.id == id)
-                    c++;
+                if (i.item.id == id)
+                    c+=i.quantity;
         return c;
     }
 
-    public Item popItemFirst(int id) {
+    public Predmet popPredmetFirst(int id) {
         if (!networkObject.IsServer) return null;
-        Item k = null;
+        Predmet k = null;
         for (int i = 0; i < this.size; i++)
         {
-            if (this.items[i] != null)
-                if (this.items[i].id == id)
-                    return popItem(i);
+            if (this.predmeti[i] != null)
+                if (this.predmeti[i].item.id == id)
+                    return popPredmet(i);
         }
         return null;
     }
@@ -84,15 +83,19 @@ public class NetworkContainer_items : NetworkContainerBehavior
     public int getEmptySpace() {
         if (!networkObject.IsServer) return -1;
         int c = 0;
-        foreach (Item i in this.items)
+        foreach (Predmet i in this.predmeti)
             if (i == null)
                 c++;
         return c;
     }
 
-    public bool contains(Item i, int amount) {
-        throw new NotImplementedException();
+    public bool containsAmount(Item i, int amount) {
+        int q = 0;
+        foreach (Predmet p in this.predmeti)
+            if (p.item.id == i.id) q += p.quantity;
+        return (q >= amount) ? true : false;
     }
+
     public bool contains(int id, int amount)
     {
         if (!networkObject.IsServer) return false;
@@ -102,16 +105,16 @@ public class NetworkContainer_items : NetworkContainerBehavior
 
     }
 
-    public void setAll(Item[] all) {//tle se nekje zabugga in jih posle 21!
-        if (this.items.Length == all.Length || !networkObject.IsServer)
-            this.items = all;
+    public void setAll(Predmet[] all) {//tle se nekje zabugga in jih posle 21!
+        if (this.predmeti.Length == all.Length || !networkObject.IsServer)
+            this.predmeti = all;
         else
             Debug.LogError("Trying to set array when sizes mismatch..");
     }
 
-    public Item[] getAll()
+    public Predmet[] getAll()
     {
-        return this.items;
+        return this.predmeti;
     }
 
 
@@ -123,8 +126,8 @@ public class NetworkContainer_items : NetworkContainerBehavior
     {
         string s = "";
         for (int i = 0; i < this.size; i++) {
-            if (this.items[i] != null)
-                s = s + "|" + this.items[i].id;
+            if (this.predmeti[i] != null)
+                s = s + "|" + this.predmeti[i].item.id;
             else
                 s = s + "|-1";
         }
@@ -132,23 +135,23 @@ public class NetworkContainer_items : NetworkContainerBehavior
         return s;
     }
 
-    internal Item[] parseItemsNetworkFormat(string s) {//implementacija te metode je garbage ker bo itak zamenjan ksnej z kšnmu serialized byte array al pa kej namest stringa. optimizacija ksnej
+    internal Predmet[] parseItemsNetworkFormat(string s) {//implementacija te metode je garbage ker bo itak zamenjan ksnej z kšnmu serialized byte array al pa kej namest stringa. optimizacija ksnej
         string[] ss = s.Split('|');
-        Item[] rez = new Item[ss.Length -1];//zacne se z "" zato en slot sfali
+        Predmet[] rez = new Predmet[ss.Length -1];//zacne se z "" zato en slot sfali
         for (int i = 1; i < ss.Length; i++) {//zacne z 1 ker je ss[0] = ""
             int k=-1;
              Int32.TryParse(ss[i],out k);
-            rez[i-1] = Mapper.instance.getItemById(k);
+            rez[i-1] = new Predmet(Mapper.instance.getItemById(k));
         }
         return rez;
     }
 
-    public void putFirst(Item item, int q) {
+    public void putFirst(Predmet predmet) {
         if (!networkObject.IsServer) return;
         for (int i = 0; i < this.size; i++) {
-            if (this.items[i] == null)
+            if (this.predmeti[i] == null)
             {
-                setItem(i, item);
+                setPredmet(i, predmet);
                 return;
             }
         }
@@ -158,9 +161,9 @@ public class NetworkContainer_items : NetworkContainerBehavior
     {
         if(networkObject.IsServer)
             if (p < this.size && v < this.size) {
-                Item temp = this.items[p];
-                this.items[p] = this.items[v];
-                this.items[v] = temp;
+                Predmet temp = this.predmeti[p];
+                this.predmeti[p] = this.predmeti[v];
+                this.predmeti[v] = temp;
             }
     }
 }

@@ -92,7 +92,7 @@ public class NetworkBackpack : NetworkBackpackBehavior
                 //lahko pobere
                 //networkObject.AssignOwnership(args.Info.SendingPlayer);
                 NetworkPlayerInventory n = player.GetComponent<NetworkPlayerInventory>();
-                n.SetLoadoutItem(Mapper.instance.getItemById(GetComponent<identifier_helper>().id));//to nrdi samo server..
+                n.SetLoadoutItem(new Predmet(Mapper.instance.getItemById(GetComponent<identifier_helper>().id)));//to nrdi samo server..
                 n.sendNetworkUpdate(false, true);
                 sendOwnershipResponse(args.Info.SendingPlayer);
             }
@@ -132,8 +132,8 @@ public class NetworkBackpack : NetworkBackpackBehavior
         //poslat kamero!
         if (networkObject.IsServer && args.Info.SendingPlayer.NetworkId == networkObject.Owner.NetworkId)
         {
-            Item i = this.nci.popItem(args.GetNext<int>());
-            this.npi.instantiateDroppedItem(i, 1, args.GetNext<Vector3>(), args.GetNext<Vector3>());
+            Predmet i = this.nci.popPredmet(args.GetNext<int>());
+            this.npi.instantiateDroppedPredmet(i, args.GetNext<Vector3>(), args.GetNext<Vector3>());
             sendBackpackItemsUpdate();
         }
 
@@ -142,8 +142,8 @@ public class NetworkBackpack : NetworkBackpackBehavior
     {
         if (args.Info.SendingPlayer.NetworkId != 0) return;
 
-        Item[] serverjevi_itemi = nci.parseItemsNetworkFormat(args.GetNext<string>());
-        nci.setAll(serverjevi_itemi);
+        Predmet[] serverjevi_predmeti = nci.parseItemsNetworkFormat(args.GetNext<string>());
+        nci.setAll(serverjevi_predmeti);
         //izrisat iteme k jih mamo tle u arrayu na panele.
 
         this.panel_handler.updateUI();//tole je za tvoj inventorij ko imas equippan
@@ -155,8 +155,8 @@ public class NetworkBackpack : NetworkBackpackBehavior
 
         //odpret panel ce nima se odprtga
 
-        Item[] serverjevi_itemi = nci.parseItemsNetworkFormat(args.GetNext<string>());
-        nci.setAll(serverjevi_itemi);
+        Predmet[] serverjevi_predmeti = nci.parseItemsNetworkFormat(args.GetNext<string>());
+        nci.setAll(serverjevi_predmeti);
         //izrisat iteme k jih mamo tle u arrayu na panele.
         //this.panel_handler.updateUI();//tole je za tvoj inventorij ko imas equippan
 
@@ -184,11 +184,11 @@ public class NetworkBackpack : NetworkBackpackBehavior
             int back_index = args.GetNext<int>();
             int inv_index = args.GetNext<int>();
 
-            Item b = this.nci.popItem(back_index);
-            Item i = this.npi.popPersonalItem(inv_index);
+            Predmet b = this.nci.popPredmet(back_index);
+            Predmet i = this.npi.popPersonalPredmet(inv_index);
 
-            this.npi.setPersonalItem(b, inv_index);
-            this.nci.setItem(back_index, i);
+            this.npi.setPersonalIventoryPredmet(b, inv_index);
+            this.nci.setPredmet(back_index, i);
 
             sendBackpackItemsUpdate();
             this.npi.sendNetworkUpdate(true, false);
@@ -206,20 +206,20 @@ public class NetworkBackpack : NetworkBackpackBehavior
             int back_index = args.GetNext<int>();
 
             //ce je backpack null ga samo not dej, ce je occupied probej nrdit swap, sicer nared nč
-            if (this.nci.getItem(back_index) != null)
+            if (this.nci.getPredmet(back_index) != null)
             {//swap
-                if (this.npi.GetItemLoadout(this.npi.getItemTypefromString(type)).type == this.nci.getItem(back_index).type)
+                if (this.npi.GetItemLoadout(this.npi.getItemTypefromString(type)).item.type == this.nci.getPredmet(back_index).item.type)
                 {//ce se itema ujemata, sicer nima smisla
-                    Item l = this.npi.PopItemLoadout(t);
-                    Item b = this.nci.popItem(back_index);
-                    this.nci.setItem(back_index, l);
+                    Predmet l = this.npi.popPredmetLoadout(t);
+                    Predmet b = this.nci.popPredmet(back_index);
+                    this.nci.setPredmet(back_index, l);
                     this.npi.SetLoadoutItem(b);
                     changed = true;
                 }
             }
             else
             {
-                this.nci.setItem(back_index, this.npi.PopItemLoadout(this.npi.getItemTypefromString(type)));//backpack slot je null tko da je vse kul.
+                this.nci.setPredmet(back_index, this.npi.popPredmetLoadout(this.npi.getItemTypefromString(type)));//backpack slot je null tko da je vse kul.
                 changed = true;
             }
 
@@ -305,9 +305,9 @@ public class NetworkBackpack : NetworkBackpackBehavior
 
 
 
-    internal void putFirst(Item resp, int quantity)
+    internal void putFirst(Predmet resp)
     {
-        this.nci.putFirst(resp,quantity);
+        this.nci.putFirst(resp);
 
     }
 
@@ -316,20 +316,20 @@ public class NetworkBackpack : NetworkBackpackBehavior
         if (networkObject.IsServer && (args.Info.SendingPlayer.NetworkId == networkObject.Owner.NetworkId)) {//ce je server in ce je poslov owner
             //dob backapack item
             int backpack_index = args.GetNext<int>();
-            Item i = nci.getItem(backpack_index);
+            Predmet i = nci.getPredmet(backpack_index);
             //dob laodout item
-            Item load;
+            Predmet load;
             
             
             
-            load = this.npi.PopItemLoadout(i.type);
+            load = this.npi.popPredmetLoadout(i.item.type);
 
 
             //nared swap
 
             if (this.npi.try_to_upgrade_loadout(i) != null) Debug.LogError("pri backapck swapu ni null, to ni mogoce. fix it");
 
-            this.nci.setItem(backpack_index, load);
+            this.nci.setPredmet(backpack_index, load);
 
 
 
@@ -347,9 +347,9 @@ public class NetworkBackpack : NetworkBackpackBehavior
         }
     }
 
-    internal void AddFirst(Item onStand)
+    internal void AddFirst(Predmet onStand)
     {
-        this.nci.putFirst(onStand,1);
+        this.nci.putFirst(onStand);
     }
 
     internal void localPlayerLoadoutToBackpackRequest(string loadout_type, int weapon_index, int backpack_index)
@@ -381,14 +381,14 @@ public class NetworkBackpack : NetworkBackpackBehavior
             int bar_index = args.GetNext<int>();
             if (npi.neutralStateHandler.isNotSelected(bar_index, -1))
             {
-                if (this.nci.items[back_index] != null)
+                if (this.nci.predmeti[back_index] != null)
                 {
 
-                    Item b = this.nci.popItem(back_index);
-                    Item i = this.npi.popBarItem(bar_index);
+                    Predmet b = this.nci.popPredmet(back_index);
+                    Predmet i = this.npi.popBarPredmet(bar_index);
 
                     this.npi.setBarItem(b, bar_index);
-                    this.nci.setItem(back_index, i);
+                    this.nci.setPredmet(back_index, i);
 
                     sendBackpackItemsUpdate();//za backpack
                     this.npi.sendNetworkUpdate(true, false);
@@ -409,15 +409,15 @@ public class NetworkBackpack : NetworkBackpackBehavior
 
             if (npi.neutralStateHandler.isNotSelected(bar_index, -1))
             {
-                if (npi.bar_items[bar_index] != null)
+                if (npi.hotbar_objects[bar_index] != null)
                 {
                     //if (itemAllowedOnBar(this.nci.items[back_index].type))
                     //{
-                    Item b = this.nci.popItem(back_index);
-                    Item i = this.npi.popBarItem(bar_index);
+                    Predmet b = this.nci.popPredmet(back_index);
+                    Predmet i = this.npi.popBarPredmet(bar_index);
 
                     this.npi.setBarItem(b, bar_index);
-                    this.nci.setItem(back_index, i);
+                    this.nci.setPredmet(back_index, i);
 
                     sendBackpackItemsUpdate();//za backpack
                     this.npi.sendNetworkUpdate(true, false);

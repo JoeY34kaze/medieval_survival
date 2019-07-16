@@ -8,7 +8,6 @@ using System.Collections;
 
 public class ItemPickup : Interactable {
     public Item i; //ujemat se mora z id-jem itema na playerju ce je na playerju al pa nevem
-    public int quantity = 1;
     public bool stackable = false;
     //zaenkrat smao pove da je item k se ga lahko pobere
 
@@ -49,7 +48,7 @@ public class ItemPickup : Interactable {
         if (local_lock.item_allows_interaction)
         {
             Debug.Log("Sending from local object to server for aprooval");
-            networkObject.SendRpc(RPC_HANDLE_ITEM_PICKUP_SERVER_SIDE, Receivers.Server, this.i.id, this.quantity, server_id);
+            networkObject.SendRpc(RPC_HANDLE_ITEM_PICKUP_SERVER_SIDE, Receivers.Server, this.i.id, i.quantity, server_id);
             local_lock.setupInteractionLocalLock();
         }
         else {

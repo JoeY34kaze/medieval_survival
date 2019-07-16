@@ -113,14 +113,14 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
     /// </summary>
     /// <returns></returns>
     private int getBarItemIdFromIndex(int id) {
-        Item k = npi.GetBarItem(id);
+        Item k = npi.getBarPredmet(id);
         if (k == null) return -1;
         else return k.id;
     }
 
     private Item.Type getBarItemTypeFromIndex(int id)
     {
-        Item k = npi.GetBarItem(id);
+        Item k = npi.getBarPredmet(id);
         if (k == null) return Item.Type.chest;
         else return k.type;
     }
@@ -131,7 +131,7 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
             if (isRequestValid()) {
                 int index = args.GetNext<int>();
                 
-                Item i = npi.GetBarItem(index);
+                Item i = npi.getBarPredmet(index);
                 if (i != null)
                 {
 
@@ -229,19 +229,19 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
             if (i.type == Item.Type.tool) SetToolSelected(i);
             else if (i.type == Item.Type.weapon || i.type == Item.Type.ranged)
             {
-                combat_handler.currently_equipped_weapon_id = i.id;
+                combat_handler.currently_equipped_weapon = i.id;
             }
             else Debug.Log("item youre trying to equip cannot be equipped : " + i.Display_name);
         }
         else {//clearat vse razen shielda ce je slucajn equipan - bom vrgu u combat handler pa nj se tam jebe
             SetToolSelected(i);
-            combat_handler.currently_equipped_weapon_id = -1;
+            combat_handler.currently_equipped_weapon = -1;
         }
 
         if (shield != null)
-            combat_handler.currently_equipped_shield_id = shield.id;
+            combat_handler.currently_equipped_shield = shield.id;
         else 
-            combat_handler.currently_equipped_shield_id = -1;
+            combat_handler.currently_equipped_shield = -1;
         combat_handler.update_equipped_weapons();//weapon in shield
     }
 

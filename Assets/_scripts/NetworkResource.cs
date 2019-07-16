@@ -35,9 +35,9 @@ public class NetworkResource : NetworkResourceBehavior
         transform.SetParent(GameObject.FindGameObjectWithTag("world_manager").transform);
     }
 
-    public int onHit(Item tool)
+    public Predmet onHitReturnItemWithQuantity(Item tool)
     {
-        if (!networkObject.IsServer) return 0;
+        if (!networkObject.IsServer) return null;
         if (this.hp > 0)
         {
             
@@ -51,7 +51,7 @@ public class NetworkResource : NetworkResourceBehavior
                     this.hp -= tool.wood_gather_rate;
                     break;
                 default:
-                    return 0;
+                    return null;
             }
             if (this.hp <= 0) this.hp = 0f;
 
@@ -62,10 +62,11 @@ public class NetworkResource : NetworkResourceBehavior
             networkObject.SendRpc(RPC_SET_HP, Receivers.All, this.hp);
 
             if (amount < 0) amount = 0;
-            return (int)amount;
+
+            return new Predmet(this.resourceItem, (int)amount);
         }
         else {
-            return 0;
+            return null;
         }
     }
 

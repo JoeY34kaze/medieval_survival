@@ -291,7 +291,7 @@ public class NetworkPlayerAnimationLogic : NetworkPlayerAnimationBehavior
 
     internal void setCombatState(byte new_mode)
     {
-        if (new_mode == 1) setCombatClass(combat_handler.currently_equipped_weapon_id);//to bi moral bit ured ker se najprej porihta vse za item, nato pa pride se en rpc da vrze vseskup v combat mode. ce se zjebe zaporedje mamo lahko problem..
+        if (new_mode == 1) setCombatClass(combat_handler.currently_equipped_weapon);//to bi moral bit ured ker se najprej porihta vse za item, nato pa pride se en rpc da vrze vseskup v combat mode. ce se zjebe zaporedje mamo lahko problem..
         anim.SetInteger("combat_mode", new_mode);
         
     }

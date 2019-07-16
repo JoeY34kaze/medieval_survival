@@ -176,7 +176,7 @@ public class NetworkArmorStand : NetworkArmorStandBehavior
                     if (npi.getHeadItem() != null)
                     {
                         //perform swap
-                        Item loadout_item = npi.PopItemLoadout(Item.Type.head);
+                        Item loadout_item = npi.popPredmetLoadout(Item.Type.head);
                         Item onStand = Mapper.instance.getItemById(this.head);
                         this.head = loadout_item.id;
                         npi.SetLoadoutItem(onStand);
@@ -194,7 +194,7 @@ public class NetworkArmorStand : NetworkArmorStandBehavior
                     if (npi.getHeadItem() != null)
                     {
                         //place equipped item on stand
-                        Item loadout_item = npi.PopItemLoadout(Item.Type.head);//pohendla tud removanje itema
+                        Item loadout_item = npi.popPredmetLoadout(Item.Type.head);//pohendla tud removanje itema
                         this.head = loadout_item.id;
                     }
                     else
@@ -211,7 +211,7 @@ public class NetworkArmorStand : NetworkArmorStandBehavior
                     if (npi.getChestItem() != null)
                     {
                         //perform swap
-                        Item loadout_item = npi.PopItemLoadout(Item.Type.chest);
+                        Item loadout_item = npi.popPredmetLoadout(Item.Type.chest);
                         Item onStand = Mapper.instance.getItemById(this.chest);
                         this.chest = loadout_item.id;
                         npi.SetLoadoutItem(onStand);
@@ -229,7 +229,7 @@ public class NetworkArmorStand : NetworkArmorStandBehavior
                     if (npi.getChestItem() != null)
                     {
                         //place equipped item on stand
-                        Item loadout_item = npi.PopItemLoadout(Item.Type.chest);//pohendla tud removanje itema
+                        Item loadout_item = npi.popPredmetLoadout(Item.Type.chest);//pohendla tud removanje itema
                         this.chest = loadout_item.id;
                     }
                     else
@@ -245,7 +245,7 @@ public class NetworkArmorStand : NetworkArmorStandBehavior
                     if (npi.getHandsItem() != null)
                     {
                         //perform swap
-                        Item loadout_item = npi.PopItemLoadout(Item.Type.hands);
+                        Item loadout_item = npi.popPredmetLoadout(Item.Type.hands);
                         Item onStand = Mapper.instance.getItemById(this.hands);
                         this.hands = loadout_item.id;
                         npi.SetLoadoutItem(onStand);
@@ -263,7 +263,7 @@ public class NetworkArmorStand : NetworkArmorStandBehavior
                     if (npi.getHandsItem() != null)
                     {
                         //place equipped item on stand
-                        Item loadout_item = npi.PopItemLoadout(Item.Type.hands);//pohendla tud removanje itema
+                        Item loadout_item = npi.popPredmetLoadout(Item.Type.hands);//pohendla tud removanje itema
                         this.hands = loadout_item.id;
                     }
                     else
@@ -279,7 +279,7 @@ public class NetworkArmorStand : NetworkArmorStandBehavior
                     if (npi.getLegsItem() != null)
                     {
                         //perform swap
-                        Item loadout_item = npi.PopItemLoadout(Item.Type.legs);
+                        Item loadout_item = npi.popPredmetLoadout(Item.Type.legs);
                         Item onStand = Mapper.instance.getItemById(this.legs);
                         this.legs = loadout_item.id;
                         npi.SetLoadoutItem(onStand);
@@ -297,7 +297,7 @@ public class NetworkArmorStand : NetworkArmorStandBehavior
                     if (npi.getLegsItem() != null)
                     {
                         //place equipped item on stand
-                        Item loadout_item = npi.PopItemLoadout(Item.Type.legs);//pohendla tud removanje itema
+                        Item loadout_item = npi.popPredmetLoadout(Item.Type.legs);//pohendla tud removanje itema
                         this.legs = loadout_item.id;
                     }
                     else
@@ -313,7 +313,7 @@ public class NetworkArmorStand : NetworkArmorStandBehavior
                     if (npi.getFeetItem() != null)
                     {
                         //perform swap
-                        Item loadout_item = npi.PopItemLoadout(Item.Type.feet);
+                        Item loadout_item = npi.popPredmetLoadout(Item.Type.feet);
                         Item onStand = Mapper.instance.getItemById(this.feet);
                         this.feet = loadout_item.id;
                         npi.SetLoadoutItem(onStand);
@@ -331,7 +331,7 @@ public class NetworkArmorStand : NetworkArmorStandBehavior
                     if (npi.getFeetItem() != null)
                     {
                         //place equipped item on stand
-                        Item loadout_item = npi.PopItemLoadout(Item.Type.feet);//pohendla tud removanje itema
+                        Item loadout_item = npi.popPredmetLoadout(Item.Type.feet);//pohendla tud removanje itema
                         this.feet = loadout_item.id;
                     }
                     else
@@ -358,7 +358,7 @@ public class NetworkArmorStand : NetworkArmorStandBehavior
                     if (npi.GetWeaponItemInHand() != null)
                     {
                         //place equipped item on stand
-                        Item players_equipped_weapon = npi.PopWeaponItemInHand();//pobere z hotbara
+                        Item players_equipped_weapon = npi.PopWeaponPredmetInHand();//pobere z hotbara
                         this.weapon_0 = players_equipped_weapon.id;
                     }
                 }
@@ -380,7 +380,7 @@ public class NetworkArmorStand : NetworkArmorStandBehavior
                     if (npi.GetShieldItemInHand() != null)
                     {
                         //place equipped item on stand
-                        Item currentlyActiveShield = npi.PopShieldItemInHand();//pohendla tud removanje itema
+                        Item currentlyActiveShield = npi.PopShieldPredmetInHand();//pohendla tud removanje itema
                         this.shield = currentlyActiveShield.id;
                     }
 
@@ -576,44 +576,44 @@ public class NetworkArmorStand : NetworkArmorStandBehavior
 
         if (this.head == -1)
         {//samo pogleda, nc ne spremeni
-            loadout_item = npi.PopItemLoadout(Item.Type.head);//lahko vrne null
+            loadout_item = npi.popPredmetLoadout(Item.Type.head);//lahko vrne null
             if (loadout_item != null) this.head = loadout_item.id;
         }
 
         //chest
         if (this.chest == -1)
         {//samo pogleda, nc ne spremeni
-            loadout_item = npi.PopItemLoadout(Item.Type.chest);//lahko vrne null
+            loadout_item = npi.popPredmetLoadout(Item.Type.chest);//lahko vrne null
             if (loadout_item != null) this.chest = loadout_item.id;
         }
         //hands
         if (this.hands == -1)
         {//samo pogleda, nc ne spremeni
-            loadout_item = npi.PopItemLoadout(Item.Type.hands);//lahko vrne null
+            loadout_item = npi.popPredmetLoadout(Item.Type.hands);//lahko vrne null
             if (loadout_item != null) this.hands = loadout_item.id;
         }
         //legs
         if (this.legs == -1)
         {//samo pogleda, nc ne spremeni
-            loadout_item = npi.PopItemLoadout(Item.Type.legs);//lahko vrne null
+            loadout_item = npi.popPredmetLoadout(Item.Type.legs);//lahko vrne null
             if (loadout_item != null) this.legs = loadout_item.id;
         }
         //feet
         if (this.feet == -1)
         {//samo pogleda, nc ne spremeni
-            loadout_item = npi.PopItemLoadout(Item.Type.feet);//lahko vrne null
+            loadout_item = npi.popPredmetLoadout(Item.Type.feet);//lahko vrne null
             if (loadout_item != null) this.feet = loadout_item.id;
         }
         //wep0
         if (this.weapon_0 == -1)
         {//samo pogleda, nc ne spremeni
-            loadout_item = npi.PopWeaponItemInHand();//lahko vrne null
+            loadout_item = npi.PopWeaponPredmetInHand();//lahko vrne null
             if (loadout_item != null) this.weapon_0 = loadout_item.id;
         }
         //shield
         if (this.shield == -1)
         {//samo pogleda, nc ne spremeni
-            loadout_item = npi.PopShieldItemInHand();//lahko vrne null
+            loadout_item = npi.PopShieldPredmetInHand();//lahko vrne null
             if (loadout_item != null) this.shield = loadout_item.id;
         }
         //ranged
@@ -628,7 +628,7 @@ public class NetworkArmorStand : NetworkArmorStandBehavior
     {
 
         //head
-        Item loadout_item = npi.PopItemLoadout(Item.Type.head);//lahko vrne null
+        Item loadout_item = npi.popPredmetLoadout(Item.Type.head);//lahko vrne null
         Item onStand = Mapper.instance.getItemById(this.head); //lahko vrne null
         if (loadout_item != null) this.head = loadout_item.id;
         else this.head = -1;
@@ -636,41 +636,41 @@ public class NetworkArmorStand : NetworkArmorStandBehavior
         else npi.RemoveItemLoadout(Item.Type.head);
 
         //chest
-        loadout_item = npi.PopItemLoadout(Item.Type.chest);//lahko vrne null
+        loadout_item = npi.popPredmetLoadout(Item.Type.chest);//lahko vrne null
         onStand = Mapper.instance.getItemById(this.chest); //lahko vrne null
         if (loadout_item != null) this.chest = loadout_item.id;
         else this.chest = -1;
         if (onStand != null) npi.SetLoadoutItem(onStand);
         else npi.RemoveItemLoadout(Item.Type.chest);
         //hands
-        loadout_item = npi.PopItemLoadout(Item.Type.hands);//lahko vrne null
+        loadout_item = npi.popPredmetLoadout(Item.Type.hands);//lahko vrne null
         onStand = Mapper.instance.getItemById(this.hands); //lahko vrne null
         if (loadout_item != null) this.hands = loadout_item.id;
         else this.hands = -1;
         if (onStand != null) npi.SetLoadoutItem(onStand);
         else npi.RemoveItemLoadout(Item.Type.hands);
         //legs
-        loadout_item = npi.PopItemLoadout(Item.Type.legs);//lahko vrne null
+        loadout_item = npi.popPredmetLoadout(Item.Type.legs);//lahko vrne null
         onStand = Mapper.instance.getItemById(this.legs); //lahko vrne null
         if (loadout_item != null) this.legs = loadout_item.id;
         else this.legs = -1;
         if (onStand != null) npi.SetLoadoutItem(onStand);
         else npi.RemoveItemLoadout(Item.Type.legs);
         //feet
-        loadout_item = npi.PopItemLoadout(Item.Type.feet);//lahko vrne null
+        loadout_item = npi.popPredmetLoadout(Item.Type.feet);//lahko vrne null
         onStand = Mapper.instance.getItemById(this.feet); //lahko vrne null
         if (loadout_item != null) this.feet = loadout_item.id;
         else this.feet = -1;
         if (onStand != null) npi.SetLoadoutItem(onStand);
         else npi.RemoveItemLoadout(Item.Type.feet);
         //wep0
-        loadout_item = npi.PopWeaponItemInHand();//lahko vrne null
+        loadout_item = npi.PopWeaponPredmetInHand();//lahko vrne null
         onStand = Mapper.instance.getItemById(this.weapon_0); //lahko vrne null
         if (loadout_item != null) this.weapon_0 = loadout_item.id;
         else this.weapon_0 = -1;
         if (onStand != null && (npi.hasBarSpace() || npi.hasInventorySpace() || npi.hasBackpackSpace())) npi.tryToAddItem(onStand);
         //shield
-        loadout_item = npi.PopShieldItemInHand();//lahko vrne null
+        loadout_item = npi.PopShieldPredmetInHand();//lahko vrne null
         onStand = Mapper.instance.getItemById(this.shield); //lahko vrne null
         if (loadout_item != null) this.shield = loadout_item.id;
         else this.shield = -1;
@@ -716,27 +716,27 @@ public class NetworkArmorStand : NetworkArmorStandBehavior
 
         if (this.head != -1)
         {
-            avatar.SetSlot("Helmet", Mapper.instance.getItemById(this.head).recipeName);
+            avatar.SetSlot("Helmet", Mapper.instance.getItemById(this.head).uma_item_recipe_name);
         }
 
         if (this.chest != -1)
         {
-            avatar.SetSlot("Chest", Mapper.instance.getItemById(this.chest).recipeName);
+            avatar.SetSlot("Chest", Mapper.instance.getItemById(this.chest).uma_item_recipe_name);
         }
 
         if (this.hands != -1)
         {
-            avatar.SetSlot("Hands", Mapper.instance.getItemById(this.hands).recipeName);
+            avatar.SetSlot("Hands", Mapper.instance.getItemById(this.hands).uma_item_recipe_name);
         }
 
         if (this.legs != -1)
         {
-            avatar.SetSlot("Legs", Mapper.instance.getItemById(this.legs).recipeName);
+            avatar.SetSlot("Legs", Mapper.instance.getItemById(this.legs).uma_item_recipe_name);
         }
 
         if (this.feet != -1)
         {
-            avatar.SetSlot("Feet", Mapper.instance.getItemById(this.feet).recipeName);
+            avatar.SetSlot("Feet", Mapper.instance.getItemById(this.feet).uma_item_recipe_name);
         }
 
         avatar.BuildCharacter();

@@ -1116,8 +1116,8 @@ private void ServerSendOnAcceptedData() {
                 backpack
                 );//nevem kaj nrdit z backpackom....
 
-            this.npi.items = saved_playerState.items;
-            this.npi.bar_items = saved_playerState.bar_items;
+            this.npi.personal_inventory_objects = saved_playerState.items;
+            this.npi.hotbar_objects = saved_playerState.bar_items;
             NetworkGuildManager.Instance.RefreshPlayersNetworkId(saved_playerState.previousNetworkId,Get_server_id());
 
 
@@ -1293,7 +1293,7 @@ private void ServerSendOnAcceptedData() {
         ps.health = health;
 
 
-        ps.items = npi.items;
+        ps.items = npi.personal_inventory_objects;
         ps.head=npi.getHeadItem();
         ps.chest = npi.getChestItem();
         ps.hands = npi.getHandsItem();
