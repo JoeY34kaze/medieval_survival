@@ -1654,20 +1654,24 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
     }
 
     #region Gathering
-    internal void requestResourceHitServer(gathering_tool_collider_handler gathering_tool_collider_handler, GameObject gameObject)
+    internal void requestResourceHitServer(gathering_tool_collider_handler gathering_tool_collider_handler, GameObject resource_obj)
     {
         if (networkObject.IsServer) {
-            if (Vector3.Distance(gathering_tool_collider_handler.transform.root.position, gameObject.transform.position) < 3f) {//mal security-a i guess
+            if (Vector3.Distance(gathering_tool_collider_handler.transform.root.position, resource_obj.transform.position) < 3f) {//mal security-a i guess
                 Debug.Log("We hit a resource!");
-                //ugotov z ktermu itemom smo udarli
+                //ugotov z ktermu itemom smo udarli in kaj smo udarli
                 Item i = gathering_tool_collider_handler.item;
+                NetworkResource nrs = resource_obj.GetComponent<NetworkResource>();
                 if (i.type == Item.Type.tool)
                 {
                     //dob vn resource - na podlagi gathering rate-a od tega itema
-
-                    //znizej hp resourca i guess - nrdimo networkObject? probably bo treba
-
+                    int amount = nrs.onHit(i);
+                    Item resource_item = nrs.resourceItem;
                     //dodaj resource v inventorij nekak - pohendla se network
+                   // if (!handleItemPickup(resource_item,amount)) {
+                        //instantiate resource with that amount of quantity
+                     //   throw new NotImplementedException();
+                    //}
                 }
             }
         }

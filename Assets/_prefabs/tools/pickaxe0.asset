@@ -23,6 +23,6 @@ MonoBehaviour:
     type: 3}
   weapon_animation_class: 2
   recipeName: 
-  stone_gather_rate: 1000
-  wood_gather_rate: 1000
-  flesh_gather_rate: 1000
+  stone_gather_rate: 10
+  wood_gather_rate: 4
+  flesh_gather_rate: 3

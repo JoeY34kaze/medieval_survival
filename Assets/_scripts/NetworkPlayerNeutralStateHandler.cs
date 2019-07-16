@@ -17,6 +17,7 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
     internal int selected_index = -1;
     internal int selected_index_shield = -1;
 
+
     private void Start()
     {
         this.combat_handler = GetComponent<NetworkPlayerCombatHandler>();
@@ -333,9 +334,8 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
                 if (obj == null) Debug.LogError("this should not have happened..");
                 ///nastimat v animatorju da zamahne
 
-                //collider
-                obj.GetComponent<Collider>().enabled = true;
-                if (networkObject.IsServer) { }
+                //nared animacijo
+                anim_logic.startToolAction(tool_to_use);
             }
         }
     }
@@ -379,5 +379,30 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
             this.selected_index_shield = -1;
             networkObject.SendRpc(RPC_BAR_SLOT_SELECTION_RESPONSE, Receivers.All, -1, -1, -1, -1);
         }
+    }
+    private GameObject getCurrentTool() {
+        foreach (Transform t in this.toolContainerOnHand)
+        {
+            if (t.gameObject.activeSelf && t.GetComponent<gathering_tool_collider_handler>() != null)
+            {
+                 return t.gameObject;
+            }
+        }
+        return null;
+
+
+    }
+
+    /// <summary>
+    /// klice animation event v layer movement na animaciji za uporabo toolov kot so kramp, sekira, in podobno kar rabi collider
+    /// </summary>
+    public void OnToolSwingStart() {
+        getCurrentTool().GetComponent<Collider>().enabled = true;
+    }
+    /// <summary>
+    /// klice animation event v layer movement na animaciji za uporabo toolov kot so kramp, sekira, in podobno kar rabi collider
+    /// </summary>
+    public void OnToolSwingEnd() {
+        getCurrentTool().GetComponent<Collider>().enabled = false;
     }
 }

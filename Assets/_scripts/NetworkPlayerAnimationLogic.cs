@@ -318,4 +318,11 @@ public class NetworkPlayerAnimationLogic : NetworkPlayerAnimationBehavior
         combat_handler.in_attack_animation = true;
         anim.SetTrigger("attack_1");
     }
+
+    internal void startToolAction(Item tool_to_use)
+    {
+        //ker bomo mel razlicne toole bi blo pametno nastimas se druge fielde na podlagi itema...
+
+        anim.SetTrigger("tool_activated");
+    }
 }

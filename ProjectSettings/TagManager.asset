@@ -13,6 +13,7 @@ TagManager:
   - GuildManager
   - resource
   - tool
+  - world_manager
   layers:
   - Default
   - TransparentFX
@@ -26,7 +27,7 @@ TagManager:
   - player
   - player_container_collider
   - world_model
-  - 
+  - Resource
   - 
   - 
   - 
