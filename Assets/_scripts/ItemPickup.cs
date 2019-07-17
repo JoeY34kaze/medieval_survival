@@ -8,6 +8,13 @@ using System.Collections;
 
 public class ItemPickup : Interactable {
     public Item i; //ujemat se mora z id-jem itema na playerju ce je na playerju al pa nevem
+
+    //kopiramo statse od objekta i guess ce nebomo direkt podal predmeta not..
+    public int quantity;
+    public int durability;
+    public string owner;
+
+
     public bool stackable = false;
     //zaenkrat smao pove da je item k se ga lahko pobere
 
@@ -48,7 +55,7 @@ public class ItemPickup : Interactable {
         if (local_lock.item_allows_interaction)
         {
             Debug.Log("Sending from local object to server for aprooval");
-            networkObject.SendRpc(RPC_HANDLE_ITEM_PICKUP_SERVER_SIDE, Receivers.Server, this.i.id, i.quantity, server_id);
+            networkObject.SendRpc(RPC_HANDLE_ITEM_PICKUP_SERVER_SIDE, Receivers.Server, this.i.id, this.quantity, server_id);
             local_lock.setupInteractionLocalLock();
         }
         else {
@@ -91,7 +98,7 @@ public class ItemPickup : Interactable {
 
         //handle_response_from_server(item_id,quantity,args.Info.SendingPlayer);//args.Info is a godsend
 
-        if(FindByid(player_id).GetComponent <NetworkPlayerInventory>().handleItemPickup(Mapper.instance.getItemById(item_id), quantity))//ce mu uspe pobrat -> unic item
+        if(FindByid(player_id).GetComponent <NetworkPlayerInventory>().handleItemPickup(new Predmet(Mapper.instance.getItemById(item_id), quantity)))//ce mu uspe pobrat -> unic item
             handle_network_destruction_server();
         return;
 

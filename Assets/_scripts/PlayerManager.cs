@@ -77,16 +77,16 @@ public class PlayerManager : MonoBehaviour
         public float health;
 
         //inventory ----------------------- poslal se bo samo id (int) nevem kaj nrdit z durability pa takim foram se..
-        public Item[] items;
-        public Item[] bar_items;
-        public Item head;
-        public Item chest;
-        public Item hands;
-        public Item legs;
-        public Item feet;
+        public Predmet[] items;
+        public Predmet[] bar_items;
+        public Predmet head;
+        public Predmet chest;
+        public Predmet hands;
+        public Predmet legs;
+        public Predmet feet;
 
 
-        public Item backpack;
+        public Predmet backpack;
         //umaData
 
         //guild ??

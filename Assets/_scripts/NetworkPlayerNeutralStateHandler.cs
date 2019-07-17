@@ -113,16 +113,16 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
     /// </summary>
     /// <returns></returns>
     private int getBarItemIdFromIndex(int id) {
-        Item k = npi.getBarPredmet(id);
+        Predmet k = npi.getBarPredmet(id);
         if (k == null) return -1;
-        else return k.id;
+        else return k.item.id;
     }
 
     private Item.Type getBarItemTypeFromIndex(int id)
     {
-        Item k = npi.getBarPredmet(id);
+        Predmet k = npi.getBarPredmet(id);
         if (k == null) return Item.Type.chest;
-        else return k.type;
+        else return k.item.type;
     }
 
     public override void BarSlotSelectionRequest(RpcArgs args)
@@ -131,7 +131,7 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
             if (isRequestValid()) {
                 int index = args.GetNext<int>();
                 
-                Item i = npi.getBarPredmet(index);
+                Predmet i = npi.getBarPredmet(index);
                 if (i != null)
                 {
 
@@ -147,7 +147,7 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
                         this.selected_index_shield = -1;
                     }
                     //ce mamo izbran shield in smo dobil index druzga shielda mormo zamenjat shield
-                    else if (this.selected_index_shield != -1 && i.type == Item.Type.shield)
+                    else if (this.selected_index_shield != -1 && i.item.type == Item.Type.shield)
                     {
                         this.selected_index_shield = index;
                     }//dobil smo ukaz da nj damo weapon stran
@@ -156,7 +156,7 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
                         this.selected_index = -1;
                     }
                     //ce mamo izbran weapon in shield in smo dobil nov weapon mormo zamenjat weapon
-                    else if (this.selected_index_shield != -1 && getBarItemTypeFromIndex(this.selected_index) == Item.Type.weapon && i.type == Item.Type.weapon)
+                    else if (this.selected_index_shield != -1 && getBarItemTypeFromIndex(this.selected_index) == Item.Type.weapon && i.item.type == Item.Type.weapon)
                     {
                         this.selected_index = index;
                     }
@@ -204,11 +204,11 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
             Debug.Log("bar update - " + index);
             if (networkObject.IsOwner)
             {
-                setSelectedItems(Mapper.instance.getItemById(item_id), Mapper.instance.getItemById(item_id2));
+                setSelectedItems(new Predmet(Mapper.instance.getItemById(item_id)), new Predmet(Mapper.instance.getItemById(item_id2)));
                 bar_handler.setSelectedSlots(index,index2);
             }
             else {
-                setSelectedItems(Mapper.instance.getItemById(item_id), Mapper.instance.getItemById(item_id2));
+                setSelectedItems(new Predmet(Mapper.instance.getItemById(item_id)),new Predmet( Mapper.instance.getItemById(item_id2)));
             }
 
             //ZA COMBAT MODE - precej neefektivno ker pri menjavi itema na baru se klice dvakrat rpc...........
@@ -221,31 +221,31 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
     /// na podlagi tega itema i, ga nastela u roke playerju
     /// </summary>
     /// <param name="i"></param>
-    private void setSelectedItems(Item i, Item shield) {//item je lahko null
-        if(i!=null)Debug.Log("Trying to place " + i.Display_name + " in the hands");
+    private void setSelectedItems(Predmet i, Predmet shield) {//item je lahko null
+        if(i!=null)Debug.Log("Trying to place " + i.item.Display_name + " in the hands");
         else Debug.Log("Trying to clear everything currently in the hands");
         if (i != null)
         {
-            if (i.type == Item.Type.tool) SetToolSelected(i);
-            else if (i.type == Item.Type.weapon || i.type == Item.Type.ranged)
+            if (i.item.type == Item.Type.tool) SetToolSelected(i);
+            else if (i.item.type == Item.Type.weapon || i.item.type == Item.Type.ranged)
             {
-                combat_handler.currently_equipped_weapon = i.id;
+                combat_handler.currently_equipped_weapon = i;
             }
-            else Debug.Log("item youre trying to equip cannot be equipped : " + i.Display_name);
+            else Debug.Log("item youre trying to equip cannot be equipped : " + i.item.Display_name);
         }
         else {//clearat vse razen shielda ce je slucajn equipan - bom vrgu u combat handler pa nj se tam jebe
             SetToolSelected(i);
-            combat_handler.currently_equipped_weapon = -1;
+            combat_handler.currently_equipped_weapon = null;
         }
 
         if (shield != null)
-            combat_handler.currently_equipped_shield = shield.id;
+            combat_handler.currently_equipped_shield = shield;
         else 
-            combat_handler.currently_equipped_shield = -1;
+            combat_handler.currently_equipped_shield = null;
         combat_handler.update_equipped_weapons();//weapon in shield
     }
 
-    private void SetToolSelected(Item i) {
+    private void SetToolSelected(Predmet i) {
         gathering_tool_collider_handler temp;
         foreach (Transform child in this.toolContainerOnHand)
         {
@@ -254,7 +254,7 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
             {
                 if (i != null)
                 {
-                    if (temp.item.id == i.id)
+                    if (temp.item.id == i.item.id)
                     {
                         child.gameObject.SetActive(true);
                     }

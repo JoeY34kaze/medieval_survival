@@ -265,33 +265,33 @@ napadenmu playerju da si poupdejta health. ta player pol ko si je updejtov healt
 
             //-----------armor values
             float armor_damage_reduction_modifier = 0;
-            Item temp;
+            Predmet temp;
             if (tag_passive.Equals("coll_0"))
             {
                 temp = npi.getHeadItem();
                 if (temp != null)
-                    armor_damage_reduction_modifier = temp.damage_reduction;
+                    armor_damage_reduction_modifier = temp.item.damage_reduction;
 
             }
             else if (tag_passive.Equals("coll_1"))
             {
                 temp = npi.getChestItem();
                 if (temp != null)
-                    armor_damage_reduction_modifier = temp.damage_reduction;
+                    armor_damage_reduction_modifier = temp.item.damage_reduction;
 
                 temp = npi.getHandsItem();
                 if (temp != null)
-                    armor_damage_reduction_modifier += temp.damage_reduction;
+                    armor_damage_reduction_modifier += temp.item.damage_reduction;
 
             }
             else if (tag_passive.Equals("coll_2")) {
                 temp = npi.getLegsItem();
                 if (temp != null)
-                    armor_damage_reduction_modifier = temp.damage_reduction;
+                    armor_damage_reduction_modifier = temp.item.damage_reduction;
 
                 temp = npi.getFeetItem();
                 if (temp != null)
-                    armor_damage_reduction_modifier += temp.damage_reduction;
+                    armor_damage_reduction_modifier += temp.item.damage_reduction;
             }
 
             armor_damage_reduction_modifier = 1 - armor_damage_reduction_modifier;
@@ -1088,17 +1088,17 @@ private void ServerSendOnAcceptedData() {
         if (saved_playerState != null)
         {
 
-            int head = -1; if (saved_playerState.head != null) head = saved_playerState.head.id;
-            int chest = -1; if (saved_playerState.chest != null) chest = saved_playerState.chest.id;
-            int hands = -1; if (saved_playerState.hands != null) hands = saved_playerState.hands.id;
-            int legs = -1; if (saved_playerState.legs != null) legs = saved_playerState.legs.id;
-            int feet = -1; if (saved_playerState.feet != null) feet = saved_playerState.feet.id;
+            int head = -1; if (saved_playerState.head != null) head = saved_playerState.head.item.id;
+            int chest = -1; if (saved_playerState.chest != null) chest = saved_playerState.chest.item.id;
+            int hands = -1; if (saved_playerState.hands != null) hands = saved_playerState.hands.item.id;
+            int legs = -1; if (saved_playerState.legs != null) legs = saved_playerState.legs.item.id;
+            int feet = -1; if (saved_playerState.feet != null) feet = saved_playerState.feet.item.id;
 
             //int ranged = -1; if (saved_playerState.ranged != null) ranged = saved_playerState.ranged.id;
             //int item_selected = -1; if (saved_playerState.item_selected != null) item_selected = saved_playerState.item_selected.id;
             //int weapon1 = -1; if (saved_playerState.weapon_1 != null) weapon1 = saved_playerState.weapon_1.id;
             //int shielkd_selected = -1; if (saved_playerState.shield_selected != null) shielkd_selected = saved_playerState.shield_selected.id;
-            int backpack = -1; if (saved_playerState.backpack != null) backpack = saved_playerState.backpack.id;
+            int backpack = -1; if (saved_playerState.backpack != null) backpack = saved_playerState.backpack.item.id;
 
             networkObject.SendRpc(RPC_RECEIVE_PERSONAL_DATA_ON_CONNECTION, Receivers.All,
                 saved_playerState.position,
@@ -1169,17 +1169,17 @@ private void ServerSendOnAcceptedData() {
             this.dead = args.GetNext<bool>();
             this.health = args.GetNext<float>();
 
-            this.npi.SetLoadoutItem(Mapper.instance.getItemById(args.GetNext<int>()));
-            this.npi.SetLoadoutItem(Mapper.instance.getItemById(args.GetNext<int>()));
-            this.npi.SetLoadoutItem(Mapper.instance.getItemById(args.GetNext<int>()));
-            this.npi.SetLoadoutItem(Mapper.instance.getItemById(args.GetNext<int>()));
-            this.npi.SetLoadoutItem(Mapper.instance.getItemById(args.GetNext<int>()));
+            this.npi.SetLoadoutItem(new Predmet(Mapper.instance.getItemById(args.GetNext<int>())));
+            this.npi.SetLoadoutItem(new Predmet(Mapper.instance.getItemById(args.GetNext<int>())));
+            this.npi.SetLoadoutItem(new Predmet(Mapper.instance.getItemById(args.GetNext<int>())));
+            this.npi.SetLoadoutItem(new Predmet(Mapper.instance.getItemById(args.GetNext<int>())));
+            this.npi.SetLoadoutItem(new Predmet(Mapper.instance.getItemById(args.GetNext<int>())));
 
             int blank = args.GetNext<int>();//
             blank = args.GetNext<int>();
             blank = args.GetNext<int>();
             blank = args.GetNext<int>();
-            this.npi.SetLoadoutItem(Mapper.instance.getItemById(args.GetNext<int>()));//Backpack??
+            this.npi.SetLoadoutItem(new Predmet(Mapper.instance.getItemById(args.GetNext<int>())));//Backpack??
 
 
 

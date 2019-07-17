@@ -296,11 +296,11 @@ public class NetworkPlayerAnimationLogic : NetworkPlayerAnimationBehavior
         
     }
 
-    public void setCombatClass(int weaponId)
+    public void setCombatClass(Predmet p)
     {
-        Item i = Mapper.instance.getItemById(weaponId);
-        if(i!=null)
-            anim.SetInteger("weapon_animation_class", i.weapon_animation_class);
+        
+        if(p!=null)
+            anim.SetInteger("weapon_animation_class", p.item.weapon_animation_class);
     }
 
     internal void setCombatBlocking(bool v)
