@@ -21,7 +21,7 @@ public class NetworkStartupSynchronizerArmorStand : NetworkStartupSynchronizer
     public override void SendDataToStartingClient(NetworkingPlayer p)
     {
         if (this.stand == null) updateScripts();
-        stand.ServerSendAllToPlayer(p);
+        //stand.ServerSendAllToPlayer(p);
 
     }
 }

@@ -396,7 +396,7 @@ public class NetworkArmorStand : NetworkArmorStandBehavior
                 break;
         }
         npi.sendNetworkUpdate(true, true);
-        networkObject.SendRpc(args.Info.SendingPlayer, RPC_ARMOR_STAND_REFRESH, this.head == null ? "-1" : this.head.toNetworkString(), this.chest == null ? "-1" : this.chest.toNetworkString(), this.hands == null ? "-1" : this.hands.toNetworkString(), this.legs == null ? "-1" : this.legs.toNetworkString(), this.feet == null ? "-1" : this.feet.toNetworkString(), this.weapon == null ? "-1" : this.weapon.toNetworkString(), this.shield == null ? "-1" : this.shield.toNetworkString(), this.ranged == null ? "-1" : this.ranged.toNetworkString());
+        networkObject.SendRpc(RPC_ARMOR_STAND_REFRESH,Receivers.All, this.head == null ? "-1" : this.head.toNetworkString(), this.chest == null ? "-1" : this.chest.toNetworkString(), this.hands == null ? "-1" : this.hands.toNetworkString(), this.legs == null ? "-1" : this.legs.toNetworkString(), this.feet == null ? "-1" : this.feet.toNetworkString(), this.weapon == null ? "-1" : this.weapon.toNetworkString(), this.shield == null ? "-1" : this.shield.toNetworkString(), this.ranged == null ? "-1" : this.ranged.toNetworkString());
     }
 
 
@@ -438,8 +438,8 @@ public class NetworkArmorStand : NetworkArmorStandBehavior
                 break;
         }
 
-        npi.sendNetworkUpdate(false, true);
-        networkObject.SendRpc(args.Info.SendingPlayer, RPC_ARMOR_STAND_REFRESH, this.head == null ? "-1" : this.head.toNetworkString(), this.chest == null ? "-1" : this.chest.toNetworkString(), this.hands == null ? "-1" : this.hands.toNetworkString(), this.legs == null ? "-1" : this.legs.toNetworkString(), this.feet == null ? "-1" : this.feet.toNetworkString(), this.weapon == null ? "-1" : this.weapon.toNetworkString(), this.shield == null ? "-1" : this.shield.toNetworkString(), this.ranged == null ? "-1" : this.ranged.toNetworkString());
+        npi.sendNetworkUpdate(true, true);
+        networkObject.SendRpc(RPC_ARMOR_STAND_REFRESH,Receivers.All, this.head == null ? "-1" : this.head.toNetworkString(), this.chest == null ? "-1" : this.chest.toNetworkString(), this.hands == null ? "-1" : this.hands.toNetworkString(), this.legs == null ? "-1" : this.legs.toNetworkString(), this.feet == null ? "-1" : this.feet.toNetworkString(), this.weapon == null ? "-1" : this.weapon.toNetworkString(), this.shield == null ? "-1" : this.shield.toNetworkString(), this.ranged == null ? "-1" : this.ranged.toNetworkString());
     }
 
     private void take_all_missing(uint server_id, NetworkPlayerInventory npi)
@@ -745,7 +745,7 @@ public class NetworkArmorStand : NetworkArmorStandBehavior
     /// klice NetowrkStartupSynchronizer da poslje povatke o tem objektu playerju, ki se je ravnokar sconnectal na server
     /// </summary>
     /// <param name="p"></param>
-    internal void ServerSendAllToPlayer(NetworkingPlayer p)
+    internal void ServerSendAllToPlayer(NetworkingPlayer p)//duplikat funkcionalnosti networkRefreshRequest ??
     {
         if(networkObject.IsServer)
          networkObject.SendRpc(p,RPC_ARMOR_STAND_REFRESH, 

@@ -52,7 +52,7 @@ public class NetworkContainer_items : NetworkContainerBehavior
     public Predmet popPredmet(int index) {
         if (networkObject.IsServer)
         {
-            return (this.predmeti[index] == null) ? null : this.predmeti[index];
+            if (this.predmeti[index] == null) return null; else { Predmet r = this.predmeti[index]; this.predmeti[index] = null; return r; }
         }
         throw new NotImplementedException();//ce ni server se tole nemore sprozit.
     }

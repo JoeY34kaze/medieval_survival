@@ -206,30 +206,45 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
     /// </summary>
     public void update_equipped_weapons()
     {
-        if(this.currently_equipped_weapon!=null)
+ 
             foreach (Transform c in weapon_slot)
             {
-                if (c.GetComponent<Weapon_collider_handler>().item.id == this.currently_equipped_weapon.item.id)
+                if (this.currently_equipped_weapon != null)
                 {
-                    c.gameObject.SetActive(true);
+                    if (c.GetComponent<Weapon_collider_handler>().item.id == this.currently_equipped_weapon.item.id)
+                    {
+                        c.gameObject.SetActive(true);
+                    }
+                    else
+                    {
+                        c.gameObject.SetActive(false);
+                    }
                 }
-                else
-                {
+                else {
                     c.gameObject.SetActive(false);
+                    //treba tud pohendlat animacijo da vrze iz combat state-a. lahko klicemo kr combatstatesetter - ker se to nastavi na vsah playerjih, tud na serverju.
+                    setCombatStateLocally(0);
                 }
             }
-        if(this.currently_equipped_shield!=null)
+        
             foreach (Transform c in shield_slot)
             {
-                if (c.GetComponent<identifier_helper>().id == this.currently_equipped_shield.item.id)
+                if (this.currently_equipped_shield != null)
                 {
-                    c.gameObject.SetActive(true);
+                    if (c.GetComponent<identifier_helper>().id == this.currently_equipped_shield.item.id)
+                    {
+                        c.gameObject.SetActive(true);
+                    }
+                    else
+                    {
+                        c.gameObject.SetActive(false);
+                    }
                 }
-                else
-                {
+                else {
                     c.gameObject.SetActive(false);
                 }
             }
+            
     }
 
 
@@ -354,23 +369,27 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
         
         int new_mode = args.GetNext<int>();
 
+        setCombatStateLocally((byte)new_mode);
+    }
+
+    private void setCombatStateLocally(byte new_mode) {
         this.combat_mode = (byte)new_mode;
         // Debug.Log("got change combat mode response : "+this.combat_mode + " "+new_mode);
 
-        
+
         if (new_mode == 0)
         {
             animator.setCombatState((byte)new_mode);
             place_shield_on_back();
             neutralStateHandler.NeutralStateSetup();
         }
-        else {
+        else
+        {
             neutralStateHandler.CombatStateSetup();
             update_equipped_weapons();
             animator.setCombatState((byte)new_mode);
         }
     }
-
  
     public override void SendAll(RpcArgs args)
     {

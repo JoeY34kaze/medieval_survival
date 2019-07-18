@@ -278,8 +278,9 @@ public class NetworkBackpack : NetworkBackpackBehavior
     //klice server
     public void local_server_BackpackUnequip() {
         if (networkObject.IsServer) {
-            networkObject.TakeOwnership();//server vzame ownership
+            
             networkObject.SendRpc(RPC_BACKPACK_UNEQUIP_RESPONSE, Receivers.All);
+            networkObject.TakeOwnership();//server vzame ownership
         }
     }
 
@@ -296,7 +297,7 @@ public class NetworkBackpack : NetworkBackpackBehavior
             if (!r.detectCollisions) r.detectCollisions = true;
             if(networkObject.IsOwner)
                 this.panel_handler.clear();
-            npi.requestUiUpdate();//najbrz overkill k itak posle redraw zmer k odpres inventorij ampak za zacetk je ok
+            if(networkObject.IsOwner)npi.requestUiUpdate();//najbrz overkill k itak posle redraw zmer k odpres inventorij ampak za zacetk je ok
             this.npi.backpack_inventory = null;
             this.npi = null;
             this.panel_handler = null;

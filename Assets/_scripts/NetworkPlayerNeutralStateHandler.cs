@@ -178,7 +178,7 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
 
                 //tle posljemo zdej rpc
                 //TODO: ownerju poslat druugacn rpc kot drugim, drugi nebi smel vidt indexa ker je to slaba stvar - ESP
-                networkObject.SendRpc(RPC_BAR_SLOT_SELECTION_RESPONSE, Receivers.All, npi.hotbar_objects[this.selected_index].toNetworkString(), this.selected_index, npi.hotbar_objects[this.selected_index_shield].toNetworkString(), selected_index_shield);
+                networkObject.SendRpc(RPC_BAR_SLOT_SELECTION_RESPONSE, Receivers.All, (this.selected_index==-1)?"-1" : npi.hotbar_objects[this.selected_index].toNetworkString(), this.selected_index, (this.selected_index_shield == -1) ? "-1" : npi.hotbar_objects[this.selected_index_shield].toNetworkString(), selected_index_shield);
             }
         }
     }
@@ -369,7 +369,9 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
 
     internal bool isNotSelected(int a, int b)
     {
-        if (a == this.selected_index_shield || a == this.selected_index || b == this.selected_index_shield || b == this.selected_index) return false;
+
+        
+        if (((a == this.selected_index_shield || a == this.selected_index) && a!=-1) || ((b == this.selected_index_shield || b == this.selected_index) && b!=-1)) return false;
         return true;
     }
 
@@ -378,7 +380,7 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
         if (networkObject.IsServer) {
             this.selected_index = -1;
             this.selected_index_shield = -1;
-            networkObject.SendRpc(RPC_BAR_SLOT_SELECTION_RESPONSE, Receivers.All, -1, -1, -1, -1);
+            networkObject.SendRpc(RPC_BAR_SLOT_SELECTION_RESPONSE, Receivers.All, "-1", -1, "-1", -1);
         }
     }
     private GameObject getCurrentTool() {

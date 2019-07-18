@@ -331,11 +331,14 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         Predmet resp = try_to_upgrade_loadout(pobran_objekt);
         if (resp != null)
         {
-            if (resp.item.type == Item.Type.weapon || resp.item.type == Item.Type.shield || resp.item.type == Item.Type.ranged || resp.item.type == Item.Type.tool) {
+            if ((resp.item.type == Item.Type.weapon || resp.item.type == Item.Type.shield || resp.item.type == Item.Type.ranged || resp.item.type == Item.Type.tool) && hasBarSpace())
+            {
                 BarAddFirst(resp);
             }
             else if (hasInventoryEmptySlot())
+            {
                 AddFirst(resp);
+            }
             else if (this.backpack != null)
             {//ce ima backpack
                 if (this.backpack_inventory.hasSpace())
@@ -343,9 +346,13 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
                     this.backpack_inventory.putFirst(resp);
                     this.backpack_inventory.sendBackpackItemsUpdate();
                 }
-                else return false;
+                else if (hasBarSpace())
+                {//nikjer ni blo placa. rust u tem primeru spawna item nazaj, ampak mi lahko recemo simpl da ga ne pobere.
+                    BarAddFirst(resp);
+                }
             }
-            else if(hasBarSpace()) {//nikjer ni blo placa. rust u tem primeru spawna item nazaj, ampak mi lahko recemo simpl da ga ne pobere.
+            else if (hasBarSpace())
+            {//nikjer ni blo placa. rust u tem primeru spawna item nazaj, ampak mi lahko recemo simpl da ga ne pobere.
                 BarAddFirst(resp);
             }
         }
@@ -1099,11 +1106,14 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
             }
             else
             {//pise na hotbara
-                this.hotbar_objects[i - this.personal_inventory_objects.Length] = payload[i - this.personal_inventory_objects.Length];
+                this.hotbar_objects[i - this.personal_inventory_objects.Length] = payload[i];
 
             }
         }
         //ce smo zarad armor standa povozil trenutno equippan weapon mormo to updejtat..
+        if (neutralStateHandler == null) this.neutralStateHandler = GetComponent<NetworkPlayerNeutralStateHandler>();
+        if (SelectedWeaponIsNotInHotbar()) neutralStateHandler.ClearActiveWeapons();
+
         combatHandler.update_equipped_weapons();
 
         if (onLoadoutChangedCallback != null)
