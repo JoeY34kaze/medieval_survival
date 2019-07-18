@@ -636,15 +636,15 @@ public class NetworkArmorStand : NetworkArmorStandBehavior
 
         if (!networkObject.IsServer)//server ze ima podatke, jih nerab povozt z potencialno napacnimi..
         {
-            this.head = args.GetNext<int>();
-            this.chest = args.GetNext<int>();
-            this.hands = args.GetNext<int>();
-            this.legs = args.GetNext<int>();
-            this.feet = args.GetNext<int>();
-            this.weapon = args.GetNext<int>();
-            int blank = args.GetNext<int>();
-            this.shield = args.GetNext<int>();
-            this.ranged = args.GetNext<int>();
+
+            this.head   = Predmet.createNewPredmet(args.GetNext<string>());
+            this.chest  = Predmet.createNewPredmet(args.GetNext<string>());
+            this.hands  = Predmet.createNewPredmet(args.GetNext<string>());
+            this.legs   = Predmet.createNewPredmet(args.GetNext<string>());
+            this.feet   = Predmet.createNewPredmet(args.GetNext<string>());
+            this.weapon = Predmet.createNewPredmet(args.GetNext<string>());
+            this.shield = Predmet.createNewPredmet(args.GetNext<string>());
+            this.ranged = Predmet.createNewPredmet(args.GetNext<string>());
         }
 
         redraw_armor_stand();
@@ -712,7 +712,7 @@ public class NetworkArmorStand : NetworkArmorStandBehavior
         //zbris vse
         for (int k = 0; k < retard.childCount; k++)//ce dam tle samo destroy ucas kr faila. nimam pojma zakaj. ce dam destroy u update ga ubije, sicer g apa ne. no fucking clue. to sm skor prepičan da je unity bug
         {
-            Destroy(retard.GetChild(k).gameObject);// crkni cigan jeben
+            Destroy(retard.GetChild(k).gameObject);// crkni cigan en
         }
 
         if (i == -1)
@@ -747,6 +747,14 @@ public class NetworkArmorStand : NetworkArmorStandBehavior
     internal void ServerSendAllToPlayer(NetworkingPlayer p)
     {
         if(networkObject.IsServer)
-         networkObject.SendRpc(p,RPC_ARMOR_STAND_REFRESH, this.head, this.chest, this.hands, this.legs, this.feet, this.weapon, -1, this.shield, this.ranged);
+         networkObject.SendRpc(p,RPC_ARMOR_STAND_REFRESH, 
+             (this.head==null)? "-1":this.head.toNetworkString(),
+             (this.chest == null) ? "-1" : this.chest.toNetworkString(),
+             (this.hands == null) ? "-1" : this.hands.toNetworkString(),
+             (this.legs == null) ? "-1" : this.legs.toNetworkString(),
+             (this.feet == null) ? "-1" : this.feet.toNetworkString(),
+             (this.weapon == null) ? "-1" : this.weapon.toNetworkString(),
+             (this.shield == null) ? "-1" : this.shield.toNetworkString(),
+             (this.ranged == null) ? "-1" : this.ranged.toNetworkString());
     }
 }

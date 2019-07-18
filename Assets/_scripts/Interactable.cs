@@ -12,7 +12,7 @@ ni lih tko kot u tutorialu ker uno je za singleplayer tle je pa multiplayer. veÄ
 inheritance nekak dela ker je vse lokalno
 to se vse overrida
 
-    NACELOMA BO VSAK INTERACTABLE OBJEKT OD SERVERJA, owener nebo player. player naceloma owna samo svojga characterja pa weapone
+    NACELOMA BO VSAK INTERACTABLE OBJEKT OD SERVERJA, owener nebo player. player naceloma owna samo svojga characterja
 */
 public class Interactable : Interactable_objectBehavior
 {
@@ -40,10 +40,6 @@ public class Interactable : Interactable_objectBehavior
     {
     }
 
-    public override void ItemPickupResponse(RpcArgs args)
-    {
-        
-    }
 
     internal virtual void interact(uint server_id)
     {
@@ -116,6 +112,17 @@ public class Interactable : Interactable_objectBehavior
     }
 
     public override void DoorStateUpdate(RpcArgs args)
+    {
+        throw new NotImplementedException();
+    }
+
+    //itempickup samo
+    internal virtual void setStartingInstantiationParameters(Predmet p, Vector3 pos, Vector3 dir)
+    {
+
+    }
+
+    public override void SetPredmetForPickup(RpcArgs args)
     {
         throw new NotImplementedException();
     }

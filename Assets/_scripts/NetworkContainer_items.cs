@@ -127,7 +127,7 @@ public class NetworkContainer_items : NetworkContainerBehavior
         string s = "";
         for (int i = 0; i < this.size; i++) {
             if (this.predmeti[i] != null)
-                s = s + "|" + this.predmeti[i].item.id;
+                s = s + "|" + this.predmeti[i].toNetworkString();
             else
                 s = s + "|-1";
         }
@@ -139,9 +139,7 @@ public class NetworkContainer_items : NetworkContainerBehavior
         string[] ss = s.Split('|');
         Predmet[] rez = new Predmet[ss.Length -1];//zacne se z "" zato en slot sfali
         for (int i = 1; i < ss.Length; i++) {//zacne z 1 ker je ss[0] = ""
-            int k=-1;
-             Int32.TryParse(ss[i],out k);
-            rez[i-1] = new Predmet(Mapper.instance.getItemById(k));
+            rez[i - 1] = Predmet.createNewPredmet(ss[i]);//ce je format networkstringa ured vrne predmet sicer vrne null
         }
         return rez;
     }

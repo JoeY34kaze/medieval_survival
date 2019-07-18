@@ -7,13 +7,7 @@ using System.Collections.Generic;
 using System.Collections;
 
 public class ItemPickup : Interactable {
-    public Item i; //ujemat se mora z id-jem itema na playerju ce je na playerju al pa nevem
-
-    //kopiramo statse od objekta i guess ce nebomo direkt podal predmeta not..
-    public int quantity;
-    public int durability;
-    public string owner;
-
+    public Predmet p; //ujemat se mora z id-jem itema na playerju ce je na playerju al pa nevem
 
     public bool stackable = false;
     //zaenkrat smao pove da je item k se ga lahko pobere
@@ -55,7 +49,7 @@ public class ItemPickup : Interactable {
         if (local_lock.item_allows_interaction)
         {
             Debug.Log("Sending from local object to server for aprooval");
-            networkObject.SendRpc(RPC_HANDLE_ITEM_PICKUP_SERVER_SIDE, Receivers.Server, this.i.id, this.quantity, server_id);
+            networkObject.SendRpc(RPC_HANDLE_ITEM_PICKUP_SERVER_SIDE, Receivers.Server);
             local_lock.setupInteractionLocalLock();
         }
         else {
@@ -86,9 +80,7 @@ public class ItemPickup : Interactable {
             Debug.Log("item does not allow interaction at this time.");
         }
 
-        int item_id = args.GetNext<int>();
-        int quantity = args.GetNext<int>();
-        uint player_id = args.GetNext<uint>();//tole lahko zvohamo tud iz args.info.sendingplayer
+        uint player_id = args.Info.SendingPlayer.NetworkId;
 
 
 
@@ -98,26 +90,14 @@ public class ItemPickup : Interactable {
 
         //handle_response_from_server(item_id,quantity,args.Info.SendingPlayer);//args.Info is a godsend
 
-        if(FindByid(player_id).GetComponent <NetworkPlayerInventory>().handleItemPickup(new Predmet(Mapper.instance.getItemById(item_id), quantity)))//ce mu uspe pobrat -> unic item
+        if(FindByid(player_id).GetComponent <NetworkPlayerInventory>().handleItemPickup(this.p))//ce mu uspe pobrat -> unic item
             handle_network_destruction_server();
         return;
 
         
     }
 
-    private void handle_response_from_server(int item_id, int quantity, NetworkingPlayer player)
-    {
-      /*  
-        //send response to NetworkPlayerInteraction to handle getting it into inventory
-        GameObject player_obj = FindByid(player.NetworkId);
-        Debug.Log("sending pickup response signal to player");
-        player_obj.GetComponent<NetworkPlayerInteraction>().call_owner_rpc_item_pickup_response(item_id,quantity);
-        //send response to yourself to kill itself
-        Debug.Log("sending kill signal the object");
-        
-
-        handle_network_destruction_server();*/
-    }
+   
 
     private void handle_network_destruction_server()
     {
@@ -126,7 +106,7 @@ public class ItemPickup : Interactable {
         local_lock.item_waiting_for_destruction = true;
         //StartCoroutine(DestroyDelayed());
 
-        networkObject.SendRpc(RPC_DESTROY_WRAPPER, Receivers.AllProximity);//tole je da disabla interakcijo drugje pa da zacne fadeout al pa nekej. uglavnem nekej casa mora pretect predn se ga unici
+        networkObject.SendRpc(RPC_DESTROY_WRAPPER, Receivers.All);//tole je da disabla interakcijo drugje pa da zacne fadeout al pa nekej. uglavnem nekej casa mora pretect predn se ga unici
         //yield return new WaitForSeconds(0.1f);
         if (!networkObject.IsOwner)
             Debug.Log("NOT OWNER!!");
@@ -137,7 +117,7 @@ public class ItemPickup : Interactable {
     IEnumerator DestroyDelayed()//sends vertical and horizontal speed to network
     {
 
-        networkObject.SendRpc(RPC_DESTROY_WRAPPER, Receivers.AllProximity);//tole je da disabla interakcijo drugje pa da zacne fadeout al pa nekej. uglavnem nekej casa mora pretect predn se ga unici
+        networkObject.SendRpc(RPC_DESTROY_WRAPPER, Receivers.All);//tole je da disabla interakcijo drugje pa da zacne fadeout al pa nekej. uglavnem nekej casa mora pretect predn se ga unici
         yield return new WaitForSeconds(0.1f);
         if (!networkObject.IsOwner)
             Debug.Log("NOT OWNER!!");
@@ -176,6 +156,28 @@ public class ItemPickup : Interactable {
 
             transform.position = pos;//da se zacne na isti poziciji kot na serverju
             rb.AddForce(dir * 1500);
+        }
+    }
+
+    internal override void setStartingInstantiationParameters(Predmet p, Vector3 pos, Vector3 dir)
+    {
+        if (networkObject.IsServer)
+        {
+            setForce(pos, dir);
+            this.p = p;
+            networkObject.SendRpc(RPC_SET_PREDMET_FOR_PICKUP, Receivers.Others, p.toNetworkString());
+
+        }
+        
+    }
+
+    public override void SetPredmetForPickup(RpcArgs args)
+    {
+        if (args.Info.SendingPlayer.NetworkId == 0)
+        {
+            Predmet k = new Predmet(null);
+            k.setParametersFromNetworkString(args.GetNext<string>());
+            this.p = k;
         }
     }
 

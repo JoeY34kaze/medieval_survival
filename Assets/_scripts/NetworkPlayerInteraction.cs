@@ -445,9 +445,4 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
     {
         offscreen_indicator.RemoveIndicator(t);
     }
-
-    public override void ItemPickupRequest(RpcArgs args)//ne nrdi nc
-    {
-        throw new NotImplementedException();
-    }
 }

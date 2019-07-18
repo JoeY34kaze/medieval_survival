@@ -979,113 +979,21 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         if (!networkObject.IsServer) { Debug.LogError("client poskusa posiljat networkupdate k je samo od serverja.."); return; }
         if (inv)//no security risk since its always sent to owner
         {
-            short i0, i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, i14, i15, i16, i17, i18, i19;
-
-
-
-            if (this.personal_inventory_objects[0] == null) i0 = -1;
-            else i0 = (short)this.personal_inventory_objects[0].item.id;
-
-            if (this.personal_inventory_objects[1] == null) i1 = -1;
-            else i1 = (short)this.personal_inventory_objects[1].item.id;
-
-            if (this.personal_inventory_objects[2] == null) i2 = -1;
-            else i2 = (short)this.personal_inventory_objects[2].item.id;
-
-            if (this.personal_inventory_objects[3] == null) i3 = -1;
-            else i3 = (short)this.personal_inventory_objects[3].item.id;
-
-            if (this.personal_inventory_objects[4] == null) i4 = -1;
-            else i4 = (short)this.personal_inventory_objects[4].item.id;
-
-            if (this.personal_inventory_objects[5] == null) i5 = -1;
-            else i5 = (short)this.personal_inventory_objects[5].item.id;
-
-            if (this.personal_inventory_objects[6] == null) i6 = -1;
-            else i6 = (short)this.personal_inventory_objects[6].item.id;
-
-            if (this.personal_inventory_objects[7] == null) i7 = -1;
-            else i7 = (short)this.personal_inventory_objects[7].item.id;
-
-            if (this.personal_inventory_objects[8] == null) i8 = -1;
-            else i8 = (short)this.personal_inventory_objects[8].item.id;
-
-            if (this.personal_inventory_objects[9] == null) i9 = -1;
-            else i9 = (short)this.personal_inventory_objects[9].item.id;
-
-            if (this.personal_inventory_objects[10] == null) i10 = -1;
-            else i10 = (short)this.personal_inventory_objects[10].item.id;
-
-            if (this.personal_inventory_objects[11] == null) i11 = -1;
-            else i11 = (short)this.personal_inventory_objects[11].item.id;
-
-            if (this.personal_inventory_objects[12] == null) i12 = -1;
-            else i12 = (short)this.personal_inventory_objects[12].item.id;
-
-            if (this.personal_inventory_objects[13] == null) i13 = -1;
-            else i13 = (short)this.personal_inventory_objects[13].item.id;
-
-            if (this.personal_inventory_objects[14] == null) i14 = -1;
-            else i14 = (short)this.personal_inventory_objects[14].item.id;
-
-            if (this.personal_inventory_objects[15] == null) i15 = -1;
-            else i15 = (short)this.personal_inventory_objects[15].item.id;
-
-            if (this.personal_inventory_objects[16] == null) i16 = -1;
-            else i16 = (short)this.personal_inventory_objects[16].item.id;
-
-            if (this.personal_inventory_objects[17] == null) i17 = -1;
-            else i17 = (short)this.personal_inventory_objects[17].item.id;
-
-            if (this.personal_inventory_objects[18] == null) i18 = -1;
-            else i18 = (short)this.personal_inventory_objects[18].item.id;
-
-            if (this.personal_inventory_objects[19] == null) i19 = -1;
-            else i19 = (short)this.personal_inventory_objects[19].item.id;
-
-            //poslat ownerju
+            
 
             //Debug.Log(" personal inventory rpc SEND: owner server id: " + GetComponent<NetworkPlayerStats>().server_id + " | networkId : " + networkObject.Owner.NetworkId);
-            networkObject.SendRpc(p,RPC_SEND_PERSONAL_INVENTORY_UPDATE,
-                i0,
-                i1,
-                i2,
-                i3,
-                i4,
-                i5,
-                i6,
-                i7,
-                i8,
-                i9,
-                i10,
-                i11,
-                i12,
-                i13,
-                i14,
-                i15,
-                i16,
-                i17,
-                i18,
-                i19);
+            networkObject.SendRpc(p,RPC_SEND_PERSONAL_INVENTORY_UPDATE,getItemsNetwork());
         }
 
         if (loadout)
         {
-            short l0 = -1, l1 = -1, l2 = -1, l3 = -1, l4 = -1, l5 = -1, l6 = -1, l7 = -1, l8 = -1, l9 = -1;
-
-            if (this.head != null) l0 = (short)this.head.item.id;
-            if (this.chest != null) l1 = (short)this.chest.item.id;
-            if (this.hands != null) l2 = (short)this.hands.item.id;
-            if (this.legs != null) l3 = (short)this.legs.item.id;
-            if (this.feet != null) l4 = (short)this.feet.item.id;
-
-            if (this.backpack != null) l9 = (short)this.backpack.item.id;
-
-            // GetComponent<NetworkPlayerCombatHandler>().send_network_update_weapons();//weapon trenutno equipan pa shield
-
-            //mogoce zamenjat z proximity. nevem ce sicer ker gear morjo vidt vsi da nebo prletu lokalno en nagex k je u resnic do konca pogearan
             networkObject.SendRpc(p,RPC_SEND_LOADOUT_UPDATE,
-                l0, l1, l2, l3, l4,l9
+                (this.head == null) ? "-1" : this.head.toNetworkString(),
+                (this.chest == null) ? "-1" : this.chest.toNetworkString(),
+                (this.hands == null) ? "-1" : this.hands.toNetworkString(),
+                (this.legs == null) ? "-1" : this.legs.toNetworkString(),
+                (this.feet == null) ? "-1" : this.feet.toNetworkString(),
+                (this.backpack == null) ? "-1" : this.backpack.toNetworkString()
                 );
 
             if (onLoadoutChangedCallback != null)
@@ -1099,160 +1007,19 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         if (!networkObject.IsServer) { Debug.LogError("client poskusa posiljat networkupdate k je samo od serverja.."); return; }
         if (inv)//no security risk since its always sent to owner
         {
-            short i0, i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, i14, i15, i16, i17, i18, i19;
-
-
-
-            if (this.personal_inventory_objects[0] == null) i0 = -1;
-            else i0 = (short)this.personal_inventory_objects[0].item.id;
-
-            if (this.personal_inventory_objects[1] == null) i1 = -1;
-            else i1 = (short)this.personal_inventory_objects[1].item.id;
-
-            if (this.personal_inventory_objects[2] == null) i2 = -1;
-            else i2 = (short)this.personal_inventory_objects[2].item.id;
-
-            if (this.personal_inventory_objects[3] == null) i3 = -1;
-            else i3 = (short)this.personal_inventory_objects[3].item.id;
-
-            if (this.personal_inventory_objects[4] == null) i4 = -1;
-            else i4 = (short)this.personal_inventory_objects[4].item.id;
-
-            if (this.personal_inventory_objects[5] == null) i5 = -1;
-            else i5 = (short)this.personal_inventory_objects[5].item.id;
-
-            if (this.personal_inventory_objects[6] == null) i6 = -1;
-            else i6 = (short)this.personal_inventory_objects[6].item.id;
-
-            if (this.personal_inventory_objects[7] == null) i7 = -1;
-            else i7 = (short)this.personal_inventory_objects[7].item.id;
-
-            if (this.personal_inventory_objects[8] == null) i8 = -1;
-            else i8 = (short)this.personal_inventory_objects[8].item.id;
-
-            if (this.personal_inventory_objects[9] == null) i9 = -1;
-            else i9 = (short)this.personal_inventory_objects[9].item.id;
-
-            if (this.personal_inventory_objects[10] == null) i10 = -1;
-            else i10 = (short)this.personal_inventory_objects[10].item.id;
-
-            if (this.personal_inventory_objects[11] == null) i11 = -1;
-            else i11 = (short)this.personal_inventory_objects[11].item.id;
-
-            if (this.personal_inventory_objects[12] == null) i12 = -1;
-            else i12 = (short)this.personal_inventory_objects[12].item.id;
-
-            if (this.personal_inventory_objects[13] == null) i13 = -1;
-            else i13 = (short)this.personal_inventory_objects[13].item.id;
-
-            if (this.personal_inventory_objects[14] == null) i14 = -1;
-            else i14 = (short)this.personal_inventory_objects[14].item.id;
-
-            if (this.personal_inventory_objects[15] == null) i15 = -1;
-            else i15 = (short)this.personal_inventory_objects[15].item.id;
-
-            if (this.personal_inventory_objects[16] == null) i16 = -1;
-            else i16 = (short)this.personal_inventory_objects[16].item.id;
-
-            if (this.personal_inventory_objects[17] == null) i17 = -1;
-            else i17 = (short)this.personal_inventory_objects[17].item.id;
-
-            if (this.personal_inventory_objects[18] == null) i18 = -1;
-            else i18 = (short)this.personal_inventory_objects[18].item.id;
-
-            if (this.personal_inventory_objects[19] == null) i19 = -1;
-            else i19 = (short)this.personal_inventory_objects[19].item.id;
-
-            //posljemo tud barData ownerju!!
-            short b0, b1, b2, b3, b4, b5, b6, b7, b8, b9;
-
-            if (this.hotbar_objects[0] == null) b0 = -1;
-            else b0 = (short)this.hotbar_objects[0].item.id;
-
-            if (this.hotbar_objects[1] == null) b1 = -1;
-            else b1 = (short)this.hotbar_objects[1].item.id;
-
-            if (this.hotbar_objects[1] == null) b1 = -1;
-            else b1 = (short)this.hotbar_objects[1].item.id;
-
-            if (this.hotbar_objects[2] == null) b2 = -1;
-            else b2 = (short)this.hotbar_objects[2].item.id;
-
-            if (this.hotbar_objects[3] == null) b3 = -1;
-            else b3 = (short)this.hotbar_objects[3].item.id;
-
-            if (this.hotbar_objects[4] == null) b4 = -1;
-            else b4 = (short)this.hotbar_objects[4].item.id;
-
-            if (this.hotbar_objects[5] == null) b5 = -1;
-            else b5 = (short)this.hotbar_objects[5].item.id;
-
-            if (this.hotbar_objects[6] == null) b6 = -1;
-            else b6 = (short)this.hotbar_objects[6].item.id;
-
-            if (this.hotbar_objects[7] == null) b7 = -1;
-            else b7 = (short)this.hotbar_objects[7].item.id;
-
-            if (this.hotbar_objects[8] == null) b8 = -1;
-            else b8 = (short)this.hotbar_objects[8].item.id;
-
-            if (this.hotbar_objects[9] == null) b9 = -1;
-            else b9 = (short)this.hotbar_objects[9].item.id;
-
-            //poslat ownerju
-
             //Debug.Log(" personal inventory rpc SEND: owner server id: " + GetComponent<NetworkPlayerStats>().server_id + " | networkId : " + networkObject.Owner.NetworkId);
-            networkObject.SendRpc(RPC_SEND_PERSONAL_INVENTORY_UPDATE, Receivers.Owner,
-                i0,
-                i1,
-                i2,
-                i3,
-                i4,
-                i5,
-                i6,
-                i7,
-                i8,
-                i9,
-                i10,
-                i11,
-                i12,
-                i13,
-                i14,
-                i15,
-                i16,
-                i17,
-                i18,
-                i19,
-                b0,
-                b1,
-                b2,
-                b3,
-                b4,
-                b5,
-                b6,
-                b7,
-                b8,
-                b9);
-
-            
+            networkObject.SendRpc(RPC_SEND_PERSONAL_INVENTORY_UPDATE, Receivers.Owner,getItemsNetwork()); 
         }
 
         if (loadout)
         {
-            short l0 = -1, l1 = -1, l2 = -1, l3 = -1, l4 = -1, l5 = -1, l6 = -1, l7 = -1, l8 = -1, l9=-1;
-
-            if (this.head != null) l0 = (short)this.head.item.id;
-            if (this.chest != null) l1 = (short)this.chest.item.id;
-            if (this.hands != null) l2 = (short)this.hands.item.id;
-            if (this.legs != null) l3 = (short)this.legs.item.id;
-            if (this.feet != null) l4 = (short)this.feet.item.id;
-            if (this.backpack != null) l9 = (short)this.backpack.item.id;
-
-           // GetComponent<NetworkPlayerCombatHandler>().send_network_update_weapons();//weapon trenutno equipan pa shield
-
-            //mogoce zamenjat z proximity. nevem ce sicer ker gear morjo vidt vsi da nebo prletu lokalno en nagex k je u resnic do konca pogearan
             networkObject.SendRpc(RPC_SEND_LOADOUT_UPDATE, Receivers.All,
-                l0, l1, l2, l3, l4, l9
+                (this.head==null)?"-1":this.head.toNetworkString(),
+                (this.chest == null) ? "-1" : this.chest.toNetworkString(),
+                (this.hands == null) ? "-1" : this.hands.toNetworkString(),
+                (this.legs == null) ? "-1" : this.legs.toNetworkString(),
+                (this.feet == null) ? "-1" : this.feet.toNetworkString(),
+                (this.backpack == null) ? "-1" : this.backpack.toNetworkString()
                 );
 
             if (onLoadoutChangedCallback != null)
@@ -1302,7 +1069,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
     }
 
     public override void SendPersonalInventoryUpdate(RpcArgs args)
-    {//nc zrihtan za kolicino
+    {
         //to bi mogu dobit samo owner in NOBEN drug, sicer je nrdit ESP hack najbolj trivialna stvar na planetu
         //Debug.Log(" personal inventory rpc receive: owner server id: " + GetComponent<NetworkPlayerStats>().server_id + " | networkId : " + networkObject.Owner.NetworkId);
         if (args.Info.SendingPlayer.NetworkId != 0) return;//ce ni poslov server al pa ce je prejeu en drug k owner(kar s eneb smel nrdit sploh!)
@@ -1310,18 +1077,23 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
 
 
         //inventory
-        for (int i = 0; i < 20; i++)
-        {
-            short item_id = args.GetNext<short>();
-            this.personal_inventory_objects[i] = new Predmet(Mapper.instance.getItemById((int)item_id));
-        }
-        //bar
-        for (int i = 0; i < 10; i++)
-        {
-            short item_id = args.GetNext<short>();
-            this.hotbar_objects[i] = new Predmet(Mapper.instance.getItemById((int)item_id));
-        }
+        string networkStringPersonalAndHotbar = args.GetNext<string>();
+        Predmet[] payload = parseItemsNetworkFormat(networkStringPersonalAndHotbar);//velikost tega je this.personal_inventory_objects.Length +this.hotbarItems.length
 
+
+
+        for (int i = 0; i < payload.Length; i++)
+        {
+            if (i < this.personal_inventory_objects.Length)//pise na personal inventorija
+            {
+                this.personal_inventory_objects[i] = payload[i];
+            }
+            else
+            {//pise na hotbara
+                this.hotbar_objects[i - this.personal_inventory_objects.Length] = payload[i - this.personal_inventory_objects.Length];
+
+            }
+        }
         //ce smo zarad armor standa povozil trenutno equippan weapon mormo to updejtat..
         combatHandler.update_equipped_weapons();
 
@@ -1413,7 +1185,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         if (!networkObject.IsServer) { Debug.LogError("instanciacija objekta k smo ga dropal ni na serverjvu!");  return; }
 
 
-        networkObject.SendRpc(RPC_NETWORK_INSTANTIATION_SERVER_REQUEST, Receivers.Server, getNetworkIdFromItem(p.item), camera_vector, camera_forward);
+        networkObject.SendRpc(RPC_NETWORK_INSTANTIATION_SERVER_REQUEST, Receivers.Server, p.toNetworkString(), camera_vector, camera_forward);
     }
 
     private int getNetworkIdFromItem(Item item)
@@ -1421,7 +1193,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         GameObject[] items = NetworkManager.Instance.Interactable_objectNetworkObject;
 
         for (int i = 0; i < items.Length; i++) {
-            if (items[i].GetComponent<ItemPickup>().i.id == item.id)
+            if (items[i].GetComponent<ItemPickup>().p.item.id == item.id)
                 return i;
         }
         throw new Exception("failed to get Id for networkBehaviour instantiation");
@@ -1451,13 +1223,14 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
     public override void NetworkInstantiationServerRequest(RpcArgs args)
     {
         if (!networkObject.IsServer) { Debug.LogError("instanciacija na clientu ne na serverju!");  return; }
-        int net_id = args.GetNext<int>();
+        Predmet p = new Predmet(null);
+        p.setParametersFromNetworkString(args.GetNext<string>());
         Vector3 pos = args.GetNext<Vector3>();
         Vector3 dir = args.GetNext<Vector3>();
-        Interactable_objectBehavior b = NetworkManager.Instance.InstantiateInteractable_object(net_id, pos);
+        Interactable_objectBehavior b = NetworkManager.Instance.InstantiateInteractable_object(getNetworkIdFromItem(p.item), pos);
 
-        //apply force on clients
-        b.gameObject.GetComponent<Interactable>().setForce(pos,dir);
+        //apply force on clients, sets predmet
+        b.gameObject.GetComponent<Interactable>().setStartingInstantiationParameters(p,pos,dir);
 
     }
 
@@ -1771,5 +1544,47 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
             }
         }
 
+    }
+
+
+    //skopiran iz nci
+
+
+    /// <summary>
+    /// zapise nekak v nek network format da pol plunes u rpc. magar csv al pa nekej
+    /// </summary>
+    /// <returns></returns>
+    internal string getItemsNetwork()//zapakira inventoriy items brezz hotbara!
+    {
+        string s = "";
+        for (int i = 0; i < this.personal_inventory_objects.Length+ this.hotbar_objects.Length; i++)
+        {
+            if (i < this.personal_inventory_objects.Length)//bere iz personal inventorija
+            {
+                if (this.personal_inventory_objects[i] != null)
+                    s = s + "|" + this.personal_inventory_objects[i].toNetworkString();
+                else
+                    s = s + "|-1";
+            }
+            else {//bere z hotbara
+                if (this.hotbar_objects[i - this.personal_inventory_objects.Length] != null)
+                    s = s + "|" + this.hotbar_objects[i- this.personal_inventory_objects.Length].toNetworkString();
+                else
+                    s = s + "|-1";
+            }
+        }
+        Debug.Log(s);
+        return s;
+    }
+
+    internal Predmet[] parseItemsNetworkFormat(string s)
+    {//implementacija te metode je garbage ker bo itak zamenjan ksnej z kšnmu serialized byte array al pa kej namest stringa. optimizacija ksnej
+        string[] ss = s.Split('|');
+        Predmet[] rez = new Predmet[ss.Length - 1];//zacne se z "" zato en slot sfali
+        for (int i = 1; i < ss.Length; i++)
+        {//zacne z 1 ker je ss[0] = ""
+            rez[i - 1] = Predmet.createNewPredmet(ss[i]);//ce je format networkstringa ured vrne predmet sicer vrne null
+        }
+        return rez;
     }
 }

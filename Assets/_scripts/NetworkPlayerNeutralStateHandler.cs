@@ -178,7 +178,7 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
 
                 //tle posljemo zdej rpc
                 //TODO: ownerju poslat druugacn rpc kot drugim, drugi nebi smel vidt indexa ker je to slaba stvar - ESP
-                networkObject.SendRpc(RPC_BAR_SLOT_SELECTION_RESPONSE, Receivers.All, getBarItemIdFromIndex(this.selected_index), this.selected_index, getBarItemIdFromIndex(this.selected_index_shield), selected_index_shield);
+                networkObject.SendRpc(RPC_BAR_SLOT_SELECTION_RESPONSE, Receivers.All, npi.hotbar_objects[this.selected_index].toNetworkString(), this.selected_index, npi.hotbar_objects[this.selected_index_shield].toNetworkString(), selected_index_shield);
             }
         }
     }
@@ -195,24 +195,25 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
     public override void BarSlotSelectionResponse(RpcArgs args)
     {
         if (args.Info.SendingPlayer.NetworkId == 0) {
-            int item_id = args.GetNext<int>();
+            string predmet1 = args.GetNext<string>();
             int index = args.GetNext<int>();
 
-            int item_id2 = args.GetNext<int>();//za shield rabmo met 2 indexa in tko
+            string predmet2 = args.GetNext<string>();//za shield rabmo met 2 indexa in tko
             int index2 = args.GetNext<int>();
 
             Debug.Log("bar update - " + index);
             if (networkObject.IsOwner)
             {
-                setSelectedItems(new Predmet(Mapper.instance.getItemById(item_id)), new Predmet(Mapper.instance.getItemById(item_id2)));
+                setSelectedItems(Predmet.createNewPredmet(predmet1), Predmet.createNewPredmet(predmet2));
                 bar_handler.setSelectedSlots(index,index2);
             }
             else {
-                setSelectedItems(new Predmet(Mapper.instance.getItemById(item_id)),new Predmet( Mapper.instance.getItemById(item_id2)));
+                setSelectedItems(Predmet.createNewPredmet(predmet1), Predmet.createNewPredmet(predmet2));
             }
 
             //ZA COMBAT MODE - precej neefektivno ker pri menjavi itema na baru se klice dvakrat rpc...........
-            combat_handler.ChangeCombatMode(Mapper.instance.getItemById(item_id));
+            if(combat_handler.currently_equipped_weapon!=null)
+                combat_handler.ChangeCombatMode(combat_handler.currently_equipped_weapon.item);
             
         }
     }

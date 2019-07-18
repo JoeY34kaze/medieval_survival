@@ -1088,11 +1088,11 @@ private void ServerSendOnAcceptedData() {
         if (saved_playerState != null)
         {
 
-            int head = -1; if (saved_playerState.head != null) head = saved_playerState.head.item.id;
-            int chest = -1; if (saved_playerState.chest != null) chest = saved_playerState.chest.item.id;
-            int hands = -1; if (saved_playerState.hands != null) hands = saved_playerState.hands.item.id;
-            int legs = -1; if (saved_playerState.legs != null) legs = saved_playerState.legs.item.id;
-            int feet = -1; if (saved_playerState.feet != null) feet = saved_playerState.feet.item.id;
+            string head = "-1"; if (saved_playerState.head != null) head = saved_playerState.head.toNetworkString();
+            string chest = "-1"; if (saved_playerState.chest != null) chest = saved_playerState.chest.toNetworkString();
+            string hands = "-1"; if (saved_playerState.hands != null) hands = saved_playerState.hands.toNetworkString();
+            string legs = "-1"; if (saved_playerState.legs != null) legs = saved_playerState.legs.toNetworkString();
+            string feet = "-1"; if (saved_playerState.feet != null) feet = saved_playerState.feet.toNetworkString();
 
             //int ranged = -1; if (saved_playerState.ranged != null) ranged = saved_playerState.ranged.id;
             //int item_selected = -1; if (saved_playerState.item_selected != null) item_selected = saved_playerState.item_selected.id;
@@ -1111,10 +1111,8 @@ private void ServerSendOnAcceptedData() {
                 hands,
                 legs,
                 feet,
-                //item_selected,
-                //shielkd_selected,
                 backpack
-                );//nevem kaj nrdit z backpackom....
+                );//nevem kaj nrdit z backpackom tbh... ko se dcja bo treba najbrz shrant stanje pa updejtat na reconnectu al ga kr dropam zravn pa rečem adijo, nj se pohendla kokr če..
 
             this.npi.personal_inventory_objects = saved_playerState.items;
             this.npi.hotbar_objects = saved_playerState.bar_items;
@@ -1169,17 +1167,12 @@ private void ServerSendOnAcceptedData() {
             this.dead = args.GetNext<bool>();
             this.health = args.GetNext<float>();
 
-            this.npi.SetLoadoutItem(new Predmet(Mapper.instance.getItemById(args.GetNext<int>())));
-            this.npi.SetLoadoutItem(new Predmet(Mapper.instance.getItemById(args.GetNext<int>())));
-            this.npi.SetLoadoutItem(new Predmet(Mapper.instance.getItemById(args.GetNext<int>())));
-            this.npi.SetLoadoutItem(new Predmet(Mapper.instance.getItemById(args.GetNext<int>())));
-            this.npi.SetLoadoutItem(new Predmet(Mapper.instance.getItemById(args.GetNext<int>())));
-
-            int blank = args.GetNext<int>();//
-            blank = args.GetNext<int>();
-            blank = args.GetNext<int>();
-            blank = args.GetNext<int>();
-            this.npi.SetLoadoutItem(new Predmet(Mapper.instance.getItemById(args.GetNext<int>())));//Backpack??
+            this.npi.SetLoadoutItem(Predmet.createNewPredmet(args.GetNext<string>()));
+            this.npi.SetLoadoutItem(Predmet.createNewPredmet(args.GetNext<string>()));
+            this.npi.SetLoadoutItem(Predmet.createNewPredmet(args.GetNext<string>()));
+            this.npi.SetLoadoutItem(Predmet.createNewPredmet(args.GetNext<string>()));
+            this.npi.SetLoadoutItem(Predmet.createNewPredmet(args.GetNext<string>()));
+            this.npi.SetLoadoutItem(Predmet.createNewPredmet(args.GetNext<string>()));//Backpack??
 
 
 
