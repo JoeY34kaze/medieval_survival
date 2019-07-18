@@ -6,13 +6,13 @@ using UnityEngine;
 /// <summary>
 /// Osnova predmeta v igri. nesmemo uporablat Itema vec, ampak uporablamo ta objekt
 /// </summary>
-public class Predmet : MonoBehaviour
+public class Predmet 
 {
     public Item item;
     public int quantity;
     //public string creator;
     public int durability;
-    public string creator;
+    public string creator = "some schmuk";
     public Predmet(Item i) {
         this.item = i;
     }

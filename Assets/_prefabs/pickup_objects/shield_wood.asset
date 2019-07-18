@@ -22,4 +22,7 @@ MonoBehaviour:
   prefab_pickup: {fileID: 4970497545351922653, guid: 452c97172b971f54a82395bd049af62f,
     type: 3}
   weapon_animation_class: 3
-  recipeName: 
+  uma_item_recipe_name: 
+  stone_gather_rate: 0
+  wood_gather_rate: 0
+  flesh_gather_rate: 0

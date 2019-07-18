@@ -31,7 +31,7 @@ public class Mapper : MonoBehaviour
             if (i.id == id)
                 return i;
 
-        throw new Exception("Item not found by id!");
+        return null;
     }
 
     public int getIdFromItem(Item i) {

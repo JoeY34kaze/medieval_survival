@@ -3571,15 +3571,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5a4553554c019344a967916eb0775583, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  head: -1
-  chest: -1
-  hands: -1
-  legs: -1
-  feet: -1
-  weapon_0: -1
-  weapon_1: -1
-  shield: -1
-  ranged: -1
+  head: {fileID: 0}
+  chest: {fileID: 0}
+  hands: {fileID: 0}
+  legs: {fileID: 0}
+  feet: {fileID: 0}
+  weapon: {fileID: 0}
+  shield: {fileID: 0}
+  ranged: {fileID: 0}
   w0: {fileID: 4720445120253938059}
   w1: {fileID: 4399728674585478766}
   sh: {fileID: 1085674039914443482}

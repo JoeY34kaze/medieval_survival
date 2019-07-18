@@ -396,7 +396,7 @@ public class NetworkArmorStand : NetworkArmorStandBehavior
                 break;
         }
         npi.sendNetworkUpdate(true, true);
-        networkObject.SendRpc(RPC_ARMOR_STAND_REFRESH, Receivers.All, this.head, this.chest, this.hands, this.legs, this.feet, this.weapon, -1, this.shield, this.ranged);
+        networkObject.SendRpc(args.Info.SendingPlayer, RPC_ARMOR_STAND_REFRESH, this.head == null ? "-1" : this.head.toNetworkString(), this.chest == null ? "-1" : this.chest.toNetworkString(), this.hands == null ? "-1" : this.hands.toNetworkString(), this.legs == null ? "-1" : this.legs.toNetworkString(), this.feet == null ? "-1" : this.feet.toNetworkString(), this.weapon == null ? "-1" : this.weapon.toNetworkString(), this.shield == null ? "-1" : this.shield.toNetworkString(), this.ranged == null ? "-1" : this.ranged.toNetworkString());
     }
 
 
@@ -409,7 +409,7 @@ public class NetworkArmorStand : NetworkArmorStandBehavior
     {
         if (!networkObject.IsServer) return;
 
-        networkObject.SendRpc(args.Info.SendingPlayer, RPC_ARMOR_STAND_REFRESH, this.head, this.chest, this.hands, this.legs, this.feet, this.weapon, -1, this.shield, this.ranged);
+        networkObject.SendRpc(args.Info.SendingPlayer, RPC_ARMOR_STAND_REFRESH, this.head==null ? "-1":this.head.toNetworkString(), this.chest == null ? "-1" : this.chest.toNetworkString(), this.hands == null ? "-1" : this.hands.toNetworkString(), this.legs == null ? "-1" : this.legs.toNetworkString(), this.feet == null ? "-1" : this.feet.toNetworkString(), this.weapon == null ? "-1" : this.weapon.toNetworkString(),this.shield == null ? "-1" : this.shield.toNetworkString(), this.ranged == null ? "-1" : this.ranged.toNetworkString());
     }
 
     /// <summary>
@@ -439,7 +439,7 @@ public class NetworkArmorStand : NetworkArmorStandBehavior
         }
 
         npi.sendNetworkUpdate(false, true);
-        networkObject.SendRpc(RPC_ARMOR_STAND_REFRESH, Receivers.All, this.head, this.chest, this.hands, this.legs, this.feet, this.weapon, -1, this.shield, this.ranged);
+        networkObject.SendRpc(args.Info.SendingPlayer, RPC_ARMOR_STAND_REFRESH, this.head == null ? "-1" : this.head.toNetworkString(), this.chest == null ? "-1" : this.chest.toNetworkString(), this.hands == null ? "-1" : this.hands.toNetworkString(), this.legs == null ? "-1" : this.legs.toNetworkString(), this.feet == null ? "-1" : this.feet.toNetworkString(), this.weapon == null ? "-1" : this.weapon.toNetworkString(), this.shield == null ? "-1" : this.shield.toNetworkString(), this.ranged == null ? "-1" : this.ranged.toNetworkString());
     }
 
     private void take_all_missing(uint server_id, NetworkPlayerInventory npi)
@@ -689,11 +689,11 @@ public class NetworkArmorStand : NetworkArmorStandBehavior
         //--------------------------------------WEAPONS AND SHIELD-----------------------------------------
 
 
-        show_weapon(this.weapon.item.id, w0);
+        show_weapon(this.weapon, w0);
 
-        show_weapon(this.shield.item.id, sh);
+        show_weapon(this.shield, sh);
 
-        show_weapon(this.ranged.item.id, ra);
+        show_weapon(this.ranged, ra);
 
 
 
@@ -707,7 +707,7 @@ public class NetworkArmorStand : NetworkArmorStandBehavior
     /// </summary>
     /// <param name="i"></param>
     /// <param name="retard"></param>
-    private void show_weapon(int i, Transform retard)//prikaze weapon k pripada id-ju na pozicijo kot child transforma.
+    private void show_weapon(Predmet p, Transform retard)//prikaze weapon k pripada id-ju na pozicijo kot child transforma.
     {
         //zbris vse
         for (int k = 0; k < retard.childCount; k++)//ce dam tle samo destroy ucas kr faila. nimam pojma zakaj. ce dam destroy u update ga ubije, sicer g apa ne. no fucking clue. to sm skor prepičan da je unity bug
@@ -715,17 +715,18 @@ public class NetworkArmorStand : NetworkArmorStandBehavior
             Destroy(retard.GetChild(k).gameObject);// crkni cigan en
         }
 
-        if (i == -1)
+        if (p == null) { }
+        else if (p.item == null)
         {
             //ce je prazn nared nc ker si itak ze vse zbrisal
-        }
+        } else if (p.item.id ==-1) { }
         else//ce ni prazn izris to kar mora bit gor
         {
 
             GameObject w = null;
             foreach (GameObject g in this.instantiatable_weapons_for_armor_stand)
             {
-                if (g.GetComponent<identifier_helper>().id == i)
+                if (g.GetComponent<identifier_helper>().id == p.item.id)
                 {
                     w = GameObject.Instantiate(g);
                     break;

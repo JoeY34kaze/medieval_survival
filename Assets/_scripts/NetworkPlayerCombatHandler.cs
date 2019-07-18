@@ -64,8 +64,12 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
 
     internal Predmet GetCurrentlyActiveWeapon()
     {
-        if (this.currently_equipped_weapon.item.type == Item.Type.weapon) return this.currently_equipped_weapon;
-        else return null;
+        if (this.currently_equipped_weapon != null)
+        {
+            if (this.currently_equipped_weapon.item.type == Item.Type.weapon) return this.currently_equipped_weapon;
+
+        }
+        return null;
 
     }
 
@@ -76,8 +80,9 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
 
     internal Predmet GetCurrentlyActiveRanged()
     {
-        if (this.currently_equipped_weapon.item.type == Item.Type.ranged) return this.currently_equipped_weapon;
-        else return null;
+        if (this.currently_equipped_weapon != null)
+            if (this.currently_equipped_weapon.item.type == Item.Type.ranged) return this.currently_equipped_weapon;
+        return null;
     }
 
 

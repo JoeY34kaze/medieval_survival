@@ -37,6 +37,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
     public InventorySlotLoadout loadout_backpack;//ni loadout item ubistvu. logika je cist locena ker je prioriteta da se backpack lahko cimlazje fukne dol. tle ga mam samo za izrisovanje v inventorij panel
 
     public InventorySlotBar[] bar_slots;
+    [SerializeField]
     public Predmet[] hotbar_objects;
 
     private Predmet head;
@@ -59,14 +60,16 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
 
     private void Start()
     {
+        this.combatHandler = GetComponent<NetworkPlayerCombatHandler>();
+        this.neutralStateHandler = GetComponent<NetworkPlayerNeutralStateHandler>();
         this.avatar = GetComponent<DynamicCharacterAvatar>();
+        hotbar_objects = new Predmet[this.bar_slots.Length];
 
         slots = new InventorySlotPersonal[panel_personalInventorySlots.Length];
         for (int i = 0; i < slots.Length; i++)
             slots[i] = panel_personalInventorySlots[i].GetComponent<InventorySlotPersonal>();
         personal_inventory_objects = new Predmet[slots.Length];
-        this.combatHandler = GetComponent<NetworkPlayerCombatHandler>();
-        this.neutralStateHandler = GetComponent<NetworkPlayerNeutralStateHandler>();
+        
     }
 
 
@@ -83,6 +86,8 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         onLoadoutChangedCallback += refresh_UMA_equipped_gear;//vsi rabjo vidt loadout
 
         networkObject.SendRpc(RPC_REQUEST_LOADOUT_ON_CONNECT, Receivers.Server);//owner poslje na server. server poslje vsem networkUpdate. pomoje lahko ponucamo samo en rpc za to ker so razlicni naslovniki
+
+        if (networkObject.IsOwner && networkObject.IsServer) instantiate_server_weapons_for_testing();
     }
 
     /// <summary>
@@ -213,6 +218,8 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
     /// <returns></returns>
     public Predmet try_to_upgrade_loadout(Predmet i) {//vrne item s katermu smo ga zamenjal al pa null ce je biu prej prazn slot
         if (!networkObject.IsServer) { Debug.LogError("client se ukvarja z metodo k je server designated.."); return null; }
+        if (i == null) return null;
+        if (i.item == null) return null;
         Predmet r = i;
         switch (i.item.type) {
             case Item.Type.head:
@@ -762,13 +769,15 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
             loadout_backpack.ClearSlot();
 
         //Update bar slots
-
-        for (int i = 0; i < this.bar_slots.Length; i++) { 
-            if (this.hotbar_objects[i] != null)
-                bar_slots[i].AddItem(this.hotbar_objects[i].item);
-            else
-                bar_slots[i].ClearSlot();
-        }
+        if (this.hotbar_objects.Length == this.bar_slots.Length)
+            for (int i = 0; i < this.bar_slots.Length; i++)
+            {
+                if (this.hotbar_objects[i] != null)
+                    bar_slots[i].AddItem(this.hotbar_objects[i].item);
+                else
+                    bar_slots[i].ClearSlot();
+            }
+        else { Debug.Log("error - fix this"); }
     }
 
 
@@ -1025,7 +1034,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
             if (onLoadoutChangedCallback != null)
                 onLoadoutChangedCallback.Invoke();
         }
-
+        if (neutralStateHandler == null) this.neutralStateHandler = GetComponent<NetworkPlayerNeutralStateHandler>();
         if (SelectedWeaponIsNotInHotbar()) neutralStateHandler.ClearActiveWeapons();
     }
 
@@ -1109,17 +1118,16 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         if (args.Info.SendingPlayer.NetworkId != 0) return;
 
 
-        this.head = new Predmet(Mapper.instance.getItemById((int)args.GetNext<short>()));
+        this.head = Predmet.createNewPredmet(args.GetNext<string>());
 
 
-        this.chest = new Predmet(Mapper.instance.getItemById((int)args.GetNext<short>()));
+        this.chest = Predmet.createNewPredmet(args.GetNext<string>());
+        this.hands = Predmet.createNewPredmet(args.GetNext<string>());
+        this.legs = Predmet.createNewPredmet(args.GetNext<string>());
 
-        this.hands = new Predmet(Mapper.instance.getItemById((int)args.GetNext<short>()));
-        this.legs = new Predmet(Mapper.instance.getItemById((int)args.GetNext<short>()));
+        this.feet = Predmet.createNewPredmet(args.GetNext<string>());
 
-        this.feet = new Predmet(Mapper.instance.getItemById((int)args.GetNext<short>()));
-
-        this.backpack = new Predmet(Mapper.instance.getItemById((int)args.GetNext<short>()));
+        this.backpack = Predmet.createNewPredmet(args.GetNext<string>());
 
         if (onLoadoutChangedCallback != null)
             onLoadoutChangedCallback.Invoke();
@@ -1178,7 +1186,15 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         return cunt;
     }
 
-
+    public void instantiate_server_weapons_for_testing() {
+        Predmet p = new Predmet(null);
+        for (int i = 0; i < 50; i++) {
+            Item it = Mapper.instance.getItemById(i);
+            while(it==null)it= Mapper.instance.getItemById(++i);
+            p = new Predmet(it, 1, 1000);
+            instantiateDroppedPredmet(p, transform.position + Vector3.up * 2, transform.forward);
+        }
+    }
 
     internal void instantiateDroppedPredmet(Predmet p, Vector3 camera_vector, Vector3 camera_forward) // instantiate it when dropped - zapakiral v rpc da se poslje vseskup na server
     {
@@ -1190,14 +1206,15 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
 
     private int getNetworkIdFromItem(Item item)
     {
-        GameObject[] items = NetworkManager.Instance.Interactable_objectNetworkObject;
+        GameObject[] prefabs = NetworkManager.Instance.Interactable_objectNetworkObject;
 
-        for (int i = 0; i < items.Length; i++) {
-            if (items[i].GetComponent<ItemPickup>().p.item.id == item.id)
+        for (int i = 0; i < prefabs.Length; i++) {
+            if (prefabs[i].Equals(item.prefab_pickup))
                 return i;
         }
-        throw new Exception("failed to get Id for networkBehaviour instantiation");
 
+        Debug.LogWarning("Id of item not found. Item is probably registered as something different from Interactable_objectNetworkObject. Like for example backpack.");
+        return -1;
         
     }
 
@@ -1227,7 +1244,9 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         p.setParametersFromNetworkString(args.GetNext<string>());
         Vector3 pos = args.GetNext<Vector3>();
         Vector3 dir = args.GetNext<Vector3>();
-        Interactable_objectBehavior b = NetworkManager.Instance.InstantiateInteractable_object(getNetworkIdFromItem(p.item), pos);
+        int net_id = getNetworkIdFromItem(p.item);
+        if (net_id == -1) return;//item is not interactable object
+        Interactable_objectBehavior b = NetworkManager.Instance.InstantiateInteractable_object(net_id, pos);
 
         //apply force on clients, sets predmet
         b.gameObject.GetComponent<Interactable>().setStartingInstantiationParameters(p,pos,dir);

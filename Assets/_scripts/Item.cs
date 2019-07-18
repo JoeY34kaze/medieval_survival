@@ -14,7 +14,7 @@ public class Item : ScriptableObject
     public int size;
     public float damage_reduction = 0;
     public int id;
-    public GameObject prefab_pickup;
+    public GameObject prefab_pickup;//rabmo za iskanje network_Id-ja
     public  int weapon_animation_class;//za switchanje po animatorju iz not_in_combat state na primern idle state. 0-unarmed, 2-1h sword, 3-1h shield
     public string uma_item_recipe_name; //recept za uma equipat
     public int stone_gather_rate;

@@ -242,7 +242,7 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
 
     private void setup_player_cam()
     {
-        this.player_cam = GetComponent<player_camera_handler>().player_cam.transform;
+        this.player_cam = Camera.main.transform;
     }
     //                                                                                       -----------------Player interactions--------------------
     internal void local_player_interaction_execution_request(GameObject target)

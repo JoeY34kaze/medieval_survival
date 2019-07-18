@@ -2466,12 +2466,12 @@ Transform:
   - {fileID: 9175463913418011072}
   - {fileID: 7390130121539967915}
   - {fileID: 8953452522522594195}
-  - {fileID: 2975713418919432656}
-  - {fileID: 8610762008772231544}
-  - {fileID: 8174457970277906887}
-  - {fileID: 1683036687234165481}
-  - {fileID: 467418216638233431}
-  - {fileID: 1396272385448926260}
+  - {fileID: 2980201033130358729}
+  - {fileID: 8606671368860306849}
+  - {fileID: 8177982473380450048}
+  - {fileID: 1681223516358157265}
+  - {fileID: 463096557037915611}
+  - {fileID: 6783421065190610533}
   m_Father: {fileID: 4059127873457050048}
   m_RootOrder: 5
   m_LocalEulerAnglesHint: {x: -90, y: 0, z: 0}
@@ -6706,8 +6706,8 @@ MonoBehaviour:
   - {fileID: 5834470938225872258, guid: 75fae846ed60a9344b8226a84c76a726, type: 3}
   weapon_slot: {fileID: 2048528667891861577}
   shield_slot: {fileID: 2169459720401964971}
-  currently_equipped_shield_id: -1
-  currently_equipped_weapon_id: -1
+  currently_equipped_shield: {fileID: 0}
+  currently_equipped_weapon: {fileID: 0}
 --- !u!114 &4281506579215346488
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6823,7 +6823,27 @@ MonoBehaviour:
   draggedParent_sibling_index: -1
   draggedParent_parent_sibling_index: -1
   space: 20
-  items: []
+  personal_inventory_objects:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
   panel_inventory: {fileID: 6659745574531949367}
   panel_personalInventorySlots:
   - {fileID: 1320395275798434348}
@@ -6864,8 +6884,8 @@ MonoBehaviour:
   - {fileID: 673353745567856640}
   - {fileID: 2110938423252893654}
   - {fileID: 9072881431965039114}
-  bar_items:
-  - {fileID: 11400000, guid: eacd34bc0e9200e46864196671622241, type: 2}
+  hotbar_objects:
+  - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}
@@ -19221,7 +19241,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 35b61329bf244b44c8a0a3832b5fbbbf, type: 3}
---- !u!4 &467418216638233431 stripped
+--- !u!4 &463096557037915611 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 4967289912243710, guid: 35b61329bf244b44c8a0a3832b5fbbbf,
     type: 3}
@@ -19655,7 +19675,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: ac7110b5c80e2d5458f15ade5da57eed, type: 3}
---- !u!4 &1396272385448926260 stripped
+--- !u!4 &6783421065190610533 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 5567297768877738451, guid: ac7110b5c80e2d5458f15ade5da57eed,
     type: 3}
@@ -19722,7 +19742,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 45c706ebb1646004693540d897cd11e8, type: 3}
---- !u!4 &1683036687234165481 stripped
+--- !u!4 &1681223516358157265 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 4432210258381414, guid: 45c706ebb1646004693540d897cd11e8,
     type: 3}
@@ -20131,7 +20151,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: c35a38c3606d47b449c31f70771a6ac9, type: 3}
---- !u!4 &2975713418919432656 stripped
+--- !u!4 &2980201033130358729 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 4528452102448506, guid: c35a38c3606d47b449c31f70771a6ac9,
     type: 3}
@@ -21754,7 +21774,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: f33b56a218617a940abebaf6f94182fe, type: 3}
---- !u!4 &8174457970277906887 stripped
+--- !u!4 &8177982473380450048 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 4368968188966298, guid: f33b56a218617a940abebaf6f94182fe,
     type: 3}
@@ -21821,7 +21841,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 70a4b41e72ce938499f8372810da775a, type: 3}
---- !u!4 &8610762008772231544 stripped
+--- !u!4 &8606671368860306849 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 4108249452105622, guid: 70a4b41e72ce938499f8372810da775a,
     type: 3}

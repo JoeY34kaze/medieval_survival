@@ -175,9 +175,9 @@ public class ItemPickup : Interactable {
     {
         if (args.Info.SendingPlayer.NetworkId == 0)
         {
-            Predmet k = new Predmet(null);
-            k.setParametersFromNetworkString(args.GetNext<string>());
+            Predmet k = Predmet.createNewPredmet(args.GetNext<string>());
             this.p = k;
+            Debug.Log("predmer on pickup set to " + p.item.Display_name);
         }
     }
 
