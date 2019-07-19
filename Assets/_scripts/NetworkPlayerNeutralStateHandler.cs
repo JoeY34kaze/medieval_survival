@@ -16,7 +16,7 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
 
     internal int selected_index = -1;
     internal int selected_index_shield = -1;
-
+    public Predmet activeTool = null;
 
     private void Start()
     {
@@ -178,7 +178,7 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
 
                 //tle posljemo zdej rpc
                 //TODO: ownerju poslat druugacn rpc kot drugim, drugi nebi smel vidt indexa ker je to slaba stvar - ESP
-                networkObject.SendRpc(RPC_BAR_SLOT_SELECTION_RESPONSE, Receivers.All, (this.selected_index==-1)?"-1" : npi.hotbar_objects[this.selected_index].toNetworkString(), this.selected_index, (this.selected_index_shield == -1) ? "-1" : npi.hotbar_objects[this.selected_index_shield].toNetworkString(), selected_index_shield);
+                networkObject.SendRpc(RPC_BAR_SLOT_SELECTION_RESPONSE, Receivers.All, (this.selected_index==-1)?"-1" : npi.predmeti_hotbar[this.selected_index].toNetworkString(), this.selected_index, (this.selected_index_shield == -1) ? "-1" : npi.predmeti_hotbar[this.selected_index_shield].toNetworkString(), selected_index_shield);
             }
         }
     }
@@ -227,7 +227,10 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
         else Debug.Log("Trying to clear everything currently in the hands");
         if (i != null)
         {
-            if (i.item.type == Item.Type.tool) SetToolSelected(i);
+            if (i.item.type == Item.Type.tool) {
+                SetToolSelected(i);
+                combat_handler.currently_equipped_weapon = null;
+            }
             else if (i.item.type == Item.Type.weapon || i.item.type == Item.Type.ranged)
             {
                 combat_handler.currently_equipped_weapon = i;
@@ -247,6 +250,7 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
     }
 
     private void SetToolSelected(Predmet i) {
+        this.activeTool = i;
         gathering_tool_collider_handler temp;
         foreach (Transform child in this.toolContainerOnHand)
         {

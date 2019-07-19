@@ -229,7 +229,7 @@ napadenmu playerju da si poupdejta health. ta player pol ko si je updejtov healt
         return this.team;
     }
 
-    public void take_weapon_damage_server_authority(Item weapon,string tag_passive, string tag_agressor ,uint passive_player_server_network_id, uint agressor_server_network_id)
+    public void take_weapon_damage_server_authority(Item weapon,string tag_passive ,uint passive_player_server_network_id, uint agressor_server_network_id)
     {
         
         //tag je za tag colliderja. coll_0 = headshot, coll_1 = body/torso, coll2=arms/legs
@@ -1114,8 +1114,8 @@ private void ServerSendOnAcceptedData() {
                 backpack
                 );//nevem kaj nrdit z backpackom tbh... ko se dcja bo treba najbrz shrant stanje pa updejtat na reconnectu al ga kr dropam zravn pa rečem adijo, nj se pohendla kokr če..
 
-            this.npi.personal_inventory_objects = saved_playerState.items;
-            this.npi.hotbar_objects = saved_playerState.bar_items;
+            this.npi.predmeti_personal = saved_playerState.items;
+            this.npi.predmeti_hotbar = saved_playerState.bar_items;
             NetworkGuildManager.Instance.RefreshPlayersNetworkId(saved_playerState.previousNetworkId,Get_server_id());
 
 
@@ -1286,7 +1286,7 @@ private void ServerSendOnAcceptedData() {
         ps.health = health;
 
 
-        ps.items = npi.personal_inventory_objects;
+        ps.items = npi.predmeti_personal;
         ps.head=npi.getHeadItem();
         ps.chest = npi.getChestItem();
         ps.hands = npi.getHandsItem();

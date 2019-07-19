@@ -28,6 +28,14 @@ public class Predmet
         this.durability = durability;
     }
 
+    public Predmet(Item i, int quantity, int durability, string creator)
+    {
+        this.item = i;
+        this.quantity = quantity;
+        this.durability = durability;
+        this.creator = creator;
+    }
+
     /// <summary>
     /// vrne strik k ga fuknes u RPC, predstavlja toString tega predmeta da ga pol stlacs v predmet.SetParametersFromNetworkString v rpcju na drug strani in smo tko prekopiral objekt po networku
     /// </summary>
@@ -58,5 +66,17 @@ public class Predmet
         r.setParametersFromNetworkString(networkString);
         if (r.item == null) return null;
         return r;
+    }
+
+    internal Predmet addQuantity(Predmet p)
+    {
+        if (!p.item.Equals(this.item) || this.quantity >= this.item.stackSize) return p;
+
+        if (this.quantity + p.quantity <= this.item.stackSize) { this.quantity += p.quantity; return null; }
+        else {
+            p.quantity = p.quantity - (this.item.stackSize - this.quantity);
+            this.quantity = this.item.stackSize;
+            return p;
+        }
     }
 }

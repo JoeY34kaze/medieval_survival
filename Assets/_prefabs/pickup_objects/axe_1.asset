@@ -16,13 +16,16 @@ MonoBehaviour:
   type: 6
   icon: {fileID: 21300000, guid: dec80af4ed5a9e94d88865ca740d7a5e, type: 3}
   damage: 40
-  size: 0
+  hasDurability: 1
+  durability: 1000
+  stackSize: 1
+  backpack_capacity: 0
   damage_reduction: 0
   id: 23
   prefab_pickup: {fileID: 481997453617132335, guid: fd03a7bad5adb1f4da7f85bef232acc9,
     type: 3}
   weapon_animation_class: 2
   uma_item_recipe_name: 
-  stone_gather_rate: 0
-  wood_gather_rate: 0
-  flesh_gather_rate: 0
+  stone_gather_rate: 2
+  wood_gather_rate: 5
+  flesh_gather_rate: 7

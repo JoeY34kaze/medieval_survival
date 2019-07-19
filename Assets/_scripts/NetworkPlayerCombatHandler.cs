@@ -299,7 +299,7 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
 
         foreach (Transform child in weapon_slot) {
             if (child.GetComponent<Weapon_collider_handler>().item.id == this.currently_equipped_weapon.item.id) {
-                child.GetComponent<Weapon_collider_handler>().set_offensive_colliders(true);
+                child.GetComponent<Weapon_collider_handler>().set_offensive_colliders(active);
             }
         }
     }

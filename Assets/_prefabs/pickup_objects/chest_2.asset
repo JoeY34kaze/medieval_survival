@@ -16,7 +16,10 @@ MonoBehaviour:
   type: 1
   icon: {fileID: 0}
   damage: 0
-  size: 0
+  hasDurability: 1
+  durability: 1000
+  stackSize: 1
+  backpack_capacity: 0
   damage_reduction: 0.3
   id: 15
   prefab_pickup: {fileID: 7940347042607550359, guid: f55f3689135f6774bacaab1c2f438e3c,

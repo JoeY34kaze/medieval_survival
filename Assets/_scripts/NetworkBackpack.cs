@@ -18,7 +18,7 @@ public class NetworkBackpack : NetworkBackpackBehavior
     {
         nci = GetComponent<NetworkContainer_items>();
         if (networkObject.IsServer) {
-            nci.init(Mapper.instance.getItemById(GetComponent<identifier_helper>().id).size);
+            nci.init(Mapper.instance.getItemById(GetComponent<identifier_helper>().id).backpack_capacity);
         }
             
         r = GetComponent<Rigidbody>();
@@ -130,7 +130,7 @@ public class NetworkBackpack : NetworkBackpackBehavior
     public override void BackpackDropItemRequest(RpcArgs args)
     {
         //poslat kamero!
-        if (networkObject.IsServer && args.Info.SendingPlayer.NetworkId == networkObject.Owner.NetworkId)
+        if (networkObject.IsServer)
         {
             Predmet i = this.nci.popPredmet(args.GetNext<int>());
             this.npi.instantiateDroppedPredmet(i, args.GetNext<Vector3>(), args.GetNext<Vector3>());
@@ -262,7 +262,7 @@ public class NetworkBackpack : NetworkBackpackBehavior
         if (networkObject.IsOwner)
         {
             this.panel_handler = this.npi.backpackPanel;
-            this.panel_handler.init(item.size, this.nci);//nastav samo slote
+            this.panel_handler.init(item.backpack_capacity, this.nci);//nastav samo slote
             networkObject.SendRpc(RPC_BACKPACK_INTERACTION_REQUEST, Receivers.Server, (byte)1, networkObject.Owner.NetworkId);//posle request da mu updejta iteme
         }
     }
@@ -340,6 +340,10 @@ public class NetworkBackpack : NetworkBackpackBehavior
         }
     }
 
+    internal Predmet[] getAll()
+    {
+        return this.nci.predmeti;
+    }
 
     internal void localPlayerRequestBackpackToLoadout(int index_backpack)//za obratno vbom naredu nov rpc ker bom poslov string k j eitem type
     {
@@ -410,7 +414,7 @@ public class NetworkBackpack : NetworkBackpackBehavior
 
             if (npi.neutralStateHandler.isNotSelected(bar_index, -1))
             {
-                if (npi.hotbar_objects[bar_index] != null)
+                if (npi.predmeti_hotbar[bar_index] != null)
                 {
                     //if (itemAllowedOnBar(this.nci.items[back_index].type))
                     //{

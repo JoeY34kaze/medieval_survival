@@ -35,7 +35,7 @@ public class NetworkResource : NetworkResourceBehavior
         transform.SetParent(GameObject.FindGameObjectWithTag("world_manager").transform);
     }
 
-    public Predmet onHitReturnItemWithQuantity(Item tool)
+    public Predmet onHitReturnItemWithQuantity(Item tool, string playerName)
     {
         if (!networkObject.IsServer) return null;
         if (this.hp > 0)
@@ -63,7 +63,7 @@ public class NetworkResource : NetworkResourceBehavior
 
             if (amount < 0) amount = 0;
 
-            return new Predmet(this.resourceItem, (int)amount);
+            return new Predmet(this.resourceItem, (int)amount, 0, playerName);
         }
         else {
             return null;

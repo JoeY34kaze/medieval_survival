@@ -11,7 +11,10 @@ public class Item : ScriptableObject
     public Type type;
     public Sprite icon = null;
     public int damage;
-    public int size;
+    public bool hasDurability;
+    public int durability = 1000;//max durability na itemu. staticno - mora bit
+    public int stackSize = 100;
+    public int backpack_capacity;
     public float damage_reduction = 0;
     public int id;
     public GameObject prefab_pickup;//rabmo za iskanje network_Id-ja

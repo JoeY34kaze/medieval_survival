@@ -3,7 +3,7 @@
 public class Weapon_collider_handler : MonoBehaviour
 {
     public Item item;
-
+    private NetworkPlayerInventory inv;
     
     void OnTriggerEnter(Collider other)//nima networkobjekta. ce je server se preverja v stats.
     {
@@ -19,21 +19,28 @@ public class Weapon_collider_handler : MonoBehaviour
             {
                // Debug.Log("Hit another player in the " + other.name + " | " + other.tag);
 
-                other.transform.root.gameObject.GetComponent<NetworkPlayerStats>().take_weapon_damage_server_authority(this.item,other.tag, gameObject.tag, other.transform.root.gameObject.GetComponent<NetworkPlayerStats>().Get_server_id(), transform.root.gameObject.GetComponent<NetworkPlayerStats>().Get_server_id());
-                if (gameObject.tag.Equals("weapon_player")) this.set_offensive_colliders(false);
+                other.transform.root.gameObject.GetComponent<NetworkPlayerStats>().take_weapon_damage_server_authority(this.item,other.tag, other.transform.root.gameObject.GetComponent<NetworkPlayerStats>().Get_server_id(), transform.root.gameObject.GetComponent<NetworkPlayerStats>().Get_server_id());
+                GetComponent<Collider>().enabled = false;
             }
         }
-        
-    }
-    
-    public void set_offensive_colliders(bool b) { //BUG NETWORKOBJECT JE NULL
-       // Debug.Log("--------->" + b);
-        GetComponent<Collider>().enabled = b;
+
+        if (other.transform.tag.Equals("resource"))//ce smo zadel nek resource
+        {
+            print("Collision detected with a resource object " + other.name);
+
+            //other.transform.root.gameObject.GetComponent<NetworkPlayerStats>().take_weapon_damage_server_authority(this.item, other.tag, gameObject.tag, other.transform.root.gameObject.GetComponent<NetworkPlayerStats>().Get_server_id(), transform.root.gameObject.GetComponent<NetworkPlayerStats>().Get_server_id());
+            if (this.inv == null) { this.inv = transform.root.GetComponent<NetworkPlayerInventory>(); }
+            inv.requestResourceHitServer(this.item, other.gameObject);
+            GetComponent<Collider>().enabled = false;
+
+        }
+
     }
 
+    public void set_offensive_colliders(bool b) { GetComponent<Collider>().enabled = b; }
 
-    
-   
+
+
 
 
 

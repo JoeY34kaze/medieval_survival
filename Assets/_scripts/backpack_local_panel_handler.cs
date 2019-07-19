@@ -11,11 +11,11 @@ public class backpack_local_panel_handler : MonoBehaviour
     private InventorySlotBackpack[] slots;
     internal void updateUI()
     {
-        Predmet[] items = nci.getAll();
+        Predmet[] predmeti = nci.getAll();
         for (int i = 0; i < this.size; i++) {
-            if (items[i] != null)  // If there is an item to add
+            if (predmeti[i] != null)  // If there is an item to add
             {
-                slots[i].AddItem(items[i].item);   // Add it
+                slots[i].AddPredmet(predmeti[i]);   // Add it
             }
             else
             {
