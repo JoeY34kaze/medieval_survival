@@ -20,7 +20,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
     public delegate void OnItemChanged();
     public OnItemChanged onItemChangedCallback;
 
-    public GameObject panel_inventory; //celotna panela za inventorij, to se izrise ko prtisnes "i"
+    //public GameObject panel_inventory; //celotna panela za inventorij, to se izrise ko prtisnes "i"
 
     public Transform[] panel_personalInventorySlots;
     InventorySlotPersonal[] slots;  // predstavlajo slote v inventoriju, vsak drzi en item. 
@@ -54,6 +54,9 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
 
     public Predmet backpack;
     private Camera c;
+
+
+
     public Transform backpackSpot; //tukaj se parenta backpack
     public backpack_local_panel_handler backpackPanel;
     public panel_bar_handler barPanel;
@@ -721,29 +724,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         //Debug.Log("items - " + this.items.Length);
         if (this.predmeti_personal.Length == 0) this.predmeti_personal = new Predmet[20];//hacky bug fix. makes me sick about this brah. mrde dat u onNetworkConnected al pa kej
 
-        if (Input.GetButtonDown("Inventory"))
-        {
-            if (GetComponent<NetworkPlayerStats>().guild_modification_panel.activeSelf) return;
-                //GetComponent<NetworkPlayerStats>().showGuildModificationPanel(false, null);
-
-            panel_inventory.SetActive(!panel_inventory.activeSelf);
-            if (onItemChangedCallback != null)
-                onItemChangedCallback.Invoke();
-            else
-                Debug.LogError("onItemChangedCallback je null.");
-
-            onItemChangedCallback.Invoke();
-            if (panel_inventory.activeSelf)
-            {
-                Cursor.lockState = CursorLockMode.None;
-                Cursor.visible = true;
-            }
-            else
-            {
-               Cursor.lockState = CursorLockMode.Locked;
-                Cursor.visible = false;
-           }
-        }
+        
     }
 
     public void addToPersonalInventory(Predmet item, int index) {
@@ -1741,5 +1722,16 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
             rez[i - 1] = Predmet.createNewPredmet(ss[i]);//ce je format networkstringa ured vrne predmet sicer vrne null
         }
         return rez;
+    }
+
+    /// <summary>
+    /// UILogic klice ko se odpre inventory panel
+    /// </summary>
+    internal void requestLocalUIUpdate()
+    {
+        if (onItemChangedCallback != null)
+            onItemChangedCallback.Invoke();
+        if (onLoadoutChangedCallback != null)
+            onLoadoutChangedCallback.Invoke();
     }
 }

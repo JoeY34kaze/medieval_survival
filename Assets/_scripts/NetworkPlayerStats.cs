@@ -76,8 +76,11 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
 
     private NetworkPlayerCombatHandler combatStateHandler;
 
+    private UILogic uiLogic;
+
     private void Start()
     {
+        this.uiLogic = GetComponent<UILogic>();
         this.npi = GetComponent<NetworkPlayerInventory>();
         acceptedAndNotUpdatedPlayers = new Queue<NetworkingPlayer>();
         this.disconnectedAndNotSavedPlayers = new Queue<NetworkingPlayer>();
@@ -159,25 +162,6 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
             Debug.Log(this.dead);
         }
 
-        if (Input.GetKeyDown(KeyCode.Escape) && networkObject.IsOwner)
-        {
-            handleEscapePressed();
-        }
-
-        if (Input.GetButtonDown("Guild") && networkObject.IsOwner && !this.guild_modification_panel.activeSelf) {
-            //zapri inventorij, zapri guildModification, ??
-
-            if (npi.panel_inventory.activeSelf) npi.panel_inventory.SetActive(false);
-            
-            GameObject.FindGameObjectWithTag("GuildManager").GetComponent<NetworkGuildManager>().toggleMemberPanel();
-        }
-
-        if(networkObject.IsOwner)
-            if (this.guild_modification_panel.activeSelf) {
-                if (!Cursor.visible) Cursor.visible = true;
-                if (Cursor.lockState != CursorLockMode.None) Cursor.lockState = CursorLockMode.None;
-
-            }
 
         /*  if (this.test) {
               this.health = 0;
@@ -203,21 +187,7 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
     }
 
 
-    private void handleEscapePressed()
-    {
-        //ce je odprto ksno okno ga zapri, sicer prikaz main menu
-        if (guild_modification_panel.activeSelf || npi.panel_inventory.activeSelf)
-        {
-            showGuildModificationPanel(false, null);
-            npi.panel_inventory.SetActive(false);//nevem kaj se nrdi z itemi lol..
-            GameObject.FindGameObjectWithTag("GuildManager").GetComponent<NetworkGuildManager>().SetMemberPanel(false);
-            Cursor.lockState = CursorLockMode.Locked;
-            Cursor.visible = false;
-        }
-        else {
-            Debug.LogWarning("trying to show main menu but i dont have anything yet");
-        }
-    }
+
 
     /*
 HOW DAMAGE WORKS RIGHT NOW:
@@ -955,20 +925,7 @@ napadenmu playerju da si poupdejta health. ta player pol ko si je updejtov healt
         }
     }
 
-    internal void showGuildModificationPanel(bool b,NetworkGuildManager ngm)
-    {
-        if (b && ngm!=null) {
-            if (ngm.name_guild == null) ngm.name_guild = this.guild_name_input;
-            if (ngm.tag_guild == null) ngm.tag_guild = this.guild_tag_input;
-            if (ngm.color_guild == null) ngm.color_guild = this.guild_color_input;
-        }
-        this.guild_modification_panel.SetActive(b);
-        if(npi!=null)if(npi.panel_inventory!=null)if(npi.panel_inventory.activeSelf)npi.panel_inventory.SetActive(false);
-
-        GetComponent<NetworkPlayerAnimationLogic>().hookChestRotation = !b;
-        GetComponent<NetworkPlayerMovement>().lockMovement = b;
-        GetComponent<player_camera_handler>().lockCamera = b;
-    }
+    
 
 
 

@@ -29,6 +29,8 @@ public class NetworkGuildManager : NetworkGuildManagerBehavior
     private panel_guild_handler pgh;
     public NetworkPlayerStats localStats;
 
+    private UILogic uiLogic;
+
     #endregion
 
     #region SINGLETON PATTERN
@@ -162,8 +164,8 @@ public class NetworkGuildManager : NetworkGuildManagerBehavior
     {
         Debug.Log("Modification CLICKED");
         if (localPlayer == null) localPlayer = FindByid(NetworkManager.Instance.Networker.Me.NetworkId);
-        if (this.localStats == null) { Debug.LogError("jz sm prizadet"); localPlayer.GetComponent<NetworkPlayerStats>().showGuildModificationPanel(true, this); this.localStats = localPlayer.GetComponent<NetworkPlayerStats>(); }
-        else { this.localStats.showGuildModificationPanel(true, this); }
+        if (this.uiLogic == null) { Debug.LogError("jz sm prizadet"); localPlayer.GetComponentInChildren<UILogic>().showGuildModificationPanel(true, this); this.uiLogic = localPlayer.GetComponentInChildren<UILogic>(); }
+        else { this.uiLogic.showGuildModificationPanel(true, this); }
 
     }
 
@@ -193,7 +195,7 @@ public class NetworkGuildManager : NetworkGuildManagerBehavior
 
 
 
-        this.localStats.showGuildModificationPanel(false, this);
+        this.uiLogic.showGuildModificationPanel(false, this);
 
 
         networkObject.SendRpc(RPC_CREATE_OR_MODIFY_GUILD_REQUEST, Receivers.Server, name, tag, color, image_byte);
@@ -361,7 +363,7 @@ public class NetworkGuildManager : NetworkGuildManagerBehavior
         bool next = !this.pgh.gameObject.activeSelf;
         this.pgh.Clear();//pobrise prejsne memberje
         this.pgh.gameObject.SetActive(!this.pgh.gameObject.activeSelf);
-        if (next)
+        /*if (next)
         {
             Cursor.lockState = CursorLockMode.None;
             Cursor.visible = true;
@@ -370,7 +372,7 @@ public class NetworkGuildManager : NetworkGuildManagerBehavior
         else {
             Cursor.lockState = CursorLockMode.Locked;
             Cursor.visible = false;
-        }
+        }*/
     }
 
     internal void SetMemberPanel(bool v)
@@ -378,19 +380,19 @@ public class NetworkGuildManager : NetworkGuildManagerBehavior
         if (!v)
         {
             if (this.pgh == null) this.pgh = this.localStats.GetPGH();
-            bool next = !this.pgh.gameObject.activeSelf;
+            //bool next = !this.pgh.gameObject.activeSelf;
             this.pgh.Clear();//pobrise prejsne memberje
-            this.pgh.gameObject.SetActive(!this.pgh.gameObject.activeSelf);
-            Cursor.lockState = CursorLockMode.Locked;
-            Cursor.visible = false;
+            //this.pgh.gameObject.SetActive(!this.pgh.gameObject.activeSelf);
+            //Cursor.lockState = CursorLockMode.Locked;
+            //Cursor.visible = false;
         }
         else {
             if (this.pgh == null) this.pgh = this.localStats.GetPGH();
-            bool next = !this.pgh.gameObject.activeSelf;
+            //bool next = !this.pgh.gameObject.activeSelf;
             this.pgh.Clear();//pobrise prejsne memberje
-            this.pgh.gameObject.SetActive(!this.pgh.gameObject.activeSelf);
-            Cursor.lockState = CursorLockMode.None;
-            Cursor.visible = true;
+            //this.pgh.gameObject.SetActive(!this.pgh.gameObject.activeSelf);
+            //Cursor.lockState = CursorLockMode.None;
+            //Cursor.visible = true;
             localGetMembersRequest();
         }
     }

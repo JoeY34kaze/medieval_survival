@@ -168,6 +168,7 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
     private NetworkPlayerAnimationLogic animation_logic_script;
     private Vector3 sliding_velocity;
 
+    private UILogic uiLogic;
     #endregion
 
     protected virtual void Start()
@@ -206,6 +207,7 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
         networkPlayerInventory = GetComponent<NetworkPlayerInventory>();
         stats = GetComponent<NetworkPlayerStats>();
         animation_logic_script = GetComponent<NetworkPlayerAnimationLogic>();
+        this.uiLogic = GetComponentInChildren<UILogic>();
     }
 
     protected virtual void LateUpdate()
@@ -229,9 +231,7 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
 
     private bool CameraRotationAllowed()
     {
-        if (networkPlayerInventory.panel_inventory.activeSelf) return false;
-        if (stats.guild_modification_panel.activeSelf) return false;
-        return true;
+        return !uiLogic.hasOpenWindow;
     }
 
     protected virtual void Update()

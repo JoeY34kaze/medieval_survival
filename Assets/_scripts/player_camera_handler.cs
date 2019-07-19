@@ -18,10 +18,11 @@ public class player_camera_handler : NetworkPlayerCameraHandlerBehavior
     public Camera player_cam;
     private NetworkPlayerInventory networkPlayerInventory;
     public bool lockCamera = false;
-
+    private UILogic uiLogic;
     private void Awake()
     {
         this.networkPlayerInventory = GetComponent<NetworkPlayerInventory>();
+        this.uiLogic = GetComponentInChildren<UILogic>();
     }
     // CE BO DAT KAMERO POD KOTOM JE TREBA POHENDLAT DA JE ZMER VODORAVNO KER DRUGAC JE NEKEJ WONKY
     protected override void NetworkStart()
@@ -46,7 +47,7 @@ public class player_camera_handler : NetworkPlayerCameraHandlerBehavior
         }
         if (!networkObject.IsOwner) return;
         if (lockCamera) return;
-        if (networkPlayerInventory.panel_inventory.activeSelf) return;
+        if (uiLogic.hasOpenWindow) return;
 
 
             player_cam.transform.localPosition = camera_starting_offset;
