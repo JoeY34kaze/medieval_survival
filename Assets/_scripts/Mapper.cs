@@ -71,5 +71,23 @@ public class Mapper : MonoBehaviour
                     pr.Add(p);
         return pr;
     }
+
+    internal List<PredmetRecepie> getRecepiesForType(Item.Type t)
+    {
+        List<PredmetRecepie> r = new List<PredmetRecepie>();
+        foreach (PredmetRecepie p in this.recepies) {
+            if (p.Product.type == t)
+                r.Add(p);
+        }
+        return r;
+    }
+
+    internal PredmetRecepie getPredmetRecepieForItemid(int v)
+    {
+        foreach (PredmetRecepie p in this.recepies)
+            if (p.Product.id==v) return p;
+
+        return null;
+    }
     #endregion
 }

@@ -63,8 +63,12 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
     internal NetworkPlayerNeutralStateHandler neutralStateHandler;
     private NetworkPlayerStats stats;
 
+    private List<PredmetRecepie> craftingQueue;
+    private IEnumerator craftingRoutine;
+
     private void Start()
     {
+        this.craftingQueue = new List<PredmetRecepie>();
         this.combatHandler = GetComponent<NetworkPlayerCombatHandler>();
         this.neutralStateHandler = GetComponent<NetworkPlayerNeutralStateHandler>();
         this.avatar = GetComponent<DynamicCharacterAvatar>();
@@ -1644,6 +1648,8 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         }
     }
 
+
+
     public override void BarToPersonalRequest(RpcArgs args)//bar, personal
     {
         if (networkObject.IsServer && args.Info.SendingPlayer.NetworkId == networkObject.Owner.NetworkId)
@@ -1734,4 +1740,276 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         if (onLoadoutChangedCallback != null)
             onLoadoutChangedCallback.Invoke();
     }
+
+    #region Crafting
+
+    public int getMaxNumberOfPossibleCraftsForRecipe(PredmetRecepie p) {
+        int minimum = int.MaxValue;
+        for (int i = 0; i < p.ingredients.Length; i++) {
+            //get max number of crafts for this particular item.
+            int q = p.ingredient_quantities[i];
+            int pool = getQuantityOfItemOnPlayer(p.ingredients[i]);
+
+            if (pool / q < minimum) minimum = pool / q;
+        }
+
+
+        return minimum;
+    }
+
+    private int getQuantityOfItemOnPlayer(Item item)
+    {
+        //prevert inv, backpack, bar
+
+        int q = 0;
+
+        foreach (Predmet p in this.predmeti_personal)
+            if(p!=null)
+                if (p.item.Equals(item))
+                    q += p.quantity;
+
+        foreach (Predmet p in this.backpack_inventory.getAll())
+            if (p != null)
+                if (p.item.Equals(item))
+                    q += p.quantity;
+
+        foreach (Predmet p in this.predmeti_hotbar)
+            if (p != null)
+                if (p.item.Equals(item))
+                    q += p.quantity;
+
+        return q;
+    }
+
+    internal void localStartCraftingRequest(Item i, int current, int skin)
+    {
+        Debug.Log("sending crafting request! " + i.Display_name + " x" + current);
+        if (networkObject.IsOwner)
+            networkObject.SendRpc(RPC_ITEM_CRAFTING_REQUEST, Receivers.Server, i.id, current, skin);
+
+    }
+
+    public override void ItemCraftingRequest(RpcArgs args)
+    {
+        if (args.Info.SendingPlayer.NetworkId == networkObject.Owner.NetworkId && networkObject.IsServer) {
+            PredmetRecepie recept = Mapper.instance.getPredmetRecepieForItemid(args.GetNext<int>());
+            int quantity = args.GetNext<int>();
+            int skin_id = args.GetNext<int>();
+
+            int max_possible_crafts = getMaxNumberOfPossibleCraftsForRecipe(recept);
+            if (max_possible_crafts < quantity) quantity = max_possible_crafts;
+
+
+            //security checks n shit za tier pa take fore
+
+
+
+
+            //djmo craftat quantity objektov
+            for (int i = 0; i < quantity; i++) {
+                pushToCrafting(recept);
+            }
+
+            networkObject.SendRpc(args.Info.SendingPlayer, RPC_ITEM_CRAFTING_RESPONSE, getItemIdsFromCraftingQueueNetworkString(this.craftingQueue));
+        }
+    }
+
+    private string getItemIdsFromCraftingQueueNetworkString(List<PredmetRecepie> craftingQueue)
+    {
+        string s = "";
+        for (int i = 0; i < this.craftingQueue.Count; i++)
+        {
+
+                if (this.craftingQueue[i] != null)
+                    s = s + "|" + this.craftingQueue[i].Product;
+                else
+                    s = s + "|-1";
+
+            
+        }
+        //Debug.Log(s);
+        if (s .Equals( "")) s = "-1";
+        return s;
+    }
+
+    private List<PredmetRecepie> getCraftingListFromNetworkStringIds(string s) {
+        string[] k = s.Split('|');
+        List<PredmetRecepie> r = new List<PredmetRecepie>();
+        int res = -1;
+        foreach (string l in k) {
+            if (int.TryParse(l, out res)) {
+                if (res != -1) {
+                    r.Add(Mapper.instance.getPredmetRecepieForItemid(res));
+                } 
+            }
+        }
+        return r;
+    }
+
+    private void pushToCrafting(PredmetRecepie recept)
+    {
+        this.craftingQueue.Add(recept);
+        if (this.craftingRoutine==null) {//tkole mora bit sa mamo eno instanco coroutine in jo lahko interruptamo! - SINGLETON
+            this.craftingRoutine = CraftingCoroutine();
+            StartCoroutine(this.craftingRoutine);
+        }
+    }
+
+    private void cancelCraft(PredmetRecepie p, int priblizni_index) {
+        //ce je item ta k se trenutno crafta mormo ubit coroutine in jo na novo zastartat
+        PredmetRecepie odstranjen = RemoveFromCraftingQueue(p, priblizni_index);
+
+
+
+        if(priblizni_index==0)
+            restartCraftingCoroutine();
+        //ce nismo odstranil trenutnega pol nimamo kej skrbet.
+    }
+
+    /// <summary>
+    /// vrne predmet k smo ga odstranil
+    /// </summary>
+    /// <param name="p"></param>
+    /// <returns></returns>
+    private PredmetRecepie RemoveFromCraftingQueue(PredmetRecepie p, int priblizni_index)
+    {
+        if (this.craftingQueue[priblizni_index].Product.Equals(p.Product))
+        {
+            PredmetRecepie r = this.craftingQueue[priblizni_index];
+            this.craftingQueue.Remove(r);
+            return r;
+        }
+        else {
+            Debug.LogError("Index in item tip k se crafta se ne ujemata.. magar poisc najblizji item tega timpa in njega odstran");
+            return null;
+        }
+    }
+
+    private void restartCraftingCoroutine()
+    {
+        StopCoroutine(this.craftingRoutine);
+        this.craftingRoutine = null;
+        this.craftingRoutine = CraftingCoroutine();
+        StartCoroutine(this.craftingRoutine);
+    }
+
+    private IEnumerator CraftingCoroutine() {
+        
+        while (this.craftingQueue.Count > 0) {
+            PredmetRecepie p = craftingQueue[0];
+            yield return new WaitForSecondsRealtime(p.crafting_time);
+
+            if (getMaxNumberOfPossibleCraftsForRecipe(p) > 0)
+                CraftingTransaction(p);//tle se skor vse dejansko nrdi
+            else
+                Debug.Log("tried crafting stuff but didnt have required items");
+            this.craftingQueue.Remove(p);
+            
+        }
+        this.craftingRoutine = null;
+    }
+
+    //this is where magic happens pobrat mormo resource, jih zbrisat in ustvart nov item. ce se umes zalomi mormo obnovit nazaj stanje - dodat material nazaj
+    private void CraftingTransaction(PredmetRecepie p)
+    {
+        //zaenkrat lahko iteme dobimo samo od personal inventorija, backpacka al pa hotbara. 
+        //vemo da mamo dovolj itemov nekje ker smo to pregledal predn smo skocil v to metodo kar pomen da nerabmo? vracat itemov ker naceloma nesmemo failat
+
+
+        //loop cez vse matse in jih brisemo iz inventorija dokler ne zbrisemo zadost.
+
+        for (int i = 0; i < p.ingredients.Length; i++) {
+            int q = p.ingredient_quantities[i];//tolkle moramo zbrisat iz nekje
+            DeleteIngredients(p.ingredients[i], q);
+        }
+
+        Predmet a_baby = new Predmet(p.Product, p.final_quantity, p.Product.durability, stats.playerName);
+        handleItemPickup(a_baby);//POSLJE TUD POTREBNI NETWORKUPDATE
+
+    }
+
+    /// <summary>
+    /// zbrise tolkle itemov z kjerkoli lahko in NE poslje updejta. updejt se poslje nekje v prejsnji metodi s katere klicemo sicer bi med craftanjem poslal en kup nepotrebnih updejtov.
+    /// </summary>
+    /// <param name="item"></param>
+    /// <param name="q"></param>
+    private void DeleteIngredients(Item item, int q)
+    {
+
+        if(q>0)//najprej bi spraznil hotbar
+            for (int i = 0; i < this.predmeti_hotbar.Length; i++)
+            {
+                Predmet p = this.predmeti_hotbar[i];
+                if (p != null)
+                    if (p.item.Equals(item))
+                    {
+                        if (p.quantity <= q)
+                        {
+                            //pobral bomo cel stack.
+                            q -= p.quantity;
+                            p = null;
+                        }
+                        else {//poberemo samo del stacka in smo zakljucli
+                            p.quantity -= q;
+                            return;
+                        }
+                    }
+            }
+
+        //pol bi sli spraznit backpack -------------------------------------TLE MOGOCE PRIDE DO BUGGA KER NEVEM LIH KKO SE PRENASA ARRAY OBJEKTOV AL JE COPY AL JE REFERENCA..
+        if (q > 0)
+        {
+            Predmet[] predmeti = this.backpack_inventory.getAll();
+            for (int i = 0; i < predmeti.Length; i++)
+            {
+                Predmet p = predmeti[i];
+                if (p != null)
+                    if (p.item.Equals(item))
+                    {
+                        if (p.quantity <= q)
+                        {
+                            //pobral bomo cel stack.
+                            q -= p.quantity;
+                            p = null;
+                        }
+                        else
+                        {//poberemo samo del stacka in smo zakljucli
+                            p.quantity -= q;
+                            return;
+                        }
+                    }
+            }
+        }
+
+        if (q > 0)//najprej bi spraznil hotbar
+            for (int i = 0; i < this.predmeti_personal.Length; i++)
+            {
+                Predmet p = this.predmeti_personal[i];
+                if (p != null)
+                    if (p.item.Equals(item))
+                    {
+                        if (p.quantity <= q)
+                        {
+                            //pobral bomo cel stack.
+                            q -= p.quantity;
+                            p = null;
+                        }
+                        else
+                        {//poberemo samo del stacka in smo zakljucli
+                            p.quantity -= q;
+                            return;
+                        }
+                    }
+            }
+    }
+
+    public override void ItemCraftingResponse(RpcArgs args)//vrne nazaj crafting queue
+    {
+        if (args.Info.SendingPlayer.NetworkId == 0) {
+            List<PredmetRecepie> r = getCraftingListFromNetworkStringIds(args.GetNext<string>());
+            GetComponentInChildren<craftingPanelHandler>().updateCraftingQueueWithServerData(r);
+        }
+    }
+
+    #endregion
 }

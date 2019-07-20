@@ -350,7 +350,7 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
     /// </summary>
     public void disableToolCollider() {
         Item i = getActiveTool();
-        if (i = null)
+        if (i == null)
         {
             GameObject obj = getGameObjectInHandFromId(i.id);
             if (obj == null) Debug.LogError("this should not have happened..");

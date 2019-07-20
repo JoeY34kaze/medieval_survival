@@ -12,9 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4746d1fc3f566dd42a210e3e3bb489aa, type: 3}
   m_Name: pickaxe0_recepie
   m_EditorClassIdentifier: 
-  Product: {fileID: 0}
-  final_quantity: 0
-  ingredients: []
-  ingredient_quantities: 
+  Product: {fileID: 11400000, guid: eacd34bc0e9200e46864196671622241, type: 2}
+  final_quantity: 1
+  ingredients:
+  - {fileID: 11400000, guid: 70201cfae2de73b48963ec5e984cc33d, type: 2}
+  ingredient_quantities: 32000000
   tier: 0
-  crafting_time: 0
+  crafting_time: 10

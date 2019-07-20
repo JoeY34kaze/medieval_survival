@@ -10,6 +10,7 @@ public class UILogic : MonoBehaviour
     public GameObject guildModificationPanel;
     public GameObject GuildPanel;
     public GameObject inventoryPanel;
+    public GameObject crafting_panel;
 
     public bool hasOpenWindow=false;
     private NetworkGuildManager ngm;
@@ -35,8 +36,7 @@ public class UILogic : MonoBehaviour
                 ngm.SetMemberPanel(false);
                 this.GuildPanel.SetActive(false);
                 this.hasOpenWindow = false;
-                Cursor.lockState = CursorLockMode.Locked;
-                Cursor.visible = false;
+                DisableMouse();
 
 
             }
@@ -46,8 +46,7 @@ public class UILogic : MonoBehaviour
                 this.hasOpenWindow = true;
                 this.inventoryPanel.SetActive(false);
                 this.guildModificationPanel.SetActive(false);
-                Cursor.lockState = CursorLockMode.None;
-                Cursor.visible = true;
+                enableMouse();
 
 
             }  
@@ -59,8 +58,7 @@ public class UILogic : MonoBehaviour
             {
                 this.inventoryPanel.SetActive(false);
                 this.hasOpenWindow = false;
-                Cursor.lockState = CursorLockMode.Locked;
-                Cursor.visible = false;
+                DisableMouse();
 
 
 
@@ -72,14 +70,27 @@ public class UILogic : MonoBehaviour
                 if(this.GuildPanel.activeSelf) ngm.SetMemberPanel(false);
                 this.guildModificationPanel.SetActive(false);
                 this.GuildPanel.SetActive(false);
-                Cursor.lockState = CursorLockMode.None;
-                Cursor.visible = true;
+                enableMouse();
 
 
             }
             //guild modificationPanel se odpre z button eventa na guild managerju...
-
             
+            
+        }
+        if (Input.GetButtonDown("Crafting"))
+        {
+            bool was_active = this.crafting_panel.activeSelf;
+            clear();
+            if (was_active)
+            {
+                //nc
+            }
+            else
+            {
+                this.crafting_panel.SetActive(true);
+                enableMouse();
+            }
         }
     }
 
@@ -98,6 +109,7 @@ public class UILogic : MonoBehaviour
             this.GuildPanel.SetActive(false);
             this.inventoryPanel.SetActive(false);
             this.hasOpenWindow = true;
+            GetComponentInParent<NetworkPlayerMovement>().lockMovement = false;
         }
         else {
             clear();
@@ -105,17 +117,27 @@ public class UILogic : MonoBehaviour
 
     }
 
+    public void enableMouse() {
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
+    }
+
+    public void DisableMouse() {
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
+    }
+
     public void clear() {
         this.inventoryPanel.SetActive(false);
         this.guildModificationPanel.SetActive(false);
         if (this.GuildPanel.activeSelf) ngm.SetMemberPanel(false);
         this.GuildPanel.SetActive(false);
+        this.crafting_panel.SetActive(false);
         this.hasOpenWindow = false;
-        Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = false;
 
+        DisableMouse();
        //GetComponentInParent<NetworkPlayerAnimationLogic>().hookChestRotation = true;
-        //GetComponentInParent<NetworkPlayerMovement>().lockMovement = false;
+        GetComponentInParent<NetworkPlayerMovement>().lockMovement = false;
         //GetComponentInParent<player_camera_handler>().lockCamera = false;
     }
 }
