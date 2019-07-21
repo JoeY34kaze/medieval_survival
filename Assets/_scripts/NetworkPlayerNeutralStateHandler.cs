@@ -34,7 +34,7 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
                 if (bar_handler.gameObject.activeSelf) {
                     checkInputBar();
                     if (Input.GetButtonDown("Fire1")) {
-                        if (hasToolSelected())//za weapone se checkira v combat handlerju
+                        if (hasToolSelected() && combat_handler.is_allowed_to_attack_local())//za weapone se checkira v combat handlerju
                         {
                             ///poslat request da nrdimo swing z tem tool-om
                             networkObject.SendRpc(RPC_TOOL_USAGE_REQUEST, Receivers.Server);
@@ -217,6 +217,8 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
             
         }
     }
+
+
 
     /// <summary>
     /// na podlagi tega itema i, ga nastela u roke playerju
@@ -412,4 +414,5 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
     public void OnToolSwingEnd() {
         getCurrentTool().GetComponent<Collider>().enabled = false;
     }
+
 }

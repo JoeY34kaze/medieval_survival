@@ -96,7 +96,7 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
     /// samo lokalno preveri da ne tezi drugim panelam. ce hacka se mora na serverju prevert
     /// </summary>
     /// <returns></returns>
-    private bool is_allowed_to_attack_local() {
+    public bool is_allowed_to_attack_local() {
         if (stats.downed || stats.dead )
         {
             return false; //Ce je downan da nemora vec napadat pa take fore. to je precej loše ker je na clientu. ksnej bo treba prenest to logiko na server ker tole zjebe ze cheatengine

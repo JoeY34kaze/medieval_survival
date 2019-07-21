@@ -122,6 +122,10 @@ public class craftingPanelHandler : MonoBehaviour
             }
         }
     }
+    private void Start()
+    {
+        this.queueRecepieList = new List<PredmetRecepie>();
+    }
 
     /// <summary>
     /// called onbtnclick event. clears current recipes shown on panel and inputs new ones
@@ -229,6 +233,15 @@ public class craftingPanelHandler : MonoBehaviour
 
     internal void updateCraftingQueueWithServerData(List<PredmetRecepie> r)
     {
+        if (r == null) {
+            foreach (Transform c in this.queue_list) Destroy(c.gameObject);
+            return;
+        }else if (r.Count==0)
+        {
+            foreach (Transform c in this.queue_list) Destroy(c.gameObject);
+            return;
+        }
+        bool wasEmpty = this.queueRecepieList.Count == 0;
         this.queueRecepieList = r;
         //mas recepte k se trenutno craftajo na serverju, za vsazga mas tud timer in vse, zmer to na un panel, na vsazga nabij opcijo da skensla, rpc za skenslanje, logika za kenslanje je pa prakticno ze napisana. ene 3 ure in je done
         foreach (Transform c in this.queue_list) Destroy(c.gameObject);
@@ -247,7 +260,7 @@ public class craftingPanelHandler : MonoBehaviour
                 });
         }
 
-        StartCoroutine(Counter(this.queueRecepieList[0].crafting_time));
+        if(wasEmpty)StartCoroutine(Counter(this.queueRecepieList[0].crafting_time));
     }
 
     private void localCancelCraftRequest(PredmetRecepie p, int index_sibling)

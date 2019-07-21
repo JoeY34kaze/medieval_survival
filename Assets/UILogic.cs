@@ -31,45 +31,29 @@ public class UILogic : MonoBehaviour
 
         if (Input.GetButtonDown("Guild"))
         {
-            if (this.GuildPanel.activeSelf)
+            bool was_active = this.GuildPanel.activeSelf;
+            clear();
+            if (was_active)
             {
-                ngm.SetMemberPanel(false);
-                this.GuildPanel.SetActive(false);
-                this.hasOpenWindow = false;
-                DisableMouse();
-
-
             }
             else {
                 this.GuildPanel.SetActive(true);
-                ngm.SetMemberPanel(true);
                 this.hasOpenWindow = true;
-                this.inventoryPanel.SetActive(false);
-                this.guildModificationPanel.SetActive(false);
                 enableMouse();
-
-
             }  
         }
 
         if (Input.GetButtonDown("Inventory"))
         {
-            if (this.inventoryPanel.activeSelf)
+            bool was_active = this.inventoryPanel.activeSelf;
+            clear();
+            if (was_active)
             {
-                this.inventoryPanel.SetActive(false);
-                this.hasOpenWindow = false;
-                DisableMouse();
-
-
-
-
             }
             else {
                 this.inventoryPanel.SetActive(true);
                 npi.requestLocalUIUpdate();
-                if(this.GuildPanel.activeSelf) ngm.SetMemberPanel(false);
-                this.guildModificationPanel.SetActive(false);
-                this.GuildPanel.SetActive(false);
+                this.hasOpenWindow = true;
                 enableMouse();
 
 
@@ -89,6 +73,7 @@ public class UILogic : MonoBehaviour
             else
             {
                 this.crafting_panel.SetActive(true);
+                this.hasOpenWindow = true;
                 enableMouse();
             }
         }
@@ -97,13 +82,14 @@ public class UILogic : MonoBehaviour
     private void handleEscapePressed()
     {
         //ce je odprto ksno okno ga zapri, sicer prikaz main menu
-        clear();
+        if (this.hasOpenWindow) clear();
+        else { Application.Quit(); }//prikazat main menu
     }
 
     internal void showGuildModificationPanel(bool b, NetworkGuildManager ngm)
     {
         this.guildModificationPanel.SetActive(b);
-        if (b)
+        if (b)//??
         {
             if (this.GuildPanel.activeSelf) ngm.SetMemberPanel(false);
             this.GuildPanel.SetActive(false);
@@ -133,11 +119,12 @@ public class UILogic : MonoBehaviour
         if (this.GuildPanel.activeSelf) ngm.SetMemberPanel(false);
         this.GuildPanel.SetActive(false);
         this.crafting_panel.SetActive(false);
+        this.crafting_panel.SetActive(false);
         this.hasOpenWindow = false;
 
         DisableMouse();
-       //GetComponentInParent<NetworkPlayerAnimationLogic>().hookChestRotation = true;
+        GetComponentInParent<NetworkPlayerAnimationLogic>().hookChestRotation = true;
         GetComponentInParent<NetworkPlayerMovement>().lockMovement = false;
-        //GetComponentInParent<player_camera_handler>().lockCamera = false;
+        GetComponentInParent<player_camera_handler>().lockCamera = false;
     }
 }
