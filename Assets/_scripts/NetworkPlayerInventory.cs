@@ -65,6 +65,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
 
     private List<PredmetRecepie> craftingQueue;
     private IEnumerator craftingRoutine;
+    private int craftingTimeRemaining = 0;
 
     private void Start()
     {
@@ -1864,7 +1865,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
                 pushToCrafting(recept);
             }
 
-            networkObject.SendRpc(args.Info.SendingPlayer, RPC_ITEM_CRAFTING_RESPONSE, getItemIdsFromCraftingQueueNetworkString(this.craftingQueue));
+            networkObject.SendRpc(args.Info.SendingPlayer, RPC_ITEM_CRAFTING_RESPONSE, getItemIdsFromCraftingQueueNetworkString(this.craftingQueue), this.craftingTimeRemaining);
         }
     }
 
@@ -1936,7 +1937,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         if (networkObject.IsServer && args.Info.SendingPlayer.NetworkId == networkObject.Owner.NetworkId)
         {
             RemoveFromCraftingQueue(Mapper.instance.getPredmetRecepieForItemid(args.GetNext<int>()), args.GetNext<int>());
-            networkObject.SendRpc(args.Info.SendingPlayer, RPC_ITEM_CRAFTING_RESPONSE, getItemIdsFromCraftingQueueNetworkString(this.craftingQueue));
+            networkObject.SendRpc(args.Info.SendingPlayer, RPC_ITEM_CRAFTING_RESPONSE, getItemIdsFromCraftingQueueNetworkString(this.craftingQueue), this.craftingTimeRemaining);
         }
     }
     /// <summary>
@@ -1946,7 +1947,21 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
     /// <returns></returns>
     private PredmetRecepie RemoveFromCraftingQueue(PredmetRecepie p, int priblizni_index)
     {
-        if (this.craftingQueue[priblizni_index].Product.Equals(p.Product))
+        if (priblizni_index == 0) {
+            //mormo odstrant in prekint coroutine
+            PredmetRecepie r = this.craftingQueue[priblizni_index];
+            this.craftingQueue.Remove(r);
+            StopCoroutine(this.craftingRoutine);
+            this.craftingRoutine = null;
+
+                this.craftingRoutine = CraftingCoroutine();//pohendla tud ce je queue enak 0
+                StartCoroutine(this.craftingRoutine);
+            if (this.craftingQueue.Count > 0) this.craftingTimeRemaining = this.craftingQueue[0].crafting_time;
+            else this.craftingTimeRemaining = 0;
+            return r;
+
+        }
+        else if (this.craftingQueue[priblizni_index].Product.Equals(p.Product))
         {
             PredmetRecepie r = this.craftingQueue[priblizni_index];
             this.craftingQueue.Remove(r);
@@ -1973,6 +1988,11 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         while (this.craftingQueue.Count > 0)
         {
             PredmetRecepie p = craftingQueue[0];
+            for (int i = p.crafting_time; i > 0; i--) {
+                this.craftingTimeRemaining = i;
+                yield return new WaitForSecondsRealtime(1);
+            }
+            this.craftingTimeRemaining = 0;
             yield return new WaitForSecondsRealtime(p.crafting_time);
 
             if (getMaxNumberOfPossibleCraftsForRecipe(p) > 0)
@@ -2085,7 +2105,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         if (args.Info.SendingPlayer.NetworkId == 0)
         {
             List<PredmetRecepie> r = getCraftingListFromNetworkStringIds(args.GetNext<string>());
-            GetComponentInChildren<craftingPanelHandler>().updateCraftingQueueWithServerData(r);
+            GetComponentInChildren<craftingPanelHandler>().updateCraftingQueueWithServerData(r, args.GetNext<int>());
         }
     }
 

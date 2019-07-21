@@ -33,6 +33,8 @@ public class craftingPanelHandler : MonoBehaviour
 
     public Text timer;
     private List<PredmetRecepie> queueRecepieList;
+    private IEnumerator countingRoutine;
+    private int current_craft_remaining_time;
 
     void OnEnable()
     {
@@ -231,7 +233,7 @@ public class craftingPanelHandler : MonoBehaviour
     }
 
 
-    internal void updateCraftingQueueWithServerData(List<PredmetRecepie> r)
+    internal void updateCraftingQueueWithServerData(List<PredmetRecepie> r, int time_remaining_of_current_craft)
     {
         if (r == null) {
             foreach (Transform c in this.queue_list) Destroy(c.gameObject);
@@ -241,7 +243,7 @@ public class craftingPanelHandler : MonoBehaviour
             foreach (Transform c in this.queue_list) Destroy(c.gameObject);
             return;
         }
-        bool wasEmpty = this.queueRecepieList.Count == 0;
+
         this.queueRecepieList = r;
         //mas recepte k se trenutno craftajo na serverju, za vsazga mas tud timer in vse, zmer to na un panel, na vsazga nabij opcijo da skensla, rpc za skenslanje, logika za kenslanje je pa prakticno ze napisana. ene 3 ure in je done
         foreach (Transform c in this.queue_list) Destroy(c.gameObject);
@@ -259,8 +261,10 @@ public class craftingPanelHandler : MonoBehaviour
                     localCancelCraftRequest(p, btn.transform.GetSiblingIndex());
                 });
         }
-
-        if(wasEmpty)StartCoroutine(Counter(this.queueRecepieList[0].crafting_time));
+        this.current_craft_remaining_time = time_remaining_of_current_craft;
+        if(this.countingRoutine!=null)StopCoroutine(this.countingRoutine);
+        this.countingRoutine = Counter(time_remaining_of_current_craft);
+            StartCoroutine(this.countingRoutine);//updejtamo timer z serverja
     }
 
     private void localCancelCraftRequest(PredmetRecepie p, int index_sibling)
@@ -272,21 +276,29 @@ public class craftingPanelHandler : MonoBehaviour
     /// samo lokalno se rihta, to je samo maska za playerja, vsa logika je na serverju
     /// </summary>
     internal void OnTimerEnd() {
-        Destroy(this.queue_list.GetChild(0).gameObject);
-        if (this.queueRecepieList.Count > 1)
+        if (this.queue_list.childCount > 0)
         {
-            PredmetRecepie next = this.queueRecepieList[1];
-            this.queueRecepieList.Remove(this.queueRecepieList[0]);
-            StartCoroutine(Counter(next.crafting_time));
-        }
-        else {
-            this.timer.text = "";
+            Destroy(this.queue_list.GetChild(0).gameObject);
+            if (this.queueRecepieList.Count > 1)
+            {
+                PredmetRecepie next = this.queueRecepieList[1];
+                this.current_craft_remaining_time = next.crafting_time;
+                this.queueRecepieList.Remove(this.queueRecepieList[0]);
+                this.countingRoutine = null;
+                this.countingRoutine = Counter(next.crafting_time);
+                StartCoroutine(this.countingRoutine);
+            }
+            else
+            {
+                this.timer.text = "";
+            }
         }
     }
 
     internal IEnumerator Counter(int seconds) {
         for (int i = seconds; i > 0; i--) {
-            this.timer.text = i + "";
+            this.current_craft_remaining_time = i;
+            this.timer.text = current_craft_remaining_time + "";
             yield return new WaitForSecondsRealtime(1);
         }
         OnTimerEnd();
