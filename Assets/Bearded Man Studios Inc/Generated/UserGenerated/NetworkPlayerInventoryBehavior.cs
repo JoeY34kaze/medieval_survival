@@ -1,0 +1,164 @@
+using BeardedManStudios.Forge.Networking;
+using BeardedManStudios.Forge.Networking.Unity;
+using UnityEngine;
+
+namespace BeardedManStudios.Forge.Networking.Generated
+{
+	[GeneratedRPC("{\"types\":[[\"string\"][\"string\", \"string\", \"string\", \"string\", \"string\", \"string\"][][\"string\", \"Vector3\", \"Vector3\"][\"int\", \"Vector3\", \"Vector3\"][\"string\", \"int\", \"Vector3\", \"Vector3\"][\"int\", \"string\", \"int\"][\"int\", \"string\", \"int\"][\"int\", \"int\"][][\"int\", \"int\"][\"int\", \"int\"][\"int\", \"int\"][\"int\", \"int\", \"int\"][\"string\"][\"int\", \"int\"]]")]
+	[GeneratedRPCVariableNames("{\"types\":[[\"personalAndhotbarNetworkString\"][\"head\", \"chest\", \"arms\", \"legs\", \"feet\", \"backpack\"][][\"predmet\", \"pos\", \"dir\"][\"inventorySlotIndex\", \"camera_vector\", \"camera_forward\"][\"item_type\", \"index\", \"camera_vector\", \"camera_forward\"][\"index\", \"type\", \"index_inv\"][\"inv_index\", \"type\", \"loadout_index\"][\"a\", \"b\"][][\"a\", \"b\"][\"c\", \"d\"][\"e\", \"f\"][\"item_id\", \"quantity\", \"skin_id\"][\"item_ids\"][\"index_itema\", \"index_sibling\"]]")]
+	public abstract partial class NetworkPlayerInventoryBehavior : NetworkBehavior
+    {
+		public const byte RPC_SEND_PERSONAL_INVENTORY_UPDATE = 0 + 5;
+		public const byte RPC_SEND_LOADOUT_UPDATE = 1 + 5;
+		public const byte RPC_REQUEST_LOADOUT_ON_CONNECT = 2 + 5;
+		public const byte RPC_NETWORK_INSTANTIATION_SERVER_REQUEST = 3 + 5;
+		public const byte RPC_DROP_ITEM_FROM_PERSONAL_INVENTORY_REQUEST = 4 + 5;
+		public const byte RPC_DROP_ITEM_FROM_LOADOUT_REQUEST = 5 + 5;
+		public const byte RPC_INVENTORY_TO_LOADOUT_REQUEST = 6 + 5;
+		public const byte RPC_LOADOUT_TO_INVENTORY_REQUEST = 7 + 5;
+		public const byte RPC_INVENTORY_TO_INVENTORY_REQUEST = 8 + 5;
+		public const byte RPC_LOADOUT_TO_LOADOUT_REQUEST = 9 + 5;
+		public const byte RPC_PERSONAL_TO_BAR_REQUEST = 10 + 5;
+		public const byte RPC_BAR_TO_PERSONAL_REQUEST = 11 + 5;
+		public const byte RPC_BAR_TO_BAR_REQUEST = 12 + 5;
+		public const byte RPC_ITEM_CRAFTING_REQUEST = 13 + 5;
+		public const byte RPC_ITEM_CRAFTING_RESPONSE = 14 + 5;
+		public const byte RPC_ITEM_CRAFTING_CANCEL_REQUEST = 15 + 5;
+		
+		public NetworkPlayerInventoryNetworkObject networkObject = null;
+
+		public override void Initialize(NetworkObject obj)
+		{
+			// We have already initialized this object
+			if (networkObject != null && networkObject.AttachedBehavior != null)
+				return;
+			
+			networkObject = (NetworkPlayerInventoryNetworkObject)obj;
+			networkObject.AttachedBehavior = this;
+
+			networkObject.RegisterRpc("SendPersonalInventoryUpdate", SendPersonalInventoryUpdate, typeof(string));
+			networkObject.RegisterRpc("SendLoadoutUpdate", SendLoadoutUpdate, typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string));
+			networkObject.RegisterRpc("RequestLoadoutOnConnect", RequestLoadoutOnConnect);
+			networkObject.RegisterRpc("NetworkInstantiationServerRequest", NetworkInstantiationServerRequest, typeof(string), typeof(Vector3), typeof(Vector3));
+			networkObject.RegisterRpc("DropItemFromPersonalInventoryRequest", DropItemFromPersonalInventoryRequest, typeof(int), typeof(Vector3), typeof(Vector3));
+			networkObject.RegisterRpc("DropItemFromLoadoutRequest", DropItemFromLoadoutRequest, typeof(string), typeof(int), typeof(Vector3), typeof(Vector3));
+			networkObject.RegisterRpc("InventoryToLoadoutRequest", InventoryToLoadoutRequest, typeof(int), typeof(string), typeof(int));
+			networkObject.RegisterRpc("LoadoutToInventoryRequest", LoadoutToInventoryRequest, typeof(int), typeof(string), typeof(int));
+			networkObject.RegisterRpc("InventoryToInventoryRequest", InventoryToInventoryRequest, typeof(int), typeof(int));
+			networkObject.RegisterRpc("LoadoutToLoadoutRequest", LoadoutToLoadoutRequest);
+			networkObject.RegisterRpc("PersonalToBarRequest", PersonalToBarRequest, typeof(int), typeof(int));
+			networkObject.RegisterRpc("BarToPersonalRequest", BarToPersonalRequest, typeof(int), typeof(int));
+			networkObject.RegisterRpc("BarToBarRequest", BarToBarRequest, typeof(int), typeof(int));
+			networkObject.RegisterRpc("ItemCraftingRequest", ItemCraftingRequest, typeof(int), typeof(int), typeof(int));
+			networkObject.RegisterRpc("ItemCraftingResponse", ItemCraftingResponse, typeof(string));
+			networkObject.RegisterRpc("ItemCraftingCancelRequest", ItemCraftingCancelRequest, typeof(int), typeof(int));
+			networkObject.RegistrationComplete();
+		}
+
+		public void Initialize(NetWorker networker)
+		{
+			Initialize(new NetworkPlayerInventoryNetworkObject(networker));
+		}
+        protected override void CompleteRegistration()
+        {
+            base.CompleteRegistration();
+            networkObject.ReleaseCreateBuffer();
+        }
+
+        public override void Initialize(NetWorker networker, byte[] metadata = null)
+        {
+            Initialize(new NetworkPlayerInventoryNetworkObject(networker, createCode: TempAttachCode, metadata: metadata));
+        }
+
+        private void DestroyGameObject(NetWorker sender)
+        {
+            MainThreadManager.Run(() => { try { Destroy(gameObject); } catch { } });
+            networkObject.onDestroy -= DestroyGameObject;
+        }
+
+        public override NetworkObject CreateNetworkObject(NetWorker networker, int createCode, byte[] metadata = null)
+        {
+            return new NetworkPlayerInventoryNetworkObject(networker, this, createCode, metadata);
+        }
+
+        protected override void InitializedTransform()
+        {
+            networkObject.SnapInterpolations();
+        }
+
+
+        /// <summary>
+        /// Arguments:
+        /// string personalAndhotbarNetworkString
+        /// </summary>
+        public abstract void SendPersonalInventoryUpdate(RpcArgs args);
+		/// <summary>
+		/// Arguments:
+		/// string head
+		/// string chest
+		/// string arms
+		/// string legs
+		/// string feet
+		/// string backpack
+		/// </summary>
+		public abstract void SendLoadoutUpdate(RpcArgs args);
+		/// <summary>
+		/// Arguments:
+		/// </summary>
+		public abstract void RequestLoadoutOnConnect(RpcArgs args);
+		/// <summary>
+		/// Arguments:
+		/// </summary>
+		public abstract void NetworkInstantiationServerRequest(RpcArgs args);
+		/// <summary>
+		/// Arguments:
+		/// </summary>
+		public abstract void DropItemFromPersonalInventoryRequest(RpcArgs args);
+		/// <summary>
+		/// Arguments:
+		/// </summary>
+		public abstract void DropItemFromLoadoutRequest(RpcArgs args);
+		/// <summary>
+		/// Arguments:
+		/// </summary>
+		public abstract void InventoryToLoadoutRequest(RpcArgs args);
+		/// <summary>
+		/// Arguments:
+		/// </summary>
+		public abstract void LoadoutToInventoryRequest(RpcArgs args);
+		/// <summary>
+		/// Arguments:
+		/// </summary>
+		public abstract void InventoryToInventoryRequest(RpcArgs args);
+		/// <summary>
+		/// Arguments:
+		/// </summary>
+		public abstract void LoadoutToLoadoutRequest(RpcArgs args);
+		/// <summary>
+		/// Arguments:
+		/// </summary>
+		public abstract void PersonalToBarRequest(RpcArgs args);
+		/// <summary>
+		/// Arguments:
+		/// </summary>
+		public abstract void BarToPersonalRequest(RpcArgs args);
+		/// <summary>
+		/// Arguments:
+		/// </summary>
+		public abstract void BarToBarRequest(RpcArgs args);
+		/// <summary>
+		/// Arguments:
+		/// </summary>
+		public abstract void ItemCraftingRequest(RpcArgs args);
+		/// <summary>
+		/// Arguments:
+		/// </summary>
+		public abstract void ItemCraftingResponse(RpcArgs args);
+		/// <summary>
+		/// Arguments:
+		/// </summary>
+		public abstract void ItemCraftingCancelRequest(RpcArgs args);
+
+		// DO NOT TOUCH, THIS GETS GENERATED PLEASE EXTEND THIS CLASS IF YOU WISH TO HAVE CUSTOM CODE ADDITIONS
+	}
+}

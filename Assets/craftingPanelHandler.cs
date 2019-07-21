@@ -28,6 +28,12 @@ public class craftingPanelHandler : MonoBehaviour
     public InputField craftOrder;
     private Item currentlySelectedItem;
 
+    public Transform queue_list;
+    public GameObject queue_element_prefab;
+
+    public Text timer;
+    private List<PredmetRecepie> queueRecepieList;
+
     void OnEnable()
     {
         stats = transform.root.GetComponent<NetworkPlayerStats>();
@@ -230,7 +236,47 @@ public class craftingPanelHandler : MonoBehaviour
 
     internal void updateCraftingQueueWithServerData(List<PredmetRecepie> r)
     {
+        this.queueRecepieList = r;
         //mas recepte k se trenutno craftajo na serverju, za vsazga mas tud timer in vse, zmer to na un panel, na vsazga nabij opcijo da skensla, rpc za skenslanje, logika za kenslanje je pa prakticno ze napisana. ene 3 ure in je done
+        foreach (Transform c in this.queue_list) Destroy(c.gameObject);
+
+        foreach (PredmetRecepie p in r) {
+            GameObject btn = GameObject.Instantiate(queue_element_prefab, this.queue_list);
+
+            btn.transform.localScale = new Vector3(1, 1, 1);
+            btn.GetComponent<Image>().sprite = p.Product.icon;
+            Button button = btn.GetComponent<Button>();
+            button.onClick.RemoveAllListeners();
+            button.onClick.AddListener(
+                delegate
+                {
+                    localCancelCraftRequest(p, btn.transform.GetSiblingIndex());
+                });
+
+
+        }
+    }
+
+    private void localCancelCraftRequest(PredmetRecepie p, int index_sibling)
+    {
+        transform.root.GetComponent<NetworkPlayerInventory>().localCancelCraftRequest(p, index_sibling);
+    }
+
+    /// <summary>
+    /// samo lokalno se rihta, to je samo maska za playerja, vsa logika je na serverju
+    /// </summary>
+    internal void OnTimerEnd() {
+        Destroy(this.queue_list.GetChild(0));
+        this.queueRecepieList.Remove(this.queueRecepieList[0]);
+        StartCoroutine(Counter(this.queueRecepieList[0].crafting_time));
+    }
+
+    internal IEnumerator Counter(int seconds) {
+        for (int i = seconds; i > 0; i--) {
+            this.timer.text = i + "";
+            yield return new WaitForSecondsRealtime(1);
+        }
+        OnTimerEnd();
     }
 }
 

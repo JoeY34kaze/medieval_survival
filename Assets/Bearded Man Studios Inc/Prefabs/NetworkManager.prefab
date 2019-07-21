@@ -1,0 +1,105 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &186558
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 471382}
+  - component: {fileID: 11439882}
+  m_Layer: 0
+  m_Name: NetworkManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &471382
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 186558}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &11439882
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 186558}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bbe5b082a785e7641bf1a62b930a3f5a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ChatManagerNetworkObject:
+  - {fileID: 1000012032569418, guid: b454b1be0b2c3fa4fb48430867af7566, type: 3}
+  CubeForgeGameNetworkObject: []
+  ExampleProximityPlayerNetworkObject:
+  - {fileID: 1000012738253334, guid: feb25ecf90a8d8b4ab922a455249997b, type: 3}
+  Interactable_objectNetworkObject:
+  - {fileID: 1566654935662004460, guid: 7d09e4243d4bf0e4197bce45a4178b1b, type: 3}
+  - {fileID: 553279084033888915, guid: 456e9081ab0248e4590d21f9f54b24b3, type: 3}
+  - {fileID: 8835628397707790727, guid: 2588b783c614a864ab14529f601ff288, type: 3}
+  - {fileID: 5136732390987847126, guid: 732581ede17690544b8d08acd2febad1, type: 3}
+  - {fileID: 8155241322856847171, guid: 0f7ac22aeefbf394bae6634154deafa2, type: 3}
+  - {fileID: 8113802634298223609, guid: 398b956b034b8b544808cc97df5a0e3f, type: 3}
+  - {fileID: 694931151034629152, guid: c882e7d675cc6ac4b858d9a8c077d2a9, type: 3}
+  - {fileID: 4970497545351922653, guid: 452c97172b971f54a82395bd049af62f, type: 3}
+  - {fileID: 274690713, guid: 6bee712664bee2f4c9f7ed3dda4d2f3f, type: 3}
+  - {fileID: 8908825830642754757, guid: 35fc61d2496c81043b1dba7a2cb5ff99, type: 3}
+  - {fileID: 481997453617132335, guid: fd03a7bad5adb1f4da7f85bef232acc9, type: 3}
+  - {fileID: 8088387727257470509, guid: 0d45e4a561444e848939902a16668d71, type: 3}
+  - {fileID: 1206042230447930, guid: 2cc73f9fe09ae6642bf2ef85f51e2fc5, type: 3}
+  - {fileID: 1939998621894806, guid: d2348d78e17dfe846babb36a40dbc20a, type: 3}
+  - {fileID: 1153930742003218, guid: 90d13dc56ec852040ad44a9ecad328cf, type: 3}
+  - {fileID: 1190600162460664, guid: b23aadf864ad1bb43813b4ec1455c1cb, type: 3}
+  - {fileID: 1398047969005088, guid: cf51fd2ad7be17542977a9ad348ef4ba, type: 3}
+  - {fileID: 6186035793259989556, guid: eb4c461083accaf4ea45f9f2d0c53ebd, type: 3}
+  - {fileID: 3896814374220688793, guid: b5c152a0b859f8f4fb2686956c5a5924, type: 3}
+  - {fileID: 3488555824391006078, guid: ef9c06f04ff8def49bd3104a1ec15cc4, type: 3}
+  - {fileID: 3215903339925601204, guid: 7923a4b6cb10181488c1ef4c76d43d9f, type: 3}
+  - {fileID: 7999107153611608437, guid: 2d18c85dcecd0f641afe5e83b394e446, type: 3}
+  - {fileID: 7302783449935106896, guid: 06413ec436bd36f48a2712fa11351c8d, type: 3}
+  - {fileID: 6521818459738564131, guid: 2f1dc96737606d1459882a7169df46a2, type: 3}
+  - {fileID: 7940347042607550359, guid: f55f3689135f6774bacaab1c2f438e3c, type: 3}
+  - {fileID: 4601069242401603006, guid: 992254de1dfeaef4ba8c4e47f6dcf5d3, type: 3}
+  - {fileID: 8820976862731433532, guid: feccc7f6ae903ea408b8199773c0412b, type: 3}
+  - {fileID: 2312398261066146200, guid: c2beb7da92a796248ae5fa028e8dcc76, type: 3}
+  - {fileID: 4344458020859959958, guid: 4d857fb3f3804e540b9c4ac4ce5da7b1, type: 3}
+  - {fileID: 5554106161126003651, guid: 73dfb6e1389a7594387f9a4412916950, type: 3}
+  NetworkArmorStandNetworkObject: []
+  NetworkBackpackNetworkObject: []
+  NetworkCameraNetworkObject:
+  - {fileID: 139536, guid: 661f29f0c0c86fa47b6015bd602d0ac6, type: 3}
+  NetworkContainerNetworkObject: []
+  NetworkGuildManagerNetworkObject:
+  - {fileID: 5449284050390073438, guid: d3a22c092c333f94e812346308e5bb63, type: 3}
+  NetworkPlayerAnimationNetworkObject: []
+  NetworkPlayerCameraHandlerNetworkObject: []
+  NetworkPlayerCombatNetworkObject: []
+  NetworkPlayerInteractionNetworkObject: []
+  NetworkPlayerInventoryNetworkObject: []
+  NetworkPlayerMovementNetworkObject: []
+  NetworkPlayerNeutralStateHandlerNetworkObject: []
+  NetworkPlayerStatsNetworkObject:
+  - {fileID: 4050820139605508289, guid: 4127547ddec345c45ac98e9c5c48df12, type: 3}
+  NetworkResourceNetworkObject: []
+  NetworkStartupSynchronizerNetworkObject: []
+  NetworkWorldManagerNetworkObject:
+  - {fileID: 1347532028169199706, guid: 140fe84386e7bcc47ba346dc178afee3, type: 3}
+  Network_bodyNetworkObject:
+  - {fileID: 6172314989953794349, guid: 021332c4eb862d945b0714f32599f2e4, type: 3}
+  TestNetworkObject: []
+  automaticScenes: 1

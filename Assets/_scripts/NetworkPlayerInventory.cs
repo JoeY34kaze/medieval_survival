@@ -25,7 +25,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
     public Transform[] panel_personalInventorySlots;
     InventorySlotPersonal[] slots;  // predstavlajo slote v inventoriju, vsak drzi en item. 
 
-    
+
 
     private DynamicCharacterAvatar avatar;
     public NetworkPlayerCombatHandler combatHandler;
@@ -79,7 +79,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         for (int i = 0; i < slots.Length; i++)
             slots[i] = panel_personalInventorySlots[i].GetComponent<InventorySlotPersonal>();
         predmeti_personal = new Predmet[slots.Length];
-        
+
     }
 
 
@@ -135,11 +135,12 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
     internal Predmet PopWeaponPredmetInHand()
     {
         if (!networkObject.IsServer) return null;
-        if (combatHandler.GetCurrentlyActiveWeapon() != null) {
+        if (combatHandler.GetCurrentlyActiveWeapon() != null)
+        {
             Predmet p = this.predmeti_hotbar[neutralStateHandler.selected_index];
             this.predmeti_hotbar[neutralStateHandler.selected_index] = null;
             return p;
-                }
+        }
         return null;
     }
 
@@ -191,7 +192,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
     public void refresh_UMA_equipped_gear()
     {
         if (avatar == null) return;
-            avatar.ClearSlots();
+        avatar.ClearSlots();
 
         if (this.head != null)
         {
@@ -227,14 +228,17 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
     /// </summary>
     /// <param name="i"></param>
     /// <returns></returns>
-    public Predmet try_to_upgrade_loadout(Predmet i) {//vrne item s katermu smo ga zamenjal al pa null ce je biu prej prazn slot
+    public Predmet try_to_upgrade_loadout(Predmet i)
+    {//vrne item s katermu smo ga zamenjal al pa null ce je biu prej prazn slot
         if (!networkObject.IsServer) { Debug.LogError("client se ukvarja z metodo k je server designated.."); return null; }
         if (i == null) return null;
         if (i.item == null) return null;
         Predmet r = i;
-        switch (i.item.type) {
+        switch (i.item.type)
+        {
             case Item.Type.head:
-                if (compareGear(head, i)) {
+                if (compareGear(head, i))
+                {
                     r = head;
                     head = i;
                 }
@@ -270,15 +274,16 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
             default:
                 break;
         }
-        if (onItemChangedCallback != null  && networkObject.IsServer)//ker se nkol ne izvede na clientu ta metoda in server itak nebo nkol vidu inventorija od drugih na ekranu.. probably
+        if (onItemChangedCallback != null && networkObject.IsServer)//ker se nkol ne izvede na clientu ta metoda in server itak nebo nkol vidu inventorija od drugih na ekranu.. probably
             onItemChangedCallback.Invoke();
         return r;
     }
 
     internal Predmet popPersonalPredmet(int inv_index)
     {
-        Predmet i=null;
-        if (networkObject.IsServer) {
+        Predmet i = null;
+        if (networkObject.IsServer)
+        {
             i = this.predmeti_personal[inv_index];
             this.predmeti_personal[inv_index] = null;
         }
@@ -287,8 +292,10 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
 
     internal void setPersonalIventoryPredmet(Predmet b, int inv_index)
     {
-        if (networkObject.IsServer) {
-            if (this.predmeti_personal[inv_index] != null) {
+        if (networkObject.IsServer)
+        {
+            if (this.predmeti_personal[inv_index] != null)
+            {
                 Debug.LogError("Overriding an item in personal inventory. i hope its intentional brah.");
             }
             this.predmeti_personal[inv_index] = b;
@@ -297,7 +304,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
 
     internal void requestUiUpdate()
     {
-        if (onItemChangedCallback != null )//za backpack ker se ne steje v dejanski loadout ampak je svoja stvar
+        if (onItemChangedCallback != null)//za backpack ker se ne steje v dejanski loadout ampak je svoja stvar
             onItemChangedCallback.Invoke();
     }
 
@@ -321,12 +328,14 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
     {
         return this.feet;
     }
-    
-    internal Predmet getBackpackItem() {
+
+    internal Predmet getBackpackItem()
+    {
         return this.backpack;
     }
 
-    internal bool handleItemPickup(Predmet p) {
+    internal bool handleItemPickup(Predmet p)
+    {
         return handleItemPickup(p, false);
     }
 
@@ -338,15 +347,18 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
     /// <returns></returns>
     internal bool handleItemPickup(Predmet pobran_objekt, bool inRecursion)
     {
-        if (!networkObject.IsServer) {
+        if (!networkObject.IsServer)
+        {
             Debug.LogError("client se ukvarja z inventorijem, to se mora samo server.");
             return false;
         }
-        if (pobran_objekt == null) return false ;
+        if (pobran_objekt == null) return false;
 
         //kaj ce ima pobran objekt preveliko kvantiteto? - razbij magar z rekurzijo
-        if (pobran_objekt.quantity > pobran_objekt.item.stackSize) {
-            while (pobran_objekt.quantity > pobran_objekt.item.stackSize) {
+        if (pobran_objekt.quantity > pobran_objekt.item.stackSize)
+        {
+            while (pobran_objekt.quantity > pobran_objekt.item.stackSize)
+            {
                 Predmet k = new Predmet(pobran_objekt.item, pobran_objekt.item.stackSize, pobran_objekt.durability, pobran_objekt.creator);
                 pobran_objekt.quantity -= pobran_objekt.item.stackSize;
                 handleItemPickup(k, true);
@@ -380,7 +392,8 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
                 {
                     BarAddFirst(resp);
                 }
-                else {
+                else
+                {
                     //mormo instantiatat
                     instantiateDroppedPredmet(resp);
                 }
@@ -395,7 +408,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
                 instantiateDroppedPredmet(resp);
             }
         }
-        if(!inRecursion)sendNetworkUpdate(true, true);//posljemo obojeee optimizacija later - ce smo znotrej rekurzije ne posljemo, bo poslala glavna metoda potem ko bo vse ze nrjen
+        if (!inRecursion) sendNetworkUpdate(true, true);//posljemo obojeee optimizacija later - ce smo znotrej rekurzije ne posljemo, bo poslala glavna metoda potem ko bo vse ze nrjen
         return true;
     }
 
@@ -409,19 +422,19 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         //poglej najprej invnetorij v while zanki
         Predmet p = resp;
         //while (getNumberOfEligibleNonEmptyStacks_personalInventory(resp.item) > 0) { //gre itak cez vse stacke in proba dodat tko da itak ze vse ujame
-            foreach (Predmet stack in this.predmeti_personal)
-                if (stack != null)
-                    if (stack.item != null)
-                        if (stack.item.Equals(p.item))
-                            if (stack.quantity < stack.item.stackSize)
-                            {
-                                p = stack.addQuantity(p);
-                                if (p == null)
-                                    return null;
-                            }
+        foreach (Predmet stack in this.predmeti_personal)
+            if (stack != null)
+                if (stack.item != null)
+                    if (stack.item.Equals(p.item))
+                        if (stack.quantity < stack.item.stackSize)
+                        {
+                            p = stack.addQuantity(p);
+                            if (p == null)
+                                return null;
+                        }
         //}
         //poglej backpack
-        if(this.backpack!=null)
+        if (this.backpack != null)
             foreach (Predmet stack in this.backpack_inventory.getAll())
                 if (stack != null)
                     if (stack.item != null)
@@ -507,7 +520,8 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         return false;
     }
 
-    internal bool hasBarSpace() {
+    internal bool hasBarSpace()
+    {
         foreach (Predmet i in this.predmeti_hotbar)
             if (i == null) return true;
         return false;
@@ -515,7 +529,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
 
     public bool SetLoadoutItem(Predmet i)
     {//nevem zakaj vrne bool
-        if (!networkObject.IsServer) { Debug.LogError("client dela stvar od serevrja!"); return false;}
+        if (!networkObject.IsServer) { Debug.LogError("client dela stvar od serevrja!"); return false; }
         if (i == null) return false;
 
         Predmet r = i;
@@ -556,7 +570,8 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         else return false;
     }
 
-    public void RemoveItemLoadout(Item.Type t) {
+    public void RemoveItemLoadout(Item.Type t)
+    {
         switch (t)
         {
             case Item.Type.head:
@@ -665,8 +680,9 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         {
             backpack_inventory.AddFirst(predmet_za_dodat);
         }
-        else {
-            instantiateDroppedPredmet(predmet_za_dodat,transform.position + new Vector3(0, 1, 0), transform.forward);
+        else
+        {
+            instantiateDroppedPredmet(predmet_za_dodat, transform.position + new Vector3(0, 1, 0), transform.forward);
             return false;
         }
         return true;
@@ -681,15 +697,19 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
     {
         if (bar_index < this.predmeti_hotbar.Length)
         {
-            this.predmeti_hotbar[bar_index]=b;
+            this.predmeti_hotbar[bar_index] = b;
         }
     }
 
     internal void BarAddFirst(Predmet onStand)
     {
-        if (networkObject.IsServer) {
-            for (int i = 0; i < this.predmeti_hotbar.Length; i++) {
-                if (this.predmeti_hotbar[i] == null) { this.predmeti_hotbar[i] = onStand;
+        if (networkObject.IsServer)
+        {
+            for (int i = 0; i < this.predmeti_hotbar.Length; i++)
+            {
+                if (this.predmeti_hotbar[i] == null)
+                {
+                    this.predmeti_hotbar[i] = onStand;
                     return;
                 }
             }
@@ -698,7 +718,8 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
 
     internal bool hasBackpackSpace()
     {
-        if (this.backpack_inventory != null) {
+        if (this.backpack_inventory != null)
+        {
             if (this.backpack_inventory.hasSpace())
                 return true;
         }
@@ -707,7 +728,8 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
 
     internal Predmet popBarPredmet(int bar_index)
     {
-        if (bar_index < this.predmeti_hotbar.Length) {
+        if (bar_index < this.predmeti_hotbar.Length)
+        {
             Predmet r = this.predmeti_hotbar[bar_index];
             this.predmeti_hotbar[bar_index] = null;
             return r;
@@ -719,7 +741,8 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
     void Update()
     {
 
-        if (networkObject == null) {
+        if (networkObject == null)
+        {
             Debug.LogError("networkObject is null.");
             return;
         }
@@ -728,16 +751,18 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         //Debug.Log("items - " + this.items.Length);
         if (this.predmeti_personal.Length == 0) this.predmeti_personal = new Predmet[20];//hacky bug fix. makes me sick about this brah. mrde dat u onNetworkConnected al pa kej
 
-        
+
     }
 
-    public void addToPersonalInventory(Predmet item, int index) {
+    public void addToPersonalInventory(Predmet item, int index)
+    {
         if (!networkObject.IsServer) return;
         if (index < 0)
         {//dodaj na prvo mesto ki je null
             addToPersonalInventoryFirstEmpty(item);
         }
-        else {//dodaj na mesto oznaceno z index ce ni polno, sicer na prvo prazno mesto
+        else
+        {//dodaj na mesto oznaceno z index ce ni polno, sicer na prvo prazno mesto
             if (predmeti_personal[index] != null) addToPersonalInventoryFirstEmpty(item);
             else predmeti_personal[index] = item;
         }
@@ -746,8 +771,10 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
     private void addToPersonalInventoryFirstEmpty(Predmet item)
     {
         if (!networkObject.IsServer) return;
-        for (int i = 0; i < predmeti_personal.Length; i++) {
-            if (predmeti_personal[i] == null) {
+        for (int i = 0; i < predmeti_personal.Length; i++)
+        {
+            if (predmeti_personal[i] == null)
+            {
                 predmeti_personal[i] = item;
                 return;
             }
@@ -761,13 +788,15 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
             predmeti_personal[index] = null;
     }
 
-    private void removePersonalInventoryItem(Predmet i, int index) {
+    private void removePersonalInventoryItem(Predmet i, int index)
+    {
         if (!networkObject.IsServer) return;
         if (index == -1)
         {
             removePersonalInventoryItemFirstMatch(i);
         }
-        else {
+        else
+        {
             predmeti_personal[index] = null;
         }
     }
@@ -775,8 +804,10 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
     private void removePersonalInventoryItemFirstMatch(Predmet it)
     {
         if (!networkObject.IsServer) return;
-        for (int i = 0; i < predmeti_personal.Length; i++) {
-            if (predmeti_personal[i].Equals(it)) {
+        for (int i = 0; i < predmeti_personal.Length; i++)
+        {
+            if (predmeti_personal[i].Equals(it))
+            {
                 predmeti_personal[i] = null;
                 return;
             }
@@ -786,7 +817,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
     public void Add(Predmet item, int index)
     {
         if (!networkObject.IsServer) return;
-        addToPersonalInventory(item,index);//nekej bo treba nrdit za hranjenje kolicine. recimo kamen pa take fore
+        addToPersonalInventory(item, index);//nekej bo treba nrdit za hranjenje kolicine. recimo kamen pa take fore
     }
 
     public void AddFirst(Predmet item)
@@ -807,11 +838,12 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         removePersonalInventoryItem(inventory_slot);
     }
 
-    public void DropItemFromPersonalInventory(int inventory_slot) {//isto k remove item samo da vrze item v svet.
+    public void DropItemFromPersonalInventory(int inventory_slot)
+    {//isto k remove item samo da vrze item v svet.
         if (!networkObject.IsOwner) return;
         Camera c = Camera.main;
-        
-        networkObject.SendRpc(RPC_DROP_ITEM_FROM_PERSONAL_INVENTORY_REQUEST, Receivers.Server, inventory_slot, c.transform.position + (c.transform.forward * 3),c.transform.forward);
+
+        networkObject.SendRpc(RPC_DROP_ITEM_FROM_PERSONAL_INVENTORY_REQUEST, Receivers.Server, inventory_slot, c.transform.position + (c.transform.forward * 3), c.transform.forward);
 
 
     }
@@ -820,7 +852,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
     {
         if (!networkObject.IsOwner) return;
         Camera c = Camera.main;
-        networkObject.SendRpc(RPC_DROP_ITEM_FROM_LOADOUT_REQUEST, Receivers.Server, type.ToString(), index, c.transform.position + (c.transform.forward * 3),c.transform.forward);
+        networkObject.SendRpc(RPC_DROP_ITEM_FROM_LOADOUT_REQUEST, Receivers.Server, type.ToString(), index, c.transform.position + (c.transform.forward * 3), c.transform.forward);
     }
 
     // Update the inventory UI by:
@@ -835,7 +867,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         if (slots == null) return;
         for (int i = 0; i < slots.Length; i++)
         {
-            if (predmeti_personal[i]!=null)  // If there is an item to add
+            if (predmeti_personal[i] != null)  // If there is an item to add
             {
                 slots[i].AddPredmet(this.predmeti_personal[i]);   // Add it
             }
@@ -920,19 +952,19 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
                 head = null;
                 break; ;
             case Item.Type.chest:
-                i=chest;
+                i = chest;
                 chest = null;
                 break;
             case Item.Type.hands:
-                i =hands;
+                i = hands;
                 hands = null;
                 break;
             case Item.Type.legs:
-                i= legs;
+                i = legs;
                 legs = null;
                 break;
             case Item.Type.feet:
-                i= feet;
+                i = feet;
                 feet = null;
                 break;
             default:
@@ -983,13 +1015,15 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
                 }
             }
         }
-        else {//right click event
+        else
+        {//right click event
             if (from is InventorySlotPersonal)
             {
                 InventoryToLoadout(null, true);
             }
-            else if (from is InventorySlotLoadout) {
-                LoadoutToInventory(null,true);
+            else if (from is InventorySlotLoadout)
+            {
+                LoadoutToInventory(null, true);
             }
         }
         this.draggedItemParent = null;//tole nastavmo tud na drag handlerju just in case
@@ -1007,27 +1041,27 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
 
         InventorySlot from = parent.GetComponent<InventorySlot>();
 
-            InventorySlot to = invSlot.GetComponent<InventorySlot>();
+        InventorySlot to = invSlot.GetComponent<InventorySlot>();
 
         if (!to.Equals(from))
         {
             if (to is InventorySlotLoadout)//premikamo iz backpacka na loadout
             {
-               
+
                 BackpackToLoadout(getIndexFromName(from.name));//id zvohamo naprej
             }
             else if (to is InventorySlotPersonal)//iz backpacka v inventorij
             {
                 throw new NotImplementedException();
-               
+
             }
             else if (to is InventorySlotBackpack)//premikamo znotraj backpacka
             {
-               
+
                 InventoryToInventory(invSlot);
             }
         }
-        
+
 
     }
 
@@ -1094,19 +1128,20 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
     }
 
 
-    public void sendNetworkUpdateToPlayer(NetworkingPlayer p, bool inv, bool loadout) {
+    public void sendNetworkUpdateToPlayer(NetworkingPlayer p, bool inv, bool loadout)
+    {
         if (!networkObject.IsServer) { Debug.LogError("client poskusa posiljat networkupdate k je samo od serverja.."); return; }
         if (inv)//no security risk since its always sent to owner
         {
-            
+
 
             //Debug.Log(" personal inventory rpc SEND: owner server id: " + GetComponent<NetworkPlayerStats>().server_id + " | networkId : " + networkObject.Owner.NetworkId);
-            networkObject.SendRpc(p,RPC_SEND_PERSONAL_INVENTORY_UPDATE,getItemsNetwork());
+            networkObject.SendRpc(p, RPC_SEND_PERSONAL_INVENTORY_UPDATE, getItemsNetwork());
         }
 
         if (loadout)
         {
-            networkObject.SendRpc(p,RPC_SEND_LOADOUT_UPDATE,
+            networkObject.SendRpc(p, RPC_SEND_LOADOUT_UPDATE,
                 (this.head == null) ? "-1" : this.head.toNetworkString(),
                 (this.chest == null) ? "-1" : this.chest.toNetworkString(),
                 (this.hands == null) ? "-1" : this.hands.toNetworkString(),
@@ -1127,13 +1162,13 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         if (inv)//no security risk since its always sent to owner
         {
             //Debug.Log(" personal inventory rpc SEND: owner server id: " + GetComponent<NetworkPlayerStats>().server_id + " | networkId : " + networkObject.Owner.NetworkId);
-            networkObject.SendRpc(RPC_SEND_PERSONAL_INVENTORY_UPDATE, Receivers.Owner,getItemsNetwork()); 
+            networkObject.SendRpc(RPC_SEND_PERSONAL_INVENTORY_UPDATE, Receivers.Owner, getItemsNetwork());
         }
 
         if (loadout)
         {
             networkObject.SendRpc(RPC_SEND_LOADOUT_UPDATE, Receivers.All,
-                (this.head==null)?"-1":this.head.toNetworkString(),
+                (this.head == null) ? "-1" : this.head.toNetworkString(),
                 (this.chest == null) ? "-1" : this.chest.toNetworkString(),
                 (this.hands == null) ? "-1" : this.hands.toNetworkString(),
                 (this.legs == null) ? "-1" : this.legs.toNetworkString(),
@@ -1150,16 +1185,16 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
 
     private bool SelectedWeaponIsNotInHotbar()
     {
-        
 
-        if (combatHandler == null) combatHandler=GetComponent<NetworkPlayerCombatHandler>();
+
+        if (combatHandler == null) combatHandler = GetComponent<NetworkPlayerCombatHandler>();
         if (neutralStateHandler == null) neutralStateHandler = GetComponent<NetworkPlayerNeutralStateHandler>();
         int activeItem = -1;
         if (combatHandler.GetCurrentlyActiveWeapon() != null) activeItem = combatHandler.GetCurrentlyActiveWeapon().item.id;
         if (combatHandler.GetCurrentlyActiveRanged() != null) activeItem = combatHandler.GetCurrentlyActiveRanged().item.id;
         if (neutralStateHandler.activeTool != null) activeItem = neutralStateHandler.activeTool.item.id;
 
-        int activeShield= -1;
+        int activeShield = -1;
         if (combatHandler.GetCurrentlyActiveShield() != null) activeShield = combatHandler.GetCurrentlyActiveShield().item.id;
 
         bool zamenjan_shield = false;
@@ -1184,7 +1219,8 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
                 if (predmeti_hotbar[neutralStateHandler.selected_index_shield].item.id != activeShield)
                     zamenjan_shield = true;
         }
-        if (zamenjan_shield || zamenjan_item) {
+        if (zamenjan_shield || zamenjan_item)
+        {
             //mormo poslat vsem da nj sinhronizirajo active item. - zunej te metode
             return true;
         }
@@ -1303,23 +1339,26 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         return cunt;
     }
 
-    public void instantiate_server_weapons_for_testing() {
+    public void instantiate_server_weapons_for_testing()
+    {
         Predmet p = new Predmet(null);
-        for (int i = 0; i < 50; i++) {
+        for (int i = 0; i < 50; i++)
+        {
             Item it = Mapper.instance.getItemById(i);
-            while(it==null)it= Mapper.instance.getItemById(++i);
+            while (it == null) it = Mapper.instance.getItemById(++i);
             p = new Predmet(it, 1, 1000);
             instantiateDroppedPredmet(p, transform.position + Vector3.up * 2, transform.forward);
         }
     }
 
-    internal void instantiateDroppedPredmet(Predmet p) {
+    internal void instantiateDroppedPredmet(Predmet p)
+    {
         instantiateDroppedPredmet(p, transform.position + new Vector3(0, 1, 0), transform.forward);
     }
 
     internal void instantiateDroppedPredmet(Predmet p, Vector3 camera_vector, Vector3 camera_forward) // instantiate it when dropped - zapakiral v rpc da se poslje vseskup na server
     {
-        if (!networkObject.IsServer) { Debug.LogError("instanciacija objekta k smo ga dropal ni na serverjvu!");  return; }
+        if (!networkObject.IsServer) { Debug.LogError("instanciacija objekta k smo ga dropal ni na serverjvu!"); return; }
 
 
         networkObject.SendRpc(RPC_NETWORK_INSTANTIATION_SERVER_REQUEST, Receivers.Server, p.toNetworkString(), camera_vector, camera_forward);
@@ -1329,14 +1368,15 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
     {
         GameObject[] prefabs = NetworkManager.Instance.Interactable_objectNetworkObject;
 
-        for (int i = 0; i < prefabs.Length; i++) {
+        for (int i = 0; i < prefabs.Length; i++)
+        {
             if (prefabs[i].Equals(item.prefab_pickup))
                 return i;
         }
 
         Debug.LogWarning("Id of item not found. Item is probably registered as something different from Interactable_objectNetworkObject. Like for example backpack.");
         return -1;
-        
+
     }
 
     internal int getIndexFromName(string name)
@@ -1349,18 +1389,18 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         return -1;
     }
 
-    
+
 
     public override void RequestLoadoutOnConnect(RpcArgs args)
     {
         //obleke - weapone bo treba dodat
-        if(networkObject.IsServer)
+        if (networkObject.IsServer)
             sendNetworkUpdate(false, true);//tole poslje vsem, ne samo temu k ga rab. optimiziacija ksnej.
     }
 
     public override void NetworkInstantiationServerRequest(RpcArgs args)
     {
-        if (!networkObject.IsServer) { Debug.LogError("instanciacija na clientu ne na serverju!");  return; }
+        if (!networkObject.IsServer) { Debug.LogError("instanciacija na clientu ne na serverju!"); return; }
         Predmet p = new Predmet(null);
         p.setParametersFromNetworkString(args.GetNext<string>());
         Vector3 pos = args.GetNext<Vector3>();
@@ -1370,14 +1410,14 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         Interactable_objectBehavior b = NetworkManager.Instance.InstantiateInteractable_object(net_id, pos);
 
         //apply force on clients, sets predmet
-        b.gameObject.GetComponent<Interactable>().setStartingInstantiationParameters(p,pos,dir);
+        b.gameObject.GetComponent<Interactable>().setStartingInstantiationParameters(p, pos, dir);
 
     }
 
     public override void DropItemFromPersonalInventoryRequest(RpcArgs args)
     {
 
-        if (!networkObject.IsServer || args.Info.SendingPlayer.NetworkId != networkObject.Owner.NetworkId) { Debug.LogError("client probava dropat item, to mora met server cez.. al pa request ni od ownerja");  return; }
+        if (!networkObject.IsServer || args.Info.SendingPlayer.NetworkId != networkObject.Owner.NetworkId) { Debug.LogError("client probava dropat item, to mora met server cez.. al pa request ni od ownerja"); return; }
         int inventory_slot = args.GetNext<int>();
         Vector3 camera_vector = args.GetNext<Vector3>();
         Vector3 camera_forward = args.GetNext<Vector3>();
@@ -1410,8 +1450,10 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
             onItemChangedCallback.Invoke();//najbrz nepotrebno ker se itak klice senkat v rpcju. optimizacija ksnej
     }
 
-    internal Item.Type getItemTypefromString(string s) {
-        foreach (Item.Type itemType in Enum.GetValues(typeof(Item.Type))) {
+    internal Item.Type getItemTypefromString(string s)
+    {
+        foreach (Item.Type itemType in Enum.GetValues(typeof(Item.Type)))
+        {
             if (itemType.ToString().Equals(s)) { return itemType; }
         }
         Debug.LogError("Item.Type mismatch! fix this shit");
@@ -1467,7 +1509,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
             return;
         }
 
-        
+
 
         if (index != -1)
         {//za right click
@@ -1495,7 +1537,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
             }
             else
             {//dodaj na ta slot.
-                Add(loadout_item,index);
+                Add(loadout_item, index);
             }
         }
         else if (hasInventoryEmptySlot())
@@ -1503,7 +1545,8 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
             //da rabmo item dat v inventorij
             AddFirst(loadout_item);
         }
-        else if (backpackHasSpace()) {//ce ma plac u backpacku ga dodaj pa sinhronizirej
+        else if (backpackHasSpace())
+        {//ce ma plac u backpacku ga dodaj pa sinhronizirej
             this.backpack_inventory.putFirst(loadout_item);
             this.backpack_inventory.sendBackpackItemsUpdate();
         }
@@ -1523,7 +1566,8 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
     }
 
 
-    private bool backpackHasSpace() {
+    private bool backpackHasSpace()
+    {
         if (this.backpack_inventory != null)
             if (this.backpack_inventory.hasSpace())
                 return true;
@@ -1576,11 +1620,13 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
     #region Gathering
     internal void requestResourceHitServer(Item i, GameObject resource_obj)
     {
-        if (networkObject.IsServer) {
-            if (Vector3.Distance(transform.position, resource_obj.transform.position) < 3f) {//mal security-a i guess
+        if (networkObject.IsServer)
+        {
+            if (Vector3.Distance(transform.position, resource_obj.transform.position) < 3f)
+            {//mal security-a i guess
                 Debug.Log("We hit a resource!");
                 //ugotov z ktermu itemom smo udarli in kaj smo udarli
-                
+
                 NetworkResource nrs = resource_obj.GetComponent<NetworkResource>();
                 if (i.type == Item.Type.tool || i.type == Item.Type.weapon)
                 {
@@ -1626,7 +1672,8 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
 
     public override void PersonalToBarRequest(RpcArgs args)//bar, personal
     {
-        if (networkObject.IsServer && args.Info.SendingPlayer.NetworkId == networkObject.Owner.NetworkId) {
+        if (networkObject.IsServer && args.Info.SendingPlayer.NetworkId == networkObject.Owner.NetworkId)
+        {
             int bar_index = args.GetNext<int>();
             int inv_index = args.GetNext<int>();
 
@@ -1678,7 +1725,8 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
             int a = args.GetNext<int>();
             int b = args.GetNext<int>();
 
-            if (neutralStateHandler.isNotSelected(a, b)) { //TODO ce je trenutno izbran item je blokiran pri menjavi. spremenit tko da lhako menja ampak se zamenja potem tud index v neutralStateHandlerju
+            if (neutralStateHandler.isNotSelected(a, b))
+            { //TODO ce je trenutno izbran item je blokiran pri menjavi. spremenit tko da lhako menja ampak se zamenja potem tud index v neutralStateHandlerju
                 Predmet x = popBarPredmet(a);
                 setBarItem(popBarPredmet(b), a);
                 setBarItem(x, b);
@@ -1699,7 +1747,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
     internal string getItemsNetwork()//zapakira inventoriy items brezz hotbara!
     {
         string s = "";
-        for (int i = 0; i < this.predmeti_personal.Length+ this.predmeti_hotbar.Length; i++)
+        for (int i = 0; i < this.predmeti_personal.Length + this.predmeti_hotbar.Length; i++)
         {
             if (i < this.predmeti_personal.Length)//bere iz personal inventorija
             {
@@ -1708,9 +1756,10 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
                 else
                     s = s + "|-1";
             }
-            else {//bere z hotbara
+            else
+            {//bere z hotbara
                 if (this.predmeti_hotbar[i - this.predmeti_personal.Length] != null)
-                    s = s + "|" + this.predmeti_hotbar[i- this.predmeti_personal.Length].toNetworkString();
+                    s = s + "|" + this.predmeti_hotbar[i - this.predmeti_personal.Length].toNetworkString();
                 else
                     s = s + "|-1";
             }
@@ -1743,9 +1792,11 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
 
     #region Crafting
 
-    public int getMaxNumberOfPossibleCraftsForRecipe(PredmetRecepie p) {
+    public int getMaxNumberOfPossibleCraftsForRecipe(PredmetRecepie p)
+    {
         int minimum = int.MaxValue;
-        for (int i = 0; i < p.ingredients.Length; i++) {
+        for (int i = 0; i < p.ingredients.Length; i++)
+        {
             //get max number of crafts for this particular item.
             int q = p.ingredient_quantities[i];
             int pool = getQuantityOfItemOnPlayer(p.ingredients[i]);
@@ -1764,7 +1815,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         int q = 0;
 
         foreach (Predmet p in this.predmeti_personal)
-            if(p!=null)
+            if (p != null)
                 if (p.item.Equals(item))
                     q += p.quantity;
 
@@ -1791,7 +1842,8 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
 
     public override void ItemCraftingRequest(RpcArgs args)
     {
-        if (args.Info.SendingPlayer.NetworkId == networkObject.Owner.NetworkId && networkObject.IsServer) {
+        if (args.Info.SendingPlayer.NetworkId == networkObject.Owner.NetworkId && networkObject.IsServer)
+        {
             PredmetRecepie recept = Mapper.instance.getPredmetRecepieForItemid(args.GetNext<int>());
             int quantity = args.GetNext<int>();
             int skin_id = args.GetNext<int>();
@@ -1806,7 +1858,8 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
 
 
             //djmo craftat quantity objektov
-            for (int i = 0; i < quantity; i++) {
+            for (int i = 0; i < quantity; i++)
+            {
                 pushToCrafting(recept);
             }
 
@@ -1820,27 +1873,31 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         for (int i = 0; i < this.craftingQueue.Count; i++)
         {
 
-                if (this.craftingQueue[i] != null)
-                    s = s + "|" + this.craftingQueue[i].Product;
-                else
-                    s = s + "|-1";
+            if (this.craftingQueue[i] != null)
+                s = s + "|" + this.craftingQueue[i].Product;
+            else
+                s = s + "|-1";
 
-            
+
         }
         //Debug.Log(s);
-        if (s .Equals( "")) s = "-1";
+        if (s.Equals("")) s = "-1";
         return s;
     }
 
-    private List<PredmetRecepie> getCraftingListFromNetworkStringIds(string s) {
+    private List<PredmetRecepie> getCraftingListFromNetworkStringIds(string s)
+    {
         string[] k = s.Split('|');
         List<PredmetRecepie> r = new List<PredmetRecepie>();
         int res = -1;
-        foreach (string l in k) {
-            if (int.TryParse(l, out res)) {
-                if (res != -1) {
+        foreach (string l in k)
+        {
+            if (int.TryParse(l, out res))
+            {
+                if (res != -1)
+                {
                     r.Add(Mapper.instance.getPredmetRecepieForItemid(res));
-                } 
+                }
             }
         }
         return r;
@@ -1849,23 +1906,37 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
     private void pushToCrafting(PredmetRecepie recept)
     {
         this.craftingQueue.Add(recept);
-        if (this.craftingRoutine==null) {//tkole mora bit sa mamo eno instanco coroutine in jo lahko interruptamo! - SINGLETON
+        if (this.craftingRoutine == null)
+        {//tkole mora bit sa mamo eno instanco coroutine in jo lahko interruptamo! - SINGLETON
             this.craftingRoutine = CraftingCoroutine();
             StartCoroutine(this.craftingRoutine);
         }
     }
 
-    private void cancelCraft(PredmetRecepie p, int priblizni_index) {
+    private void cancelCraft(PredmetRecepie p, int priblizni_index)
+    {
         //ce je item ta k se trenutno crafta mormo ubit coroutine in jo na novo zastartat
         PredmetRecepie odstranjen = RemoveFromCraftingQueue(p, priblizni_index);
 
 
 
-        if(priblizni_index==0)
+        if (priblizni_index == 0)
             restartCraftingCoroutine();
         //ce nismo odstranil trenutnega pol nimamo kej skrbet.
     }
+    internal void localCancelCraftRequest(PredmetRecepie p, int index_sibling)
+    {
+        if (networkObject.IsOwner)
+            networkObject.SendRpc(RPC_ITEM_CRAFTING_CANCEL_REQUEST, Receivers.Server, p.Product.id, index_sibling);
+    }
 
+    public override void ItemCraftingCancelRequest(RpcArgs args)
+    {
+        if (networkObject.IsServer && args.Info.SendingPlayer.NetworkId == networkObject.Owner.NetworkId)
+        {
+            RemoveFromCraftingQueue(Mapper.instance.getPredmetRecepieForItemid(args.GetNext<int>()), args.GetNext<int>());
+        }
+    }
     /// <summary>
     /// vrne predmet k smo ga odstranil
     /// </summary>
@@ -1879,7 +1950,8 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
             this.craftingQueue.Remove(r);
             return r;
         }
-        else {
+        else
+        {
             Debug.LogError("Index in item tip k se crafta se ne ujemata.. magar poisc najblizji item tega timpa in njega odstran");
             return null;
         }
@@ -1893,9 +1965,11 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         StartCoroutine(this.craftingRoutine);
     }
 
-    private IEnumerator CraftingCoroutine() {
-        
-        while (this.craftingQueue.Count > 0) {
+    private IEnumerator CraftingCoroutine()
+    {
+
+        while (this.craftingQueue.Count > 0)
+        {
             PredmetRecepie p = craftingQueue[0];
             yield return new WaitForSecondsRealtime(p.crafting_time);
 
@@ -1904,7 +1978,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
             else
                 Debug.Log("tried crafting stuff but didnt have required items");
             this.craftingQueue.Remove(p);
-            
+
         }
         this.craftingRoutine = null;
     }
@@ -1918,7 +1992,8 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
 
         //loop cez vse matse in jih brisemo iz inventorija dokler ne zbrisemo zadost.
 
-        for (int i = 0; i < p.ingredients.Length; i++) {
+        for (int i = 0; i < p.ingredients.Length; i++)
+        {
             int q = p.ingredient_quantities[i];//tolkle moramo zbrisat iz nekje
             DeleteIngredients(p.ingredients[i], q);
         }
@@ -1936,7 +2011,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
     private void DeleteIngredients(Item item, int q)
     {
 
-        if(q>0)//najprej bi spraznil hotbar
+        if (q > 0)//najprej bi spraznil hotbar
             for (int i = 0; i < this.predmeti_hotbar.Length; i++)
             {
                 Predmet p = this.predmeti_hotbar[i];
@@ -1949,7 +2024,8 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
                             q -= p.quantity;
                             p = null;
                         }
-                        else {//poberemo samo del stacka in smo zakljucli
+                        else
+                        {//poberemo samo del stacka in smo zakljucli
                             p.quantity -= q;
                             return;
                         }
@@ -2005,7 +2081,8 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
 
     public override void ItemCraftingResponse(RpcArgs args)//vrne nazaj crafting queue
     {
-        if (args.Info.SendingPlayer.NetworkId == 0) {
+        if (args.Info.SendingPlayer.NetworkId == 0)
+        {
             List<PredmetRecepie> r = getCraftingListFromNetworkStringIds(args.GetNext<string>());
             GetComponentInChildren<craftingPanelHandler>().updateCraftingQueueWithServerData(r);
         }
