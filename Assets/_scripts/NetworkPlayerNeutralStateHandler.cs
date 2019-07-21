@@ -87,7 +87,7 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
 
     internal void NeutralStateSetup()
     {
-        Debug.Log("not implemented yet");
+        //Debug.Log("not implemented yet");
         if (!networkObject.IsOwner) Debug.Log("NeutralStateSetup se klice tudi na clientu! juhu!");
     }
 

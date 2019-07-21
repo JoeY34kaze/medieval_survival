@@ -251,7 +251,7 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
 
     private void place_shield_on_back()
     {
-        Debug.Log("Treba implementirat da se da shield na hrbet.");
+        //Debug.Log("Treba implementirat da se da shield na hrbet.");
     }
 
 

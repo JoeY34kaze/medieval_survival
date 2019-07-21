@@ -7,7 +7,7 @@ namespace BeardedManStudios.Forge.Networking.Generated
 	[GeneratedRPC("{\"types\":[[\"string\"][\"string\", \"string\", \"string\", \"string\", \"string\", \"string\"][][\"string\", \"Vector3\", \"Vector3\"][\"int\", \"Vector3\", \"Vector3\"][\"string\", \"int\", \"Vector3\", \"Vector3\"][\"int\", \"string\", \"int\"][\"int\", \"string\", \"int\"][\"int\", \"int\"][][\"int\", \"int\"][\"int\", \"int\"][\"int\", \"int\"][\"int\", \"int\", \"int\"][\"string\"][\"int\", \"int\"]]")]
 	[GeneratedRPCVariableNames("{\"types\":[[\"personalAndhotbarNetworkString\"][\"head\", \"chest\", \"arms\", \"legs\", \"feet\", \"backpack\"][][\"predmet\", \"pos\", \"dir\"][\"inventorySlotIndex\", \"camera_vector\", \"camera_forward\"][\"item_type\", \"index\", \"camera_vector\", \"camera_forward\"][\"index\", \"type\", \"index_inv\"][\"inv_index\", \"type\", \"loadout_index\"][\"a\", \"b\"][][\"a\", \"b\"][\"c\", \"d\"][\"e\", \"f\"][\"item_id\", \"quantity\", \"skin_id\"][\"item_ids\"][\"index_itema\", \"index_sibling\"]]")]
 	public abstract partial class NetworkPlayerInventoryBehavior : NetworkBehavior
-    {
+	{
 		public const byte RPC_SEND_PERSONAL_INVENTORY_UPDATE = 0 + 5;
 		public const byte RPC_SEND_LOADOUT_UPDATE = 1 + 5;
 		public const byte RPC_REQUEST_LOADOUT_ON_CONNECT = 2 + 5;
@@ -36,6 +36,7 @@ namespace BeardedManStudios.Forge.Networking.Generated
 			networkObject = (NetworkPlayerInventoryNetworkObject)obj;
 			networkObject.AttachedBehavior = this;
 
+			base.SetupHelperRpcs(networkObject);
 			networkObject.RegisterRpc("SendPersonalInventoryUpdate", SendPersonalInventoryUpdate, typeof(string));
 			networkObject.RegisterRpc("SendLoadoutUpdate", SendLoadoutUpdate, typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string));
 			networkObject.RegisterRpc("RequestLoadoutOnConnect", RequestLoadoutOnConnect);
@@ -52,46 +53,87 @@ namespace BeardedManStudios.Forge.Networking.Generated
 			networkObject.RegisterRpc("ItemCraftingRequest", ItemCraftingRequest, typeof(int), typeof(int), typeof(int));
 			networkObject.RegisterRpc("ItemCraftingResponse", ItemCraftingResponse, typeof(string));
 			networkObject.RegisterRpc("ItemCraftingCancelRequest", ItemCraftingCancelRequest, typeof(int), typeof(int));
-			networkObject.RegistrationComplete();
+
+			networkObject.onDestroy += DestroyGameObject;
+
+			if (!obj.IsOwner)
+			{
+				if (!skipAttachIds.ContainsKey(obj.NetworkId)){
+					uint newId = obj.NetworkId + 1;
+					ProcessOthers(gameObject.transform, ref newId);
+				}
+				else
+					skipAttachIds.Remove(obj.NetworkId);
+			}
+
+			if (obj.Metadata != null)
+			{
+				byte transformFlags = obj.Metadata[0];
+
+				if (transformFlags != 0)
+				{
+					BMSByte metadataTransform = new BMSByte();
+					metadataTransform.Clone(obj.Metadata);
+					metadataTransform.MoveStartIndex(1);
+
+					if ((transformFlags & 0x01) != 0 && (transformFlags & 0x02) != 0)
+					{
+						MainThreadManager.Run(() =>
+						{
+							transform.position = ObjectMapper.Instance.Map<Vector3>(metadataTransform);
+							transform.rotation = ObjectMapper.Instance.Map<Quaternion>(metadataTransform);
+						});
+					}
+					else if ((transformFlags & 0x01) != 0)
+					{
+						MainThreadManager.Run(() => { transform.position = ObjectMapper.Instance.Map<Vector3>(metadataTransform); });
+					}
+					else if ((transformFlags & 0x02) != 0)
+					{
+						MainThreadManager.Run(() => { transform.rotation = ObjectMapper.Instance.Map<Quaternion>(metadataTransform); });
+					}
+				}
+			}
+
+			MainThreadManager.Run(() =>
+			{
+				NetworkStart();
+				networkObject.Networker.FlushCreateActions(networkObject);
+			});
 		}
 
-		public void Initialize(NetWorker networker)
+		protected override void CompleteRegistration()
 		{
-			Initialize(new NetworkPlayerInventoryNetworkObject(networker));
+			base.CompleteRegistration();
+			networkObject.ReleaseCreateBuffer();
 		}
-        protected override void CompleteRegistration()
-        {
-            base.CompleteRegistration();
-            networkObject.ReleaseCreateBuffer();
-        }
 
-        public override void Initialize(NetWorker networker, byte[] metadata = null)
-        {
-            Initialize(new NetworkPlayerInventoryNetworkObject(networker, createCode: TempAttachCode, metadata: metadata));
-        }
+		public override void Initialize(NetWorker networker, byte[] metadata = null)
+		{
+			Initialize(new NetworkPlayerInventoryNetworkObject(networker, createCode: TempAttachCode, metadata: metadata));
+		}
 
-        private void DestroyGameObject(NetWorker sender)
-        {
-            MainThreadManager.Run(() => { try { Destroy(gameObject); } catch { } });
-            networkObject.onDestroy -= DestroyGameObject;
-        }
+		private void DestroyGameObject(NetWorker sender)
+		{
+			MainThreadManager.Run(() => { try { Destroy(gameObject); } catch { } });
+			networkObject.onDestroy -= DestroyGameObject;
+		}
 
-        public override NetworkObject CreateNetworkObject(NetWorker networker, int createCode, byte[] metadata = null)
-        {
-            return new NetworkPlayerInventoryNetworkObject(networker, this, createCode, metadata);
-        }
+		public override NetworkObject CreateNetworkObject(NetWorker networker, int createCode, byte[] metadata = null)
+		{
+			return new NetworkPlayerInventoryNetworkObject(networker, this, createCode, metadata);
+		}
 
-        protected override void InitializedTransform()
-        {
-            networkObject.SnapInterpolations();
-        }
+		protected override void InitializedTransform()
+		{
+			networkObject.SnapInterpolations();
+		}
 
-
-        /// <summary>
-        /// Arguments:
-        /// string personalAndhotbarNetworkString
-        /// </summary>
-        public abstract void SendPersonalInventoryUpdate(RpcArgs args);
+		/// <summary>
+		/// Arguments:
+		/// string personalAndhotbarNetworkString
+		/// </summary>
+		public abstract void SendPersonalInventoryUpdate(RpcArgs args);
 		/// <summary>
 		/// Arguments:
 		/// string head

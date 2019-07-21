@@ -226,13 +226,6 @@ public class craftingPanelHandler : MonoBehaviour
         transform.root.GetComponent<NetworkPlayerInventory>().localStartCraftingRequest(i, current, skin);
     }
 
-    /// <summary>
-    /// klice npi kot odgovor serverja na request craftinga. crafta se na serverju, client samo poslje request, se mu nastima tle u queue kjer lahko skensla in poslje cancel request al pa dobi v inventorij od serverja ko timer na serverju potece
-    /// </summary>
-    /// <param name="product"></param>
-    public void AddToCraftingQueue(Item product) {
-        throw new NotImplementedException();
-    }
 
     internal void updateCraftingQueueWithServerData(List<PredmetRecepie> r)
     {
@@ -252,9 +245,9 @@ public class craftingPanelHandler : MonoBehaviour
                 {
                     localCancelCraftRequest(p, btn.transform.GetSiblingIndex());
                 });
-
-
         }
+
+        StartCoroutine(Counter(this.queueRecepieList[0].crafting_time));
     }
 
     private void localCancelCraftRequest(PredmetRecepie p, int index_sibling)
@@ -266,9 +259,16 @@ public class craftingPanelHandler : MonoBehaviour
     /// samo lokalno se rihta, to je samo maska za playerja, vsa logika je na serverju
     /// </summary>
     internal void OnTimerEnd() {
-        Destroy(this.queue_list.GetChild(0));
-        this.queueRecepieList.Remove(this.queueRecepieList[0]);
-        StartCoroutine(Counter(this.queueRecepieList[0].crafting_time));
+        Destroy(this.queue_list.GetChild(0).gameObject);
+        if (this.queueRecepieList.Count > 1)
+        {
+            PredmetRecepie next = this.queueRecepieList[1];
+            this.queueRecepieList.Remove(this.queueRecepieList[0]);
+            StartCoroutine(Counter(next.crafting_time));
+        }
+        else {
+            this.timer.text = "";
+        }
     }
 
     internal IEnumerator Counter(int seconds) {

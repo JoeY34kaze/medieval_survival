@@ -1819,10 +1819,11 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
                 if (p.item.Equals(item))
                     q += p.quantity;
 
-        foreach (Predmet p in this.backpack_inventory.getAll())
-            if (p != null)
-                if (p.item.Equals(item))
-                    q += p.quantity;
+        if(this.backpack!=null)
+            foreach (Predmet p in this.backpack_inventory.getAll())
+                if (p != null)
+                    if (p.item.Equals(item))
+                        q += p.quantity;
 
         foreach (Predmet p in this.predmeti_hotbar)
             if (p != null)
@@ -1874,7 +1875,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         {
 
             if (this.craftingQueue[i] != null)
-                s = s + "|" + this.craftingQueue[i].Product;
+                s = s + "|" + this.craftingQueue[i].Product.id;
             else
                 s = s + "|-1";
 
@@ -2000,7 +2001,6 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
 
         Predmet a_baby = new Predmet(p.Product, p.final_quantity, p.Product.durability, stats.playerName);
         handleItemPickup(a_baby);//POSLJE TUD POTREBNI NETWORKUPDATE
-
     }
 
     /// <summary>
@@ -2033,7 +2033,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
             }
 
         //pol bi sli spraznit backpack -------------------------------------TLE MOGOCE PRIDE DO BUGGA KER NEVEM LIH KKO SE PRENASA ARRAY OBJEKTOV AL JE COPY AL JE REFERENCA..
-        if (q > 0)
+        if (q > 0 && this.backpack!=null)
         {
             Predmet[] predmeti = this.backpack_inventory.getAll();
             for (int i = 0; i < predmeti.Length; i++)

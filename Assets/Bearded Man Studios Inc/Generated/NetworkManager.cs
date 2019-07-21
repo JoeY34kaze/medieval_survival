@@ -23,6 +23,7 @@ namespace BeardedManStudios.Forge.Networking.Unity
 		public GameObject[] NetworkPlayerCameraHandlerNetworkObject = null;
 		public GameObject[] NetworkPlayerCombatNetworkObject = null;
 		public GameObject[] NetworkPlayerInteractionNetworkObject = null;
+		public GameObject[] NetworkPlayerInventoryNetworkObject = null;
 		public GameObject[] NetworkPlayerMovementNetworkObject = null;
 		public GameObject[] NetworkPlayerNeutralStateHandlerNetworkObject = null;
 		public GameObject[] NetworkPlayerStatsNetworkObject = null;
@@ -335,6 +336,29 @@ namespace BeardedManStudios.Forge.Networking.Unity
 						{
 							var go = Instantiate(NetworkPlayerInteractionNetworkObject[obj.CreateCode]);
 							newObj = go.GetComponent<NetworkPlayerInteractionBehavior>();
+						}
+					}
+
+					if (newObj == null)
+						return;
+						
+					newObj.Initialize(obj);
+
+					if (objectInitialized != null)
+						objectInitialized(newObj, obj);
+				});
+			}
+			else if (obj is NetworkPlayerInventoryNetworkObject)
+			{
+				MainThreadManager.Run(() =>
+				{
+					NetworkBehavior newObj = null;
+					if (!NetworkBehavior.skipAttachIds.TryGetValue(obj.NetworkId, out newObj))
+					{
+						if (NetworkPlayerInventoryNetworkObject.Length > 0 && NetworkPlayerInventoryNetworkObject[obj.CreateCode] != null)
+						{
+							var go = Instantiate(NetworkPlayerInventoryNetworkObject[obj.CreateCode]);
+							newObj = go.GetComponent<NetworkPlayerInventoryBehavior>();
 						}
 					}
 
@@ -692,6 +716,18 @@ namespace BeardedManStudios.Forge.Networking.Unity
 			var netBehavior = go.GetComponent<NetworkPlayerInteractionBehavior>();
 			var obj = netBehavior.CreateNetworkObject(Networker, index);
 			go.GetComponent<NetworkPlayerInteractionBehavior>().networkObject = (NetworkPlayerInteractionNetworkObject)obj;
+
+			FinalizeInitialization(go, netBehavior, obj, position, rotation, sendTransform);
+			
+			return netBehavior;
+		}
+		[Obsolete("Use InstantiateNetworkPlayerInventory instead, its shorter and easier to type out ;)")]
+		public NetworkPlayerInventoryBehavior InstantiateNetworkPlayerInventoryNetworkObject(int index = 0, Vector3? position = null, Quaternion? rotation = null, bool sendTransform = true)
+		{
+			var go = Instantiate(NetworkPlayerInventoryNetworkObject[index]);
+			var netBehavior = go.GetComponent<NetworkPlayerInventoryBehavior>();
+			var obj = netBehavior.CreateNetworkObject(Networker, index);
+			go.GetComponent<NetworkPlayerInventoryBehavior>().networkObject = (NetworkPlayerInventoryNetworkObject)obj;
 
 			FinalizeInitialization(go, netBehavior, obj, position, rotation, sendTransform);
 			
@@ -1322,6 +1358,47 @@ namespace BeardedManStudios.Forge.Networking.Unity
 			}
 
 			go.GetComponent<NetworkPlayerInteractionBehavior>().networkObject = (NetworkPlayerInteractionNetworkObject)obj;
+
+			FinalizeInitialization(go, netBehavior, obj, position, rotation, sendTransform);
+			
+			return netBehavior;
+		}
+		public NetworkPlayerInventoryBehavior InstantiateNetworkPlayerInventory(int index = 0, Vector3? position = null, Quaternion? rotation = null, bool sendTransform = true)
+		{
+			var go = Instantiate(NetworkPlayerInventoryNetworkObject[index]);
+			var netBehavior = go.GetComponent<NetworkPlayerInventoryBehavior>();
+
+			NetworkObject obj = null;
+			if (!sendTransform && position == null && rotation == null)
+				obj = netBehavior.CreateNetworkObject(Networker, index);
+			else
+			{
+				metadata.Clear();
+
+				if (position == null && rotation == null)
+				{
+					byte transformFlags = 0x1 | 0x2;
+					ObjectMapper.Instance.MapBytes(metadata, transformFlags);
+					ObjectMapper.Instance.MapBytes(metadata, go.transform.position, go.transform.rotation);
+				}
+				else
+				{
+					byte transformFlags = 0x0;
+					transformFlags |= (byte)(position != null ? 0x1 : 0x0);
+					transformFlags |= (byte)(rotation != null ? 0x2 : 0x0);
+					ObjectMapper.Instance.MapBytes(metadata, transformFlags);
+
+					if (position != null)
+						ObjectMapper.Instance.MapBytes(metadata, position.Value);
+
+					if (rotation != null)
+						ObjectMapper.Instance.MapBytes(metadata, rotation.Value);
+				}
+
+				obj = netBehavior.CreateNetworkObject(Networker, index, metadata.CompressBytes());
+			}
+
+			go.GetComponent<NetworkPlayerInventoryBehavior>().networkObject = (NetworkPlayerInventoryNetworkObject)obj;
 
 			FinalizeInitialization(go, netBehavior, obj, position, rotation, sendTransform);
 			
