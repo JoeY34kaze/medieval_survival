@@ -34,8 +34,8 @@ public class backpack_local_panel_handler : MonoBehaviour
         
         this.slots = new InventorySlotBackpack[this.size];
         for (int i = 0; i < this.size; i++) {
-           GameObject g= GameObject.Instantiate(InventorySlotBackpackPrefab);
-            g.transform.SetParent(transform);
+           GameObject g= GameObject.Instantiate(InventorySlotBackpackPrefab, transform);
+            g.transform.localScale = new Vector3(1, 1, 1);
             this.slots[i] = g.GetComponent<InventorySlotBackpack>();
             g.name = "InventorySlotBackpack (" + i + ")";
         }

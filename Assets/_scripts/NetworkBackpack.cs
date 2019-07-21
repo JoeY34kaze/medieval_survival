@@ -97,7 +97,7 @@ public class NetworkBackpack : NetworkBackpackBehavior
                 sendOwnershipResponse(args.Info.SendingPlayer);
             }
         }
-        else if (tip == 1 && (networkObject.IsOwner) &&(this.owner_id!=0))
+        else if (tip == 1 && (networkObject.IsOwner) &&(this.owner_id==-1))//ce je -1 pomen da ni od nobenga in lezi na tleh. ce je 0 pomen da ima serverjev player na hrbtu
         { //look request. ce je od serverja
             //lahko pogleda i guess.
             networkObject.SendRpc(args.Info.SendingPlayer, RPC_BACKPACK_ITEMS_OTHER_RESPONSE, nci.getItemsNetwork());
@@ -263,7 +263,7 @@ public class NetworkBackpack : NetworkBackpackBehavior
         {
             this.panel_handler = this.npi.backpackPanel;
             this.panel_handler.init(item.backpack_capacity, this.nci);//nastav samo slote
-            networkObject.SendRpc(RPC_BACKPACK_INTERACTION_REQUEST, Receivers.Server, (byte)1, networkObject.Owner.NetworkId);//posle request da mu updejta iteme
+            networkObject.SendRpc(RPC_BACKPACK_INTERACTION_REQUEST, Receivers.Server, (byte)1);//posle request da mu updejta iteme
         }
     }
 

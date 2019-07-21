@@ -19,7 +19,7 @@ MonoBehaviour:
   hasDurability: 1
   durability: 1000
   stackSize: 1
-  backpack_capacity: 0
+  backpack_capacity: 20
   damage_reduction: 0
   id: 21
   prefab_pickup: {fileID: 5554106161126003651, guid: 73dfb6e1389a7594387f9a4412916950,
@@ -29,3 +29,4 @@ MonoBehaviour:
   stone_gather_rate: 0
   wood_gather_rate: 0
   flesh_gather_rate: 0
+  description: no description yet.

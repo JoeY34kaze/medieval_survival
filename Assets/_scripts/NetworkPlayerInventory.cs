@@ -145,6 +145,8 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         return null;
     }
 
+
+
     /// <summary>
     /// potegne z hotbara
     /// </summary>
@@ -1993,7 +1995,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
                 yield return new WaitForSecondsRealtime(1);
             }
             this.craftingTimeRemaining = 0;
-            yield return new WaitForSecondsRealtime(p.crafting_time);
+            
 
             if (getMaxNumberOfPossibleCraftsForRecipe(p) > 0)
                 CraftingTransaction(p);//tle se skor vse dejansko nrdi
@@ -2107,6 +2109,18 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
             List<PredmetRecepie> r = getCraftingListFromNetworkStringIds(args.GetNext<string>());
             GetComponentInChildren<craftingPanelHandler>().updateCraftingQueueWithServerData(r, args.GetNext<int>());
         }
+
+
+    }
+    internal void localSendCraftingQueueUpdateRequest()
+    {
+        if (networkObject.IsOwner)
+            networkObject.SendRpc(RPC_CRAFTING_QUEUE_UPDATE_REQUEST, Receivers.Server);
+        }
+
+    public override void CraftingQueueUpdateRequest(RpcArgs args)
+    {
+        networkObject.SendRpc(args.Info.SendingPlayer, RPC_ITEM_CRAFTING_RESPONSE, getItemIdsFromCraftingQueueNetworkString(this.craftingQueue), this.craftingTimeRemaining);
     }
 
     #endregion

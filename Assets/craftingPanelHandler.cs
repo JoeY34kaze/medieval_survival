@@ -33,12 +33,13 @@ public class craftingPanelHandler : MonoBehaviour
 
     public Text timer;
     private List<PredmetRecepie> queueRecepieList;
-    private IEnumerator countingRoutine;
+
     private int current_craft_remaining_time;
+    private IEnumerator CuntQueue;
 
     void OnEnable()
     {
-        stats = transform.root.GetComponent<NetworkPlayerStats>();
+        if(stats==null)stats = transform.root.GetComponent<NetworkPlayerStats>();
 
         foreach (Transform child in this.craftingTypeTabsList) Destroy(child.gameObject);
 
@@ -123,10 +124,13 @@ public class craftingPanelHandler : MonoBehaviour
                     });
             }
         }
+
+        transform.root.GetComponent<NetworkPlayerInventory>().localSendCraftingQueueUpdateRequest();
     }
     private void Start()
     {
         this.queueRecepieList = new List<PredmetRecepie>();
+
     }
 
     /// <summary>
@@ -262,9 +266,18 @@ public class craftingPanelHandler : MonoBehaviour
                 });
         }
         this.current_craft_remaining_time = time_remaining_of_current_craft;
-        if(this.countingRoutine!=null)StopCoroutine(this.countingRoutine);
-        this.countingRoutine = Counter(time_remaining_of_current_craft);
-            StartCoroutine(this.countingRoutine);//updejtamo timer z serverja
+
+        //-------------------------------------------SAMO TLE SE STELA TO COROUTINO
+        if (this.CuntQueue != null)
+            StopCoroutine(this.CuntQueue);
+        this.CuntQueue = null;
+        if (this.CuntQueue == null)
+        {
+            this.CuntQueue = Cunter();
+            StartCoroutine(this.CuntQueue);
+        }
+
+        //-----------------------------------------------------------------------------------
     }
 
     private void localCancelCraftRequest(PredmetRecepie p, int index_sibling)
@@ -275,7 +288,7 @@ public class craftingPanelHandler : MonoBehaviour
     /// <summary>
     /// samo lokalno se rihta, to je samo maska za playerja, vsa logika je na serverju
     /// </summary>
-    internal void OnTimerEnd() {
+    internal void fixNextInQueue() {
         if (this.queue_list.childCount > 0)
         {
             Destroy(this.queue_list.GetChild(0).gameObject);
@@ -284,9 +297,7 @@ public class craftingPanelHandler : MonoBehaviour
                 PredmetRecepie next = this.queueRecepieList[1];
                 this.current_craft_remaining_time = next.crafting_time;
                 this.queueRecepieList.Remove(this.queueRecepieList[0]);
-                this.countingRoutine = null;
-                this.countingRoutine = Counter(next.crafting_time);
-                StartCoroutine(this.countingRoutine);
+                
             }
             else
             {
@@ -295,13 +306,25 @@ public class craftingPanelHandler : MonoBehaviour
         }
     }
 
-    internal IEnumerator Counter(int seconds) {
-        for (int i = seconds; i > 0; i--) {
-            this.current_craft_remaining_time = i;
-            this.timer.text = current_craft_remaining_time + "";
+    internal IEnumerator Cunter() {//to nj bi skos delal. loh damo tud u field as in private IEnumerator coutningRoutine in mamo referenco na to in ce je kdaj ==null ga zastartamo. tko k je zdle tega nemormo ker je nek u ozadju dela bogvekaj
+        while (true) {
+
+            if (this.current_craft_remaining_time > 0)
+            {
+                this.current_craft_remaining_time -= 1;
+                this.timer.text = current_craft_remaining_time + "";
+            }
+            else {
+                if (this.queueRecepieList.Count > 0)
+                    fixNextInQueue();//gremo naslednga uzet
+                else {
+                    this.timer.text = "";//koncamo
+                    yield return null;
+                }
+            }
             yield return new WaitForSecondsRealtime(1);
         }
-        OnTimerEnd();
+        
     }
 }
 
