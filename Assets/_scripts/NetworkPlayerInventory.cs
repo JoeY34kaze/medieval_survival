@@ -1936,6 +1936,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         if (networkObject.IsServer && args.Info.SendingPlayer.NetworkId == networkObject.Owner.NetworkId)
         {
             RemoveFromCraftingQueue(Mapper.instance.getPredmetRecepieForItemid(args.GetNext<int>()), args.GetNext<int>());
+            networkObject.SendRpc(args.Info.SendingPlayer, RPC_ITEM_CRAFTING_RESPONSE, getItemIdsFromCraftingQueueNetworkString(this.craftingQueue));
         }
     }
     /// <summary>
