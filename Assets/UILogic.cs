@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 /// <summary>
 /// skripta skrbi za celotno logiko kar se tice ui-a. izjema je radial menu, canvas za healthbar, team panel pa take fore. cez ima guild, inventorij, pa take stvari k jih player lahko sam odpira
@@ -11,10 +12,13 @@ public class UILogic : MonoBehaviour
     public GameObject GuildPanel;
     public GameObject inventoryPanel;
     public GameObject crafting_panel;
+    public GameObject chatInput;
 
     public bool hasOpenWindow=false;
     private NetworkGuildManager ngm;
     private NetworkPlayerInventory npi;
+
+    bool chatActive = false;
 
     private void Start()
     {
@@ -29,7 +33,25 @@ public class UILogic : MonoBehaviour
             handleEscapePressed();
         }
 
-        if (Input.GetButtonDown("Guild"))
+        if (Input.GetKeyDown(KeyCode.Return)) {
+            //djmo fokusirat not da loh pisemo ke
+            if (chatActive)
+            {
+                chatActive = false;
+                GetComponentInChildren<ChatManager>().SendMessage();
+            }
+            else
+            {
+                chatActive = true;
+                chatInput.GetComponent<InputField>().Select();
+                GetComponentInChildren<ChatManager>().onInputFieldSelected();
+                GetComponentInParent<NetworkPlayerMovement>().lockMovement = true;
+                GetComponentInParent<player_camera_handler>().lockCamera = true;
+            }
+            
+        }
+
+        if (Input.GetButtonDown("Guild") && !chatInput.GetComponent<InputField>().isFocused)
         {
             bool was_active = this.GuildPanel.activeSelf;
             clear();
@@ -43,7 +65,7 @@ public class UILogic : MonoBehaviour
             }  
         }
 
-        if (Input.GetButtonDown("Inventory"))
+        if (Input.GetButtonDown("Inventory") && !chatInput.GetComponent<InputField>().isFocused)
         {
             bool was_active = this.inventoryPanel.activeSelf;
             clear();
@@ -62,7 +84,7 @@ public class UILogic : MonoBehaviour
             
             
         }
-        if (Input.GetButtonDown("Crafting"))
+        if (Input.GetButtonDown("Crafting") && !chatInput.GetComponent<InputField>().isFocused)
         {
             bool was_active = this.crafting_panel.activeSelf;
             clear();
