@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 496286}
   - component: {fileID: 20569220}
+  - component: {fileID: 7352577363110337176}
   m_Layer: 0
   m_Name: Chest 1 Prefab
   m_TagString: Untagged
@@ -40,8 +41,8 @@ LODGroup:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 132834}
   serializedVersion: 2
-  m_LocalReferencePoint: {x: -14.555405, y: -2.4193788, z: 14.922692}
-  m_Size: 1.5524197
+  m_LocalReferencePoint: {x: 0, y: 0.013659984, z: 0.009878308}
+  m_Size: 0.59064156
   m_FadeMode: 0
   m_AnimateCrossFading: 0
   m_LastLODIsBillboard: 0
@@ -50,7 +51,20 @@ LODGroup:
     fadeTransitionWidth: 0
     renderers:
     - renderer: {fileID: 2392830}
+  m_Enabled: 0
+--- !u!65 &7352577363110337176
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 132834}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
   m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 0.5453805, y: 0.24732411, z: 0.3444962}
+  m_Center: {x: 0.0033832788, y: 0.010676324, z: -0.0007074103}
 --- !u!1 &185024
 GameObject:
   m_ObjectHideFlags: 0
@@ -62,7 +76,6 @@ GameObject:
   - component: {fileID: 480112}
   - component: {fileID: 3360060}
   - component: {fileID: 2392830}
-  - component: {fileID: 6448102}
   m_Layer: 0
   m_Name: Chest_1
   m_TagString: Untagged
@@ -78,8 +91,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 185024}
   m_LocalRotation: {x: -0.7071068, y: 0, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: -14.555405, y: -2.4552817, z: 14.8967285}
-  m_LocalScale: {x: 2.6283605, y: 2.628362, z: 2.628362}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 496286}
   m_RootOrder: 0
@@ -129,17 +142,3 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
---- !u!64 &6448102
-MeshCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 185024}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Convex: 0
-  m_CookingOptions: 14
-  m_Mesh: {fileID: 4300084, guid: e9e7951d9c0b6b2419c3c3c9ac4c0db8, type: 3}

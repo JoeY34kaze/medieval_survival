@@ -444,4 +444,9 @@ public class NetworkBackpack : NetworkBackpackBehavior
         if (networkObject.IsOwner)
             networkObject.SendRpc(RPC_BAR_TO_BACKPACK_REQUEST, Receivers.Server, back, bar);
     }
+
+    internal void requestUIUpdate()
+    {
+        this.panel_handler.updateUI();
+    }
 }

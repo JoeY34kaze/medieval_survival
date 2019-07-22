@@ -27,12 +27,13 @@ public class craftingPanelHandler : MonoBehaviour
 
     public InputField craftOrder;
     private Item currentlySelectedItem;
-
+    private PredmetRecepie currentlySelectedRecipe;
     public Transform queue_list;
     public GameObject queue_element_prefab;
 
     public Text timer;
     private List<PredmetRecepie> queueRecepieList;
+    private NetworkPlayerInventory npi;
 
     private int current_craft_remaining_time;
     private IEnumerator CuntQueue;
@@ -130,6 +131,7 @@ public class craftingPanelHandler : MonoBehaviour
     private void Start()
     {
         this.queueRecepieList = new List<PredmetRecepie>();
+        if (this.npi = null) this.npi = transform.root.GetComponent<NetworkPlayerInventory>();
 
     }
 
@@ -177,6 +179,7 @@ public class craftingPanelHandler : MonoBehaviour
     private void drawSelectedRecipe(PredmetRecepie p)
     {
         this.currentlySelectedItem = p.Product;
+        this.currentlySelectedRecipe = p;
 
         Debug.Log("selected recipe " + p.Product.Display_name);
         foreach (Transform child in this.material_cost_panel) Destroy(child.gameObject);
@@ -189,7 +192,7 @@ public class craftingPanelHandler : MonoBehaviour
         this.productDescription.text = p.Product.description;
 
 
-        for (int i = 0; i < p.ingredients.Length;i++) {
+        for (int i = 0; i < p.ingredients.GetLength(0); i++) {
             GameObject mat = GameObject.Instantiate(this.material_cost_prefab);
 
             mat.transform.SetParent(this.material_cost_panel);
@@ -210,6 +213,9 @@ public class craftingPanelHandler : MonoBehaviour
             current = int.Parse(this.craftOrder.text);
         if (current > 0)
             current -= 1;
+        int max = GetMaxPossibleCraftsWithRegardsToCraftingQueue();
+        if (current > max)
+            current = max;
         this.craftOrder.text = (current) + "";
 
         Debug.Log("Reducing craft order to " + this.craftOrder.text);
@@ -221,15 +227,118 @@ public class craftingPanelHandler : MonoBehaviour
             current = int.Parse(this.craftOrder.text);
         if (current > 0)
             current += 1;
+        int max = GetMaxPossibleCraftsWithRegardsToCraftingQueue();
+        if (current > max)
+            current = max;
             this.craftOrder.text = (current) + "";
 
         Debug.Log("Increasing craft order to " + this.craftOrder.text);
+    }
+
+
+    public void onBtnClickSetMaxCrafts()
+    {
+        int r = GetMaxPossibleCraftsWithRegardsToCraftingQueue();
+        this.craftOrder.text = r + "";
+        Debug.Log("Increasing craft order to " + this.craftOrder.text);
+    }
+
+    private int GetMaxPossibleCraftsWithRegardsToCraftingQueue()
+    {
+        int max_possible = transform.root.GetComponent<NetworkPlayerInventory>().getMaxNumberOfPossibleCraftsForRecipe(this.currentlySelectedRecipe);
+
+        int[,] all_cost = getCostOfQuantity(this.currentlySelectedRecipe, max_possible);
+        int[,] current_stuff_in_queue = GetCurrentAmountOfStuffInQueue();
+
+        for (int i = 0; i < all_cost.GetLength(0); i++)
+        {
+            for (int j = 0; j < current_stuff_in_queue.GetLength(0); j++)
+            {
+                if (all_cost[i, 0] == current_stuff_in_queue[j, 0])
+                    all_cost[i, 1] -= current_stuff_in_queue[j, 1];
+            }
+        }
+
+        //all cost bi sedaj mogu met vrednosti itemov k jih mamo na razpolago in k niso u queue
+        int max_adjusted = getMaxCraftsFromArray(all_cost, this.currentlySelectedRecipe);
+        return max_adjusted;
+    }
+
+    private int getMaxCraftsFromArray(int[,] all_cost, PredmetRecepie p)
+    {
+        int minimum = int.MaxValue;
+        for (int i = 0; i < p.ingredients.GetLength(0); i++)
+        {
+            //get max number of crafts for this particular item.
+            int q = p.ingredient_quantities[i];
+            int pool = 0;
+            for (int j = 0; j < all_cost.GetLength(0); j++) {
+                if (all_cost[j, 0] == p.ingredients[i].id) {
+                    pool = all_cost[j, 1];//mamo kolicino itema na vojlo
+                    break;
+                        }
+            }
+            
+
+            if (pool / q < minimum) minimum = pool / q;
+        }
+        return minimum;
+    }
+
+    private int[,] getCostOfQuantity(PredmetRecepie p, int max)
+    {
+
+        int[,] rez = new int[p.ingredients.GetLength(0), 2];
+
+        for (int i = 0; i < p.ingredients.GetLength(0); i++)
+        {
+            //get max number of crafts for this particular item.
+            rez[i, 0] = p.ingredients[i].id;
+            rez[i,1] = p.ingredient_quantities[i]*max;
+        }
+        return rez;
+
+    }
+
+    /// <summary>
+    /// vrne 2d array =>  [item.id , kolicina]
+    /// </summary>
+    /// <returns></returns>
+    private int[,] GetCurrentAmountOfStuffInQueue()
+    {
+        List<int> uniq = new List<int>();
+        foreach (PredmetRecepie r in this.queueRecepieList) {
+            foreach (Item i in r.ingredients)
+                if (!uniq.Contains(i.id))
+                    uniq.Add(i.id);
+        }
+
+        int[,] rez = new int[uniq.Count,2];
+        for (int i = 0; i < uniq.Count; i++)
+            rez[i,0] = uniq[i];
+
+        foreach (PredmetRecepie r in this.queueRecepieList)
+        {
+            for(int j=0;j<r.ingredients.GetLength(0); j++)
+            {
+                for (int i = 0; i < rez.GetLength(0); i++) {
+                    if (rez[i, 0] == r.ingredients[j].id) rez[i, 1] = r.ingredient_quantities[j];
+                }
+
+            }
+        }
+        return rez;
     }
 
     public void startCraftOrder() {
         int current = 1;
         if (!this.craftOrder.text.Equals(""))
             current = int.Parse(this.craftOrder.text);
+
+        int max = GetMaxPossibleCraftsWithRegardsToCraftingQueue();//limit
+        if (current > max)
+            current = max;
+
         this.craftOrder.text = "1";
         Item i = this.currentlySelectedItem;
         int skin = 0;
@@ -301,6 +410,7 @@ public class craftingPanelHandler : MonoBehaviour
             }
             else
             {
+                this.queueRecepieList.Clear();
                 this.timer.text = "";
             }
         }

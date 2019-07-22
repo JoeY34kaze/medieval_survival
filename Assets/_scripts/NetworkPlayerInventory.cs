@@ -1791,6 +1791,8 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
             onItemChangedCallback.Invoke();
         if (onLoadoutChangedCallback != null)
             onLoadoutChangedCallback.Invoke();
+        if (this.backpack != null)
+            this.backpack_inventory.requestUIUpdate();
     }
 
     #region Crafting
@@ -1811,7 +1813,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         return minimum;
     }
 
-    private int getQuantityOfItemOnPlayer(Item item)
+    internal int getQuantityOfItemOnPlayer(Item item)
     {
         //prevert inv, backpack, bar
 

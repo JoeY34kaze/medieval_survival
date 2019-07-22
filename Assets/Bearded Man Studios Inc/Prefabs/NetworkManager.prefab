@@ -79,6 +79,7 @@ MonoBehaviour:
   - {fileID: 2312398261066146200, guid: c2beb7da92a796248ae5fa028e8dcc76, type: 3}
   - {fileID: 4344458020859959958, guid: 4d857fb3f3804e540b9c4ac4ce5da7b1, type: 3}
   - {fileID: 5554106161126003651, guid: 73dfb6e1389a7594387f9a4412916950, type: 3}
+  - {fileID: 6827638122189165124, guid: 24debb5f39c01b146a935e4c85f79d91, type: 3}
   NetworkArmorStandNetworkObject: []
   NetworkBackpackNetworkObject: []
   NetworkCameraNetworkObject:
