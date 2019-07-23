@@ -8,7 +8,7 @@ using UnityEngine;
 public class NetworkBackpack : NetworkBackpackBehavior
 {
     // Start is called before the first frame update
-    private NetworkContainer_items nci;
+    internal NetworkContainer_items nci;
     private int owner_id = -1;
     private GameObject owning_player = null;
     private NetworkPlayerInventory npi = null;
@@ -340,10 +340,7 @@ public class NetworkBackpack : NetworkBackpackBehavior
         }
     }
 
-    internal Predmet[] getAll()
-    {
-        return this.nci.predmeti;
-    }
+
 
     internal void localPlayerRequestBackpackToLoadout(int index_backpack)//za obratno vbom naredu nov rpc ker bom poslov string k j eitem type
     {

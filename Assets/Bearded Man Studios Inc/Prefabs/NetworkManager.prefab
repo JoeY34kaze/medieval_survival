@@ -103,4 +103,6 @@ MonoBehaviour:
   Network_bodyNetworkObject:
   - {fileID: 6172314989953794349, guid: 021332c4eb862d945b0714f32599f2e4, type: 3}
   TestNetworkObject: []
+  NetworkPlaceableNetworkObject:
+  - {fileID: 132834, guid: c005470ae31f1f146bdda4536f3e9be5, type: 3}
   automaticScenes: 1

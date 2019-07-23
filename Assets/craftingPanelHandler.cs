@@ -131,7 +131,7 @@ public class craftingPanelHandler : MonoBehaviour
     private void Start()
     {
         this.queueRecepieList = new List<PredmetRecepie>();
-        if (this.npi = null) this.npi = transform.root.GetComponent<NetworkPlayerInventory>();
+        if (this.npi == null) this.npi = transform.root.GetComponent<NetworkPlayerInventory>();
 
     }
 
@@ -397,7 +397,7 @@ public class craftingPanelHandler : MonoBehaviour
     /// <summary>
     /// samo lokalno se rihta, to je samo maska za playerja, vsa logika je na serverju
     /// </summary>
-    internal void fixNextInQueue() {
+    internal bool fixNextInQueue() {
         if (this.queue_list.childCount > 0)
         {
             Destroy(this.queue_list.GetChild(0).gameObject);
@@ -412,12 +412,15 @@ public class craftingPanelHandler : MonoBehaviour
             {
                 this.queueRecepieList.Clear();
                 this.timer.text = "";
+                return false;
             }
         }
+        return true;
     }
 
     internal IEnumerator Cunter() {//to nj bi skos delal. loh damo tud u field as in private IEnumerator coutningRoutine in mamo referenco na to in ce je kdaj ==null ga zastartamo. tko k je zdle tega nemormo ker je nek u ozadju dela bogvekaj
-        while (true) {
+        bool t = true; ;
+        while (t) {
 
             if (this.current_craft_remaining_time > 0)
             {
@@ -426,10 +429,11 @@ public class craftingPanelHandler : MonoBehaviour
             }
             else {
                 if (this.queueRecepieList.Count > 0)
-                    fixNextInQueue();//gremo naslednga uzet
+                    t=fixNextInQueue();//gremo naslednga uzet
                 else {
                     this.timer.text = "";//koncamo
                     yield return null;
+                    t = false;
                 }
             }
             yield return new WaitForSecondsRealtime(1);

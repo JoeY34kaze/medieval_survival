@@ -376,7 +376,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
 
         if (resp != null)
         {
-            if ((resp.item.type == Item.Type.weapon || resp.item.type == Item.Type.shield || resp.item.type == Item.Type.ranged || resp.item.type == Item.Type.tool) && hasBarSpace())
+            if ((resp.item.type == Item.Type.weapon || resp.item.type == Item.Type.shield || resp.item.type == Item.Type.ranged || resp.item.type == Item.Type.tool || resp.item.type == Item.Type.placeable) && hasBarSpace())
             {
                 BarAddFirst(resp);
             }
@@ -438,7 +438,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         //}
         //poglej backpack
         if (this.backpack != null)
-            foreach (Predmet stack in this.backpack_inventory.getAll())
+            foreach (Predmet stack in this.backpack_inventory.nci.predmeti)
                 if (stack != null)
                     if (stack.item != null)
                         if (stack.item.Equals(p.item))
@@ -480,7 +480,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         if (this.backpack == null) return 0;
 
         int c = 0;
-        foreach (Predmet p in this.backpack_inventory.getAll())
+        foreach (Predmet p in this.backpack_inventory.nci.predmeti)
             if (p != null)
                 if (p.item != null)
                     if (p.item.Equals(item))
@@ -717,6 +717,26 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
                 }
             }
         }
+    }
+
+    /// <summary>
+    /// vrne true ce smo ubil celotn stack - da se poslje barslotselectionupdate
+    /// </summary>
+    /// <param name="index"></param>
+    /// <returns></returns>
+    internal bool reduceCurrentActivePlaceable(int index)
+    {
+        
+        if (this.predmeti_hotbar[index].quantity > 1) this.predmeti_hotbar[index].quantity -= 1;
+        else {
+            predmeti_hotbar[index] = null;
+            sendNetworkUpdate(true, false);
+            neutralStateHandler.selected_index=-1;
+            return true;
+        }
+
+        sendNetworkUpdate(true, false);
+        return false;
     }
 
     internal bool hasBackpackSpace()
@@ -1230,7 +1250,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         return false;
     }
 
-    public override void SendPersonalInventoryUpdate(RpcArgs args)
+    public override void SendPersonalInventoryUpdate(RpcArgs args)//dobi samo owner
     {
         //to bi mogu dobit samo owner in NOBEN drug, sicer je nrdit ESP hack najbolj trivialna stvar na planetu
         //Debug.Log(" personal inventory rpc receive: owner server id: " + GetComponent<NetworkPlayerStats>().server_id + " | networkId : " + networkObject.Owner.NetworkId);
@@ -1825,7 +1845,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
                     q += p.quantity;
 
         if(this.backpack!=null)
-            foreach (Predmet p in this.backpack_inventory.getAll())
+            foreach (Predmet p in this.backpack_inventory.nci.predmeti)
                 if (p != null)
                     if (p.item.Equals(item))
                         q += p.quantity;
@@ -1868,8 +1888,8 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
             {
                 pushToCrafting(recept);
             }
-
-            networkObject.SendRpc(args.Info.SendingPlayer, RPC_ITEM_CRAFTING_RESPONSE, getItemIdsFromCraftingQueueNetworkString(this.craftingQueue), this.craftingTimeRemaining);
+            if(quantity>0)
+                networkObject.SendRpc(args.Info.SendingPlayer, RPC_ITEM_CRAFTING_RESPONSE, getItemIdsFromCraftingQueueNetworkString(this.craftingQueue), this.craftingTimeRemaining);
         }
     }
 
@@ -2039,19 +2059,19 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         if (q > 0)//najprej bi spraznil hotbar
             for (int i = 0; i < this.predmeti_hotbar.Length; i++)
             {
-                Predmet p = this.predmeti_hotbar[i];
-                if (p != null)
-                    if (p.item.Equals(item))
+                
+                if (this.predmeti_hotbar[i] != null)
+                    if (this.predmeti_hotbar[i].item.Equals(item))
                     {
-                        if (p.quantity <= q)
+                        if (this.predmeti_hotbar[i].quantity <= q)
                         {
                             //pobral bomo cel stack.
-                            q -= p.quantity;
-                            p = null;
+                            q -= this.predmeti_hotbar[i].quantity;
+                            this.predmeti_hotbar[i] = null;
                         }
                         else
                         {//poberemo samo del stacka in smo zakljucli
-                            p.quantity -= q;
+                            this.predmeti_hotbar[i].quantity -= q;
                             return;
                         }
                     }
@@ -2060,22 +2080,22 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         //pol bi sli spraznit backpack -------------------------------------TLE MOGOCE PRIDE DO BUGGA KER NEVEM LIH KKO SE PRENASA ARRAY OBJEKTOV AL JE COPY AL JE REFERENCA..
         if (q > 0 && this.backpack!=null)
         {
-            Predmet[] predmeti = this.backpack_inventory.getAll();
-            for (int i = 0; i < predmeti.Length; i++)
+            
+            for (int i = 0; i < this.backpack_inventory.nci.predmeti.Length; i++)
             {
-                Predmet p = predmeti[i];
-                if (p != null)
-                    if (p.item.Equals(item))
+                
+                if (this.backpack_inventory.nci.predmeti[i] != null)
+                    if (this.backpack_inventory.nci.predmeti[i].item.Equals(item))
                     {
-                        if (p.quantity <= q)
+                        if (this.backpack_inventory.nci.predmeti[i].quantity <= q)
                         {
                             //pobral bomo cel stack.
-                            q -= p.quantity;
-                            p = null;
+                            q -= this.backpack_inventory.nci.predmeti[i].quantity;
+                            this.backpack_inventory.nci.predmeti[i] = null;
                         }
                         else
                         {//poberemo samo del stacka in smo zakljucli
-                            p.quantity -= q;
+                            this.backpack_inventory.nci.predmeti[i].quantity -= q;
                             return;
                         }
                     }
@@ -2085,19 +2105,19 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         if (q > 0)//najprej bi spraznil hotbar
             for (int i = 0; i < this.predmeti_personal.Length; i++)
             {
-                Predmet p = this.predmeti_personal[i];
-                if (p != null)
-                    if (p.item.Equals(item))
+                
+                if (this.predmeti_personal[i] != null)
+                    if (this.predmeti_personal[i].item.Equals(item))
                     {
-                        if (p.quantity <= q)
+                        if (this.predmeti_personal[i].quantity <= q)
                         {
                             //pobral bomo cel stack.
-                            q -= p.quantity;
-                            p = null;
+                            q -= this.predmeti_personal[i].quantity;
+                            this.predmeti_personal[i] = null;
                         }
                         else
                         {//poberemo samo del stacka in smo zakljucli
-                            p.quantity -= q;
+                            this.predmeti_personal[i].quantity -= q;
                             return;
                         }
                     }

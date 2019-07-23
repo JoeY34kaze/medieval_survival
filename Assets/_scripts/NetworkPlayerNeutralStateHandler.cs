@@ -18,6 +18,7 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
     internal int selected_index = -1;
     internal int selected_index_shield = -1;
     public Predmet activeTool = null;
+    public Predmet activePlaceable = null;
     private bool inPlaceableMode;
     private GameObject CurrentLocalPlaceable;
     private Vector3 previously_valid_position;
@@ -310,13 +311,24 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
             int index2 = args.GetNext<int>();
 
             Debug.Log("bar update - " + index);
+            Predmet p = Predmet.createNewPredmet(predmet1);
+
+
+            //ce je enako stanje kot je zdj in je izbran indeks indeks placeable itema ne nrdimo nic ker to samo pomen da smo postavli en item z stacka k ga imamo. zdi se mal hacky ampak tak je. restructure code ksnej i guess - mogoce bo treba enako nrdit za puscice / javelins ksnej
+            if(p!=null)
+                if(p.item!=null)
+                    if (p.item.type == Item.Type.placeable && this.current_placeable_item!=null)
+                        if(p.item.id == this.current_placeable_item.id)
+                            return;
+
+
             if (networkObject.IsOwner)
             {
-                setSelectedItems(Predmet.createNewPredmet(predmet1), Predmet.createNewPredmet(predmet2));
+                setSelectedItems(p, Predmet.createNewPredmet(predmet2));
                 bar_handler.setSelectedSlots(index,index2);
             }
             else {
-                setSelectedItems(Predmet.createNewPredmet(predmet1), Predmet.createNewPredmet(predmet2));
+                setSelectedItems(p, Predmet.createNewPredmet(predmet2));
             }
 
             //ZA COMBAT MODE - precej neefektivno ker pri menjavi itema na baru se klice dvakrat rpc...........
@@ -391,6 +403,7 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
         this.current_placeable_item = null;
         this.currentPlaceableCollider = null;
         this.currentPlaceableRenderer = null;
+        this.activePlaceable = null;
     }
 
     private void setPlaceableState(Predmet i)
@@ -398,6 +411,7 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
         this.inPlaceableMode = true;
         this.CurrentLocalPlaceable = Instantiate(i.item.placeable_Local_object);
         this.current_placeable_item = i.item;
+        this.activePlaceable = i;
         this.currentPlaceableCollider = this.CurrentLocalPlaceable.GetComponent<BoxCollider>();
         this.currentPlaceableRenderer = this.CurrentLocalPlaceable.GetComponent<MeshRenderer>();
         if (this.currentPlaceableRenderer == null) this.currentPlaceableRenderer= this.CurrentLocalPlaceable.GetComponentInChildren<MeshRenderer>();
@@ -593,6 +607,14 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
             Vector3 pos = args.GetNext<Vector3>();
             Quaternion rot = args.GetNext <Quaternion>();
 
+            //get current placeable predmet!
+            Predmet p = this.activePlaceable;
+            NetworkPlaceableInstantiationServer(p, pos, rot);
+            this.npi.reduceCurrentActivePlaceable(this.selected_index);//sicer vrne bool da nam pove ce smo pobral celotn stack, ampak nima veze ker rabmo poslat update za kvantiteto v vsakem primeru.
+                                                         //nastavi selected index na -1 ce smo pobral vse - da gre lepo v rpc             
+            
+            networkObject.SendRpc(RPC_BAR_SLOT_SELECTION_RESPONSE, Receivers.All, (this.selected_index == -1) ? "-1" : npi.predmeti_hotbar[this.selected_index].toNetworkString(), this.selected_index, (this.selected_index_shield == -1) ? "-1" : npi.predmeti_hotbar[this.selected_index_shield].toNetworkString(), selected_index_shield);
+
 
         }
 
@@ -600,30 +622,30 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
 
     }
 
+
     public void NetworkPlaceableInstantiationServer(Predmet p, Vector3 pos, Quaternion rot)
     {
         if (!networkObject.IsServer) { Debug.LogError("instanciacija na clientu ne na serverju!"); return; }
-        
         int net_id = getPlaceableNetworkIdFromItem(p.item);
         if (net_id == -1) return;//item is not interactable object
-        Interactable_objectBehavior b = NetworkManager.Instance.InstantiateInteractable_object(net_id, pos);
+        NetworkPlaceableBehavior b = NetworkManager.Instance.InstantiateNetworkPlaceable(net_id, pos, rot);
 
         //apply force on clients, sets predmet
-        //b.gameObject.GetComponent<Interactable>().setStartingInstantiationParameters(p, pos, dir);
+        b.gameObject.GetComponent<NetworkPlaceable>().init();
 
     }
 
     private int getPlaceableNetworkIdFromItem(Item item)
     {
-        GameObject[] prefabs = NetworkManager.Instance.Interactable_objectNetworkObject;
+        GameObject[] prefabs = NetworkManager.Instance.NetworkPlaceableNetworkObject;
 
         for (int i = 0; i < prefabs.Length; i++)
         {
-            if (prefabs[i].Equals(item.prefab_pickup))
+            if (prefabs[i].Equals(item.placeable_networked_object))
                 return i;
         }
 
-        Debug.LogWarning("Id of item not found. Item is probably registered as something different from Interactable_objectNetworkObject. Like for example backpack.");
+        Debug.LogWarning("Id of item not found.");
         return -1;
 
     }
