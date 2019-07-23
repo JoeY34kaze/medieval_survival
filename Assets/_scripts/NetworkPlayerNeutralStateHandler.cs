@@ -590,9 +590,41 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
         if (networkObject.IsServer && args.Info.SendingPlayer.NetworkId == networkObject.Owner.NetworkId) {
             Debug.Log("server - placing "+this.current_placeable_item.Display_name);
 
+            Vector3 pos = args.GetNext<Vector3>();
+            Quaternion rot = args.GetNext <Quaternion>();
+
+
         }
 
 
+
+    }
+
+    public void NetworkPlaceableInstantiationServer(Predmet p, Vector3 pos, Quaternion rot)
+    {
+        if (!networkObject.IsServer) { Debug.LogError("instanciacija na clientu ne na serverju!"); return; }
+        
+        int net_id = getPlaceableNetworkIdFromItem(p.item);
+        if (net_id == -1) return;//item is not interactable object
+        Interactable_objectBehavior b = NetworkManager.Instance.InstantiateInteractable_object(net_id, pos);
+
+        //apply force on clients, sets predmet
+        //b.gameObject.GetComponent<Interactable>().setStartingInstantiationParameters(p, pos, dir);
+
+    }
+
+    private int getPlaceableNetworkIdFromItem(Item item)
+    {
+        GameObject[] prefabs = NetworkManager.Instance.Interactable_objectNetworkObject;
+
+        for (int i = 0; i < prefabs.Length; i++)
+        {
+            if (prefabs[i].Equals(item.prefab_pickup))
+                return i;
+        }
+
+        Debug.LogWarning("Id of item not found. Item is probably registered as something different from Interactable_objectNetworkObject. Like for example backpack.");
+        return -1;
 
     }
 
