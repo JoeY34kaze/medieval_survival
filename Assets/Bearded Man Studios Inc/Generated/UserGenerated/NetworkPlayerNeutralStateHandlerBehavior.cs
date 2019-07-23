@@ -4,14 +4,15 @@ using UnityEngine;
 
 namespace BeardedManStudios.Forge.Networking.Generated
 {
-	[GeneratedRPC("{\"types\":[[\"int\"][\"string\", \"int\", \"string\", \"int\"][][\"int\"]]")]
-	[GeneratedRPCVariableNames("{\"types\":[[\"index\"][\"item\", \"index_selected\", \"item2\", \"index_selected2\"][][\"tool_id\"]]")]
+	[GeneratedRPC("{\"types\":[[\"int\"][\"string\", \"int\", \"string\", \"int\"][][\"int\"][\"Vector3\", \"Quaternion\"]]")]
+	[GeneratedRPCVariableNames("{\"types\":[[\"index\"][\"item\", \"index_selected\", \"item2\", \"index_selected2\"][][\"tool_id\"][\"pos\", \"rot\"]]")]
 	public abstract partial class NetworkPlayerNeutralStateHandlerBehavior : NetworkBehavior
 	{
 		public const byte RPC_BAR_SLOT_SELECTION_REQUEST = 0 + 5;
 		public const byte RPC_BAR_SLOT_SELECTION_RESPONSE = 1 + 5;
 		public const byte RPC_TOOL_USAGE_REQUEST = 2 + 5;
 		public const byte RPC_TOOL_USAGE_RESPONSE = 3 + 5;
+		public const byte RPC_PLACEMENTOF_ITEM_REQUEST = 4 + 5;
 		
 		public NetworkPlayerNeutralStateHandlerNetworkObject networkObject = null;
 
@@ -29,6 +30,7 @@ namespace BeardedManStudios.Forge.Networking.Generated
 			networkObject.RegisterRpc("BarSlotSelectionResponse", BarSlotSelectionResponse, typeof(string), typeof(int), typeof(string), typeof(int));
 			networkObject.RegisterRpc("ToolUsageRequest", ToolUsageRequest);
 			networkObject.RegisterRpc("ToolUsageResponse", ToolUsageResponse, typeof(int));
+			networkObject.RegisterRpc("PlacementofItemRequest", PlacementofItemRequest, typeof(Vector3), typeof(Quaternion));
 
 			networkObject.onDestroy += DestroyGameObject;
 
@@ -126,6 +128,10 @@ namespace BeardedManStudios.Forge.Networking.Generated
 		/// Arguments:
 		/// </summary>
 		public abstract void ToolUsageResponse(RpcArgs args);
+		/// <summary>
+		/// Arguments:
+		/// </summary>
+		public abstract void PlacementofItemRequest(RpcArgs args);
 
 		// DO NOT TOUCH, THIS GETS GENERATED PLEASE EXTEND THIS CLASS IF YOU WISH TO HAVE CUSTOM CODE ADDITIONS
 	}

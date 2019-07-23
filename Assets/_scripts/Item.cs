@@ -24,4 +24,7 @@ public class Item : ScriptableObject
     public int wood_gather_rate;
     public int flesh_gather_rate;
     public string description="no description yet.";
+    public GameObject placeable_Local_object;
+    public GameObject placeable_networked_object;
+    public bool ignorePlacementNormal;
 }

@@ -1625,7 +1625,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
     {
         if (networkObject.IsServer)
         {
-            if (Vector3.Distance(transform.position, resource_obj.transform.position) < 3f)
+            if (true)// Vector3.Distance(transform.position, resource_obj.transform.position) < 3f tole je prej pisal not ampak ker je hit detection na serverju je neklak pointless in sam zjebe stvar pr nabiranju lesa
             {//mal security-a i guess
                 Debug.Log("We hit a resource!");
                 //ugotov z ktermu itemom smo udarli in kaj smo udarli

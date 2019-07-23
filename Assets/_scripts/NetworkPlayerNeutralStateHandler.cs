@@ -11,38 +11,146 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
     private NetworkPlayerAnimationLogic anim_logic;
     private panel_bar_handler bar_handler;
     private NetworkPlayerInventory npi;
-
+    private Material valid_material;
+    private Material invalid_material;
     public Transform toolContainerOnHand;
 
     internal int selected_index = -1;
     internal int selected_index_shield = -1;
     public Predmet activeTool = null;
+    private bool inPlaceableMode;
+    private GameObject CurrentLocalPlaceable;
+    private Vector3 previously_valid_position;
+    private Quaternion previously_valid_rotation;
+    private Item current_placeable_item;
+    private BoxCollider currentPlaceableCollider;
+    private Renderer currentPlaceableRenderer;
 
+    private float mouseWheelRotation;
     private void Start()
     {
         this.combat_handler = GetComponent<NetworkPlayerCombatHandler>();
         this.anim_logic = GetComponent<NetworkPlayerAnimationLogic>();
         this.bar_handler = GetComponentInChildren<panel_bar_handler>();
         this.npi = GetComponent<NetworkPlayerInventory>();
-
+        this.valid_material = (Material)Resources.Load("Glow_green", typeof(Material));
+        this.invalid_material = (Material)Resources.Load("Glow_red", typeof(Material));
     }
 
     private void Update()
     {
         if (networkObject.IsOwner) {
-           // if (combat_handler.Combat_mode == 0) {//smo v neutralnemu stanju in logiko prevzame naceloma ta skript
-                if (bar_handler.gameObject.activeSelf) {
-                    checkInputBar();
-                    if (Input.GetButtonDown("Fire1")) {
-                        if (hasToolSelected() && combat_handler.is_allowed_to_attack_local())//za weapone se checkira v combat handlerju
-                        {
-                            ///poslat request da nrdimo swing z tem tool-om
-                            networkObject.SendRpc(RPC_TOOL_USAGE_REQUEST, Receivers.Server);
-                        }
+            if (bar_handler.gameObject.activeSelf) {
+                checkInputBar();
+                if (Input.GetButtonDown("Fire1"))
+                {
+                    if (this.activeTool!=null && combat_handler.is_allowed_to_attack_local())//za weapone se checkira v combat handlerju
+                    {
+                        ///poslat request da nrdimo swing z tem tool-om
+                        networkObject.SendRpc(RPC_TOOL_USAGE_REQUEST, Receivers.Server);
+                    }
+
+                    else if (this.CurrentLocalPlaceable != null)
+                    {
+                        //ce ni valid, se itak poslje zadnji valid transform ker se je tko updejtal na koncu metode v update pri nastavlanju pozicije
+
+                        Debug.Log("tukej bomo poslal rpc za postavlanje itema");
+                        networkObject.SendRpc(RPC_PLACEMENTOF_ITEM_REQUEST, Receivers.Server, this.CurrentLocalPlaceable.transform.position, this.CurrentLocalPlaceable.transform.rotation);
                     }
                 }
-           // }
+                else if (this.current_placeable_item != null) {
+
+                    handlePlaceableLocalPlacementSelection();
+                }
+            }
         }
+    }
+
+    /// <summary>
+    /// lokalno izrise placeable karkoli ze pac hocmo postavt
+    /// </summary>
+    private void handlePlaceableLocalPlacementSelection()
+    {
+        RaycastHit h= local_MoveCurrentPlaceableObjectToMouseRay();
+        local_rotatePlaceableWithMousewheel();
+
+        if (currentTransformOfPlaceableIsValid(h))
+        {
+            this.previously_valid_position = this.CurrentLocalPlaceable.transform.position;
+            this.previously_valid_rotation = this.CurrentLocalPlaceable.transform.rotation;
+            this.currentPlaceableRenderer.material = this.valid_material;
+
+        }
+        else
+        {
+            if (this.previously_valid_position != null && this.previously_valid_rotation != null)
+            {
+                this.CurrentLocalPlaceable.transform.position = this.previously_valid_position;
+                this.CurrentLocalPlaceable.transform.rotation = this.previously_valid_rotation;
+                
+            }
+            this.currentPlaceableRenderer.material = this.invalid_material;
+        }
+    }
+
+    /// <summary>
+    /// klice se samo na lokalnemu ker dostopa do stvari k jih server ne vid, like raycast k smo g anrdil. server to posebej pohendla na podobn nacin
+    /// </summary>
+    /// <param name="h"></param>
+    /// <returns></returns>
+    private bool currentTransformOfPlaceableIsValid(RaycastHit h)
+    {
+        //nevem kk bom se zrihtov tole tbh
+        if (Vector3.Distance(transform.position, this.CurrentLocalPlaceable.transform.position) < 4f  && Vector3.Angle(Vector3.up,h.normal)<50f)
+            return true;
+        else return false;
+    }
+
+    /// <summary>
+    /// i guess se klice na serverju, ker manjkajo podatki k jih ma lokaln player, server pa nima. posiljat pa tud nima smisla ker je tole samo za security da client ne pohacka
+    /// </summary>
+    /// <returns></returns>
+    private bool currentTransformOfPlaceableIsValid()
+    {
+        //nevem kk bom se zrihtov tole tbh
+        if (Vector3.Distance(transform.position, this.CurrentLocalPlaceable.transform.position) < 4f)
+            return true;
+        else return false;
+    }
+
+    private void local_rotatePlaceableWithMousewheel()
+    {
+
+        this.mouseWheelRotation += Input.mouseScrollDelta.y;
+        this.CurrentLocalPlaceable.transform.Rotate(Vector3.up, this.mouseWheelRotation*10);
+    }
+
+    private RaycastHit local_MoveCurrentPlaceableObjectToMouseRay()
+    {
+        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+
+        RaycastHit hitInfo;
+        if (Physics.Raycast(ray, out hitInfo)) {
+
+            Vector3 offsetOfColliderHeight=Vector3.up* this.currentPlaceableCollider.size.y / 2;
+            //pivot objekta je v sredini njegovga colliderja. tko da ga izrise not v zemljo. to rabmo compensatat
+            if (!this.current_placeable_item.ignorePlacementNormal)
+            {
+                this.CurrentLocalPlaceable.transform.rotation = Quaternion.FromToRotation(Vector3.up, hitInfo.normal);//ce hocmo da je zmer alignan z terenom - chesti pa take stvari
+                offsetOfColliderHeight = Vector3.up * this.currentPlaceableCollider.size.y / 2;
+
+                offsetOfColliderHeight = hitInfo.normal * this.currentPlaceableCollider.size.y / 2;
+
+            }
+            else {//mislm da je ze to - to kar se tice rotacije.
+
+            }
+
+
+            this.CurrentLocalPlaceable.transform.position = hitInfo.point+offsetOfColliderHeight;
+
+        }
+        return hitInfo;
     }
 
     /// <summary>
@@ -227,21 +335,37 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
     private void setSelectedItems(Predmet i, Predmet shield) {//item je lahko null
         if(i!=null)Debug.Log("Trying to place " + i.item.Display_name + " in the hands");
         else Debug.Log("Trying to clear everything currently in the hands");
+
+
+        clearAllPossiblySelected();//ne cleara shielda
+        
+
         if (i != null)
         {
-            if (i.item.type == Item.Type.tool) {
+            if (i.item.type == Item.Type.tool)
+            {
                 SetToolSelected(i);
-                combat_handler.currently_equipped_weapon = null;
+                //combat_handler.currently_equipped_weapon = null;
+
             }
             else if (i.item.type == Item.Type.weapon || i.item.type == Item.Type.ranged)
             {
                 combat_handler.currently_equipped_weapon = i;
+
             }
-            else Debug.Log("item youre trying to equip cannot be equipped : " + i.item.Display_name);
+            else if (i.item.type == Item.Type.placeable)
+            {
+                Debug.Log("lets try to place down " + i.item.Display_name);
+                setPlaceableState(i);
+            }
+            else { Debug.Log("item youre trying to equip cannot be equipped : " + i.item.Display_name);
+
+            }
         }
         else {//clearat vse razen shielda ce je slucajn equipan - bom vrgu u combat handler pa nj se tam jebe
             SetToolSelected(i);
             combat_handler.currently_equipped_weapon = null;
+
         }
 
         if (shield != null)
@@ -249,6 +373,38 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
         else 
             combat_handler.currently_equipped_shield = null;
         combat_handler.update_equipped_weapons();//weapon in shield
+    }
+
+    private void clearAllPossiblySelected()
+    {
+        clearPlaceableState();
+        SetToolSelected(null);
+        combat_handler.currently_equipped_weapon = null;
+        combat_handler.currently_equipped_weapon = null;
+    }
+
+    private void clearPlaceableState()
+    {
+        this.inPlaceableMode = false;
+        if (this.CurrentLocalPlaceable != null) Destroy(this.CurrentLocalPlaceable);
+        this.CurrentLocalPlaceable = null;
+        this.current_placeable_item = null;
+        this.currentPlaceableCollider = null;
+        this.currentPlaceableRenderer = null;
+    }
+
+    private void setPlaceableState(Predmet i)
+    {
+        this.inPlaceableMode = true;
+        this.CurrentLocalPlaceable = Instantiate(i.item.placeable_Local_object);
+        this.current_placeable_item = i.item;
+        this.currentPlaceableCollider = this.CurrentLocalPlaceable.GetComponent<BoxCollider>();
+        this.currentPlaceableRenderer = this.CurrentLocalPlaceable.GetComponent<MeshRenderer>();
+        if (this.currentPlaceableRenderer == null) this.currentPlaceableRenderer= this.CurrentLocalPlaceable.GetComponentInChildren<MeshRenderer>();
+        if (this.currentPlaceableRenderer == null) this.currentPlaceableRenderer = this.CurrentLocalPlaceable.GetComponent<Renderer>();
+        if (this.currentPlaceableRenderer == null) this.currentPlaceableRenderer = this.CurrentLocalPlaceable.GetComponentInChildren<Renderer>();
+        //SetToolSelected(null);
+        //combat_handler.currently_equipped_weapon=null;
     }
 
     private void SetToolSelected(Predmet i) {
@@ -286,7 +442,7 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
     }
 
     /// <summary>
-    /// owner poslje request da zamahne z toolom. server mora prevert ce je vse OK  -(legitimnost ukaza) in poslje ukaz vsem da nj izvedejo swing.
+    /// owner poslje request da zamahne z toolom. server mora prevert ce je vse OK  -(legitimnost ukaza) in poslje ukaz vsem da nj izvedejo swing oziroma da naj aktivirajo item k je u roki.
     /// </summary>
     /// <param name="args"></param>
     public override void ToolUsageRequest(RpcArgs args)
@@ -415,4 +571,30 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
         getCurrentTool().GetComponent<Collider>().enabled = false;
     }
 
+    #region BUILDING
+
+    /// <summary>
+    /// dobi od ownerja k ma uz rok nek placeable.
+    /// </summary>
+    /// <param name="args"></param>
+    public override void PlacementofItemRequest(RpcArgs args)
+    {
+        
+
+        /*ugotovmo kter item ma u roki
+        spawnamo lokalni item na isti poiziciji, pogledamo ce je valid*
+        -   ce ni valid je konc
+        -   ce je valid networkInstantiatamo ta placeable in vrnemo playerju odgovor kšn zgleda zdj njegov nov hotbar.
+    */
+   
+        if (networkObject.IsServer && args.Info.SendingPlayer.NetworkId == networkObject.Owner.NetworkId) {
+            Debug.Log("server - placing "+this.current_placeable_item.Display_name);
+
+        }
+
+
+
+    }
+
+    #endregion
 }

@@ -26,7 +26,10 @@ MonoBehaviour:
     type: 3}
   weapon_animation_class: 2
   uma_item_recipe_name: 
-  stone_gather_rate: 5
-  wood_gather_rate: 10
-  flesh_gather_rate: 8
+  stone_gather_rate: 500
+  wood_gather_rate: 500
+  flesh_gather_rate: 500
   description: no description yet.
+  placeable_Local_object: {fileID: 0}
+  placeable_networked_object: {fileID: 0}
+  ignorePlacementNormal: 0
