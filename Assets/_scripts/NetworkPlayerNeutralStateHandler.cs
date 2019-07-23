@@ -650,5 +650,28 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
 
     }
 
+    /// <summary>
+    /// izvaja samo an serverju. klice se ko v npi porihtamo kej v zvezi z hotbarom ( pa se to ne povsod ker je bla ta metoda dodana ksnej).
+    /// updejt itemov se poslje drugje. npi.sendInventoryUpdate...
+    /// </summary>
+    internal void sendBarUpdate()
+    {
+        if (this.selected_index != -1) {
+            if (npi.predmeti_hotbar[this.selected_index] == null) this.selected_index = -1;
+        }
+
+        if (this.selected_index_shield != -1)
+        {
+            if (npi.predmeti_hotbar[this.selected_index_shield] == null) this.selected_index = -1;
+            else if (npi.predmeti_hotbar[this.selected_index_shield].item.type != Item.Type.shield) this.selected_index_shield = -1;
+        }
+
+        if (networkObject.IsServer)
+        {
+            npi.sendNetworkUpdate(true, false);
+            networkObject.SendRpc(RPC_BAR_SLOT_SELECTION_RESPONSE, Receivers.All, (this.selected_index == -1) ? "-1" : npi.predmeti_hotbar[this.selected_index].toNetworkString(), this.selected_index, (this.selected_index_shield == -1) ? "-1" : npi.predmeti_hotbar[this.selected_index_shield].toNetworkString(), selected_index_shield);
+        }
+    }
+
     #endregion
 }

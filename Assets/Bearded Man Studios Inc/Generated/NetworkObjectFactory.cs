@@ -59,6 +59,10 @@ namespace BeardedManStudios.Forge.Networking.Generated
 						availableCallback = true;
 						obj = new NetworkGuildManagerNetworkObject(networker, id, frame);
 						break;
+					case NetworkPlaceableNetworkObject.IDENTITY:
+						availableCallback = true;
+						obj = new NetworkPlaceableNetworkObject(networker, id, frame);
+						break;
 					case NetworkPlayerAnimationNetworkObject.IDENTITY:
 						availableCallback = true;
 						obj = new NetworkPlayerAnimationNetworkObject(networker, id, frame);
@@ -110,10 +114,6 @@ namespace BeardedManStudios.Forge.Networking.Generated
 					case TestNetworkObject.IDENTITY:
 						availableCallback = true;
 						obj = new TestNetworkObject(networker, id, frame);
-						break;
-					case NetworkPlaceableNetworkObject.IDENTITY:
-						availableCallback = true;
-						obj = new NetworkPlaceableNetworkObject(networker, id, frame);
 						break;
 				}
 

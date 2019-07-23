@@ -120,6 +120,8 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         return combatHandler.GetCurrentlyActiveShield();
     }
 
+
+
     /// <summary>
     /// vrne kter ranged weap ima trenutno v roki. ni nujno da ima ksn ranged sploh v roki mind you.
     /// </summary>
@@ -869,6 +871,34 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         networkObject.SendRpc(RPC_DROP_ITEM_FROM_PERSONAL_INVENTORY_REQUEST, Receivers.Server, inventory_slot, c.transform.position + (c.transform.forward * 3), c.transform.forward);
 
 
+    }
+
+    internal void localPlayerDropFromBarRequest(int v)
+    {
+        if (networkObject.IsOwner)
+            networkObject.SendRpc(RPC_DROP_ITEM_FROM_BAR, Receivers.Server, v);
+    }
+
+    public override void DropItemFromBar(RpcArgs args)
+    {
+        if (networkObject.IsServer)
+        {
+            if (args.Info.SendingPlayer.NetworkId == networkObject.Owner.NetworkId)
+            {
+                int index = args.GetNext<int>();
+
+                Predmet p = this.predmeti_hotbar[index];
+                if (p != null)
+                    instantiateDroppedPredmet(p);
+
+                this.predmeti_hotbar[index]=null;
+                neutralStateHandler.sendBarUpdate();
+
+
+                
+
+            }
+        }
     }
 
     internal void DropItemFromLoadout(Item.Type type, int index)
@@ -2144,6 +2174,8 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
     {
         networkObject.SendRpc(args.Info.SendingPlayer, RPC_ITEM_CRAFTING_RESPONSE, getItemIdsFromCraftingQueueNetworkString(this.craftingQueue), this.craftingTimeRemaining);
     }
+
+
 
     #endregion
 }
