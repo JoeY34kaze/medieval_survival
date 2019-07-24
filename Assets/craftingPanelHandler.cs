@@ -432,13 +432,15 @@ public class craftingPanelHandler : MonoBehaviour
                     t=fixNextInQueue();//gremo naslednga uzet
                 else {
                     this.timer.text = "";//koncamo
+                    this.queueRecepieList.Clear();
                     yield return null;
                     t = false;
                 }
             }
             yield return new WaitForSecondsRealtime(1);
         }
-        
+        this.queueRecepieList.Clear();
+
     }
 }
 

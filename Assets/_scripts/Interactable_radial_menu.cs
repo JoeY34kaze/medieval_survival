@@ -270,6 +270,35 @@ public class Interactable_radial_menu : MonoBehaviour
         menu.reDraw();
     }
 
+    internal void show_chest_interaction_menu(GameObject gameObject)
+    {
+        show_menu(gameObject);
+        this.number_of_elements = 2;
+        menu.angleOffset = (360f / this.number_of_elements);
+        center_label.text = "Chest";
+
+        GameObject btn_0_r = Resources.Load<GameObject>("radial_menu_elements/interaction_chest_open");
+        GameObject btn_1_r = Resources.Load<GameObject>("radial_menu_elements/interaction_player_steal");
+        GameObject btn_0 = GameObject.Instantiate(btn_0_r);
+        GameObject btn_1 = GameObject.Instantiate(btn_1_r);
+        menu.elements.Clear();
+        setup_button(btn_0, menu.angleOffset * 0);
+        setup_button(btn_1, menu.angleOffset * 1);
+        //menu.textLabel.text = "Downed Player";
+
+        Button button = btn_0.transform.GetComponentInChildren<Button>();
+        button.onClick.RemoveAllListeners();
+        button.onClick.AddListener(delegate { player_interaction_chest_open_request(); });
+
+        button = btn_1.transform.GetComponentInChildren<Button>();
+        button.onClick.RemoveAllListeners();
+        button.onClick.AddListener(delegate { player_interaction_chest_pickup_request(); });
+    
+        menu.reDraw();
+    }
+
+
+
     internal void show_ArmorStand_interaction_menu(GameObject stand)
     {
         show_menu(stand);
@@ -514,6 +543,19 @@ public class Interactable_radial_menu : MonoBehaviour
     {
         hide_radial_menu();
         interaction.local_alert_ground_request(point);
+    }
+
+    private void player_interaction_chest_pickup_request()
+    {
+        hide_radial_menu();
+        interaction.local_chest_pickup_request(this.target);
+        
+    }
+
+    private void player_interaction_chest_open_request()
+    {
+        hide_radial_menu();
+        interaction.local_chest_open_request(this.target);
     }
 
 }

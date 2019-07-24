@@ -49,6 +49,12 @@ public class NetworkContainer_items : NetworkContainerBehavior
         }
     }
 
+    internal bool isEmpty()
+    {
+        foreach (Predmet p in this.predmeti) if (p != null) return false;
+        return true;
+    }
+
     public Predmet popPredmet(int index) {
         if (networkObject.IsServer)
         {

@@ -17,6 +17,7 @@ namespace BeardedManStudios.Forge.Networking.Unity
 		public GameObject[] NetworkArmorStandNetworkObject = null;
 		public GameObject[] NetworkBackpackNetworkObject = null;
 		public GameObject[] NetworkCameraNetworkObject = null;
+		public GameObject[] NetworkChestNetworkObject = null;
 		public GameObject[] NetworkContainerNetworkObject = null;
 		public GameObject[] NetworkGuildManagerNetworkObject = null;
 		public GameObject[] NetworkPlaceableNetworkObject = null;
@@ -199,6 +200,29 @@ namespace BeardedManStudios.Forge.Networking.Unity
 						{
 							var go = Instantiate(NetworkCameraNetworkObject[obj.CreateCode]);
 							newObj = go.GetComponent<NetworkCameraBehavior>();
+						}
+					}
+
+					if (newObj == null)
+						return;
+						
+					newObj.Initialize(obj);
+
+					if (objectInitialized != null)
+						objectInitialized(newObj, obj);
+				});
+			}
+			else if (obj is NetworkChestNetworkObject)
+			{
+				MainThreadManager.Run(() =>
+				{
+					NetworkBehavior newObj = null;
+					if (!NetworkBehavior.skipAttachIds.TryGetValue(obj.NetworkId, out newObj))
+					{
+						if (NetworkChestNetworkObject.Length > 0 && NetworkChestNetworkObject[obj.CreateCode] != null)
+						{
+							var go = Instantiate(NetworkChestNetworkObject[obj.CreateCode]);
+							newObj = go.GetComponent<NetworkChestBehavior>();
 						}
 					}
 
@@ -668,6 +692,18 @@ namespace BeardedManStudios.Forge.Networking.Unity
 			var netBehavior = go.GetComponent<NetworkCameraBehavior>();
 			var obj = netBehavior.CreateNetworkObject(Networker, index);
 			go.GetComponent<NetworkCameraBehavior>().networkObject = (NetworkCameraNetworkObject)obj;
+
+			FinalizeInitialization(go, netBehavior, obj, position, rotation, sendTransform);
+			
+			return netBehavior;
+		}
+		[Obsolete("Use InstantiateNetworkChest instead, its shorter and easier to type out ;)")]
+		public NetworkChestBehavior InstantiateNetworkChestNetworkObject(int index = 0, Vector3? position = null, Quaternion? rotation = null, bool sendTransform = true)
+		{
+			var go = Instantiate(NetworkChestNetworkObject[index]);
+			var netBehavior = go.GetComponent<NetworkChestBehavior>();
+			var obj = netBehavior.CreateNetworkObject(Networker, index);
+			go.GetComponent<NetworkChestBehavior>().networkObject = (NetworkChestNetworkObject)obj;
 
 			FinalizeInitialization(go, netBehavior, obj, position, rotation, sendTransform);
 			
@@ -1148,6 +1184,47 @@ namespace BeardedManStudios.Forge.Networking.Unity
 			}
 
 			go.GetComponent<NetworkCameraBehavior>().networkObject = (NetworkCameraNetworkObject)obj;
+
+			FinalizeInitialization(go, netBehavior, obj, position, rotation, sendTransform);
+			
+			return netBehavior;
+		}
+		public NetworkChestBehavior InstantiateNetworkChest(int index = 0, Vector3? position = null, Quaternion? rotation = null, bool sendTransform = true)
+		{
+			var go = Instantiate(NetworkChestNetworkObject[index]);
+			var netBehavior = go.GetComponent<NetworkChestBehavior>();
+
+			NetworkObject obj = null;
+			if (!sendTransform && position == null && rotation == null)
+				obj = netBehavior.CreateNetworkObject(Networker, index);
+			else
+			{
+				metadata.Clear();
+
+				if (position == null && rotation == null)
+				{
+					byte transformFlags = 0x1 | 0x2;
+					ObjectMapper.Instance.MapBytes(metadata, transformFlags);
+					ObjectMapper.Instance.MapBytes(metadata, go.transform.position, go.transform.rotation);
+				}
+				else
+				{
+					byte transformFlags = 0x0;
+					transformFlags |= (byte)(position != null ? 0x1 : 0x0);
+					transformFlags |= (byte)(rotation != null ? 0x2 : 0x0);
+					ObjectMapper.Instance.MapBytes(metadata, transformFlags);
+
+					if (position != null)
+						ObjectMapper.Instance.MapBytes(metadata, position.Value);
+
+					if (rotation != null)
+						ObjectMapper.Instance.MapBytes(metadata, rotation.Value);
+				}
+
+				obj = netBehavior.CreateNetworkObject(Networker, index, metadata.CompressBytes());
+			}
+
+			go.GetComponent<NetworkChestBehavior>().networkObject = (NetworkChestNetworkObject)obj;
 
 			FinalizeInitialization(go, netBehavior, obj, position, rotation, sendTransform);
 			

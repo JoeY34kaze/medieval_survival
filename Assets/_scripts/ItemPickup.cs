@@ -42,7 +42,7 @@ public class ItemPickup : Interactable {
 
     }
 
-    internal override void interact(uint server_id)//sprozi na playerju
+    internal override void Interact()//sprozi na playerju
     {
         if (networkObject == null) { Debug.LogError("networkObject is null."); }
         if(this.local_lock==null)this.local_lock = GetComponent<InteractableLocalLock>();

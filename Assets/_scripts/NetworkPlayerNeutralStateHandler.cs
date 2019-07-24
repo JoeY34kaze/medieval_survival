@@ -631,7 +631,7 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
         NetworkPlaceableBehavior b = NetworkManager.Instance.InstantiateNetworkPlaceable(net_id, pos, rot);
 
         //apply force on clients, sets predmet
-        b.gameObject.GetComponent<NetworkPlaceable>().init();
+        b.gameObject.GetComponent<NetworkPlaceable>().init(p);
 
     }
 

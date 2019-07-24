@@ -110,7 +110,7 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
 
                          */
 
-                        if ((interactable is ItemPickup || interactable is Interactable_door) && interactable != this.recent_interactable)
+                        if ((interactable is Interactable_chest || interactable is ItemPickup || interactable is Interactable_door) && interactable != this.recent_interactable)
                         {
                             interactable.setMaterialGlow();
                             if (this.recent_interactable != null)
@@ -132,7 +132,7 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
                             this.time_pressed_interaction = 0;
                             //Debug.Log("quick press" + (time_released - this.time_pressed));
                             if (interactable is ItemPickup)//pobere item
-                                interactable.interact(stats.Get_server_id());
+                                interactable.Interact();
 
                             if (interactable is Interactable_Backpack)//pobere backpack
                                                                       //this.menu.show_backpack_interaction_menu(interactable.gameObject);
@@ -146,6 +146,10 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
                             if (interactable is Interactable_door)
                                 interactable.localPlayer_interaction_request(0);
 
+                            if (interactable is Interactable_chest)
+                                local_chest_open_request(interactable.gameObject);
+                                
+
                         }
                         else if (Input.GetButton("Interact") && this.time_pressed_interaction > 0 && time_passed_interaction(150f) && !(Input.GetButton("Alert") || this.time_pressed_alert > 0))
                         {
@@ -157,7 +161,7 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
                             {
                                 // -----------------------------------------    Inventory item / weapon /gear ---------------------------------------------------
                                 if (interactable is ItemPickup)
-                                    interactable.interact(stats.Get_server_id());//full inventory se mora handlat drugje
+                                    interactable.Interact();//full inventory se mora handlat drugje
                                                                            //-------------------------------------------  player ---------------------------------------------------------------
                                 if (interactable is Interactable_player)
                                 {
@@ -171,6 +175,9 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
                                 }
                                 if (interactable is Interactable_Backpack)
                                     this.menu.show_backpack_interaction_menu(interactable.gameObject);
+
+                                if (interactable is Interactable_chest)
+                                    this.menu.show_chest_interaction_menu(interactable.gameObject);
                             }
                         }
                     }
@@ -444,5 +451,19 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
     private void removeIndicator(Transform t)
     {
         offscreen_indicator.RemoveIndicator(t);
+    }
+
+    internal void local_chest_pickup_request(GameObject target)
+    {
+        //throw new NotImplementedException();
+        Debug.Log("request to pickup chest");
+        target.GetComponent<NetworkChest>().local_chest_pickup_request();
+    }
+
+    internal void local_chest_open_request(GameObject target)
+    {
+        //throw new NotImplementedException();
+        Debug.Log("request to open chest");
+        target.GetComponent<NetworkChest>().local_chest_open_request();
     }
 }

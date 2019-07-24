@@ -41,7 +41,7 @@ public class Interactable : Interactable_objectBehavior
     }
 
 
-    internal virtual void interact(uint server_id)
+    internal virtual void Interact()
     {
 
     }

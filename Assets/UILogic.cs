@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -14,9 +15,13 @@ public class UILogic : MonoBehaviour
     public GameObject crafting_panel;
     public GameObject chatInput;
 
+    public GameObject subpanel_chest;
+
     public bool hasOpenWindow=false;
     private NetworkGuildManager ngm;
     private NetworkPlayerInventory npi;
+
+
 
     bool chatActive = false;
 
@@ -73,10 +78,7 @@ public class UILogic : MonoBehaviour
             {
             }
             else {
-                this.inventoryPanel.SetActive(true);
-                npi.requestLocalUIUpdate();
-                this.hasOpenWindow = true;
-                enableMouse();
+                showInventory();
 
 
             }
@@ -148,5 +150,23 @@ public class UILogic : MonoBehaviour
         GetComponentInParent<NetworkPlayerAnimationLogic>().hookChestRotation = true;
         GetComponentInParent<NetworkPlayerMovement>().lockMovement = false;
         GetComponentInParent<player_camera_handler>().lockCamera = false;
+    }
+
+    /// <summary>
+    /// klice se ob uspesnem requestu za odpret chest v odgovoru od serverja.
+    /// vrne panel katerga otroc so panele za iteme da se anrise gor pa tak
+    /// </summary>
+    public GameObject showChestPanel() {
+        showInventory();
+        this.subpanel_chest.SetActive(true);
+        return this.subpanel_chest;
+    }
+
+    private void showInventory()
+    {
+        this.inventoryPanel.SetActive(true);
+        npi.requestLocalUIUpdate();
+        this.hasOpenWindow = true;
+        enableMouse();
     }
 }

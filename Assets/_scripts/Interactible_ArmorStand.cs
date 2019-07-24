@@ -25,15 +25,6 @@ public class Interactible_ArmorStand : Interactable
         this.nas = GetComponent<NetworkArmorStand>();
     }
 
-    internal override void interact(uint server_id)//sprozi na playerju
-    {
-        //server_id nimamo kaj rabit zdjle
-        // Debug.Log("Interactible armor stand : " + collider_number);
-        // nas.local_interaction_request(this.collider_number, server_id);
-        Debug.LogError("ej retard: use of this function is depricated ker gre vser mim tega zaram novga menija. poprav");
-
-    }
-
     internal void local_player_interaction_ranged_request(uint server_id)
     {
         nas.local_interaction_request(8, server_id);
