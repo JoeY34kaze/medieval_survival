@@ -96,6 +96,10 @@ public class NetworkContainer_items : NetworkContainerItemsBehavior
         return c;
     }
 
+    public bool hasSpace() {
+        return getEmptySpace() > 0;
+    }
+
     public bool containsAmount(Item i, int amount) {
         int q = 0;
         foreach (Predmet p in this.predmeti)
@@ -171,5 +175,6 @@ public class NetworkContainer_items : NetworkContainerItemsBehavior
                 this.predmeti[v] = temp;
             }
     }
+
 
 }

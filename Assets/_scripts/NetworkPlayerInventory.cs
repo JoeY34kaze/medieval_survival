@@ -12,7 +12,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
 {
     public Transform draggedItemParent = null;//mrde bolsa resitev obstaja ker nemaram statikov uporablat ampak lej. dela
     internal NetworkBackpack backpack_inventory;
-    public int draggedParent_sibling_index = -1;
+    public int dragged_gameobjectSiblingIndex = -1;
     public int draggedParent_parent_sibling_index = -1;
 
     public int space = 20; // kao space inventorija
@@ -66,7 +66,10 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
     private List<PredmetRecepie> craftingQueue;
     private IEnumerator craftingRoutine;
     private int craftingTimeRemaining = 0;
-
+    internal int draggedGameobjectParentSiblingIndex;
+    internal int draggedGameobjectParent_parentSiblingIndex;
+    internal int draggedGameobjectParent_parent_parentSiblingIndex;
+    internal int draggedGameobjectParent_parent_parent_parentSiblingIndex;
 
     private void Start()
     {
@@ -103,6 +106,72 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         if (networkObject.IsOwner) UpdateUI();//bugfix
     }
 
+    // Update the inventory UI by:
+    //		- Adding items
+    //		- Clearing empty slots
+    //      - upgrading loadout items
+    // This is called using a delegate on the Inventory.
+    void UpdateUI()
+    {
+        if (!networkObject.IsOwner) return;
+        //personal inventory
+        if (slots == null) return;
+        for (int i = 0; i < slots.Length; i++)
+        {
+            if (predmeti_personal[i] != null)  // If there is an item to add
+            {
+                slots[i].AddPredmet(this.predmeti_personal[i]);   // Add it
+            }
+            else
+            {
+                // Otherwise clear the slot
+                slots[i].ClearSlot();
+            }
+        }
+
+        //update loadout. hardcoded pain lol
+
+        if (this.head != null)
+            loadout_head.AddPredmet(this.head);
+        else
+            loadout_head.ClearSlot();
+
+        if (this.chest != null)
+            loadout_chest.AddPredmet(this.chest);
+        else
+            loadout_chest.ClearSlot();
+
+        if (this.hands != null)
+            loadout_hands.AddPredmet(this.hands);
+        else
+            loadout_hands.ClearSlot();
+
+        if (this.legs != null)
+            loadout_legs.AddPredmet(this.legs);
+        else
+            loadout_legs.ClearSlot();
+
+        if (this.feet != null)
+            loadout_feet.AddPredmet(this.feet);
+        else
+            loadout_feet.ClearSlot();
+
+        if (this.backpack != null)
+            loadout_backpack.AddPredmet(this.backpack);
+        else
+            loadout_backpack.ClearSlot();
+
+        //Update bar slots
+        if (this.predmeti_hotbar.Length == this.bar_slots.Length)
+            for (int i = 0; i < this.bar_slots.Length; i++)
+            {
+                if (this.predmeti_hotbar[i] != null)
+                    bar_slots[i].AddPredmet(this.predmeti_hotbar[i]);
+                else
+                    bar_slots[i].ClearSlot();
+            }
+        else { Debug.Log("error - fix this"); }
+    }
 
     /// <summary>
     /// vrne kter weapon ima trenutno v roki. ni nujno da ima ksn weapon sploh v roki mind you.
@@ -702,7 +771,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
     /// </summary>
     /// <param name="b"></param>
     /// <param name="bar_index"></param>
-    internal void setBarItem(Predmet b, int bar_index)
+    internal void setBarPredmet(Predmet b, int bar_index)
     {
         if (bar_index < this.predmeti_hotbar.Length)
         {
@@ -912,72 +981,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         networkObject.SendRpc(RPC_DROP_ITEM_FROM_LOADOUT_REQUEST, Receivers.Server, type.ToString(), index, c.transform.position + (c.transform.forward * 3), c.transform.forward);
     }
 
-    // Update the inventory UI by:
-    //		- Adding items
-    //		- Clearing empty slots
-    //      - upgrading loadout items
-    // This is called using a delegate on the Inventory.
-    void UpdateUI()
-    {
-        if (!networkObject.IsOwner) return;
-        //personal inventory
-        if (slots == null) return;
-        for (int i = 0; i < slots.Length; i++)
-        {
-            if (predmeti_personal[i] != null)  // If there is an item to add
-            {
-                slots[i].AddPredmet(this.predmeti_personal[i]);   // Add it
-            }
-            else
-            {
-                // Otherwise clear the slot
-                slots[i].ClearSlot();
-            }
-        }
-
-        //update loadout. hardcoded pain lol
-
-        if (this.head != null)
-            loadout_head.AddPredmet(this.head);
-        else
-            loadout_head.ClearSlot();
-
-        if (this.chest != null)
-            loadout_chest.AddPredmet(this.chest);
-        else
-            loadout_chest.ClearSlot();
-
-        if (this.hands != null)
-            loadout_hands.AddPredmet(this.hands);
-        else
-            loadout_hands.ClearSlot();
-
-        if (this.legs != null)
-            loadout_legs.AddPredmet(this.legs);
-        else
-            loadout_legs.ClearSlot();
-
-        if (this.feet != null)
-            loadout_feet.AddPredmet(this.feet);
-        else
-            loadout_feet.ClearSlot();
-
-        if (this.backpack != null)
-            loadout_backpack.AddPredmet(this.backpack);
-        else
-            loadout_backpack.ClearSlot();
-
-        //Update bar slots
-        if (this.predmeti_hotbar.Length == this.bar_slots.Length)
-            for (int i = 0; i < this.bar_slots.Length; i++)
-            {
-                if (this.predmeti_hotbar[i] != null)
-                    bar_slots[i].AddPredmet(this.predmeti_hotbar[i]);
-                else
-                    bar_slots[i].ClearSlot();
-            }
-        else { Debug.Log("error - fix this"); }
-    }
+    
 
 
 
@@ -1742,7 +1746,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
                     Predmet b = popPersonalPredmet(inv_index);
                     Predmet i = popBarPredmet(bar_index);
 
-                    setBarItem(b, bar_index);
+                    setBarPredmet(b, bar_index);
                     setPersonalIventoryPredmet(i, inv_index);
 
                     sendNetworkUpdate(true, false);
@@ -1766,7 +1770,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
                 {
                     Predmet b = popPersonalPredmet(inv_index);
                     Predmet i = popBarPredmet(bar_index);
-                    setBarItem(b, bar_index);
+                    setBarPredmet(b, bar_index);
                     setPersonalIventoryPredmet(i, inv_index);
                     sendNetworkUpdate(true, false);
                 }
@@ -1785,8 +1789,8 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
             if (neutralStateHandler.isNotSelected(a, b))
             { //TODO ce je trenutno izbran item je blokiran pri menjavi. spremenit tko da lhako menja ampak se zamenja potem tud index v neutralStateHandlerju
                 Predmet x = popBarPredmet(a);
-                setBarItem(popBarPredmet(b), a);
-                setBarItem(x, b);
+                setBarPredmet(popBarPredmet(b), a);
+                setBarPredmet(x, b);
                 sendNetworkUpdate(true, false);
             }
         }

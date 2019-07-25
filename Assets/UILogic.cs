@@ -26,6 +26,7 @@ public class UILogic : MonoBehaviour
     public GameObject chest_slot80;
 
     private GameObject activeChestPanel;
+    public GameObject[] panelsPredmetiContainer;
     internal NetworkContainer currentActiveContainer;//tole se posreduje npi-ju med premikanjem predmetov. z npi v tole in obratno
 
     bool chatActive = false;
@@ -153,6 +154,7 @@ public class UILogic : MonoBehaviour
         clearContainerPanel();
         this.hasOpenWindow = false;
         this.currentActiveContainer = null;
+        this.panelsPredmetiContainer = null;
 
         DisableMouse();
         GetComponentInParent<NetworkPlayerAnimationLogic>().hookChestRotation = true;
@@ -175,28 +177,40 @@ public class UILogic : MonoBehaviour
                 clearChestPanelPredmeti();
                 this.activeChestPanel.SetActive(false);
                 this.activeChestPanel = null;
+                this.panelsPredmetiContainer = null;
             }
         this.currentActiveContainer = null;
     }
 
     internal void setContainerPanelActiveForChest(Predmet[] predmeti)
     {
-        showInventory();
-        this.containerPanel.SetActive(true);
+        if (this.activeChestPanel == null)//ce je samo updejt itemov skipamo inicializacijo panele
+        {
+            showInventory();
+            this.containerPanel.SetActive(true);
+            this.panelsPredmetiContainer = new GameObject[predmeti.Length];
 
-        //bi blo tle mogoce fajn nrdit prefabe ui elementov za razlicne cheste al pa crafting statione? pa sam nalimas gor kar rabs
-        if (predmeti.Length == 20)
-        {
-            this.activeChestPanel = this.chest_slot20;
+            //bi blo tle mogoce fajn nrdit prefabe ui elementov za razlicne cheste al pa crafting statione? pa sam nalimas gor kar rabs
+            if (predmeti.Length == 20)
+            {
+                this.activeChestPanel = this.chest_slot20;
+            }
+            else if (predmeti.Length == 40)
+            {
+                this.activeChestPanel = this.chest_slot40;
+            }
+            else if (predmeti.Length == 80)
+            {
+                this.activeChestPanel = this.chest_slot80;
+            }
+            this.activeChestPanel.SetActive(true);
+
+            for (int i = 0; i < this.activeChestPanel.transform.childCount; i++)
+            {
+                this.panelsPredmetiContainer[i] = this.activeChestPanel.transform.GetChild(i).gameObject;
+            }
         }
-        else if (predmeti.Length == 40)
-        {
-            this.activeChestPanel = this.chest_slot40;
-        }
-        else if(predmeti.Length==80){
-            this.activeChestPanel = this.chest_slot80;
-        }
-        this.activeChestPanel.SetActive(true);
+
         UpdateActiveChestPanel(predmeti);
 
     }
@@ -205,7 +219,7 @@ public class UILogic : MonoBehaviour
     {
         if (this.activeChestPanel != null)
             for (int i = 0; i < this.activeChestPanel.transform.childCount; i++) {
-                this.activeChestPanel.transform.GetChild(i).GetComponent<InventorySlotContainer>().AddPredmet(predmeti[i]);
+                this.panelsPredmetiContainer[i].GetComponent<InventorySlotContainer>().AddPredmet(predmeti[i]);
             }
     }
 
@@ -213,7 +227,7 @@ public class UILogic : MonoBehaviour
         if (this.activeChestPanel != null)
             for (int i = 0; i < this.activeChestPanel.transform.childCount; i++)
             {
-                this.activeChestPanel.transform.GetChild(i).GetComponent<InventorySlotContainer>().AddPredmet(null);
+                this.panelsPredmetiContainer[i].GetComponent<InventorySlotContainer>().AddPredmet(null);
             }
     }
 

@@ -389,7 +389,7 @@ public class NetworkBackpack : NetworkBackpackBehavior
                     Predmet b = this.nci.popPredmet(back_index);
                     Predmet i = this.npi.popBarPredmet(bar_index);
 
-                    this.npi.setBarItem(b, bar_index);
+                    this.npi.setBarPredmet(b, bar_index);
                     this.nci.setPredmet(back_index, i);
 
                     sendBackpackItemsUpdate();//za backpack
@@ -418,7 +418,7 @@ public class NetworkBackpack : NetworkBackpackBehavior
                     Predmet b = this.nci.popPredmet(back_index);
                     Predmet i = this.npi.popBarPredmet(bar_index);
 
-                    this.npi.setBarItem(b, bar_index);
+                    this.npi.setBarPredmet(b, bar_index);
                     this.nci.setPredmet(back_index, i);
 
                     sendBackpackItemsUpdate();//za backpack

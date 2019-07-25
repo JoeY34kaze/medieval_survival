@@ -14,18 +14,54 @@ public class ItemDragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, I
     {
         //transform.root.GetComponentInChildren<CanvasGroup>().blocksRaycasts = false;
         //if (transform.root.GetComponent<NetworkPlayerInventory>().draggedItemParent == null)
-        npi.draggedItemParent = transform.parent;
-        npi.draggedParent_sibling_index = transform.GetSiblingIndex();
 
-        if (transform.GetComponent<InventorySlot>() is InventorySlotPersonal) {
-            transform.SetAsFirstSibling();
-            
-        }
-        //hierarhijo zrihtat ker je unity ui prizadet
-        transform.parent.parent.SetAsFirstSibling();//tole menja loadout panel in inventory panel. 
-        transform.parent.parent.parent.SetAsFirstSibling();
+        npi.dragged_gameobjectSiblingIndex = transform.GetSiblingIndex();
+        transform.SetAsFirstSibling();
+
+
+        npi.draggedItemParent = transform.parent;
+
+        bool endReached = false;
+
+        if (transform.parent != null)
+            if (transform.parent.GetComponent<UILogic>() == null) {//ni se canvas. pr canvasu se bomo ustavli
+
+                npi.draggedGameobjectParentSiblingIndex = transform.parent.GetSiblingIndex();
+                transform.parent.SetAsFirstSibling();
+            } else
+                endReached = true;
+        else endReached = true;
+
+
+        if (transform.parent.parent != null && !endReached)
+            if (transform.parent.parent.GetComponent<UILogic>() == null)
+            {//ni se canvas. pr canvasu se bomo ustavli
+                npi.draggedGameobjectParent_parentSiblingIndex = transform.parent.parent.GetSiblingIndex();
+                transform.parent.parent.SetAsFirstSibling();
+            }
+            else endReached = true;
+        else endReached = true;
+
+        if (transform.parent.parent.parent != null && !endReached)
+            if (transform.parent.parent.parent.GetComponent<UILogic>() == null)
+            {//ni se canvas. pr canvasu se bomo ustavli
+                npi.draggedGameobjectParent_parent_parentSiblingIndex = transform.parent.parent.parent.GetSiblingIndex();
+                transform.parent.parent.parent.SetAsFirstSibling();
+            }
+            else endReached = true;
+        else endReached = true;
+
+        
+        if (transform.parent.parent.parent.parent != null && !endReached)
+            if (transform.parent.parent.parent.parent.GetComponent<UILogic>() == null)
+            {//ni se canvas. pr canvasu se bomo ustavli
+                npi.draggedGameobjectParent_parent_parent_parentSiblingIndex = transform.parent.parent.parent.parent.GetSiblingIndex();
+                transform.parent.parent.parent.parent.SetAsFirstSibling();
+            }
+            else endReached = true;
+        else endReached = true;
+
         //pofiksat hierarhijo se za personal inventorij in loadout ker sicer ne detecta ker je unity ui prizadet
-        transform.parent.SetAsFirstSibling();
 
         Debug.Log("start drag " + transform.parent.name + " | " + npi.draggedItemParent.name);
     }
@@ -39,13 +75,53 @@ public class ItemDragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, I
     public void OnEndDrag(PointerEventData eventData)
     {
         Debug.Log("end drag -"+transform.parent.name);
-        if (transform.GetComponent<InventorySlot>() is InventorySlotPersonal)
-        {
-            transform.SetSiblingIndex(npi.draggedParent_sibling_index);
-        }
+        transform.SetSiblingIndex(npi.dragged_gameobjectSiblingIndex);
+
+        bool endReached = false;
+
+        if (transform.parent != null)
+            if (transform.parent.GetComponent<UILogic>() == null)
+            {//ni se canvas. pr canvasu se bomo ustavli
+                transform.parent.SetSiblingIndex(npi.draggedGameobjectParentSiblingIndex);
+            }
+            else
+                endReached = true;
+        else endReached = true;
+
+
+        if (transform.parent.parent != null && !endReached)
+            if (transform.parent.parent.GetComponent<UILogic>() == null)
+            {//ni se canvas. pr canvasu se bomo ustavli
+                transform.parent.parent.SetSiblingIndex(npi.draggedGameobjectParent_parentSiblingIndex);
+            }
+            else endReached = true;
+        else endReached = true;
+
+        if (transform.parent.parent.parent != null && !endReached)
+            if (transform.parent.parent.parent.GetComponent<UILogic>() == null)
+            {//ni se canvas. pr canvasu se bomo ustavli
+                transform.parent.parent.parent.SetSiblingIndex(npi.draggedGameobjectParent_parent_parentSiblingIndex);
+            }
+            else endReached = true;
+        else endReached = true;
+
+
+        if (transform.parent.parent.parent.parent != null && !endReached)
+            if (transform.parent.parent.parent.parent.GetComponent<UILogic>() == null)
+            {//ni se canvas. pr canvasu se bomo ustavli
+                transform.parent.parent.parent.parent.SetSiblingIndex(npi.draggedGameobjectParent_parent_parent_parentSiblingIndex);
+            }
+            else endReached = true;
+        else endReached = true;
+
+        
         transform.localPosition = Vector3.zero;
-        npi.draggedParent_sibling_index = -1;
+        npi.dragged_gameobjectSiblingIndex = -1;
         npi.draggedItemParent = null;
+        npi.draggedGameobjectParentSiblingIndex = -1;
+        npi.draggedGameobjectParent_parentSiblingIndex = -1;
+        npi.draggedGameobjectParent_parent_parentSiblingIndex = -1;
+        npi.draggedGameobjectParent_parent_parent_parentSiblingIndex = -1;
     }
 
     public void Start()

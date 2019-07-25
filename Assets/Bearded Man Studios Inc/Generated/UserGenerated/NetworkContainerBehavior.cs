@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace BeardedManStudios.Forge.Networking.Generated
 {
-	[GeneratedRPC("{\"types\":[[\"int\", \"int\"][\"int\", \"int\"][\"int\", \"byte\"][\"int\", \"int\"][\"int\", \"int\"][\"int\", \"int\"][\"int\", \"int\"][\"int\", \"int\"][][][\"int\", \"string\"][\"int\", \"int\"]]")]
+	[GeneratedRPC("{\"types\":[[\"int\", \"int\"][\"int\", \"int\"][\"int\", \"int\"][\"int\", \"int\"][\"int\", \"int\"][\"int\", \"int\"][\"int\", \"int\"][\"int\", \"int\"][][][\"int\", \"string\"][\"int\", \"int\"]]")]
 	[GeneratedRPCVariableNames("{\"types\":[[\"p\", \"c\"][\"c\", \"p\"][\"b\", \"c\"][\"c\", \"b\"][\"b\", \"c\"][\"c\", \"b\"][\"l\", \"c\"][\"c\", \"l\"][][][\"succ\", \"items\"][\"f\", \"t\"]]")]
 	public abstract partial class NetworkContainerBehavior : NetworkBehavior
 	{
@@ -35,7 +35,7 @@ namespace BeardedManStudios.Forge.Networking.Generated
 			base.SetupHelperRpcs(networkObject);
 			networkObject.RegisterRpc("PersonalToContainer", PersonalToContainer, typeof(int), typeof(int));
 			networkObject.RegisterRpc("ContainerToPersonal", ContainerToPersonal, typeof(int), typeof(int));
-			networkObject.RegisterRpc("BarToContainer", BarToContainer, typeof(int), typeof(byte));
+			networkObject.RegisterRpc("BarToContainer", BarToContainer, typeof(int), typeof(int));
 			networkObject.RegisterRpc("ContainerToBar", ContainerToBar, typeof(int), typeof(int));
 			networkObject.RegisterRpc("BackpackToContainer", BackpackToContainer, typeof(int), typeof(int));
 			networkObject.RegisterRpc("ContainerToBackpack", ContainerToBackpack, typeof(int), typeof(int));
@@ -136,7 +136,7 @@ namespace BeardedManStudios.Forge.Networking.Generated
 		/// <summary>
 		/// Arguments:
 		/// int b
-		/// byte c
+		/// int c
 		/// </summary>
 		public abstract void BarToContainer(RpcArgs args);
 		/// <summary>

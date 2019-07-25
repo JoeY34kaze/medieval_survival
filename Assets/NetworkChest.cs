@@ -185,6 +185,11 @@ public class NetworkChest : NetworkContainer
     }
     //  RPCJI NA SERVERJU
 
+
+        /// <summary>
+        /// nekka je napisan tud za desni klik
+        /// </summary>
+        /// <param name="args"></param>
     public override void PersonalToContainer(RpcArgs args)
     {
         if (networkObject.IsServer) {
@@ -194,41 +199,169 @@ public class NetworkChest : NetworkContainer
             int personalIndex = args.GetNext<int>();
             int containerIndex = args.GetNext<int>();
 
-            if (this.nci.predmeti.Length > (containerIndex + 1)) {//to bi mogl zmer bit true btw
+            if (this.nci.predmeti.Length > (containerIndex + 1) && containerIndex > -1)
+            {//to bi mogl zmer bit true btw
                 Predmet c = this.nci.predmeti[containerIndex];
                 this.nci.predmeti[containerIndex] = requester_npi.predmeti_personal[personalIndex];
                 requester_npi.predmeti_personal[personalIndex] = c;
-                //poslat update za container
-                networkObject.SendRpc(args.Info.SendingPlayer, RPC_OPEN_RESPONSE, 1, this.nci.getItemsNetwork());
-                //poslat update za personal inventory
-                requester_npi.sendNetworkUpdate(true, false);
             }
+            else {//desni klik - index == -1
+                if (this.nci.hasSpace())
+                {
+                    this.nci.putFirst(requester_npi.predmeti_personal[personalIndex]);
+                    requester_npi.predmeti_personal[personalIndex] = null;
+                }
+                else {
+                    // ni placa
+                }
+            }
+            //poslat update za container
+            networkObject.SendRpc(args.Info.SendingPlayer, RPC_OPEN_RESPONSE, 1, this.nci.getItemsNetwork());
+            //poslat update za personal inventory
+            requester_npi.sendNetworkUpdate(true, false);
         }
     }
 
-    public override void ContainerToPersonal(RpcArgs args)
+    public override void ContainerToPersonal(RpcArgs args)//desni klik ne pride v postev ker se nemore sprozit. also desni klik na container pomen da proba dat in na loadout, hotbar, in povsod. ubistvu HandleItemPickup, z checkom prej ce ima plac za pobrat.
     {
-        throw new NotImplementedException();
+        if (networkObject.IsServer)
+        {
+            uint requester = args.Info.SendingPlayer.NetworkId;
+            NetworkPlayerInventory requester_npi = FindByid(requester).GetComponent<NetworkPlayerInventory>();
+            //nrdit mormo swap
+            int containerIndex = args.GetNext<int>();
+            int personalIndex = args.GetNext<int>();
+            
+
+           
+            //to bi mogl zmer bit true btw
+                Predmet c = this.nci.predmeti[containerIndex];
+                this.nci.predmeti[containerIndex] = requester_npi.predmeti_personal[personalIndex];
+                requester_npi.predmeti_personal[personalIndex] = c;
+            
+
+            //poslat update za container
+            networkObject.SendRpc(args.Info.SendingPlayer, RPC_OPEN_RESPONSE, 1, this.nci.getItemsNetwork());
+            //poslat update za personal inventory
+            requester_npi.sendNetworkUpdate(true, false);
+        }
     }
 
     public override void BarToContainer(RpcArgs args)
     {
-        throw new NotImplementedException();
+        if (networkObject.IsServer)
+        {
+            uint requester = args.Info.SendingPlayer.NetworkId;
+            NetworkPlayerInventory requester_npi = FindByid(requester).GetComponent<NetworkPlayerInventory>();
+            //nrdit mormo swap
+            int bar_index = args.GetNext<int>();
+            int containerIndex = args.GetNext<int>();
+
+
+            if (containerIndex > -1)
+            {
+                Predmet c = this.nci.predmeti[containerIndex];
+                this.nci.predmeti[containerIndex] = requester_npi.popBarPredmet(bar_index);
+                requester_npi.setBarPredmet(c, bar_index);
+            }
+            else {//desni klik
+                if (this.nci.hasSpace())
+                {
+                    this.nci.putFirst(requester_npi.popBarPredmet(bar_index));
+                    requester_npi.setBarPredmet(null, bar_index);
+                }
+            }
+            //poslat update za container
+            networkObject.SendRpc(args.Info.SendingPlayer, RPC_OPEN_RESPONSE, 1, this.nci.getItemsNetwork());
+            //poslat update za personal inventory
+            requester_npi.sendNetworkUpdate(true, false);
+        }
     }
 
     public override void ContainerToBar(RpcArgs args)
     {
-        throw new NotImplementedException();
+        if (networkObject.IsServer)
+        {
+            uint requester = args.Info.SendingPlayer.NetworkId;
+            NetworkPlayerInventory requester_npi = FindByid(requester).GetComponent<NetworkPlayerInventory>();
+            //nrdit mormo swap
+            int containerIndex = args.GetNext<int>();
+            int bar_index = args.GetNext<int>();
+            
+
+
+
+                Predmet c = this.nci.predmeti[containerIndex];
+                this.nci.predmeti[containerIndex] = requester_npi.popBarPredmet(bar_index);
+                requester_npi.setBarPredmet(c, bar_index);
+            
+            //poslat update za container
+            networkObject.SendRpc(args.Info.SendingPlayer, RPC_OPEN_RESPONSE, 1, this.nci.getItemsNetwork());
+            //poslat update za personal inventory
+            requester_npi.sendNetworkUpdate(true, false);
+        }
     }
 
     public override void BackpackToContainer(RpcArgs args)
     {
-        throw new NotImplementedException();
+        if (networkObject.IsServer)
+        {
+            uint requester = args.Info.SendingPlayer.NetworkId;
+            NetworkPlayerInventory requester_npi = FindByid(requester).GetComponent<NetworkPlayerInventory>();
+            //nrdit mormo swap
+            if (requester_npi.backpack == null) return;
+            int backpack_index = args.GetNext<int>();
+            int containerIndex = args.GetNext<int>();
+
+            if (this.nci.predmeti.Length > (containerIndex + 1) && containerIndex > -1)
+            {//to bi mogl zmer bit true btw
+                Predmet c = this.nci.predmeti[containerIndex];
+                this.nci.predmeti[containerIndex] = requester_npi.backpack_inventory.nci.predmeti[backpack_index];
+                requester_npi.backpack_inventory.nci.predmeti[backpack_index] = c;
+            }
+            else
+            {//desni klik - index == -1
+                if (this.nci.hasSpace())
+                {
+                    this.nci.putFirst(requester_npi.backpack_inventory.nci.predmeti[backpack_index]);
+                    requester_npi.backpack_inventory.nci.predmeti[backpack_index] = null;
+                }
+                else
+                {
+                    // ni placa
+                }
+            }
+            //poslat update za container
+            networkObject.SendRpc(args.Info.SendingPlayer, RPC_OPEN_RESPONSE, 1, this.nci.getItemsNetwork());
+            //poslat update za personal inventory
+            requester_npi.backpack_inventory.sendBackpackItemsUpdate();
+        }
     }
 
     public override void ContainerToBackpack(RpcArgs args)
     {
-        throw new NotImplementedException();
+        if (networkObject.IsServer)
+        {
+            uint requester = args.Info.SendingPlayer.NetworkId;
+            NetworkPlayerInventory requester_npi = FindByid(requester).GetComponent<NetworkPlayerInventory>();
+            if (requester_npi.backpack == null) return;
+            //nrdit mormo swap
+            int containerIndex = args.GetNext<int>();
+            int backpack_index = args.GetNext<int>();
+
+
+
+         
+                Predmet c = this.nci.predmeti[containerIndex];
+            this.nci.predmeti[containerIndex] = requester_npi.backpack_inventory.nci.predmeti[backpack_index];
+                requester_npi.backpack_inventory.nci.predmeti[backpack_index] = c;
+            
+
+            //poslat update za container
+            networkObject.SendRpc(args.Info.SendingPlayer, RPC_OPEN_RESPONSE, 1, this.nci.getItemsNetwork());
+            //poslat update za personal inventory
+            requester_npi.backpack_inventory.sendBackpackItemsUpdate();
+        }
     }
 
     public override void LoadoutToContainer(RpcArgs args)
@@ -239,6 +372,16 @@ public class NetworkChest : NetworkContainer
     public override void ContainerToLoadout(RpcArgs args)
     {
         throw new NotImplementedException();
+    }
+
+    public override void ContainerToContainer(RpcArgs args)
+    {
+        if (networkObject.IsServer)
+        {
+            this.nci.swap(args.GetNext<int>(), args.GetNext<int>());
+            //poslat update za container
+            networkObject.SendRpc(args.Info.SendingPlayer, RPC_OPEN_RESPONSE, 1, this.nci.getItemsNetwork());
+        }
     }
 
     #endregion
