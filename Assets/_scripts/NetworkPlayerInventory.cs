@@ -67,6 +67,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
     private IEnumerator craftingRoutine;
     private int craftingTimeRemaining = 0;
 
+
     private void Start()
     {
         this.craftingQueue = new List<PredmetRecepie>();
@@ -102,6 +103,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         if (networkObject.IsOwner) UpdateUI();//bugfix
     }
 
+
     /// <summary>
     /// vrne kter weapon ima trenutno v roki. ni nujno da ima ksn weapon sploh v roki mind you.
     /// </summary>
@@ -122,6 +124,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
 
 
 
+
     /// <summary>
     /// vrne kter ranged weap ima trenutno v roki. ni nujno da ima ksn ranged sploh v roki mind you.
     /// </summary>
@@ -130,6 +133,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
     {
         return combatHandler.GetCurrentlyActiveRanged();
     }
+
 
     /// <summary>
     /// potegne z hotbara - samo server klice
@@ -2178,4 +2182,122 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
 
 
     #endregion
+
+
+    #region containers
+    //naceloma vsi containerji. crafting tables in take fore ce bojo ble. zaenkrat je samo chest
+    internal void onChestOpen(NetworkContainer container,Predmet[] predmeti)
+    {
+        GetComponentInChildren<UILogic>().setContainerPanelActiveForChest(predmeti);
+        GetComponentInChildren<UILogic>().setCurrentActiveContainer(container);
+    }
+
+
+    //--------Te metode tipa handleBackpackToContainer(RectTransform invSlot) se klicejo direkt z ItemDropHandler.OnDrop(PointerEventData eventData)
+
+    internal void handleBackpackToContainer(RectTransform invSlot)
+    {
+        NetworkContainer ncbh = GetComponentInChildren<UILogic>().currentActiveContainer;
+
+        InventorySlot from = this.draggedItemParent.GetComponent<InventorySlot>();
+        int indexFrom = getIndexFromName(from.name);
+        InventorySlot to = invSlot.GetComponent<InventorySlot>();
+        int indexTo = getIndexFromName(to.name);
+        ncbh.localRequestBackpackToContainer(indexFrom, indexTo);
+    }
+
+    internal void handleContainerToBackpack(RectTransform invSlot)
+    {
+        NetworkContainer ncbh = GetComponentInChildren<UILogic>().currentActiveContainer;
+
+        InventorySlot from = this.draggedItemParent.GetComponent<InventorySlot>();
+        int indexFrom = getIndexFromName(from.name);
+        InventorySlot to = invSlot.GetComponent<InventorySlot>();
+        int indexTo = getIndexFromName(to.name);
+        ncbh.localRequestContainerToBackpack(indexFrom, indexTo);
+    }
+
+    internal void handleContainerToPersonal(RectTransform invSlot)
+    {
+        NetworkContainer ncbh = GetComponentInChildren<UILogic>().currentActiveContainer;
+
+        InventorySlot from = this.draggedItemParent.GetComponent<InventorySlot>();
+        int indexFrom = getIndexFromName(from.name);
+        InventorySlot to = invSlot.GetComponent<InventorySlot>();
+        int indexTo = getIndexFromName(to.name);
+        ncbh.localRequestContainerToPersonal(indexFrom, indexTo);
+    }
+
+    internal void handleBarToContainer(RectTransform invSlot)
+    {
+        NetworkContainer ncbh = GetComponentInChildren<UILogic>().currentActiveContainer;
+
+        InventorySlot from = this.draggedItemParent.GetComponent<InventorySlot>();
+        int indexFrom = getIndexFromName(from.name);
+        InventorySlot to = invSlot.GetComponent<InventorySlot>();
+        int indexTo = getIndexFromName(to.name);
+        ncbh.localRequestBarToContainer(indexFrom, indexTo);
+    }
+
+    internal void handleContainerToBar(RectTransform invSlot)
+    {
+        NetworkContainer ncbh = GetComponentInChildren<UILogic>().currentActiveContainer;
+
+        InventorySlot from = this.draggedItemParent.GetComponent<InventorySlot>();
+        int indexFrom = getIndexFromName(from.name);
+        InventorySlot to = invSlot.GetComponent<InventorySlot>();
+        int indexTo = getIndexFromName(to.name);
+        ncbh.localRequestContainerToBar(indexFrom, indexTo);
+    }
+
+    internal void handleLoadoutToContainer(RectTransform invSlot)
+    {
+        NetworkContainer ncbh = GetComponentInChildren<UILogic>().currentActiveContainer;
+
+        InventorySlot from = this.draggedItemParent.GetComponent<InventorySlot>();
+        int indexFrom = getIndexFromName(from.name);
+        InventorySlot to = invSlot.GetComponent<InventorySlot>();
+        int indexTo = getIndexFromName(to.name);
+        ncbh.localRequestLoadoutToContainer(indexFrom, indexTo);
+    }
+
+    internal void handleContainerToLoadout(RectTransform invSlot)
+    {
+        NetworkContainer ncbh = GetComponentInChildren<UILogic>().currentActiveContainer;
+
+        InventorySlot from = this.draggedItemParent.GetComponent<InventorySlot>();
+        int indexFrom = getIndexFromName(from.name);
+        InventorySlot to = invSlot.GetComponent<InventorySlot>();
+        int indexTo = getIndexFromName(to.name);
+        ncbh.localRequestContainerToLoadout(indexFrom, indexTo);
+    }
+
+    internal void handlePersonalToContainer(RectTransform invSlot)
+    {
+        //rabmo dobit taprav container kterga mamo zdle izbranga. ko ga dobimo klicemo z containerja metodo za manipulacijo z itemi.
+        //najlazje bo to dobit kr z UILOgic, ker smo nastavli trenutni container ob odprtju containerja.
+        NetworkContainer ncbh= GetComponentInChildren<UILogic>().currentActiveContainer;
+
+        InventorySlot from = this.draggedItemParent.GetComponent<InventorySlot>();
+        int indexFrom = getIndexFromName(from.name);
+        InventorySlot to = invSlot.GetComponent<InventorySlot>();
+        int indexTo = getIndexFromName(to.name);
+
+        ncbh.localRequestPersonalToContainer(indexFrom, indexTo);
+    }
+
+    internal void handleContainerToContainer(RectTransform invSlot)
+    {
+        NetworkContainer ncbh = GetComponentInChildren<UILogic>().currentActiveContainer;
+
+        InventorySlot from = this.draggedItemParent.GetComponent<InventorySlot>();
+        int indexFrom = getIndexFromName(from.name);
+        InventorySlot to = invSlot.GetComponent<InventorySlot>();
+        int indexTo = getIndexFromName(to.name);
+
+        ncbh.localRequestContainerToContainer(indexFrom, indexTo);
+    }
+
+    #endregion
+
 }

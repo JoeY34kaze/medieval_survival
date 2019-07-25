@@ -17,7 +17,7 @@ namespace BeardedManStudios.Forge.Networking.Unity
 		public GameObject[] NetworkArmorStandNetworkObject = null;
 		public GameObject[] NetworkBackpackNetworkObject = null;
 		public GameObject[] NetworkCameraNetworkObject = null;
-		public GameObject[] NetworkChestNetworkObject = null;
+		public GameObject[] NetworkContainerItemsNetworkObject = null;
 		public GameObject[] NetworkContainerNetworkObject = null;
 		public GameObject[] NetworkGuildManagerNetworkObject = null;
 		public GameObject[] NetworkPlaceableNetworkObject = null;
@@ -212,17 +212,17 @@ namespace BeardedManStudios.Forge.Networking.Unity
 						objectInitialized(newObj, obj);
 				});
 			}
-			else if (obj is NetworkChestNetworkObject)
+			else if (obj is NetworkContainerItemsNetworkObject)
 			{
 				MainThreadManager.Run(() =>
 				{
 					NetworkBehavior newObj = null;
 					if (!NetworkBehavior.skipAttachIds.TryGetValue(obj.NetworkId, out newObj))
 					{
-						if (NetworkChestNetworkObject.Length > 0 && NetworkChestNetworkObject[obj.CreateCode] != null)
+						if (NetworkContainerItemsNetworkObject.Length > 0 && NetworkContainerItemsNetworkObject[obj.CreateCode] != null)
 						{
-							var go = Instantiate(NetworkChestNetworkObject[obj.CreateCode]);
-							newObj = go.GetComponent<NetworkChestBehavior>();
+							var go = Instantiate(NetworkContainerItemsNetworkObject[obj.CreateCode]);
+							newObj = go.GetComponent<NetworkContainerItemsBehavior>();
 						}
 					}
 
@@ -697,13 +697,13 @@ namespace BeardedManStudios.Forge.Networking.Unity
 			
 			return netBehavior;
 		}
-		[Obsolete("Use InstantiateNetworkChest instead, its shorter and easier to type out ;)")]
-		public NetworkChestBehavior InstantiateNetworkChestNetworkObject(int index = 0, Vector3? position = null, Quaternion? rotation = null, bool sendTransform = true)
+		[Obsolete("Use InstantiateNetworkContainerItems instead, its shorter and easier to type out ;)")]
+		public NetworkContainerItemsBehavior InstantiateNetworkContainerItemsNetworkObject(int index = 0, Vector3? position = null, Quaternion? rotation = null, bool sendTransform = true)
 		{
-			var go = Instantiate(NetworkChestNetworkObject[index]);
-			var netBehavior = go.GetComponent<NetworkChestBehavior>();
+			var go = Instantiate(NetworkContainerItemsNetworkObject[index]);
+			var netBehavior = go.GetComponent<NetworkContainerItemsBehavior>();
 			var obj = netBehavior.CreateNetworkObject(Networker, index);
-			go.GetComponent<NetworkChestBehavior>().networkObject = (NetworkChestNetworkObject)obj;
+			go.GetComponent<NetworkContainerItemsBehavior>().networkObject = (NetworkContainerItemsNetworkObject)obj;
 
 			FinalizeInitialization(go, netBehavior, obj, position, rotation, sendTransform);
 			
@@ -1189,10 +1189,10 @@ namespace BeardedManStudios.Forge.Networking.Unity
 			
 			return netBehavior;
 		}
-		public NetworkChestBehavior InstantiateNetworkChest(int index = 0, Vector3? position = null, Quaternion? rotation = null, bool sendTransform = true)
+		public NetworkContainerItemsBehavior InstantiateNetworkContainerItems(int index = 0, Vector3? position = null, Quaternion? rotation = null, bool sendTransform = true)
 		{
-			var go = Instantiate(NetworkChestNetworkObject[index]);
-			var netBehavior = go.GetComponent<NetworkChestBehavior>();
+			var go = Instantiate(NetworkContainerItemsNetworkObject[index]);
+			var netBehavior = go.GetComponent<NetworkContainerItemsBehavior>();
 
 			NetworkObject obj = null;
 			if (!sendTransform && position == null && rotation == null)
@@ -1224,7 +1224,7 @@ namespace BeardedManStudios.Forge.Networking.Unity
 				obj = netBehavior.CreateNetworkObject(Networker, index, metadata.CompressBytes());
 			}
 
-			go.GetComponent<NetworkChestBehavior>().networkObject = (NetworkChestNetworkObject)obj;
+			go.GetComponent<NetworkContainerItemsBehavior>().networkObject = (NetworkContainerItemsNetworkObject)obj;
 
 			FinalizeInitialization(go, netBehavior, obj, position, rotation, sendTransform);
 			

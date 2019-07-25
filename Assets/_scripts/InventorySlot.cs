@@ -32,6 +32,7 @@ public abstract class InventorySlot : MonoBehaviour
     {
         if (this.durability_bar == null || this.text_quantity == null)
             setReferences();
+        if (p == null) { ClearSlot(); return; };
 
         predmet = p;
         icon.sprite = p.item.icon;

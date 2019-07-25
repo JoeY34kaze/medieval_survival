@@ -51,9 +51,9 @@ namespace BeardedManStudios.Forge.Networking.Generated
 						availableCallback = true;
 						obj = new NetworkCameraNetworkObject(networker, id, frame);
 						break;
-					case NetworkChestNetworkObject.IDENTITY:
+					case NetworkContainerItemsNetworkObject.IDENTITY:
 						availableCallback = true;
-						obj = new NetworkChestNetworkObject(networker, id, frame);
+						obj = new NetworkContainerItemsNetworkObject(networker, id, frame);
 						break;
 					case NetworkContainerNetworkObject.IDENTITY:
 						availableCallback = true;

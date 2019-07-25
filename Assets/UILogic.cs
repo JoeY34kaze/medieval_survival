@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using BeardedManStudios.Forge.Networking.Generated;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -14,14 +15,18 @@ public class UILogic : MonoBehaviour
     public GameObject inventoryPanel;
     public GameObject crafting_panel;
     public GameObject chatInput;
-
-    public GameObject subpanel_chest;
+    public GameObject containerPanel;
 
     public bool hasOpenWindow=false;
     private NetworkGuildManager ngm;
     private NetworkPlayerInventory npi;
 
+    public GameObject chest_slot20;
+    public GameObject chest_slot40;
+    public GameObject chest_slot80;
 
+    private GameObject activeChestPanel;
+    internal NetworkContainer currentActiveContainer;//tole se posreduje npi-ju med premikanjem predmetov. z npi v tole in obratno
 
     bool chatActive = false;
 
@@ -133,6 +138,7 @@ public class UILogic : MonoBehaviour
     }
 
     public void DisableMouse() {
+        if (this.hasOpenWindow || this.activeChestPanel != null) { Debug.Log("NOT disabling mouse curson because we still have open windows!."); return; }
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
     }
@@ -144,7 +150,9 @@ public class UILogic : MonoBehaviour
         this.GuildPanel.SetActive(false);
         this.crafting_panel.SetActive(false);
         this.crafting_panel.SetActive(false);
+        clearContainerPanel();
         this.hasOpenWindow = false;
+        this.currentActiveContainer = null;
 
         DisableMouse();
         GetComponentInParent<NetworkPlayerAnimationLogic>().hookChestRotation = true;
@@ -152,15 +160,6 @@ public class UILogic : MonoBehaviour
         GetComponentInParent<player_camera_handler>().lockCamera = false;
     }
 
-    /// <summary>
-    /// klice se ob uspesnem requestu za odpret chest v odgovoru od serverja.
-    /// vrne panel katerga otroc so panele za iteme da se anrise gor pa tak
-    /// </summary>
-    public GameObject showChestPanel() {
-        showInventory();
-        this.subpanel_chest.SetActive(true);
-        return this.subpanel_chest;
-    }
 
     private void showInventory()
     {
@@ -168,5 +167,58 @@ public class UILogic : MonoBehaviour
         npi.requestLocalUIUpdate();
         this.hasOpenWindow = true;
         enableMouse();
+    }
+
+    internal void clearContainerPanel() {
+        if(this.activeChestPanel!=null)
+            if (this.activeChestPanel.activeSelf) {
+                clearChestPanelPredmeti();
+                this.activeChestPanel.SetActive(false);
+                this.activeChestPanel = null;
+            }
+        this.currentActiveContainer = null;
+    }
+
+    internal void setContainerPanelActiveForChest(Predmet[] predmeti)
+    {
+        showInventory();
+        this.containerPanel.SetActive(true);
+
+        //bi blo tle mogoce fajn nrdit prefabe ui elementov za razlicne cheste al pa crafting statione? pa sam nalimas gor kar rabs
+        if (predmeti.Length == 20)
+        {
+            this.activeChestPanel = this.chest_slot20;
+        }
+        else if (predmeti.Length == 40)
+        {
+            this.activeChestPanel = this.chest_slot40;
+        }
+        else if(predmeti.Length==80){
+            this.activeChestPanel = this.chest_slot80;
+        }
+        this.activeChestPanel.SetActive(true);
+        UpdateActiveChestPanel(predmeti);
+
+    }
+
+    private void UpdateActiveChestPanel(Predmet[] predmeti)
+    {
+        if (this.activeChestPanel != null)
+            for (int i = 0; i < this.activeChestPanel.transform.childCount; i++) {
+                this.activeChestPanel.transform.GetChild(i).GetComponent<InventorySlotContainer>().AddPredmet(predmeti[i]);
+            }
+    }
+
+    private void clearChestPanelPredmeti() {
+        if (this.activeChestPanel != null)
+            for (int i = 0; i < this.activeChestPanel.transform.childCount; i++)
+            {
+                this.activeChestPanel.transform.GetChild(i).GetComponent<InventorySlotContainer>().AddPredmet(null);
+            }
+    }
+
+    internal void setCurrentActiveContainer(NetworkContainer container)
+    {
+        this.currentActiveContainer = container;
     }
 }

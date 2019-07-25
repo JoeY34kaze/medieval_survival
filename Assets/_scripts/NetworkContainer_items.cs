@@ -1,4 +1,5 @@
-﻿using BeardedManStudios.Forge.Networking.Generated;
+﻿using BeardedManStudios.Forge.Networking;
+using BeardedManStudios.Forge.Networking.Generated;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -9,7 +10,7 @@ using UnityEngine;
 /// RPCJEV NEBO MEL, RPCJE SPISAT V RAZREDIH, KI TA CLASS UPORABLAJO
 /// 
 /// </summary>
-public class NetworkContainer_items : NetworkContainerBehavior
+public class NetworkContainer_items : NetworkContainerItemsBehavior
 {
     private int size;
     public Predmet[] predmeti;//samo id ni zadost ker v prihodnosti bo treba hrant tud kolicino in ali durability itemov.
@@ -170,4 +171,5 @@ public class NetworkContainer_items : NetworkContainerBehavior
                 this.predmeti[v] = temp;
             }
     }
+
 }

@@ -18,8 +18,8 @@ MonoBehaviour:
   damage: 0
   hasDurability: 0
   durability: 200
-  stackSize: 32
-  backpack_capacity: 30
+  stackSize: 10
+  backpack_capacity: 20
   damage_reduction: 0
   id: 43
   prefab_pickup: {fileID: 4344458020859959958, guid: 4d857fb3f3804e540b9c4ac4ce5da7b1,
@@ -34,3 +34,4 @@ MonoBehaviour:
     type: 3}
   placeable_networked_object: {fileID: 132834, guid: c005470ae31f1f146bdda4536f3e9be5,
     type: 3}
+  ignorePlacementNormal: 0

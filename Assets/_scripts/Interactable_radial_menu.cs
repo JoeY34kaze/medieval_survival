@@ -394,8 +394,7 @@ public class Interactable_radial_menu : MonoBehaviour
         }
         center_label.text = "";
         this.radialMenu.SetActive(false);
-        Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = false;
+        GetComponentInParent<UILogic>().DisableMouse();
     }
 
     public void player_interaction_button_execution()
@@ -554,7 +553,16 @@ public class Interactable_radial_menu : MonoBehaviour
 
     private void player_interaction_chest_open_request()
     {
-        hide_radial_menu();
+        //hide_radial_menu();
+        //koda kopirana sem not ker nocmo da gre miska stran ker se nam odpre inventorij.
+        menu.elements.Clear();
+        foreach (Transform child in elements)
+        {
+            GameObject.Destroy(child.gameObject);
+        }
+        center_label.text = "";
+        this.radialMenu.SetActive(false);
+
         interaction.local_chest_open_request(this.target);
     }
 

@@ -55,6 +55,26 @@ public class ItemDropHandler : MonoBehaviour, IDropHandler , IPointerClickHandle
                 networkPlayerInventory.handleBarToPersonal(invSlot);
             else if (from is InventorySlotBar && to is InventorySlotBar)
                 networkPlayerInventory.handleBarToBar(invSlot);
+            else if (from is InventorySlotPersonal && to is InventorySlotContainer)
+                networkPlayerInventory.handlePersonalToContainer(invSlot);
+            else if (from is InventorySlotContainer && to is InventorySlotPersonal)
+                networkPlayerInventory.handleContainerToPersonal(invSlot);
+            else if (from is InventorySlotBackpack && to is InventorySlotContainer)
+                networkPlayerInventory.handleBackpackToContainer(invSlot);
+            else if (from is InventorySlotContainer && to is InventorySlotBackpack)
+                networkPlayerInventory.handleContainerToBackpack(invSlot);
+            else if (from is InventorySlotBar && to is InventorySlotContainer)
+                networkPlayerInventory.handleBarToContainer(invSlot);
+            else if (from is InventorySlotContainer && to is InventorySlotBar)
+                networkPlayerInventory.handleContainerToBar(invSlot);
+            else if (from is InventorySlotLoadout && to is InventorySlotContainer)
+                networkPlayerInventory.handleLoadoutToContainer(invSlot);
+            else if (from is InventorySlotContainer && to is InventorySlotLoadout)
+                networkPlayerInventory.handleContainerToLoadout(invSlot);
+            else if (from is InventorySlotContainer && to is InventorySlotContainer)
+                networkPlayerInventory.handleContainerToContainer(invSlot);
+
+
         }
         else
         {//smo dropal nekam tko da mora past na tla. gremo prevert s kje smo potegnil

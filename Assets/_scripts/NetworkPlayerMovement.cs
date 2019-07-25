@@ -282,9 +282,6 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
 
     protected virtual void InputHandle()
     {
-        
-
-        ExitGameInput();
         //CameraInput();
 
         if (!lockMovement && !stats.downed)
@@ -310,17 +307,6 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
 
     }
 
-    protected virtual void ExitGameInput()
-    {
-        // just a example to quit the application 
-        if (Input.GetKeyDown(KeyCode.Escape))
-        {
-            if (!Cursor.visible)
-                Cursor.visible = true;
-            else
-                Application.Quit();
-        }
-    }
 
     protected virtual void MoveCharacter()
     {

@@ -4,15 +4,12 @@ using UnityEngine;
 
 namespace BeardedManStudios.Forge.Networking.Generated
 {
-	[GeneratedRPC("{\"types\":[[][][\"int\", \"string\"]]")]
-	[GeneratedRPCVariableNames("{\"types\":[[][][\"succ\", \"items\"]]")]
-	public abstract partial class NetworkChestBehavior : NetworkBehavior
+	[GeneratedRPC("{\"types\":[]")]
+	[GeneratedRPCVariableNames("{\"types\":[]")]
+	public abstract partial class NetworkContainerItemsBehavior : NetworkBehavior
 	{
-		public const byte RPC_PICKUP_REQUEST = 0 + 5;
-		public const byte RPC_OPEN_REQUEST = 1 + 5;
-		public const byte RPC_OPEN_RESPONSE = 2 + 5;
 		
-		public NetworkChestNetworkObject networkObject = null;
+		public NetworkContainerItemsNetworkObject networkObject = null;
 
 		public override void Initialize(NetworkObject obj)
 		{
@@ -20,13 +17,10 @@ namespace BeardedManStudios.Forge.Networking.Generated
 			if (networkObject != null && networkObject.AttachedBehavior != null)
 				return;
 			
-			networkObject = (NetworkChestNetworkObject)obj;
+			networkObject = (NetworkContainerItemsNetworkObject)obj;
 			networkObject.AttachedBehavior = this;
 
 			base.SetupHelperRpcs(networkObject);
-			networkObject.RegisterRpc("pickupRequest", pickupRequest);
-			networkObject.RegisterRpc("openRequest", openRequest);
-			networkObject.RegisterRpc("openResponse", openResponse, typeof(int), typeof(string));
 
 			networkObject.onDestroy += DestroyGameObject;
 
@@ -84,7 +78,7 @@ namespace BeardedManStudios.Forge.Networking.Generated
 
 		public override void Initialize(NetWorker networker, byte[] metadata = null)
 		{
-			Initialize(new NetworkChestNetworkObject(networker, createCode: TempAttachCode, metadata: metadata));
+			Initialize(new NetworkContainerItemsNetworkObject(networker, createCode: TempAttachCode, metadata: metadata));
 		}
 
 		private void DestroyGameObject(NetWorker sender)
@@ -95,7 +89,7 @@ namespace BeardedManStudios.Forge.Networking.Generated
 
 		public override NetworkObject CreateNetworkObject(NetWorker networker, int createCode, byte[] metadata = null)
 		{
-			return new NetworkChestNetworkObject(networker, this, createCode, metadata);
+			return new NetworkContainerItemsNetworkObject(networker, this, createCode, metadata);
 		}
 
 		protected override void InitializedTransform()
@@ -103,18 +97,6 @@ namespace BeardedManStudios.Forge.Networking.Generated
 			networkObject.SnapInterpolations();
 		}
 
-		/// <summary>
-		/// Arguments:
-		/// </summary>
-		public abstract void pickupRequest(RpcArgs args);
-		/// <summary>
-		/// Arguments:
-		/// </summary>
-		public abstract void openRequest(RpcArgs args);
-		/// <summary>
-		/// Arguments:
-		/// </summary>
-		public abstract void openResponse(RpcArgs args);
 
 		// DO NOT TOUCH, THIS GETS GENERATED PLEASE EXTEND THIS CLASS IF YOU WISH TO HAVE CUSTOM CODE ADDITIONS
 	}
