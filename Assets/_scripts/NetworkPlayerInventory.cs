@@ -301,6 +301,75 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         avatar.BuildCharacter();
     }
 
+    /// <summary>
+    /// vrne true ce lahko pobere item (ce je prazn slot kjerkoli), ce je gear in ma plac u loadoutu, ce je stackable in ga loh stlacmo na stack k ze obstaja
+    /// </summary>
+    /// <param name="c"></param>
+    /// <returns></returns>
+    internal bool canPickupPredmetFullStack(Predmet c)
+    {
+        if (c != null)
+        {
+            if (hasPersonalSpace() || hasBackpackSpace() || hasBarSpace()) return true;
+
+            if (c.item.type == Item.Type.head && getHeadItem() == null ||
+                c.item.type == Item.Type.chest && getChestItem() == null ||
+                c.item.type == Item.Type.hands && getHandsItem() == null ||
+                c.item.type == Item.Type.legs && getLegsItem() == null ||
+                c.item.type == Item.Type.feet && getFeetItem() == null) return true;
+
+            if (c.item.stackSize > 1) return CanBePlacedOnExistingStacksInFull(c);
+        }
+        else return true;
+        return false;
+    }
+
+    private bool CanBePlacedOnExistingStacksInFull(Predmet p)
+    {
+        //poglej najprej invnetorij v while zanki
+        int kol = p.quantity;
+        //while (getNumberOfEligibleNonEmptyStacks_personalInventory(resp.item) > 0) { //gre itak cez vse stacke in proba dodat tko da itak ze vse ujame
+        foreach (Predmet stack in this.predmeti_personal)
+            if (stack != null)
+                if (stack.item != null)
+                    if (stack.item.Equals(p.item))
+                        if (stack.quantity < stack.item.stackSize)
+                        {
+                            kol -= stack.item.stackSize - stack.quantity;
+                            if (kol <= 0) return true;
+                        }
+        //}
+        //poglej backpack
+        if (this.backpack != null)
+            foreach (Predmet stack in this.backpack_inventory.nci.predmeti)
+                if (stack != null)
+                    if (stack.item != null)
+                        if (stack.item.Equals(p.item))
+                            if (stack.quantity < stack.item.stackSize)
+                            {
+                                kol -= stack.item.stackSize - stack.quantity;
+                                if (kol <= 0) return true;
+                            }
+        //poglej hotbar
+        foreach (Predmet stack in this.predmeti_hotbar)
+            if (stack != null)
+                if (stack.item != null)
+                    if (stack.item.Equals(p.item))
+                        if (stack.quantity < stack.item.stackSize)
+                        {
+                            kol -= stack.item.stackSize - stack.quantity;
+                            if (kol <= 0) return true;
+                        }
+
+        return false;
+    }
+
+    private bool hasPersonalSpace()
+    {
+        foreach (Predmet p in this.predmeti_personal) if (p == null) return true;
+        return false;
+    }
+
 
     /// <summary>
     /// proba upgrejdat loadout z itemom i. vrne item i ce ni upgrade. vrne item s katermu ga je zamenov ce je upgrade bil, vrne null ce je biu prazn slot prej
@@ -496,7 +565,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
     /// </summary>
     /// <param name="resp"></param>
     /// <returns></returns>
-    private Predmet tryToAddPredmetToExistingStack(Predmet resp)
+    internal Predmet tryToAddPredmetToExistingStack(Predmet resp)
     {
         //poglej najprej invnetorij v while zanki
         Predmet p = resp;
@@ -577,20 +646,94 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         return c;
     }
 
-    internal void OnRightClick(GameObject g)//tole lahko potem pri ciscenju kode z malo preurejanja damo v uno tavelko metodo
+    #region right click
+
+    internal void OnRightClickPersonalInventory(GameObject g)//tole lahko potem pri ciscenju kode z malo preurejanja damo v uno tavelko metodo
     {
-        handleInventorySlotOnDragDropEvent(null, g.transform, true);
+        if (GetComponentInChildren<UILogic>().currentActiveContainer != null) {//personal -> chest
+            NetworkContainer ncbh = GetComponentInChildren<UILogic>().currentActiveContainer;
+
+            InventorySlot from = g.GetComponent<InventorySlot>();
+            int indexFrom = getIndexFromName(from.name);
+            
+
+            ncbh.localRequestPersonalToContainer(indexFrom, -1);
+        }
+        else
+            handleInventorySlotOnDragDropEvent(null, g.transform, true);
     }
 
-    internal void OnRightClickBackpack(GameObject gameObject)//ce smo kliknli z desno na backpack. proba dat na loadout, ce ni prazn nrdi swap
+    internal void OnRightClickBackpack(GameObject g)//ce smo kliknli z desno na backpack. proba dat na loadout, ce ni prazn nrdi swap
     {
         if (networkObject.IsOwner)
         {
-            int index_backpack = getIndexFromName(gameObject.name);
-            this.backpack_inventory.localPlayerRequestBackpackToLoadout(index_backpack);
+            if (GetComponentInChildren<UILogic>().currentActiveContainer != null)
+            {// -> chest
+                NetworkContainer ncbh = GetComponentInChildren<UILogic>().currentActiveContainer;
+
+                InventorySlot from = g.GetComponent<InventorySlot>();
+                int indexFrom = getIndexFromName(from.name);
+
+
+                ncbh.localRequestBackpackToContainer(indexFrom, -1);
+            }
+            else
+            {
+                int index_backpack = getIndexFromName(gameObject.name);
+                this.backpack_inventory.localPlayerRequestBackpackToLoadout(index_backpack);
+            }
         }
     }
 
+    internal void OnRightClickBar(GameObject g)//tole lahko potem pri ciscenju kode z malo preurejanja damo v uno tavelko metodo
+    {
+        if (GetComponentInChildren<UILogic>().currentActiveContainer != null)
+        {// -> chest
+            NetworkContainer ncbh = GetComponentInChildren<UILogic>().currentActiveContainer;
+
+            InventorySlot from = g.GetComponent<InventorySlot>();
+            int indexFrom = getIndexFromName(from.name);
+
+
+            ncbh.localRequestBarToContainer(indexFrom, -1);
+        }
+        //else
+          //  handleInventorySlotOnDragDropEvent(null, g.transform, true);
+    }
+
+    internal void OnRightClickLoadout(GameObject g)//tole lahko potem pri ciscenju kode z malo preurejanja damo v uno tavelko metodo
+    {
+        if (GetComponentInChildren<UILogic>().currentActiveContainer!=null)
+        {//personal -> chest
+            NetworkContainer ncbh = GetComponentInChildren<UILogic>().currentActiveContainer;
+
+            InventorySlot from = g.GetComponent<InventorySlot>();
+            int indexFrom = (int)((InventorySlotLoadout)from).type;//getIndexFromName(from.name);
+
+
+            ncbh.localRequestLoadoutToContainer(indexFrom, -1);
+        }
+        else
+            handleInventorySlotOnDragDropEvent(null, g.transform, true);
+    }
+
+    internal void OnRightClickContainer(GameObject g)//tole lahko potem pri ciscenju kode z malo preurejanja damo v uno tavelko metodo
+    {
+        if (GetComponentInChildren<UILogic>().currentActiveContainer != null)
+        {//personal -> chest
+            NetworkContainer ncbh = GetComponentInChildren<UILogic>().currentActiveContainer;
+
+            InventorySlot from = g.GetComponent<InventorySlot>();
+            int indexFrom = getIndexFromName(from.name);
+
+
+            ncbh.localRequestContainerToPersonal(indexFrom, -1);
+        }
+       
+    }
+
+
+    #endregion
     internal bool hasInventoryEmptySlot()
     {
         foreach (Predmet i in this.predmeti_personal)
@@ -606,7 +749,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         return false;
     }
 
-    public bool SetLoadoutItem(Predmet i)
+    public bool SetPredmetLoadout(Predmet i)
     {//nevem zakaj vrne bool
         if (!networkObject.IsServer) { Debug.LogError("client dela stvar od serevrja!"); return false; }
         if (i == null) return false;
@@ -1030,7 +1173,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
                 feet = null;
                 break;
             default:
-                Debug.LogError("Item type doesnt match anything. shits fucked yo");
+                //Debug.LogError("Item type doesnt match anything. shits fucked yo");
                 break;
         }
         return i;
@@ -1530,14 +1673,28 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         int loadout_index = args.GetNext<int>();
         string type_s = args.GetNext<string>();
         Item.Type type = getItemTypefromString(type_s);
-        Predmet loadout_item = null;
-        loadout_item = PopLoadoutItem(type);
 
         int inv_index = args.GetNext<int>();
         Predmet inventory_item = this.predmeti_personal[inv_index];//poisce item glede na id-ju slota. id dobi z rpc k ga poda z imena tega starsa
 
+        //
+        if (inventory_item.item.type == Item.Type.head ||//cce je item za u loadout. ce je backpack ga itak nemormo dobit v inventorij ??
+            inventory_item.item.type == Item.Type.chest ||
+            inventory_item.item.type == Item.Type.hands ||
+            inventory_item.item.type == Item.Type.legs ||
+            inventory_item.item.type == Item.Type.feet) { }
+        else
+            return;
+        
 
-        if (SetLoadoutItem(inventory_item))//to bo zmer slo cez ker je slot ze prazen. smo ga izpraznli z popom. vrne true ce je item biu valid za nek loadout slot.
+
+            Predmet loadout_item = null;
+        loadout_item = PopLoadoutItem(type);
+
+        
+
+
+        if (SetPredmetLoadout(inventory_item))//to bo zmer slo cez ker je slot ze prazen. smo ga izpraznli z popom. vrne true ce je item biu valid za nek loadout slot.
             Remove(inv_index);
         if (loadout_item != null)
         {//loadout ni bil prazen prej tko da rabmo item dat v inventorij
@@ -1585,7 +1742,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
                     if (loadout_item != null)
                     {
                         Add(loadout_item, index);
-                        SetLoadoutItem(inventory_item);
+                        SetPredmetLoadout(inventory_item);
                     }
                 }
                 else if (hasInventoryEmptySlot()) //ce se ne ujema ga mormo dodat na prvo prazno mesto v inventoriju
@@ -1740,8 +1897,8 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
             int bar_index = args.GetNext<int>();
             int inv_index = args.GetNext<int>();
 
-            if (neutralStateHandler.isNotSelected(bar_index, -1))
-            {
+            //if (neutralStateHandler.isNotSelected(bar_index, -1))
+            //{
                 if (this.predmeti_personal[inv_index] != null)
                 {
 
@@ -1754,7 +1911,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
                     sendNetworkUpdate(true, false);
 
                 }
-            }
+            //}
         }
     }
 
@@ -1766,8 +1923,8 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         {
             int inv_index = args.GetNext<int>();
             int bar_index = args.GetNext<int>();
-            if (neutralStateHandler.isNotSelected(bar_index, -1))
-            {
+            //if (neutralStateHandler.isNotSelected(bar_index, -1))
+            //{
                 if (this.predmeti_hotbar[bar_index] != null)
                 {
                     Predmet b = popPersonalPredmet(inv_index);
@@ -1776,7 +1933,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
                     setPersonalIventoryPredmet(i, inv_index);
                     sendNetworkUpdate(true, false);
                 }
-            }
+            //}
         }
 
     }
@@ -1788,13 +1945,13 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
             int a = args.GetNext<int>();
             int b = args.GetNext<int>();
 
-            if (neutralStateHandler.isNotSelected(a, b))
-            { //TODO ce je trenutno izbran item je blokiran pri menjavi. spremenit tko da lhako menja ampak se zamenja potem tud index v neutralStateHandlerju
+            //if (neutralStateHandler.isNotSelected(a, b))
+            //{ //TODO ce je trenutno izbran item je blokiran pri menjavi. spremenit tko da lhako menja ampak se zamenja potem tud index v neutralStateHandlerju
                 Predmet x = popBarPredmet(a);
                 setBarPredmet(popBarPredmet(b), a);
                 setBarPredmet(x, b);
                 sendNetworkUpdate(true, false);
-            }
+            //}
         }
 
     }
@@ -2274,8 +2431,8 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         InventorySlot from = this.draggedItemParent.GetComponent<InventorySlot>();
         int indexFrom = getIndexFromName(from.name);
         InventorySlot to = invSlot.GetComponent<InventorySlot>();
-        int indexTo = getIndexFromName(to.name);
-        ncbh.localRequestContainerToLoadout(indexFrom, indexTo);
+        //int indexTo = getIndexFromName(to.name);
+        ncbh.localRequestContainerToLoadout(indexFrom, -1);
     }
 
     internal void handlePersonalToContainer(RectTransform invSlot)

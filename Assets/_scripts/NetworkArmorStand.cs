@@ -179,12 +179,12 @@ public class NetworkArmorStand : NetworkArmorStandBehavior
                         Predmet loadout_p = npi.popPredmetLoadout(Item.Type.head);
                         Predmet onStand = this.head;
                         this.head = loadout_p;
-                        npi.SetLoadoutItem(onStand);
+                        npi.SetPredmetLoadout(onStand);
                     }
                     else
                     {
                         //equip item from stand
-                        npi.SetLoadoutItem(this.head);
+                        npi.SetPredmetLoadout(this.head);
                         this.head = null;
                     }
                 }
@@ -212,12 +212,12 @@ public class NetworkArmorStand : NetworkArmorStandBehavior
                         Predmet loadout_item = npi.popPredmetLoadout(Item.Type.chest);
                         Predmet onStand = this.chest;
                         this.chest = loadout_item;
-                        npi.SetLoadoutItem(onStand);
+                        npi.SetPredmetLoadout(onStand);
                     }
                     else
                     {
                         //equip item from stand
-                        npi.SetLoadoutItem(this.chest);
+                        npi.SetPredmetLoadout(this.chest);
                         this.chest = null;
                     }
                 }
@@ -243,12 +243,12 @@ public class NetworkArmorStand : NetworkArmorStandBehavior
                         Predmet loadout_item = npi.popPredmetLoadout(Item.Type.hands);
                         Predmet onStand =this.hands;
                         this.hands = loadout_item;
-                        npi.SetLoadoutItem(onStand);
+                        npi.SetPredmetLoadout(onStand);
                     }
                     else
                     {
                         //equip item from stand
-                        npi.SetLoadoutItem(this.hands);
+                        npi.SetPredmetLoadout(this.hands);
                         this.hands = null;
                     }
                 }
@@ -275,12 +275,12 @@ public class NetworkArmorStand : NetworkArmorStandBehavior
                         Predmet loadout_item = npi.popPredmetLoadout(Item.Type.legs);
                         Predmet onStand = this.legs;
                         this.legs = loadout_item;
-                        npi.SetLoadoutItem(onStand);
+                        npi.SetPredmetLoadout(onStand);
                     }
                     else
                     {
                         //equip item from stand 
-                        npi.SetLoadoutItem(this.legs);
+                        npi.SetPredmetLoadout(this.legs);
                         this.legs = null;
                     }
                 }
@@ -307,12 +307,12 @@ public class NetworkArmorStand : NetworkArmorStandBehavior
                         Predmet loadout_item = npi.popPredmetLoadout(Item.Type.feet);
                         Predmet onStand = this.feet;
                         this.feet = loadout_item;
-                        npi.SetLoadoutItem(onStand);
+                        npi.SetPredmetLoadout(onStand);
                     }
                     else
                     {
                         //equip item from stand
-                        npi.SetLoadoutItem(this.feet);
+                        npi.SetPredmetLoadout(this.feet);
                         this.feet = null;
                     }
                 }
@@ -449,7 +449,7 @@ public class NetworkArmorStand : NetworkArmorStandBehavior
         {
             if (this.head != null)
             {
-                npi.SetLoadoutItem(this.head);
+                npi.SetPredmetLoadout(this.head);
                 this.head = null;
             }
         }
@@ -459,7 +459,7 @@ public class NetworkArmorStand : NetworkArmorStandBehavior
         {
             if (this.chest != null)
             {
-                npi.SetLoadoutItem(this.chest);
+                npi.SetPredmetLoadout(this.chest);
                 this.chest = null;
             }
         }
@@ -469,7 +469,7 @@ public class NetworkArmorStand : NetworkArmorStandBehavior
         {
             if (this.hands != null)
             {
-                npi.SetLoadoutItem(this.hands);
+                npi.SetPredmetLoadout(this.hands);
                 this.hands = null;
             }
         }
@@ -479,7 +479,7 @@ public class NetworkArmorStand : NetworkArmorStandBehavior
         {
             if (this.legs != null)
             {
-                npi.SetLoadoutItem(this.legs);
+                npi.SetPredmetLoadout(this.legs);
                 this.legs = null;
             }
         }
@@ -488,7 +488,7 @@ public class NetworkArmorStand : NetworkArmorStandBehavior
         {
             if (this.feet != null)
             {
-                npi.SetLoadoutItem(this.feet);
+                npi.SetPredmetLoadout(this.feet);
                 this.feet = null;
             }
         }
@@ -577,7 +577,7 @@ public class NetworkArmorStand : NetworkArmorStandBehavior
         Predmet onStand = this.head; //lahko vrne null
         if (loadout_item != null) this.head = loadout_item;
         else this.head = null;
-        if (onStand != null) npi.SetLoadoutItem(onStand);
+        if (onStand != null) npi.SetPredmetLoadout(onStand);
         else npi.RemoveItemLoadout(Item.Type.head);
 
         //chest
@@ -585,28 +585,28 @@ public class NetworkArmorStand : NetworkArmorStandBehavior
         onStand = this.chest; //lahko vrne null
         if (loadout_item != null) this.chest = loadout_item;
         else this.chest = null;
-        if (onStand != null) npi.SetLoadoutItem(onStand);
+        if (onStand != null) npi.SetPredmetLoadout(onStand);
         else npi.RemoveItemLoadout(Item.Type.chest);
         //hands
         loadout_item = npi.popPredmetLoadout(Item.Type.hands);//lahko vrne null
         onStand = this.hands; //lahko vrne null
         if (loadout_item != null) this.hands = loadout_item;
         else this.hands = null;
-        if (onStand != null) npi.SetLoadoutItem(onStand);
+        if (onStand != null) npi.SetPredmetLoadout(onStand);
         else npi.RemoveItemLoadout(Item.Type.hands);
         //legs
         loadout_item = npi.popPredmetLoadout(Item.Type.legs);//lahko vrne null
         onStand = this.legs; //lahko vrne null
         if (loadout_item != null) this.legs = loadout_item;
         else this.legs = null;
-        if (onStand != null) npi.SetLoadoutItem(onStand);
+        if (onStand != null) npi.SetPredmetLoadout(onStand);
         else npi.RemoveItemLoadout(Item.Type.legs);
         //feet
         loadout_item = npi.popPredmetLoadout(Item.Type.feet);//lahko vrne null
         onStand = this.feet; //lahko vrne null
         if (loadout_item != null) this.feet = loadout_item;
         else this.feet = null;
-        if (onStand != null) npi.SetLoadoutItem(onStand);
+        if (onStand != null) npi.SetPredmetLoadout(onStand);
         else npi.RemoveItemLoadout(Item.Type.feet);
         //wep0
         loadout_item = npi.PopWeaponPredmetInHand();//lahko vrne null

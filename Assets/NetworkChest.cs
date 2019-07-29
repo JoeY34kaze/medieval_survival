@@ -211,13 +211,15 @@ public class NetworkChest : NetworkContainer
                 this.nci.predmeti[containerIndex] = requester_npi.predmeti_personal[personalIndex];
                 requester_npi.predmeti_personal[personalIndex] = c;
             }
-            else {//desni klik - index == -1
+            else
+            {//desni klik - index == -1
                 if (this.nci.hasSpace())
                 {
                     this.nci.putFirst(requester_npi.predmeti_personal[personalIndex]);
                     requester_npi.predmeti_personal[personalIndex] = null;
                 }
-                else {
+                else
+                {
                     // ni placa
                 }
             }
@@ -237,14 +239,31 @@ public class NetworkChest : NetworkContainer
             //nrdit mormo swap
             int containerIndex = args.GetNext<int>();
             int personalIndex = args.GetNext<int>();
-            
 
+            Predmet c = this.nci.predmeti[containerIndex];
+            if (personalIndex == -1)
+            {
+                //desni click na container. -> handleItemPickup
+                if (requester_npi.canPickupPredmetFullStack(c))
+                {
+                    this.nci.predmeti[containerIndex] = null;
+                    requester_npi.handleItemPickup(c);
+                }
+                else if(c.item.stackSize>1){//probamo pobrat delni stack. kot response dobimo del stacka k ga nismo mogli pobrat in ga pac damo nazaj v chest na isto mesto.
+                    c = requester_npi.tryToAddPredmetToExistingStack(c);
+                    this.nci.predmeti[containerIndex] = c;
+                }
+            }
+            else {
+
+            
            
             //to bi mogl zmer bit true btw
-                Predmet c = this.nci.predmeti[containerIndex];
+                
                 this.nci.predmeti[containerIndex] = requester_npi.predmeti_personal[personalIndex];
                 requester_npi.predmeti_personal[personalIndex] = c;
-            
+
+            }
 
             //poslat update za container
             networkObject.SendRpc(args.Info.SendingPlayer, RPC_OPEN_RESPONSE, 1, this.nci.getItemsNetwork());
@@ -372,12 +391,60 @@ public class NetworkChest : NetworkContainer
 
     public override void LoadoutToContainer(RpcArgs args)
     {
-        throw new NotImplementedException();
+        if (networkObject.IsServer)
+        {
+            uint requester = args.Info.SendingPlayer.NetworkId;
+            NetworkPlayerInventory requesterNpi = FindByid(requester).GetComponent<NetworkPlayerInventory>();
+            int item_type_casted_enum = args.GetNext<int>();
+            Item.Type t = (Item.Type)item_type_casted_enum;
+
+            int to = args.GetNext<int>();
+            if (this.nci.hasSpace()) { 
+                if (to > -1)
+                {
+                    this.nci.predmeti[to] = requesterNpi.popPredmetLoadout(t);
+                }
+                else
+                {
+                    this.nci.putFirst(requesterNpi.popPredmetLoadout(t));
+                }
+
+                //poslat update za container
+                networkObject.SendRpc(args.Info.SendingPlayer, RPC_OPEN_RESPONSE, 1, this.nci.getItemsNetwork());
+
+                requesterNpi.sendNetworkUpdate(false, true);
+            }
+        }
     }
 
     public override void ContainerToLoadout(RpcArgs args)
     {
-        throw new NotImplementedException();
+        if (networkObject.IsServer)
+        {
+            uint requester = args.Info.SendingPlayer.NetworkId;
+            NetworkPlayerInventory requesterNpi = FindByid(requester).GetComponent<NetworkPlayerInventory>();
+            int cont_index = args.GetNext<int>();
+
+            if (this.nci.predmeti[cont_index] != null) {
+                Predmet c = this.nci.predmeti[cont_index];
+                if (c.item.type == Item.Type.head && requesterNpi.getHeadItem() == null ||
+                c.item.type == Item.Type.chest && requesterNpi.getChestItem() == null ||
+                c.item.type == Item.Type.hands && requesterNpi.getHandsItem() == null ||
+                c.item.type == Item.Type.legs && requesterNpi.getLegsItem() == null ||
+                c.item.type == Item.Type.feet && requesterNpi.getFeetItem() == null) {//je valid
+                    
+                    this.nci.predmeti[cont_index] = requesterNpi.popPredmetLoadout(c.item.type);
+                    requesterNpi.SetPredmetLoadout(c);
+
+                    //poslat update za container
+                    networkObject.SendRpc(args.Info.SendingPlayer, RPC_OPEN_RESPONSE, 1, this.nci.getItemsNetwork());
+
+                    requesterNpi.sendNetworkUpdate(false, true);
+                }
+            }
+            
+
+        }
     }
 
     public override void ContainerToContainer(RpcArgs args)

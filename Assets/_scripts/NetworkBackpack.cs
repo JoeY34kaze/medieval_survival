@@ -92,7 +92,7 @@ public class NetworkBackpack : NetworkBackpackBehavior
                 //lahko pobere
                 //networkObject.AssignOwnership(args.Info.SendingPlayer);
                 NetworkPlayerInventory n = player.GetComponent<NetworkPlayerInventory>();
-                n.SetLoadoutItem(new Predmet(Mapper.instance.getItemById(GetComponent<identifier_helper>().id)));//to nrdi samo server..
+                n.SetPredmetLoadout(new Predmet(Mapper.instance.getItemById(GetComponent<identifier_helper>().id)));//to nrdi samo server..
                 n.sendNetworkUpdate(false, true);
                 sendOwnershipResponse(args.Info.SendingPlayer);
             }
@@ -213,7 +213,7 @@ public class NetworkBackpack : NetworkBackpackBehavior
                     Predmet l = this.npi.popPredmetLoadout(t);
                     Predmet b = this.nci.popPredmet(back_index);
                     this.nci.setPredmet(back_index, l);
-                    this.npi.SetLoadoutItem(b);
+                    this.npi.SetPredmetLoadout(b);
                     changed = true;
                 }
             }
@@ -381,8 +381,8 @@ public class NetworkBackpack : NetworkBackpackBehavior
         {
             int back_index = args.GetNext<int>();
             int bar_index = args.GetNext<int>();
-            if (npi.neutralStateHandler.isNotSelected(bar_index, -1))
-            {
+            //if (npi.neutralStateHandler.isNotSelected(bar_index, -1))
+            //{
                 if (this.nci.predmeti[back_index] != null)
                 {
 
@@ -397,7 +397,7 @@ public class NetworkBackpack : NetworkBackpackBehavior
 
 
                 }
-            }
+            //}
         }
 
     }
@@ -409,8 +409,8 @@ public class NetworkBackpack : NetworkBackpackBehavior
             int back_index = args.GetNext<int>();
             int bar_index = args.GetNext<int>();
 
-            if (npi.neutralStateHandler.isNotSelected(bar_index, -1))
-            {
+            //if (npi.neutralStateHandler.isNotSelected(bar_index, -1))
+            //{
                 if (npi.predmeti_hotbar[bar_index] != null)
                 {
                     //if (itemAllowedOnBar(this.nci.items[back_index].type))
@@ -425,7 +425,7 @@ public class NetworkBackpack : NetworkBackpackBehavior
                     this.npi.sendNetworkUpdate(true, false);
                 }//za inventorij/bar
                  //}
-            }
+            //}
         }
 
     }

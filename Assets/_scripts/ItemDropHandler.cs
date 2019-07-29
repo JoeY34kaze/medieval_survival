@@ -110,12 +110,19 @@ public class ItemDropHandler : MonoBehaviour, IDropHandler , IPointerClickHandle
         InventorySlot iss= GetComponent<InventorySlot>();
         if (eventData.button == PointerEventData.InputButton.Right && iss.GetPredmet() != null)
         {
-            if(iss.GetPredmet().item.type==Item.Type.backpack)//ce je backpack ga dropa
+            if (iss.GetPredmet().item.type == Item.Type.backpack)//ce je backpack ga dropa
                 networkPlayerInventory.backpackSpot.GetComponentInChildren<NetworkBackpack>().local_player_backpack_unequip_request();
-            else if(iss is InventorySlotPersonal || iss is InventorySlotLoadout)//ce je personal inventorij al pa loadout k je blo to spisan ze prej
-                networkPlayerInventory.OnRightClick(gameObject);
-            else if(iss is InventorySlotBackpack)
+            else if (iss is InventorySlotPersonal)//ce je personal inventorij al pa loadout k je blo to spisan ze prej
+                networkPlayerInventory.OnRightClickPersonalInventory(gameObject);
+            else if (iss is InventorySlotBackpack)
                 networkPlayerInventory.OnRightClickBackpack(gameObject);
+            else if (iss is InventorySlotBar)
+                networkPlayerInventory.OnRightClickBar(gameObject);
+            else if (iss is InventorySlotLoadout)
+                networkPlayerInventory.OnRightClickLoadout(gameObject);
+            else if (iss is InventorySlotContainer)
+                networkPlayerInventory.OnRightClickContainer(gameObject);
+
         }
     }
 }

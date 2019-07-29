@@ -1124,12 +1124,12 @@ private void ServerSendOnAcceptedData() {
             this.dead = args.GetNext<bool>();
             this.health = args.GetNext<float>();
 
-            this.npi.SetLoadoutItem(Predmet.createNewPredmet(args.GetNext<string>()));
-            this.npi.SetLoadoutItem(Predmet.createNewPredmet(args.GetNext<string>()));
-            this.npi.SetLoadoutItem(Predmet.createNewPredmet(args.GetNext<string>()));
-            this.npi.SetLoadoutItem(Predmet.createNewPredmet(args.GetNext<string>()));
-            this.npi.SetLoadoutItem(Predmet.createNewPredmet(args.GetNext<string>()));
-            this.npi.SetLoadoutItem(Predmet.createNewPredmet(args.GetNext<string>()));//Backpack??
+            this.npi.SetPredmetLoadout(Predmet.createNewPredmet(args.GetNext<string>()));
+            this.npi.SetPredmetLoadout(Predmet.createNewPredmet(args.GetNext<string>()));
+            this.npi.SetPredmetLoadout(Predmet.createNewPredmet(args.GetNext<string>()));
+            this.npi.SetPredmetLoadout(Predmet.createNewPredmet(args.GetNext<string>()));
+            this.npi.SetPredmetLoadout(Predmet.createNewPredmet(args.GetNext<string>()));
+            this.npi.SetPredmetLoadout(Predmet.createNewPredmet(args.GetNext<string>()));//Backpack??
 
 
 
