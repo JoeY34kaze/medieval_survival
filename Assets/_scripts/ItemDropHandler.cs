@@ -91,6 +91,7 @@ public class ItemDropHandler : MonoBehaviour, IDropHandler , IPointerClickHandle
             else if (inventorySlot is InventorySlotBackpack)
                 this.networkPlayerInventory.backpack_inventory.localPlayerdropItemFromBackpackRequest(this.networkPlayerInventory.getIndexFromName(networkPlayerInventory.draggedItemParent.name));
             else if (inventorySlot is InventorySlotBar) this.networkPlayerInventory.localPlayerDropFromBarRequest(this.networkPlayerInventory.getIndexFromName(networkPlayerInventory.draggedItemParent.name));
+            else if (inventorySlot is InventorySlotContainer) this.networkPlayerInventory.localPlayerDropItemFromContainerRequest(this.networkPlayerInventory.getIndexFromName(networkPlayerInventory.draggedItemParent.name));
         }
     }
 

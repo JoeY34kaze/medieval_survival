@@ -32,15 +32,17 @@ public class craftingPanelHandler : MonoBehaviour
     public GameObject queue_element_prefab;
 
     public Text timer;
-    private List<PredmetRecepie> queueRecepieList;
+    //private List<PredmetRecepie> queueRecepieList;
     private NetworkPlayerInventory npi;
 
-    private int current_craft_remaining_time;
-    private IEnumerator CuntQueue;
+
 
     void OnEnable()
     {
-        if(stats==null)stats = transform.root.GetComponent<NetworkPlayerStats>();
+
+        PlayerCraftingManager.Instance.timer= this.timer;
+        PlayerCraftingManager.Instance.panel = this;
+        if (stats==null)stats = transform.root.GetComponent<NetworkPlayerStats>();
 
         foreach (Transform child in this.craftingTypeTabsList) Destroy(child.gameObject);
 
@@ -130,7 +132,7 @@ public class craftingPanelHandler : MonoBehaviour
     }
     private void Start()
     {
-        this.queueRecepieList = new List<PredmetRecepie>();
+        PlayerCraftingManager.Instance.queueRecepieList = new List<PredmetRecepie>();
         if (this.npi == null) this.npi = transform.root.GetComponent<NetworkPlayerInventory>();
 
     }
@@ -225,8 +227,8 @@ public class craftingPanelHandler : MonoBehaviour
         int current = 1;
         if (!this.craftOrder.text.Equals(""))
             current = int.Parse(this.craftOrder.text);
-        if (current > 0)
-            current += 1;
+        //if (current > 0)
+          //  current += 1;
         int max = GetMaxPossibleCraftsWithRegardsToCraftingQueue();
         if (current > max)
             current = max;
@@ -307,7 +309,7 @@ public class craftingPanelHandler : MonoBehaviour
     private int[,] GetCurrentAmountOfStuffInQueue()
     {
         List<int> uniq = new List<int>();
-        foreach (PredmetRecepie r in this.queueRecepieList) {
+        foreach (PredmetRecepie r in PlayerCraftingManager.Instance.queueRecepieList) {
             foreach (Item i in r.ingredients)
                 if (!uniq.Contains(i.id))
                     uniq.Add(i.id);
@@ -317,7 +319,7 @@ public class craftingPanelHandler : MonoBehaviour
         for (int i = 0; i < uniq.Count; i++)
             rez[i,0] = uniq[i];
 
-        foreach (PredmetRecepie r in this.queueRecepieList)
+        foreach (PredmetRecepie r in PlayerCraftingManager.Instance.queueRecepieList)
         {
             for(int j=0;j<r.ingredients.GetLength(0); j++)
             {
@@ -357,7 +359,7 @@ public class craftingPanelHandler : MonoBehaviour
             return;
         }
 
-        this.queueRecepieList = r;
+        PlayerCraftingManager.Instance.queueRecepieList = r;
         //mas recepte k se trenutno craftajo na serverju, za vsazga mas tud timer in vse, zmer to na un panel, na vsazga nabij opcijo da skensla, rpc za skenslanje, logika za kenslanje je pa prakticno ze napisana. ene 3 ure in je done
         foreach (Transform c in this.queue_list) Destroy(c.gameObject);
 
@@ -374,19 +376,10 @@ public class craftingPanelHandler : MonoBehaviour
                     localCancelCraftRequest(p, btn.transform.GetSiblingIndex());
                 });
         }
-        this.current_craft_remaining_time = time_remaining_of_current_craft;
 
-        //-------------------------------------------SAMO TLE SE STELA TO COROUTINO
-        if (this.CuntQueue != null)
-            StopCoroutine(this.CuntQueue);
-        this.CuntQueue = null;
-        if (this.CuntQueue == null)
-        {
-            this.CuntQueue = Cunter();
-            StartCoroutine(this.CuntQueue);
-        }
 
-        //-----------------------------------------------------------------------------------
+        PlayerCraftingManager.Instance.current_craft_remaining_time = time_remaining_of_current_craft;
+        PlayerCraftingManager.Instance.resetCoroutine();
     }
 
     private void localCancelCraftRequest(PredmetRecepie p, int index_sibling)
@@ -394,54 +387,9 @@ public class craftingPanelHandler : MonoBehaviour
         transform.root.GetComponent<NetworkPlayerInventory>().localCancelCraftRequest(p, index_sibling);
     }
 
-    /// <summary>
-    /// samo lokalno se rihta, to je samo maska za playerja, vsa logika je na serverju
-    /// </summary>
-    internal bool fixNextInQueue() {
-        if (this.queue_list.childCount > 0)
-        {
-            Destroy(this.queue_list.GetChild(0).gameObject);
-            if (this.queueRecepieList.Count > 1)
-            {
-                PredmetRecepie next = this.queueRecepieList[1];
-                this.current_craft_remaining_time = next.crafting_time;
-                this.queueRecepieList.Remove(this.queueRecepieList[0]);
-                
-            }
-            else
-            {
-                this.queueRecepieList.Clear();
-                this.timer.text = "";
-                return false;
-            }
-        }
-        return true;
-    }
 
-    internal IEnumerator Cunter() {//to nj bi skos delal. loh damo tud u field as in private IEnumerator coutningRoutine in mamo referenco na to in ce je kdaj ==null ga zastartamo. tko k je zdle tega nemormo ker je nek u ozadju dela bogvekaj
-        bool t = true; ;
-        while (t) {
 
-            if (this.current_craft_remaining_time > 0)
-            {
-                this.current_craft_remaining_time -= 1;
-                this.timer.text = current_craft_remaining_time + "";
-            }
-            else {
-                if (this.queueRecepieList.Count > 0)
-                    t=fixNextInQueue();//gremo naslednga uzet
-                else {
-                    this.timer.text = "";//koncamo
-                    this.queueRecepieList.Clear();
-                    yield return null;
-                    t = false;
-                }
-            }
-            yield return new WaitForSecondsRealtime(1);
-        }
-        this.queueRecepieList.Clear();
 
-    }
 }
 
 

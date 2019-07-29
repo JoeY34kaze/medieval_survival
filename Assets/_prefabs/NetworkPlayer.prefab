@@ -10277,7 +10277,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   draggedItemParent: {fileID: 0}
-  draggedParent_sibling_index: -1
+  dragged_gameobjectSiblingIndex: -1
   draggedParent_parent_sibling_index: -1
   space: 20
   panel_personalInventorySlots:
@@ -18977,6 +18977,8 @@ MonoBehaviour:
   queue_element_prefab: {fileID: 3783309773081570554, guid: f9b0489466624c34982709fb6ddfc491,
     type: 3}
   timer: {fileID: 9213432494532611621}
+  craftingQueuePrefab: {fileID: 5750284755450048934, guid: 7ad75b67d84a7094cbcdc1c6c7d89a6b,
+    type: 3}
 --- !u!1 &5972425603631758697
 GameObject:
   m_ObjectHideFlags: 0

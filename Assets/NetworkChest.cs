@@ -183,13 +183,19 @@ public class NetworkChest : NetworkContainer
     {
         networkObject.SendRpc(RPC_CONTAINER_TO_CONTAINER, Receivers.Server, indexFrom, indexTo);
     }
+
+    internal override void localRequestDropItemContainer(int v)
+    {
+        networkObject.SendRpc(RPC_DROP_ITEM, Receivers.Server, v);
+    }
+
     //  RPCJI NA SERVERJU
 
 
-        /// <summary>
-        /// nekka je napisan tud za desni klik
-        /// </summary>
-        /// <param name="args"></param>
+    /// <summary>
+    /// nekka je napisan tud za desni klik
+    /// </summary>
+    /// <param name="args"></param>
     public override void PersonalToContainer(RpcArgs args)
     {
         if (networkObject.IsServer) {
@@ -381,6 +387,18 @@ public class NetworkChest : NetworkContainer
             this.nci.swap(args.GetNext<int>(), args.GetNext<int>());
             //poslat update za container
             networkObject.SendRpc(args.Info.SendingPlayer, RPC_OPEN_RESPONSE, 1, this.nci.getItemsNetwork());
+        }
+    }
+
+    /// <summary>
+    /// dropa item direkt. ce je container tak da se kej crafta not ( pecica) je treba nekak pohendlat interruption, magar tko kot je zrihtan player chafting v npi
+    /// </summary>
+    /// <param name="args"></param>
+    public override void dropItem(RpcArgs args)
+    {
+        if (networkObject.IsServer) {
+            Predmet p = this.nci.popPredmet(args.GetNext<int>());
+            FindByid(args.Info.SendingPlayer.NetworkId).GetComponent<NetworkPlayerInventory>().instantiateDroppedPredmet(p);
         }
     }
 

@@ -173,6 +173,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         else { Debug.Log("error - fix this"); }
     }
 
+
     /// <summary>
     /// vrne kter weapon ima trenutno v roki. ni nujno da ima ksn weapon sploh v roki mind you.
     /// </summary>
@@ -1425,7 +1426,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         networkObject.SendRpc(RPC_NETWORK_INSTANTIATION_SERVER_REQUEST, Receivers.Server, p.toNetworkString(), camera_vector, camera_forward);
     }
 
-    private int getNetworkIdFromItem(Item item)
+    private int getNetworkIdFromInteractableObject(Item item)
     {
         GameObject[] prefabs = NetworkManager.Instance.Interactable_objectNetworkObject;
 
@@ -1466,12 +1467,13 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         p.setParametersFromNetworkString(args.GetNext<string>());
         Vector3 pos = args.GetNext<Vector3>();
         Vector3 dir = args.GetNext<Vector3>();
-        int net_id = getNetworkIdFromItem(p.item);
-        if (net_id == -1) return;//item is not interactable object
-        Interactable_objectBehavior b = NetworkManager.Instance.InstantiateInteractable_object(net_id, pos);
-
-        //apply force on clients, sets predmet
-        b.gameObject.GetComponent<Interactable>().setStartingInstantiationParameters(p, pos, dir);
+        int net_id = getNetworkIdFromInteractableObject(p.item);
+        if (net_id != -1)
+        { //item is interactable object
+            Interactable_objectBehavior b = NetworkManager.Instance.InstantiateInteractable_object(net_id, pos);
+            //apply force on clients, sets predmet
+            b.gameObject.GetComponent<Interactable>().setStartingInstantiationParameters(p, pos, dir);
+        }
 
     }
 
@@ -2300,6 +2302,11 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         int indexTo = getIndexFromName(to.name);
 
         ncbh.localRequestContainerToContainer(indexFrom, indexTo);
+    }
+
+    internal void localPlayerDropItemFromContainerRequest(int v)
+    {
+        GetComponentInChildren<UILogic>().currentActiveContainer.localRequestDropItemContainer(v);
     }
 
     #endregion

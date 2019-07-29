@@ -10,6 +10,7 @@ using UnityEngine;
 /// </summary>
 public class NetworkContainer : NetworkContainerBehavior
 {
+    #region RPC
     public override void ContainerToContainer(RpcArgs args)
     {
         throw new NotImplementedException();
@@ -70,6 +71,13 @@ public class NetworkContainer : NetworkContainerBehavior
         throw new NotImplementedException();
     }
 
+    public override void dropItem(RpcArgs args)
+    {
+        throw new NotImplementedException();
+    }
+    #endregion
+    #region LOCAL CALLS
+
     internal virtual void localRequestPersonalToContainer(int indexFrom, int indexTo) {
         throw new NotImplementedException();
     }
@@ -113,4 +121,10 @@ public class NetworkContainer : NetworkContainerBehavior
     {
         throw new NotImplementedException();
     }
+
+    internal virtual void localRequestDropItemContainer(int v)
+    {
+        throw new NotImplementedException();
+    }
+    #endregion
 }
