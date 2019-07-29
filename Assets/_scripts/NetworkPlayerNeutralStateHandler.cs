@@ -28,6 +28,9 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
     private Renderer currentPlaceableRenderer;
 
     private float mouseWheelRotation;
+    [SerializeField]
+    private LayerMask placement_layer_mask;
+
     private void Start()
     {
         this.combat_handler = GetComponent<NetworkPlayerCombatHandler>();
@@ -128,11 +131,16 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
 
     private RaycastHit local_MoveCurrentPlaceableObjectToMouseRay()
     {
-        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-
+        Ray ray = Camera.main.ScreenPointToRay(new Vector3(Screen.width * 0.5f, Screen.height * 0.5f,0f));
+        //ignorirat mora 9,10,13 ter tud vse kar spada pod UI, ker je canvas narisan cez ekran.
+       /* int layermask1 = (1 << 9);
+        int layermask4 = (1 << 5);
+        int layermask2 = (1 << 10);
+        int layermask3 =  (1 << 13);
+        int finalLayermask = ~(layermask3 | layermask1 | layermask2 | layermask4 );*/
         RaycastHit hitInfo;
-        if (Physics.Raycast(ray, out hitInfo)) {
-
+        if (Physics.Raycast(ray, out hitInfo, Mathf.Infinity, this.placement_layer_mask)) {
+            Debug.Log(hitInfo.collider.name);
             Vector3 offsetOfColliderHeight=Vector3.up* this.currentPlaceableCollider.size.y / 2;
             //pivot objekta je v sredini njegovga colliderja. tko da ga izrise not v zemljo. to rabmo compensatat
             if (!this.current_placeable_item.ignorePlacementNormal)

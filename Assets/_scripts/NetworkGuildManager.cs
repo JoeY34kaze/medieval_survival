@@ -29,7 +29,7 @@ public class NetworkGuildManager : NetworkGuildManagerBehavior
     private panel_guild_handler pgh;
     public NetworkPlayerStats localStats;
 
-    private UILogic uiLogic;
+    //private UILogic uiLogic;
 
     #endregion
 
@@ -164,8 +164,7 @@ public class NetworkGuildManager : NetworkGuildManagerBehavior
     {
         Debug.Log("Modification CLICKED");
         if (localPlayer == null) localPlayer = FindByid(NetworkManager.Instance.Networker.Me.NetworkId);
-        if (this.uiLogic == null) { Debug.LogError("jz sm prizadet"); localPlayer.GetComponentInChildren<UILogic>().showGuildModificationPanel(true, this); this.uiLogic = localPlayer.GetComponentInChildren<UILogic>(); }
-        else { this.uiLogic.showGuildModificationPanel(true, this); }
+        localPlayer.GetComponentInChildren<UILogic>().showGuildModificationPanel(true, this);
 
     }
 
@@ -195,7 +194,7 @@ public class NetworkGuildManager : NetworkGuildManagerBehavior
 
 
 
-        this.uiLogic.showGuildModificationPanel(false, this);
+        localPlayer.GetComponentInChildren<UILogic>().showGuildModificationPanel(false, this);
 
 
         networkObject.SendRpc(RPC_CREATE_OR_MODIFY_GUILD_REQUEST, Receivers.Server, name, tag, color, image_byte);

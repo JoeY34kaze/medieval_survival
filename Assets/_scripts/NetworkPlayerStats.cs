@@ -917,9 +917,6 @@ napadenmu playerju da si poupdejta health. ta player pol ko si je updejtov healt
             this.color_guild = args.GetNext<Color>();
             this.image_guild = args.GetNext<byte[]>();
 
-            //samo ownerju se nastav ime v inventoriju. drugi nimajo sploh canvasa
-            if (networkObject.IsOwner) {this.inventory_guild_name.text = this.name_guild; }
-
             // vsi nastavjo
             updateDisplayName();
         }

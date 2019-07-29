@@ -28,7 +28,7 @@ TagManager:
   - player_container_collider
   - world_model
   - Resource
-  - 
+  - Placeable_local
   - 
   - 
   - 

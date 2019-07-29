@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 496286}
   - component: {fileID: 20569220}
   - component: {fileID: 7352577363110337176}
-  m_Layer: 2
+  m_Layer: 13
   m_Name: chest_0_local
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -76,7 +76,7 @@ GameObject:
   - component: {fileID: 480112}
   - component: {fileID: 3360060}
   - component: {fileID: 2392830}
-  m_Layer: 2
+  m_Layer: 13
   m_Name: Chest_1
   m_TagString: Untagged
   m_Icon: {fileID: 0}

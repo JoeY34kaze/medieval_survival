@@ -72,6 +72,7 @@ public class UILogic : MonoBehaviour
             else {
                 this.GuildPanel.SetActive(true);
                 this.hasOpenWindow = true;
+                NetworkGuildManager.Instance.SetMemberPanel(true);
                 enableMouse();
             }  
         }
@@ -155,6 +156,7 @@ public class UILogic : MonoBehaviour
         this.hasOpenWindow = false;
         this.currentActiveContainer = null;
         this.panelsPredmetiContainer = null;
+        NetworkGuildManager.Instance.SetMemberPanel(false);
 
         DisableMouse();
         GetComponentInParent<NetworkPlayerAnimationLogic>().hookChestRotation = true;
@@ -234,5 +236,12 @@ public class UILogic : MonoBehaviour
     internal void setCurrentActiveContainer(NetworkContainer container)
     {
         this.currentActiveContainer = container;
+    }
+
+    public void OnGuildModificationButtonClick() {
+        clear();
+        enableMouse();
+        NetworkGuildManager.Instance.OnButtonModifyClick();
+        
     }
 }
