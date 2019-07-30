@@ -166,11 +166,13 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 46a13300836ed05499f0beab60b8f4bf, type: 2}
   - {fileID: 11400000, guid: 408cb180addef0b4faa547522a042224, type: 2}
   - {fileID: 11400000, guid: e96cf4f0d2315f848bb20a83abd11434, type: 2}
+  - {fileID: 11400000, guid: 24ff9ab344b2a5d4fbd1b34f127025f0, type: 2}
   recepies:
   - {fileID: 11400000, guid: f9caf05e7002c3f4bbe9f2e5b8380a06, type: 2}
   - {fileID: 11400000, guid: e6c0bea530fe58647b364bea19644366, type: 2}
   - {fileID: 11400000, guid: cb20b12d7e2f027409d107e723d335b8, type: 2}
   - {fileID: 11400000, guid: f994972ef8b5b184a9505d86473d614c, type: 2}
+  - {fileID: 11400000, guid: a21fe7493a492ae4099273097c982db8, type: 2}
 --- !u!1 &5856741249316013018
 GameObject:
   m_ObjectHideFlags: 0

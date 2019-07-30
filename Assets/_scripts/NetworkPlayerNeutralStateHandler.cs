@@ -33,6 +33,8 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
 
     [SerializeField]
     private float placeable_snapping_range = 8f;
+    [SerializeField]
+    private float placementRange = 6f;
 
     private void Start()
     {
@@ -122,11 +124,18 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
     {
         //nevem kk bom se zrihtov tole tbh
         if (current_placeable_item.snappableType == Item.SnappableType.none || current_placeable_item.snappableType == Item.SnappableType.free_in_range)
-            if (Vector3.Distance(transform.position, this.CurrentLocalPlaceable.transform.position) < 5f && Vector3.Angle(Vector3.up, h.normal) < 50f)
+            if (Vector3.Distance(transform.position, this.CurrentLocalPlaceable.transform.position) < this.placementRange && Vector3.Angle(Vector3.up, h.normal) < 50f)
                 return true;
             else return false;
-        else if (current_placeable_item.snappableType == Item.SnappableType.foundation) {
-            if (Vector3.Distance(transform.position, this.CurrentLocalPlaceable.transform.position)<5f & currentPlaceableIsCollidingWithTerrain())
+        else if (current_placeable_item.snappableType == Item.SnappableType.foundation)
+        {
+            if (Vector3.Distance(transform.position, this.CurrentLocalPlaceable.transform.position) < this.placementRange & currentPlaceableIsCollidingWithTerrain())
+                return true;
+            else return false;
+        }
+        else if (current_placeable_item.snappableType == Item.SnappableType.wall || current_placeable_item.snappableType == Item.SnappableType.door_frame || current_placeable_item.snappableType == Item.SnappableType.windows_frame) {
+            //tle bo sicer treba prevert ce se snapa na pravi objekt pa ob postavlanju poslat na server kam nj bi se to prlimal.
+            if (Vector3.Distance(transform.position, this.CurrentLocalPlaceable.transform.position) < this.placementRange & currentPlaceableIsCollidingWithTerrain())
                 return true;
             else return false;
         }
@@ -147,20 +156,23 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
     private bool currentTransformOfPlaceableIsValid()
     {
         //nevem kk bom se zrihtov tole tbh
-        if (Vector3.Distance(transform.position, this.CurrentLocalPlaceable.transform.position) < 4f)
+        if (Vector3.Distance(transform.position, this.CurrentLocalPlaceable.transform.position) < this.placementRange)
             return true;
         else return false;
     }
 
     private void rotatePlaceableWithMouseFree(float allowedAngleChunk)
     {
+        this.mouseWheelRotation = Input.mouseScrollDelta.y;
+        if (this.mouseWheelRotation == 0) return;
+
         if (allowedAngleChunk <1)
         {
-            this.mouseWheelRotation = Input.mouseScrollDelta.y;
+            
             this.CurrentLocalPlaceable.transform.Rotate(Vector3.up, this.mouseWheelRotation * 10);
         }
         else{
-            this.mouseWheelRotation = Input.mouseScrollDelta.y;
+            
             this.CurrentLocalPlaceable.transform.Rotate(CurrentLocalPlaceable.transform.up, (this.mouseWheelRotation/ this.mouseWheelRotation) * allowedAngleChunk);
         }
     }
@@ -213,22 +225,23 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
     /// vrne najblizjo tocko kamor se lahko nas trenutno izban objekt snappa. na podlagi odgovora bomo postavli in rotiral objekt. Ce je valid al pa ne se ugotovi ksnej. to je zato da se foundation vid kam ga hoce postavt ampak se sezmer pobarva
     /// </summary>
     /// <param name="point"></param>
-    /// <param name="snappableType"></param>
+    /// <param name="current_snappable_type"></param>
     /// <returns></returns>
-    private SnappableObject GetClosestValidSnapPointInRange(Vector3 point, Item.SnappableType snappableType)
+    private SnappableObject GetClosestValidSnapPointInRange(Vector3 point, Item.SnappableType current_snappable_type)
     {
+        SnappableObject r = null;
 
-        if (snappableType == Item.SnappableType.foundation)
+        if (current_snappable_type == Item.SnappableType.foundation)
         {//foundation se itak snappa na 4 strani, ista visina, rotacija ni vazna, vzamemo isto rotacijo zaenkrat.
             //ce je scale 1 potem je snappable point za naslednji foundation v vsako izmed 3 strani za |scale| dolzino, pod pogojem, da se collida z terenom
             float dolzinaStranice = currentPlaceableCollider.gameObject.transform.localScale.x;//je itak kocka
-            
 
-            NetworkPlaceable[] all_placeables = (NetworkPlaceable [])GameObject.FindObjectsOfType<NetworkPlaceable>();
+
+            NetworkPlaceable[] all_placeables = (NetworkPlaceable[])GameObject.FindObjectsOfType<NetworkPlaceable>();
             if (all_placeables == null) return null;
-            NetworkPlaceable closest = FindClosestPlaceableFromArray(all_placeables, point, snappableType);
+            NetworkPlaceable closest = FindClosestPlaceableFromArray(all_placeables, point, current_snappable_type);//izmed vseh poisce tiste tocke ktere so legitimne, da se na njih prlima foundation
             if (closest == null) return null;
-            //mamo samo 4 tocke. poiscmo najblizjo
+            //mamo samo 4 tocke - ker se foundation lahko prlima SAMO na drug foundation. poiscmo najblizjo
             Vector3 center = closest.transform.position;
             Vector3 point1 = center + closest.transform.forward * dolzinaStranice;//naprej
             Vector3 point2 = center - closest.transform.forward * dolzinaStranice;//nazaj
@@ -236,7 +249,7 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
             Vector3 point3 = center + closest.transform.right * dolzinaStranice;//desno
             Vector3 point4 = center - closest.transform.right * dolzinaStranice;//levo
 
-            SnappableObject r = null;
+         
 
             Vector3 rezz = point1;
 
@@ -246,12 +259,55 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
             if (Vector3.Distance(point, point4) < min) { min = Vector3.Distance(point, point4); rezz = point4; }
 
             r = new SnappableObject(rezz, closest.transform.rotation);//nevem ce je rotacija prav
-            if(Vector3.Distance(point,r.position)<this.placeable_snapping_range)
+            if (Vector3.Distance(point, r.position) < this.placeable_snapping_range)
                 return r;
-            
+
 
         }
-        return null;
+        else if (current_snappable_type == Item.SnappableType.wall || current_snappable_type == Item.SnappableType.door_frame || current_snappable_type == Item.SnappableType.windows_frame) {
+            //ti objekti se lahko nalimajo samo na foundation, floor, wall, door_frame ali window_frame.
+            NetworkPlaceable[] all_placeables = (NetworkPlaceable[])GameObject.FindObjectsOfType<NetworkPlaceable>();
+            if (all_placeables == null) return null;
+            NetworkPlaceable closest = FindClosestPlaceableFromArray(all_placeables, point, current_snappable_type);//izmed vseh poisce tiste tocke ktere so legitimne, da se na njih prlima foundation
+            if (closest == null) return null;
+
+            switch (closest.snappableType) {
+                case Item.SnappableType.foundation: {
+                        //foundation lahko postavmo na 4 strani. nevem kk bo pohendlat zaenkrat da bo bla samo 1 stena med dvemi kockami..
+                        float dolzinaStranice_foundationa = closest.gameObject.transform.localScale.x;//nima veze kaj vzames, je kocka
+
+                        Vector3 center = closest.transform.position;
+                        //---------------------------------------------------smer------------------------------------------visina-----------------------
+                        Vector3 point1 = center + (closest.transform.forward * dolzinaStranice_foundationa/2) + closest.transform.up * dolzinaStranice_foundationa;//naprej
+                        Vector3 point2 = center - (closest.transform.forward * dolzinaStranice_foundationa/2) + closest.transform.up * dolzinaStranice_foundationa;//nazaj
+
+                        Vector3 point3 = center + closest.transform.right * dolzinaStranice_foundationa/2 + closest.transform.up * dolzinaStranice_foundationa;//desno
+                        Vector3 point4 = center - closest.transform.right * dolzinaStranice_foundationa/2 + closest.transform.up * dolzinaStranice_foundationa;//levo
+
+
+                        //izmed teh potencialnih tock dobit najblizjo
+
+                        Vector3 rezz = point1;
+                        float min = Vector3.Distance(point, point1);
+                        Quaternion rot = closest.transform.rotation;
+
+                        if (Vector3.Distance(point, point2) < min) { min = Vector3.Distance(point, point2); rezz = point2; rot = Quaternion.AngleAxis(180, closest.transform.up); }
+                        if (Vector3.Distance(point, point3) < min) { min = Vector3.Distance(point, point3); rezz = point3; rot = Quaternion.AngleAxis(90, closest.transform.up); }
+                        if (Vector3.Distance(point, point4) < min) { min = Vector3.Distance(point, point4); rezz = point4; rot = Quaternion.AngleAxis(270, closest.transform.up); }
+
+                        r = new SnappableObject(rezz, rot);//nevem ce je rotacija prav
+
+                        if (Vector3.Distance(point, r.position) < this.placeable_snapping_range)
+                            return r;
+                        break;
+                    }
+                default:
+                    Debug.LogError("notImplemented yet");
+                    break;
+            }
+
+        }
+        return r;
     }
 
     private NetworkPlaceable FindClosestPlaceableFromArray(NetworkPlaceable[] all_placeables, Vector3 point,  Item.SnappableType snappableType)
@@ -260,7 +316,7 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
         float current_min = float.MaxValue;
         float current_dist =0;
         foreach (NetworkPlaceable p in all_placeables) {
-            if (p.snappableType == snappableType)
+            if (PlaceableCanSnapTo(snappableType, p.snappableType))
             {
                 current_dist = (p.transform.position - point).sqrMagnitude;//Vector3.Distance je pocasen, ta je bols
                 if (current_dist < current_min)
@@ -271,6 +327,23 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
             }
         }
         return kandidat;
+    }
+
+    private bool PlaceableCanSnapTo(Item.SnappableType current, Item.SnappableType other)
+    {
+        switch (current) {
+            case Item.SnappableType.foundation:
+                    return current == other;
+            case Item.SnappableType.wall:
+                if (other == Item.SnappableType.foundation || other == Item.SnappableType.wall || other == Item.SnappableType.door_frame || other == Item.SnappableType.windows_frame || other == Item.SnappableType.floor)
+                    return true;
+                break;
+            default:
+                return false;
+                
+        }
+        return false;
+
     }
 
     /// <summary>

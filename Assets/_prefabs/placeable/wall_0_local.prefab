@@ -12,9 +12,9 @@ GameObject:
   - component: {fileID: 1805417395977712643}
   - component: {fileID: 1805417395977712652}
   - component: {fileID: 1805417395977712653}
-  - component: {fileID: 6195028864623292675}
-  m_Layer: 0
-  m_Name: foundation_0_networked
+  - component: {fileID: 4701023138851119582}
+  m_Layer: 13
+  m_Name: wall_0_local
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -29,7 +29,7 @@ Transform:
   m_GameObject: {fileID: 1805417395977712654}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 323.47968, y: 39.382854, z: 560.56244}
-  m_LocalScale: {x: 3, y: 3, z: 3}
+  m_LocalScale: {x: 3, y: 3, z: 0.1}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
@@ -59,7 +59,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: b171df2116ec5554a8fa613a98146954, type: 2}
+  - {fileID: 2100000, guid: 1648a9aa7a1204e428ecc9d5b5a43c90, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -92,7 +92,7 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &6195028864623292675
+--- !u!114 &4701023138851119582
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -101,7 +101,6 @@ MonoBehaviour:
   m_GameObject: {fileID: 1805417395977712654}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2b298bb46440e6f49a63781f93d94be4, type: 3}
+  m_Script: {fileID: 11500000, guid: 5cfbc831614f4184ba5fe410ec87de29, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  snappableType: 1
