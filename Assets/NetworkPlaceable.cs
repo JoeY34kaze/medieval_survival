@@ -12,6 +12,9 @@ using BeardedManStudios.Forge.Networking;
 public class NetworkPlaceable : NetworkPlaceableBehavior
 {
     public Predmet p;
+    [SerializeField]
+    public Item.SnappableType snappableType;
+
     public void init(Predmet p)
     {
         this.p = p;
@@ -34,6 +37,8 @@ public class NetworkPlaceable : NetworkPlaceableBehavior
          */
         }
     }
+
+
 
     /*
     internal override void setStartingInstantiationParameters(Predmet p, Vector3 pos, Vector3 dir)

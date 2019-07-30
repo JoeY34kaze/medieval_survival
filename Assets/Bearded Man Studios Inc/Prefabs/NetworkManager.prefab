@@ -84,9 +84,13 @@ MonoBehaviour:
   NetworkBackpackNetworkObject: []
   NetworkCameraNetworkObject:
   - {fileID: 139536, guid: 661f29f0c0c86fa47b6015bd602d0ac6, type: 3}
+  NetworkContainerItemsNetworkObject: []
   NetworkContainerNetworkObject: []
   NetworkGuildManagerNetworkObject:
   - {fileID: 5449284050390073438, guid: d3a22c092c333f94e812346308e5bb63, type: 3}
+  NetworkPlaceableNetworkObject:
+  - {fileID: 132834, guid: c005470ae31f1f146bdda4536f3e9be5, type: 3}
+  - {fileID: 1805417395977712654, guid: 9b6fabd4b2753604eaf462dd7510042a, type: 3}
   NetworkPlayerAnimationNetworkObject: []
   NetworkPlayerCameraHandlerNetworkObject: []
   NetworkPlayerCombatNetworkObject: []
@@ -103,6 +107,4 @@ MonoBehaviour:
   Network_bodyNetworkObject:
   - {fileID: 6172314989953794349, guid: 021332c4eb862d945b0714f32599f2e4, type: 3}
   TestNetworkObject: []
-  NetworkPlaceableNetworkObject:
-  - {fileID: 132834, guid: c005470ae31f1f146bdda4536f3e9be5, type: 3}
   automaticScenes: 1

@@ -8,6 +8,7 @@ public class Item : ScriptableObject
 {
     public string Display_name = "New item";
     public enum Type { head, chest, hands, feet, legs, ranged, weapon, shield, backpack,tool,resource, placeable };
+    public enum SnappableType { none, foundation, wall, wall_attachment_top, wall_attachment_side,wall_attachment_free, door, window, window_attachment, free_in_range}//tle so opisani vsi nacini kko se placable itemi snappajo na ksno stvar
     public Type type;
     public Sprite icon = null;
     public int damage;
@@ -27,4 +28,5 @@ public class Item : ScriptableObject
     public GameObject placeable_Local_object;
     public GameObject placeable_networked_object;
     public bool ignorePlacementNormal;
+    public SnappableType snappableType;
 }

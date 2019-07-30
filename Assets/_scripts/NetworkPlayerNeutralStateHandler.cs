@@ -31,6 +31,9 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
     [SerializeField]
     private LayerMask placement_layer_mask;
 
+    [SerializeField]
+    private float placeable_snapping_range = 8f;
+
     private void Start()
     {
         this.combat_handler = GetComponent<NetworkPlayerCombatHandler>();
@@ -63,7 +66,7 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
                     }
                 }
                 else if (this.current_placeable_item != null) {
-
+                    if(this.CurrentLocalPlaceable.GetComponent<LocalPlaceableHelper>()!=null) this.CurrentLocalPlaceable.GetComponent<LocalPlaceableHelper>().isSnapping = false;
                     handlePlaceableLocalPlacementSelection();
                 }
             }
@@ -76,7 +79,7 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
     private void handlePlaceableLocalPlacementSelection()
     {
         RaycastHit h= local_MoveCurrentPlaceableObjectToMouseRay();
-        local_rotatePlaceableWithMousewheel();
+        rotatePlaceableWithMouseFree(GetAllowedAngleRotationFromCurrentPlaceable());
 
         if (currentTransformOfPlaceableIsValid(h))
         {
@@ -87,7 +90,7 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
         }
         else
         {
-            if (this.previously_valid_position != null && this.previously_valid_rotation != null)
+            if (this.previously_valid_position != Vector3.zero && this.previously_valid_rotation != Quaternion.identity)
             {
                 this.CurrentLocalPlaceable.transform.position = this.previously_valid_position;
                 this.CurrentLocalPlaceable.transform.rotation = this.previously_valid_rotation;
@@ -97,6 +100,19 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
         }
     }
 
+    //vrne stopinje kolkr se loh obrne. ce je 0 ni limita, se loh obraca kolkr hoce
+    private float GetAllowedAngleRotationFromCurrentPlaceable()
+    {
+        //karkoli se ne snappa trenutno lahko rotiramo in pade v prvi if. drugi so samo za izbiranje kote, potem ko je ze snappan gor
+        if (current_placeable_item.snappableType == Item.SnappableType.none || current_placeable_item.snappableType == Item.SnappableType.free_in_range || current_placeable_item.snappableType == Item.SnappableType.wall_attachment_free || (!this.CurrentLocalPlaceable.GetComponent<LocalPlaceableHelper>().isSnapping))
+        {
+            return 0;
+        }
+        else if (current_placeable_item.snappableType == Item.SnappableType.foundation) return 90f;
+        else return 180f;
+    }
+
+
     /// <summary>
     /// klice se samo na lokalnemu ker dostopa do stvari k jih server ne vid, like raycast k smo g anrdil. server to posebej pohendla na podobn nacin
     /// </summary>
@@ -105,9 +121,23 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
     private bool currentTransformOfPlaceableIsValid(RaycastHit h)
     {
         //nevem kk bom se zrihtov tole tbh
-        if (Vector3.Distance(transform.position, this.CurrentLocalPlaceable.transform.position) < 4f  && Vector3.Angle(Vector3.up,h.normal)<50f)
-            return true;
-        else return false;
+        if (current_placeable_item.snappableType == Item.SnappableType.none || current_placeable_item.snappableType == Item.SnappableType.free_in_range)
+            if (Vector3.Distance(transform.position, this.CurrentLocalPlaceable.transform.position) < 5f && Vector3.Angle(Vector3.up, h.normal) < 50f)
+                return true;
+            else return false;
+        else if (current_placeable_item.snappableType == Item.SnappableType.foundation) {
+            if (Vector3.Distance(transform.position, this.CurrentLocalPlaceable.transform.position)<5f & currentPlaceableIsCollidingWithTerrain())
+                return true;
+            else return false;
+        }
+
+        Debug.LogError("we are trying to place a placeable for which we have not setup validity checks");
+        return false;
+    }
+
+    private bool currentPlaceableIsCollidingWithTerrain()
+    {
+        return this.CurrentLocalPlaceable.GetComponent<LocalPlaceableHelper>().isCollidingWithTerrain();
     }
 
     /// <summary>
@@ -122,11 +152,17 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
         else return false;
     }
 
-    private void local_rotatePlaceableWithMousewheel()
+    private void rotatePlaceableWithMouseFree(float allowedAngleChunk)
     {
-
-        this.mouseWheelRotation += Input.mouseScrollDelta.y;
-        this.CurrentLocalPlaceable.transform.Rotate(Vector3.up, this.mouseWheelRotation*10);
+        if (allowedAngleChunk <1)
+        {
+            this.mouseWheelRotation = Input.mouseScrollDelta.y;
+            this.CurrentLocalPlaceable.transform.Rotate(Vector3.up, this.mouseWheelRotation * 10);
+        }
+        else{
+            this.mouseWheelRotation = Input.mouseScrollDelta.y;
+            this.CurrentLocalPlaceable.transform.Rotate(CurrentLocalPlaceable.transform.up, (this.mouseWheelRotation/ this.mouseWheelRotation) * allowedAngleChunk);
+        }
     }
 
     private RaycastHit local_MoveCurrentPlaceableObjectToMouseRay()
@@ -140,26 +176,101 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
         int finalLayermask = ~(layermask3 | layermask1 | layermask2 | layermask4 );*/
         RaycastHit hitInfo;
         if (Physics.Raycast(ray, out hitInfo, Mathf.Infinity, this.placement_layer_mask)) {
-            Debug.Log(hitInfo.collider.name);
+            //Debug.Log(hitInfo.collider.name);
             Vector3 offsetOfColliderHeight=Vector3.up* this.currentPlaceableCollider.size.y / 2;
             //pivot objekta je v sredini njegovga colliderja. tko da ga izrise not v zemljo. to rabmo compensatat
-            if (!this.current_placeable_item.ignorePlacementNormal)
+            
+            SnappableObject s= GetClosestValidSnapPointInRange(hitInfo.point, this.current_placeable_item.snappableType);
+
+            if (s == null)
             {
-                this.CurrentLocalPlaceable.transform.rotation = Quaternion.FromToRotation(Vector3.up, hitInfo.normal);//ce hocmo da je zmer alignan z terenom - chesti pa take stvari
-                offsetOfColliderHeight = Vector3.up * this.currentPlaceableCollider.size.y / 2;
+                if (this.current_placeable_item.snappableType == Item.SnappableType.none || this.current_placeable_item.snappableType == Item.SnappableType.free_in_range || this.current_placeable_item.snappableType == Item.SnappableType.foundation)
+                {
+                    if (!this.current_placeable_item.ignorePlacementNormal)
+                    {
+                        this.CurrentLocalPlaceable.transform.rotation = Quaternion.FromToRotation(Vector3.up, hitInfo.normal);//ce hocmo da je zmer alignan z terenom - chesti pa take stvari
+                        offsetOfColliderHeight = Vector3.up * this.currentPlaceableCollider.size.y / 2;
 
-                offsetOfColliderHeight = hitInfo.normal * this.currentPlaceableCollider.size.y / 2;
+                        offsetOfColliderHeight = hitInfo.normal * this.currentPlaceableCollider.size.y / 2;
 
+                    }
+                    this.CurrentLocalPlaceable.transform.position = hitInfo.point + offsetOfColliderHeight;
+                }
             }
-            else {//mislm da je ze to - to kar se tice rotacije.
+            else {//nalimej na tocko k smo jo dobil - snap sistem
 
+
+
+                this.CurrentLocalPlaceable.transform.position = s.position;
+                this.CurrentLocalPlaceable.transform.rotation = s.rotation;
+                this.CurrentLocalPlaceable.GetComponent<LocalPlaceableHelper>().isSnapping = true;
             }
-
-
-            this.CurrentLocalPlaceable.transform.position = hitInfo.point+offsetOfColliderHeight;
-
         }
         return hitInfo;
+    }
+
+    /// <summary>
+    /// vrne najblizjo tocko kamor se lahko nas trenutno izban objekt snappa. na podlagi odgovora bomo postavli in rotiral objekt. Ce je valid al pa ne se ugotovi ksnej. to je zato da se foundation vid kam ga hoce postavt ampak se sezmer pobarva
+    /// </summary>
+    /// <param name="point"></param>
+    /// <param name="snappableType"></param>
+    /// <returns></returns>
+    private SnappableObject GetClosestValidSnapPointInRange(Vector3 point, Item.SnappableType snappableType)
+    {
+
+        if (snappableType == Item.SnappableType.foundation)
+        {//foundation se itak snappa na 4 strani, ista visina, rotacija ni vazna, vzamemo isto rotacijo zaenkrat.
+            //ce je scale 1 potem je snappable point za naslednji foundation v vsako izmed 3 strani za |scale| dolzino, pod pogojem, da se collida z terenom
+            float dolzinaStranice = currentPlaceableCollider.gameObject.transform.localScale.x;//je itak kocka
+            
+
+            NetworkPlaceable[] all_placeables = (NetworkPlaceable [])GameObject.FindObjectsOfType<NetworkPlaceable>();
+            if (all_placeables == null) return null;
+            NetworkPlaceable closest = FindClosestPlaceableFromArray(all_placeables, point, snappableType);
+            if (closest == null) return null;
+            //mamo samo 4 tocke. poiscmo najblizjo
+            Vector3 center = closest.transform.position;
+            Vector3 point1 = center + closest.transform.forward * dolzinaStranice;//naprej
+            Vector3 point2 = center - closest.transform.forward * dolzinaStranice;//nazaj
+
+            Vector3 point3 = center + closest.transform.right * dolzinaStranice;//desno
+            Vector3 point4 = center - closest.transform.right * dolzinaStranice;//levo
+
+            SnappableObject r = null;
+
+            Vector3 rezz = point1;
+
+            float min = Vector3.Distance(point, point1);
+            if (Vector3.Distance(point, point2) < min) { min = Vector3.Distance(point, point2); rezz = point2; }
+            if (Vector3.Distance(point, point3) < min) { min = Vector3.Distance(point, point3); rezz = point3; }
+            if (Vector3.Distance(point, point4) < min) { min = Vector3.Distance(point, point4); rezz = point4; }
+
+            r = new SnappableObject(rezz, closest.transform.rotation);//nevem ce je rotacija prav
+            if(Vector3.Distance(point,r.position)<this.placeable_snapping_range)
+                return r;
+            
+
+        }
+        return null;
+    }
+
+    private NetworkPlaceable FindClosestPlaceableFromArray(NetworkPlaceable[] all_placeables, Vector3 point,  Item.SnappableType snappableType)
+    {
+        NetworkPlaceable kandidat=null;
+        float current_min = float.MaxValue;
+        float current_dist =0;
+        foreach (NetworkPlaceable p in all_placeables) {
+            if (p.snappableType == snappableType)
+            {
+                current_dist = (p.transform.position - point).sqrMagnitude;//Vector3.Distance je pocasen, ta je bols
+                if (current_dist < current_min)
+                {//current min je ze kvadrirana
+                    kandidat = p;
+                    current_min = current_dist;
+                }
+            }
+        }
+        return kandidat;
     }
 
     /// <summary>
