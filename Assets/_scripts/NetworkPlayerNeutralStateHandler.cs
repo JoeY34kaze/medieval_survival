@@ -3,6 +3,7 @@ using BeardedManStudios.Forge.Networking;
 using BeardedManStudios.Forge.Networking.Unity;
 using System;
 using UnityEngine;
+using System.Linq;
 using System.Collections.Generic;
 
 public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandlerBehavior
@@ -23,7 +24,7 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
     private GameObject CurrentLocalPlaceable;
     private Vector3 previously_valid_position;
     private Quaternion previously_valid_rotation;
-    private Item current_placeable_item;
+    internal Item current_placeable_item;
     private BoxCollider currentPlaceableCollider;
     private Renderer currentPlaceableRenderer;
 
@@ -35,6 +36,8 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
     private float placeable_snapping_range = 8f;
     [SerializeField]
     private float placementRange = 6f;
+
+    private AttachmentPoint current_closest_attachment_point;
 
     private void Start()
     {
@@ -64,7 +67,12 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
                         //ce ni valid, se itak poslje zadnji valid transform ker se je tko updejtal na koncu metode v update pri nastavlanju pozicije
 
                         Debug.Log("tukej bomo poslal rpc za postavlanje itema");
-                        networkObject.SendRpc(RPC_PLACEMENTOF_ITEM_REQUEST, Receivers.Server, this.CurrentLocalPlaceable.transform.position, this.CurrentLocalPlaceable.transform.rotation);
+                        
+                        if (this.current_closest_attachment_point != null)
+                            this.current_closest_attachment_point.local_placement_of_placeable_request(this.CurrentLocalPlaceable.transform.rotation);
+                        else
+                            networkObject.SendRpc(RPC_PLACEMENTOF_ITEM_REQUEST, Receivers.Server, this.CurrentLocalPlaceable.transform.position, this.CurrentLocalPlaceable.transform.rotation);
+
                     }
                 }
                 else if (this.current_placeable_item != null) {
@@ -106,11 +114,11 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
     private float GetAllowedAngleRotationFromCurrentPlaceable()
     {
         //karkoli se ne snappa trenutno lahko rotiramo in pade v prvi if. drugi so samo za izbiranje kote, potem ko je ze snappan gor
-        if (current_placeable_item.snappableType == Item.SnappableType.none || current_placeable_item.snappableType == Item.SnappableType.free_in_range || current_placeable_item.snappableType == Item.SnappableType.wall_attachment_free || (!this.CurrentLocalPlaceable.GetComponent<LocalPlaceableHelper>().isSnapping))
+        if (current_placeable_item.PlacementType == Item.SnappableType.none || current_placeable_item.PlacementType == Item.SnappableType.free_in_range || current_placeable_item.PlacementType == Item.SnappableType.wall_attachment_free || (!this.CurrentLocalPlaceable.GetComponent<LocalPlaceableHelper>().isSnapping))
         {
             return 0;
         }
-        else if (current_placeable_item.snappableType == Item.SnappableType.foundation) return 90f;
+        else if (current_placeable_item.PlacementType == Item.SnappableType.foundation) return 90f;
         else return 180f;
     }
 
@@ -123,21 +131,31 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
     private bool currentTransformOfPlaceableIsValid(RaycastHit h)
     {
         //nevem kk bom se zrihtov tole tbh
-        if (current_placeable_item.snappableType == Item.SnappableType.none || current_placeable_item.snappableType == Item.SnappableType.free_in_range)
+        if (current_placeable_item.PlacementType == Item.SnappableType.none || current_placeable_item.PlacementType == Item.SnappableType.free_in_range)
             if (Vector3.Distance(transform.position, this.CurrentLocalPlaceable.transform.position) < this.placementRange && Vector3.Angle(Vector3.up, h.normal) < 50f)
                 return true;
             else return false;
-        else if (current_placeable_item.snappableType == Item.SnappableType.foundation)
+        else if (current_placeable_item.PlacementType == Item.SnappableType.foundation)
         {
             if (Vector3.Distance(transform.position, this.CurrentLocalPlaceable.transform.position) < this.placementRange & currentPlaceableIsCollidingWithTerrain())
-                return true;
+                if (this.CurrentLocalPlaceable.GetComponent<LocalPlaceableHelper>().isSnapping)
+                {
+                    if (this.current_closest_attachment_point.isFree())//ces se ne snappa na ze zaseden spot
+                        return true;
+                }
+                else
+                    return true;
             else return false;
         }
-        else if (current_placeable_item.snappableType == Item.SnappableType.wall || current_placeable_item.snappableType == Item.SnappableType.door_frame || current_placeable_item.snappableType == Item.SnappableType.windows_frame) {
+        else if (current_placeable_item.PlacementType == Item.SnappableType.wall || current_placeable_item.PlacementType == Item.SnappableType.door_frame || current_placeable_item.PlacementType == Item.SnappableType.windows_frame) {
             //tle bo sicer treba prevert ce se snapa na pravi objekt pa ob postavlanju poslat na server kam nj bi se to prlimal.
-            if (Vector3.Distance(transform.position, this.CurrentLocalPlaceable.transform.position) < this.placementRange & currentPlaceableIsCollidingWithTerrain())
-                return true;
-            else return false;
+            if (Vector3.Distance(transform.position, this.CurrentLocalPlaceable.transform.position) < this.placementRange)
+                if (this.CurrentLocalPlaceable.GetComponent<LocalPlaceableHelper>().isSnapping)
+                {
+                    if (this.current_closest_attachment_point.isFree())//ces se ne snappa na ze zaseden spot
+                        return true;
+                }
+                else return false;
         }
 
         Debug.LogError("we are trying to place a placeable for which we have not setup validity checks");
@@ -191,12 +209,12 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
             //Debug.Log(hitInfo.collider.name);
             Vector3 offsetOfColliderHeight=Vector3.up* this.currentPlaceableCollider.size.y / 2;
             //pivot objekta je v sredini njegovga colliderja. tko da ga izrise not v zemljo. to rabmo compensatat
-            
-            SnappableObject s= GetClosestValidSnapPointInRange(hitInfo.point, this.current_placeable_item.snappableType);
 
-            if (s == null)
+            AttachmentPoint s = GetClosestValidSnapPointInRange(hitInfo.point, this.current_placeable_item.PlacementType);
+            this.current_closest_attachment_point = s;
+            if (s == null)//ce je null in je foundation ga loh postavlamo na tla po zelji
             {
-                if (this.current_placeable_item.snappableType == Item.SnappableType.none || this.current_placeable_item.snappableType == Item.SnappableType.free_in_range || this.current_placeable_item.snappableType == Item.SnappableType.foundation)
+                if (this.current_placeable_item.PlacementType == Item.SnappableType.none || this.current_placeable_item.PlacementType == Item.SnappableType.free_in_range || this.current_placeable_item.PlacementType == Item.SnappableType.foundation)
                 {
                     if (!this.current_placeable_item.ignorePlacementNormal)
                     {
@@ -213,8 +231,8 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
 
 
 
-                this.CurrentLocalPlaceable.transform.position = s.position;
-                this.CurrentLocalPlaceable.transform.rotation = s.rotation;
+                this.CurrentLocalPlaceable.transform.position = s.transform.position;
+                this.CurrentLocalPlaceable.transform.rotation = s.transform.rotation;
                 this.CurrentLocalPlaceable.GetComponent<LocalPlaceableHelper>().isSnapping = true;
             }
         }
@@ -227,75 +245,32 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
     /// <param name="point"></param>
     /// <param name="current_snappable_type"></param>
     /// <returns></returns>
-    private SnappableObject GetClosestValidSnapPointInRange(Vector3 point, Item.SnappableType current_snappable_type)
+    private AttachmentPoint GetClosestValidSnapPointInRange(Vector3 point, Item.SnappableType current_snappable_type)
     {
-        SnappableObject r = null;
+       
 
-        if (current_snappable_type == Item.SnappableType.foundation)
-        {//foundation se itak snappa na 4 strani, ista visina, rotacija ni vazna, vzamemo isto rotacijo zaenkrat.
-            //ce je scale 1 potem je snappable point za naslednji foundation v vsako izmed 3 strani za |scale| dolzino, pod pogojem, da se collida z terenom
-            float dolzinaStranice = currentPlaceableCollider.gameObject.transform.localScale.x;//je itak kocka
+       // if (current_snappable_type == Item.SnappableType.foundation)//we cant put switch because it would get messier than this crap
+        //{
 
-
-            NetworkPlaceable[] all_placeables = (NetworkPlaceable[])GameObject.FindObjectsOfType<NetworkPlaceable>();
-            if (all_placeables == null) return null;
-            NetworkPlaceable closest = FindClosestPlaceableFromArray(all_placeables, point, current_snappable_type);//izmed vseh poisce tiste tocke ktere so legitimne, da se na njih prlima foundation
-            if (closest == null) return null;
-            //mamo samo 4 tocke - ker se foundation lahko prlima SAMO na drug foundation. poiscmo najblizjo
-            Vector3 center = closest.transform.position;
-            Vector3 point1 = center + closest.transform.forward * dolzinaStranice;//naprej
-            Vector3 point2 = center - closest.transform.forward * dolzinaStranice;//nazaj
-
-            Vector3 point3 = center + closest.transform.right * dolzinaStranice;//desno
-            Vector3 point4 = center - closest.transform.right * dolzinaStranice;//levo
-
-         
-
-            Vector3 rezz = point1;
-
-            float min = Vector3.Distance(point, point1);
-            if (Vector3.Distance(point, point2) < min) { min = Vector3.Distance(point, point2); rezz = point2; }
-            if (Vector3.Distance(point, point3) < min) { min = Vector3.Distance(point, point3); rezz = point3; }
-            if (Vector3.Distance(point, point4) < min) { min = Vector3.Distance(point, point4); rezz = point4; }
-
-            r = new SnappableObject(rezz, closest.transform.rotation);//nevem ce je rotacija prav
-            if (Vector3.Distance(point, r.position) < this.placeable_snapping_range)
-                return r;
+            AttachmentPoint closestAttachmentPoint = getClosestAttachmentPoint_NoChecks(point, current_snappable_type);
+            if(closestAttachmentPoint!=null)
+                if (Vector3.Distance(point, closestAttachmentPoint.transform.position) < this.placeable_snapping_range)
+                    return closestAttachmentPoint;
+            return null;//ce je null al pa ce je predalec
 
 
-        }
+       // }
+
+        /*
         else if (current_snappable_type == Item.SnappableType.wall || current_snappable_type == Item.SnappableType.door_frame || current_snappable_type == Item.SnappableType.windows_frame) {
             //ti objekti se lahko nalimajo samo na foundation, floor, wall, door_frame ali window_frame.
-            NetworkPlaceable[] all_placeables = (NetworkPlaceable[])GameObject.FindObjectsOfType<NetworkPlaceable>();
-            if (all_placeables == null) return null;
-            NetworkPlaceable closest = FindClosestPlaceableFromArray(all_placeables, point, current_snappable_type);//izmed vseh poisce tiste tocke ktere so legitimne, da se na njih prlima foundation
-            if (closest == null) return null;
+            AttachmentPoint closestAttachmentPoint = getClosestAttachmentPoint_NoChecks(point, current_snappable_type);
+            if (closestAttachmentPoint == null) return null;
 
-            switch (closest.snappableType) {
+
+            switch (closest.snappableType) {//attachmentPoint na kterga se je prlimal
                 case Item.SnappableType.foundation: {
-                        //foundation lahko postavmo na 4 strani. nevem kk bo pohendlat zaenkrat da bo bla samo 1 stena med dvemi kockami..
-                        float dolzinaStranice_foundationa = closest.gameObject.transform.localScale.x;//nima veze kaj vzames, je kocka
-
-                        Vector3 center = closest.transform.position;
-                        //---------------------------------------------------smer------------------------------------------visina-----------------------
-                        Vector3 point1 = center + (closest.transform.forward * dolzinaStranice_foundationa/2) + closest.transform.up * dolzinaStranice_foundationa;//naprej
-                        Vector3 point2 = center - (closest.transform.forward * dolzinaStranice_foundationa/2) + closest.transform.up * dolzinaStranice_foundationa;//nazaj
-
-                        Vector3 point3 = center + closest.transform.right * dolzinaStranice_foundationa/2 + closest.transform.up * dolzinaStranice_foundationa;//desno
-                        Vector3 point4 = center - closest.transform.right * dolzinaStranice_foundationa/2 + closest.transform.up * dolzinaStranice_foundationa;//levo
-
-
-                        //izmed teh potencialnih tock dobit najblizjo
-
-                        Vector3 rezz = point1;
-                        float min = Vector3.Distance(point, point1);
-                        Quaternion rot = closest.transform.rotation;
-
-                        if (Vector3.Distance(point, point2) < min) { min = Vector3.Distance(point, point2); rezz = point2; rot = Quaternion.AngleAxis(180, closest.transform.up); }
-                        if (Vector3.Distance(point, point3) < min) { min = Vector3.Distance(point, point3); rezz = point3; rot = Quaternion.AngleAxis(90, closest.transform.up); }
-                        if (Vector3.Distance(point, point4) < min) { min = Vector3.Distance(point, point4); rezz = point4; rot = Quaternion.AngleAxis(270, closest.transform.up); }
-
-                        r = new SnappableObject(rezz, rot);//nevem ce je rotacija prav
+                        
 
                         if (Vector3.Distance(point, r.position) < this.placeable_snapping_range)
                             return r;
@@ -307,16 +282,36 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
             }
 
         }
-        return r;
+        */
+        //return r;
     }
 
-    private NetworkPlaceable FindClosestPlaceableFromArray(NetworkPlaceable[] all_placeables, Vector3 point,  Item.SnappableType snappableType)
+    private AttachmentPoint getClosestAttachmentPoint_NoChecks(Vector3 point, Item.SnappableType current_snappable_type)
     {
-        NetworkPlaceable kandidat=null;
+        AttachmentPoint[] all_AttachmentPoints = (AttachmentPoint[])GameObject.FindObjectsOfType<AttachmentPoint>();
+        if (all_AttachmentPoints == null) return null;
+        all_AttachmentPoints = removeTakenAttachmentPoints(all_AttachmentPoints);
+        if (all_AttachmentPoints == null) return null;
+        AttachmentPoint closestAttachmentPoint = FindClosestPlaceableFromArray_noChecksForSlotTaken(all_AttachmentPoints, point, current_snappable_type);//izmed vseh poisce tiste tocke ktere so legitimne, da se na njih prlima foundation
+        if (closestAttachmentPoint == null) return null;
+        return closestAttachmentPoint;
+    }
+
+    private AttachmentPoint[] removeTakenAttachmentPoints(AttachmentPoint[] all_AttachmentPoints)
+    {
+        List<AttachmentPoint> l = new List<AttachmentPoint>();
+        foreach (AttachmentPoint p in all_AttachmentPoints) if (p.isFree()) l.Add(p);
+
+        return l.ToArray();
+    }
+
+    private AttachmentPoint FindClosestPlaceableFromArray_noChecksForSlotTaken(AttachmentPoint[] atch_pts, Vector3 point,  Item.SnappableType attachment_type)
+    {
+        AttachmentPoint kandidat =null;
         float current_min = float.MaxValue;
         float current_dist =0;
-        foreach (NetworkPlaceable p in all_placeables) {
-            if (PlaceableCanSnapTo(snappableType, p.snappableType))
+        foreach (AttachmentPoint p in atch_pts) {
+            if (p.acceptsAttachmentOfType(attachment_type))
             {
                 current_dist = (p.transform.position - point).sqrMagnitude;//Vector3.Distance je pocasen, ta je bols
                 if (current_dist < current_min)
@@ -385,6 +380,29 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
         }
     }
 
+    /// <summary>
+    /// izvaja samo an serverju. klice se ko v npi porihtamo kej v zvezi z hotbarom ( pa se to ne povsod ker je bla ta metoda dodana ksnej).
+    /// updejt itemov se poslje drugje. npi.sendInventoryUpdate...
+    /// </summary>
+    internal void sendBarUpdate()
+    {
+        if (this.selected_index != -1)
+        {
+            if (npi.predmeti_hotbar[this.selected_index] == null) this.selected_index = -1;
+        }
+
+        if (this.selected_index_shield != -1)
+        {
+            if (npi.predmeti_hotbar[this.selected_index_shield] == null) this.selected_index = -1;
+            else if (npi.predmeti_hotbar[this.selected_index_shield].item.type != Item.Type.shield) this.selected_index_shield = -1;
+        }
+
+        if (networkObject.IsServer)
+        {
+            npi.sendNetworkUpdate(true, false);
+            networkObject.SendRpc(RPC_BAR_SLOT_SELECTION_RESPONSE, Receivers.All, (this.selected_index == -1) ? "-1" : npi.predmeti_hotbar[this.selected_index].toNetworkString(), this.selected_index, (this.selected_index_shield == -1) ? "-1" : npi.predmeti_hotbar[this.selected_index_shield].toNetworkString(), selected_index_shield);
+        }
+    }
 
     internal void NeutralStateSetup()
     {
@@ -785,7 +803,7 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
     /// <param name="args"></param>
     public override void PlacementofItemRequest(RpcArgs args)
     {
-        
+        //----------- ZA PLACEABLE K SE SNAPPA NA NEKEJ JE KODA / RPC REQUEST V NETWORKPLACEABLE!
 
         /*ugotovmo kter item ma u roki
         spawnamo lokalni item na isti poiziciji, pogledamo ce je valid*
@@ -815,16 +833,16 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
     }
 
 
-    public void NetworkPlaceableInstantiationServer(Predmet p, Vector3 pos, Quaternion rot)
+    public NetworkPlaceable NetworkPlaceableInstantiationServer(Predmet p, Vector3 pos, Quaternion rot)
     {
-        if (!networkObject.IsServer) { Debug.LogError("instanciacija na clientu ne na serverju!"); return; }
+        if (!networkObject.IsServer) { Debug.LogError("instanciacija na clientu ne na serverju!"); return null; }
         int net_id = getPlaceableNetworkIdFromItem(p.item);
-        if (net_id == -1) return;//item is not interactable object
+        if (net_id == -1) return null;//item is not interactable object
         NetworkPlaceableBehavior b = NetworkManager.Instance.InstantiateNetworkPlaceable(net_id, pos, rot);
 
         //apply force on clients, sets predmet
         b.gameObject.GetComponent<NetworkPlaceable>().init(p);
-
+        return b.gameObject.GetComponent<NetworkPlaceable>();
     }
 
     private int getPlaceableNetworkIdFromItem(Item item)
@@ -841,29 +859,5 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
         return -1;
 
     }
-
-    /// <summary>
-    /// izvaja samo an serverju. klice se ko v npi porihtamo kej v zvezi z hotbarom ( pa se to ne povsod ker je bla ta metoda dodana ksnej).
-    /// updejt itemov se poslje drugje. npi.sendInventoryUpdate...
-    /// </summary>
-    internal void sendBarUpdate()
-    {
-        if (this.selected_index != -1) {
-            if (npi.predmeti_hotbar[this.selected_index] == null) this.selected_index = -1;
-        }
-
-        if (this.selected_index_shield != -1)
-        {
-            if (npi.predmeti_hotbar[this.selected_index_shield] == null) this.selected_index = -1;
-            else if (npi.predmeti_hotbar[this.selected_index_shield].item.type != Item.Type.shield) this.selected_index_shield = -1;
-        }
-
-        if (networkObject.IsServer)
-        {
-            npi.sendNetworkUpdate(true, false);
-            networkObject.SendRpc(RPC_BAR_SLOT_SELECTION_RESPONSE, Receivers.All, (this.selected_index == -1) ? "-1" : npi.predmeti_hotbar[this.selected_index].toNetworkString(), this.selected_index, (this.selected_index_shield == -1) ? "-1" : npi.predmeti_hotbar[this.selected_index_shield].toNetworkString(), selected_index_shield);
-        }
-    }
-
     #endregion
 }

@@ -4,10 +4,12 @@ using UnityEngine;
 
 namespace BeardedManStudios.Forge.Networking.Generated
 {
-	[GeneratedRPC("{\"types\":[]")]
-	[GeneratedRPCVariableNames("{\"types\":[]")]
+	[GeneratedRPC("{\"types\":[[\"Quaternion\", \"int\"][\"int\", \"bool\"]]")]
+	[GeneratedRPCVariableNames("{\"types\":[[\"rotation\", \"sibling_index_of_attachment_point\"][\"sib\", \"status\"]]")]
 	public abstract partial class NetworkPlaceableBehavior : NetworkBehavior
 	{
+		public const byte RPC_NETWORK_PLACEABLE_ATTACHMENT_REQUEST = 0 + 5;
+		public const byte RPC_NETWORK_ATTACHMENT_UPDATE = 1 + 5;
 		
 		public NetworkPlaceableNetworkObject networkObject = null;
 
@@ -21,6 +23,8 @@ namespace BeardedManStudios.Forge.Networking.Generated
 			networkObject.AttachedBehavior = this;
 
 			base.SetupHelperRpcs(networkObject);
+			networkObject.RegisterRpc("NetworkPlaceableAttachmentRequest", NetworkPlaceableAttachmentRequest, typeof(Quaternion), typeof(int));
+			networkObject.RegisterRpc("NetworkAttachmentUpdate", NetworkAttachmentUpdate, typeof(int), typeof(bool));
 
 			networkObject.onDestroy += DestroyGameObject;
 
@@ -97,6 +101,18 @@ namespace BeardedManStudios.Forge.Networking.Generated
 			networkObject.SnapInterpolations();
 		}
 
+		/// <summary>
+		/// Arguments:
+		/// Quaternion rotation
+		/// int sibling_index_of_attachment_point
+		/// </summary>
+		public abstract void NetworkPlaceableAttachmentRequest(RpcArgs args);
+		/// <summary>
+		/// Arguments:
+		/// int sib
+		/// bool status
+		/// </summary>
+		public abstract void NetworkAttachmentUpdate(RpcArgs args);
 
 		// DO NOT TOUCH, THIS GETS GENERATED PLEASE EXTEND THIS CLASS IF YOU WISH TO HAVE CUSTOM CODE ADDITIONS
 	}
