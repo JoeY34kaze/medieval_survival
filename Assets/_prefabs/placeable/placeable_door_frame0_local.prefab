@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 599668607320350692}
   - component: {fileID: 5075786156287702026}
   m_Layer: 0
-  m_Name: placeable_door_frame'_local
+  m_Name: placeable_door_frame0_local
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -59,7 +59,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 7dae8edc9e8f95d49987181fb43b50a9, type: 3}
+  - {fileID: 2100000, guid: 1648a9aa7a1204e428ecc9d5b5a43c90, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0

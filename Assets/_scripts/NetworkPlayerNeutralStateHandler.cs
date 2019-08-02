@@ -152,7 +152,8 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
                     return true;
             else return false;
         }
-        else if (current_placeable_item.PlacementType == Item.SnappableType.wall || current_placeable_item.PlacementType == Item.SnappableType.door_frame || current_placeable_item.PlacementType == Item.SnappableType.windows_frame) {
+        else //if (current_placeable_item.PlacementType == Item.SnappableType.wall || current_placeable_item.PlacementType == Item.SnappableType.door_frame || current_placeable_item.PlacementType == Item.SnappableType.windows_frame)
+        {
             //tle bo sicer treba prevert ce se snapa na pravi objekt pa ob postavlanju poslat na server kam nj bi se to prlimal.
             if (Vector3.Distance(transform.position, this.CurrentLocalPlaceable.transform.position) < this.placementRange)
                 if (this.CurrentLocalPlaceable.GetComponent<LocalPlaceableHelper>().isSnapping)
@@ -194,7 +195,8 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
                     return false;
                     break;
                 default:
-                    return false;
+                    Debug.LogWarning("not checking placement validation for this placeable");
+                    return true;
                     break;
             }
         return false;
