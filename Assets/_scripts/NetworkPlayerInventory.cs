@@ -1385,10 +1385,10 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
                 onLoadoutChangedCallback.Invoke();
         }
         if (neutralStateHandler == null) this.neutralStateHandler = GetComponent<NetworkPlayerNeutralStateHandler>();
-        if (SelectedWeaponIsNotInHotbar()) neutralStateHandler.ClearActiveWeapons();
+        if (Selected_PREDMET_IsNotInHotbar()) neutralStateHandler.ClearActiveWeapons();
     }
 
-    private bool SelectedWeaponIsNotInHotbar()
+    private bool Selected_PREDMET_IsNotInHotbar()
     {
 
 
@@ -1398,6 +1398,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         if (combatHandler.GetCurrentlyActiveWeapon() != null) activeItem = combatHandler.GetCurrentlyActiveWeapon().item.id;
         if (combatHandler.GetCurrentlyActiveRanged() != null) activeItem = combatHandler.GetCurrentlyActiveRanged().item.id;
         if (neutralStateHandler.activeTool != null) activeItem = neutralStateHandler.activeTool.item.id;
+        if (neutralStateHandler.current_placeable_item != null) activeItem = neutralStateHandler.activePlaceable.item.id;
 
         int activeShield = -1;
         if (combatHandler.GetCurrentlyActiveShield() != null) activeShield = combatHandler.GetCurrentlyActiveShield().item.id;
@@ -1460,7 +1461,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         }
         //ce smo zarad armor standa povozil trenutno equippan weapon mormo to updejtat..
         if (neutralStateHandler == null) this.neutralStateHandler = GetComponent<NetworkPlayerNeutralStateHandler>();
-        if (SelectedWeaponIsNotInHotbar()) neutralStateHandler.ClearActiveWeapons();
+        if (Selected_PREDMET_IsNotInHotbar()) neutralStateHandler.ClearActiveWeapons();
 
         combatHandler.update_equipped_weapons();
 

@@ -46,7 +46,7 @@ public class NetworkPlaceable : NetworkPlaceableBehavior
             NetworkPlayerNeutralStateHandler ntrl = FindByid(args.Info.SendingPlayer.NetworkId).GetComponent<NetworkPlayerNeutralStateHandler>();
 
 
-            if (networkObject.IsServer && args.Info.SendingPlayer.NetworkId == networkObject.Owner.NetworkId)
+            if (networkObject.IsServer)
             {
                 Debug.Log("server - placing " + ntrl.current_placeable_item.Display_name);
 
@@ -59,6 +59,8 @@ public class NetworkPlaceable : NetworkPlaceableBehavior
                     Debug.LogError("Attachment slot occupied");
                     return;
                 }
+
+                if (!ntrl.currentTransformOfPlaceableIsValid(ch.transform.position)) return;
                 
                 NetworkPlaceable created = ntrl.NetworkPlaceableInstantiationServer(p, ch.position, rot);
 

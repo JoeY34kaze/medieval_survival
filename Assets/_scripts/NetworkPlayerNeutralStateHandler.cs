@@ -130,7 +130,12 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
     /// <returns></returns>
     private bool currentTransformOfPlaceableIsValid(RaycastHit h)
     {
-        //nevem kk bom se zrihtov tole tbh
+        //server side check k ga izvedemo prej lokalno da neb slucajno passov lokaln check pa failov na serverju. passat mora oba, ce faila koga nj faila na clientu, ce passa ni take panike
+        if (!currentTransformOfPlaceableIsValid(this.CurrentLocalPlaceable.transform.position)) return false;
+
+
+
+        //Tole so pa samo checki za clienta
         if (current_placeable_item.PlacementType == Item.SnappableType.none || current_placeable_item.PlacementType == Item.SnappableType.free_in_range)
             if (Vector3.Distance(transform.position, this.CurrentLocalPlaceable.transform.position) < this.placementRange && Vector3.Angle(Vector3.up, h.normal) < 50f)
                 return true;
@@ -168,15 +173,31 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
     }
 
     /// <summary>
-    /// i guess se klice na serverju, ker manjkajo podatki k jih ma lokaln player, server pa nima. posiljat pa tud nima smisla ker je tole samo za security da client ne pohacka
+    /// i guess se klice na serverju IN NA CLIENTU, ker manjkajo podatki k jih ma lokaln player, server pa nima. posiljat pa tud nima smisla ker je tole samo za security da client ne pohacka
     /// </summary>
     /// <returns></returns>
-    private bool currentTransformOfPlaceableIsValid()
+    internal bool currentTransformOfPlaceableIsValid(Vector3 placeable_position)//ce je placeable izrisan nima veze ker ga maska za raycast ignorira
     {
         //nevem kk bom se zrihtov tole tbh
-        if (Vector3.Distance(transform.position, this.CurrentLocalPlaceable.transform.position) < this.placementRange)
-            return true;
-        else return false;
+        if (Vector3.Distance(transform.position, placeable_position) < this.placementRange) 
+            switch (this.current_placeable_item.PlacementType)
+            {
+                case (Item.SnappableType.foundation):
+                    //treba pogledat ce se dotika terena al pa nekej. kej ne vidmo dejanskga objekta se bo najbrz treba raycastat z nekje da vidmo ce je teren dovolj blizu.
+                    Ray ray;
+
+                    RaycastHit hitInfo;
+                    if (Physics.Raycast(placeable_position+Vector3.up*1.5f, Vector3.down, out hitInfo, 3f, this.placement_layer_mask))//3f je nekak velikost nase kocke. zadet mora itak teren
+                    {
+                        return true;
+                    }
+                    return false;
+                    break;
+                default:
+                    return false;
+                    break;
+            }
+        return false;
     }
 
     private void rotatePlaceableWithMouseFree(float allowedAngleChunk)
@@ -207,15 +228,18 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
         RaycastHit hitInfo;
         if (Physics.Raycast(ray, out hitInfo, Mathf.Infinity, this.placement_layer_mask)) {
             //Debug.Log(hitInfo.collider.name);
-            Vector3 offsetOfColliderHeight=Vector3.up* this.currentPlaceableCollider.size.y / 2;
+            
             //pivot objekta je v sredini njegovga colliderja. tko da ga izrise not v zemljo. to rabmo compensatat
 
             AttachmentPoint s = GetClosestValidSnapPointInRange(hitInfo.point, this.current_placeable_item.PlacementType);
             this.current_closest_attachment_point = s;
             if (s == null)//ce je null in je foundation ga loh postavlamo na tla po zelji
             {
+                
+
                 if (this.current_placeable_item.PlacementType == Item.SnappableType.none || this.current_placeable_item.PlacementType == Item.SnappableType.free_in_range || this.current_placeable_item.PlacementType == Item.SnappableType.foundation)
                 {
+                    Vector3 offsetOfColliderHeight = Vector3.up * this.currentPlaceableCollider.size.y / 2;
                     if (!this.current_placeable_item.ignorePlacementNormal)
                     {
                         this.CurrentLocalPlaceable.transform.rotation = Quaternion.FromToRotation(Vector3.up, hitInfo.normal);//ce hocmo da je zmer alignan z terenom - chesti pa take stvari
@@ -323,24 +347,6 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
         }
         return kandidat;
     }
-
-    private bool PlaceableCanSnapTo(Item.SnappableType current, Item.SnappableType other)
-    {
-        switch (current) {
-            case Item.SnappableType.foundation:
-                    return current == other;
-            case Item.SnappableType.wall:
-                if (other == Item.SnappableType.foundation || other == Item.SnappableType.wall || other == Item.SnappableType.door_frame || other == Item.SnappableType.windows_frame || other == Item.SnappableType.floor)
-                    return true;
-                break;
-            default:
-                return false;
-                
-        }
-        return false;
-
-    }
-
     /// <summary>
     /// vrne true ce je izbran tool u roki. neglede kdo klice
     /// </summary>
