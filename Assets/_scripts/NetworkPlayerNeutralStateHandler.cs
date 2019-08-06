@@ -314,13 +314,19 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
 
     private AttachmentPoint getClosestAttachmentPoint_NoChecks(Vector3 point, Item.SnappableType current_snappable_type)
     {
+        AttachmentPoint[] all_AttachmentPoints = GetAllValidAttachmentPoints(current_snappable_type);
+        AttachmentPoint closestAttachmentPoint = FindClosestPlaceableFromArray_noChecksForSlotTaken(all_AttachmentPoints, point, current_snappable_type);//izmed vseh poisce tiste tocke ktere so legitimne, da se na njih prlima foundation
+        if (closestAttachmentPoint == null) return null;
+        return closestAttachmentPoint;
+    }
+
+    public AttachmentPoint[] GetAllValidAttachmentPoints(Item.SnappableType current_snappable_type)
+    {
         AttachmentPoint[] all_AttachmentPoints = (AttachmentPoint[])GameObject.FindObjectsOfType<AttachmentPoint>();
         if (all_AttachmentPoints == null) return null;
         all_AttachmentPoints = removeTakenAttachmentPoints(all_AttachmentPoints);
         if (all_AttachmentPoints == null) return null;
-        AttachmentPoint closestAttachmentPoint = FindClosestPlaceableFromArray_noChecksForSlotTaken(all_AttachmentPoints, point, current_snappable_type);//izmed vseh poisce tiste tocke ktere so legitimne, da se na njih prlima foundation
-        if (closestAttachmentPoint == null) return null;
-        return closestAttachmentPoint;
+        return all_AttachmentPoints;
     }
 
     private AttachmentPoint[] removeTakenAttachmentPoints(AttachmentPoint[] all_AttachmentPoints)
@@ -331,7 +337,7 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
         return l.ToArray();
     }
 
-    private AttachmentPoint FindClosestPlaceableFromArray_noChecksForSlotTaken(AttachmentPoint[] atch_pts, Vector3 point,  Item.SnappableType attachment_type)
+    public AttachmentPoint FindClosestPlaceableFromArray_noChecksForSlotTaken(AttachmentPoint[] atch_pts, Vector3 point,  Item.SnappableType attachment_type)
     {
         AttachmentPoint kandidat =null;
         float current_min = float.MaxValue;

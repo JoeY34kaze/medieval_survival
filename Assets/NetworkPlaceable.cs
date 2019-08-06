@@ -11,6 +11,9 @@ using BeardedManStudios.Forge.Networking;
 /// </summary>
 public class NetworkPlaceable : NetworkPlaceableBehavior
 {
+    [SerializeField]
+    private float distanceForSnappingHandling = 0.05f;
+
     public Predmet p;
     [SerializeField]
     public Item.SnappableType snappableType;
@@ -64,7 +67,13 @@ public class NetworkPlaceable : NetworkPlaceableBehavior
                 
                 NetworkPlaceable created = ntrl.NetworkPlaceableInstantiationServer(p, ch.position, rot);
 
-                ch.GetComponent<AttachmentPoint>().attach(created.gameObject);
+                ch.GetComponent<AttachmentPoint>().attachTryReverse(created.gameObject);//proba nrdit obojestransko referenco ce se vse izide, sicer samo v eno smer
+
+                //samo dve povezavi nista dovolj, ko se sklene krog je treba to tud ugotovit, recimo 4 foundationi
+
+                created.refreshAttachmentPointOccupancy();
+
+                
                 
 
                 player.GetComponent<NetworkPlayerInventory>().reduceCurrentActivePlaceable(ntrl.selected_index);//sicer vrne bool da nam pove ce smo pobral celotn stack, ampak nima veze ker rabmo poslat update za kvantiteto v vsakem primeru.
@@ -75,6 +84,80 @@ public class NetworkPlaceable : NetworkPlaceableBehavior
 
 
         }
+    }
+
+
+    /// <summary>
+    /// metoda se klice ob networkInstantiation placeable objekta. metoda mora prever kaj se dogaja z attachment pointi tega objekta (če so znotraj druzga objekta) in povezat na soseda, ter v primeru da se dotika tud drugih pointov (recimo če smo postavli 2x2 povezat tud une.
+    /// </summary>
+    /// <param name="networkPlaceable"></param>
+    private void refreshAttachmentPointOccupancy()
+    {
+
+
+        //poisc vse attachment pointe v dolocenem rangeu (1f recimo)
+
+        AttachmentPoint[] all_AttachmentPoints = (AttachmentPoint[])GameObject.FindObjectsOfType<AttachmentPoint>();
+        if (all_AttachmentPoints == null) return;
+        all_AttachmentPoints = removeTakenAttachmentPoints(all_AttachmentPoints);
+        if (all_AttachmentPoints == null) return;
+        all_AttachmentPoints = removeNotValidSnappableTypeAttachmentPoints(all_AttachmentPoints, this.snappableType);
+
+        foreach (AttachmentPoint p in all_AttachmentPoints) {
+
+
+            if (p.isFree())
+                if (p.acceptsAttachmentOfType(this.snappableType))
+                    if (Vector3.Distance(p.gameObject.transform.position, this.transform.position) < this.distanceForSnappingHandling)
+                    {
+                        p.attachTryReverse(this.transform.gameObject);
+                    }
+            
+
+        }
+
+
+
+    }
+
+    private AttachmentPoint[] GetAttachmentPointsInRangeForSnapping(AttachmentPoint[] all_valid)
+    {
+        List<AttachmentPoint> l = new List<AttachmentPoint>();
+        foreach (AttachmentPoint p in all_valid) {
+            float dist = Vector3.Distance(p.transform.position, transform.position);
+            if ( dist< this.distanceForSnappingHandling)
+                l.Add(p);
+            Debug.Log(Vector3.Distance(p.transform.position, transform.position));
+
+        }
+
+        return l.ToArray();
+    }
+
+    public AttachmentPoint[] GetAllValidAttachmentPoints(Item.SnappableType current_snappable_type)//kopiran z neutralstatehandlerja
+    {
+        AttachmentPoint[] all_AttachmentPoints = (AttachmentPoint[])GameObject.FindObjectsOfType<AttachmentPoint>();
+        if (all_AttachmentPoints == null) return null;
+        all_AttachmentPoints = removeTakenAttachmentPoints(all_AttachmentPoints);
+        if (all_AttachmentPoints == null) return null;
+        all_AttachmentPoints = removeNotValidSnappableTypeAttachmentPoints(all_AttachmentPoints, current_snappable_type);
+        return all_AttachmentPoints;
+    }
+
+    private AttachmentPoint[] removeNotValidSnappableTypeAttachmentPoints(AttachmentPoint[] all_AttachmentPoints, Item.SnappableType current_snappable_type)
+    {
+        List<AttachmentPoint> l = new List<AttachmentPoint>();
+        foreach (AttachmentPoint p in all_AttachmentPoints) if (p.acceptsAttachmentOfType(current_snappable_type)) l.Add(p);
+
+        return l.ToArray();
+    }
+
+    private AttachmentPoint[] removeTakenAttachmentPoints(AttachmentPoint[] all_AttachmentPoints)//kopiran z neutralstatehandlerja
+    {
+        List<AttachmentPoint> l = new List<AttachmentPoint>();
+        foreach (AttachmentPoint p in all_AttachmentPoints) if (p.isFree()) l.Add(p);
+
+        return l.ToArray();
     }
 
     public GameObject FindByid(uint targetNetworkId) //koda kopširana povsod

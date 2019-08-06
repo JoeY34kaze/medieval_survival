@@ -6,7 +6,9 @@ using UnityEngine;
 public class AttachmentPoint : MonoBehaviour
 {
     public Item.SnappableType[] allowed_attachment_types;
-    
+    [SerializeField]
+    private float distanceForSnappingHandling = 0.05f;
+
     public GameObject attached_placeable = null;
 
     internal bool acceptsAttachmentOfType(Item.SnappableType s)
@@ -48,5 +50,22 @@ public class AttachmentPoint : MonoBehaviour
             this.attached_placeable = gameObject;//bomo kr nrdil pointer samga nase good enough. za unicevanje pa take fore bomo pa na serverju spawnal in client nerab met. stability bo pa field k se nastav ob dodajanju / odstranjevanju objektov in se zracuna na serverju pa nastavi clientim i guess
         }
         else this.attached_placeable = null;
+    }
+
+    internal void attachTryReverse(GameObject gameObject)
+    {
+        attach(gameObject);
+
+        //poiskat vse valid attachemnt pointe in izbrat najblizjo
+
+        foreach (AttachmentPoint p in gameObject.GetComponentsInChildren<AttachmentPoint>()) {
+            if (p.isFree())
+                if (p.acceptsAttachmentOfType(GetComponentInParent<NetworkPlaceable>().snappableType))
+                    if (Vector3.Distance(p.gameObject.transform.position, this.transform.parent.position) < this.distanceForSnappingHandling)
+                    {//naceloma bi mogu bit samo edn so
+                        p.attach(this.transform.parent.gameObject);
+                    }
+        }
+
     }
 }
