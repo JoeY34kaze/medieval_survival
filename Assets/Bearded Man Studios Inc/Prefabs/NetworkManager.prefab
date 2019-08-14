@@ -93,7 +93,7 @@ MonoBehaviour:
   - {fileID: 1805417395977712654, guid: 9b6fabd4b2753604eaf462dd7510042a, type: 3}
   - {fileID: 1805417395977712654, guid: 4421f8c75a3bc0c41ac145bf11a3fbf6, type: 3}
   - {fileID: 2336698151731219390, guid: 0058c4c98ecfba242bda50d4803ad34b, type: 3}
-  - {fileID: 5456245247482363637, guid: ffe2abeca5fe87d46a9eaef4b28055c5, type: 3}
+  - {fileID: 8232459245449259890, guid: ffe2abeca5fe87d46a9eaef4b28055c5, type: 3}
   NetworkPlayerAnimationNetworkObject: []
   NetworkPlayerCameraHandlerNetworkObject: []
   NetworkPlayerCombatNetworkObject: []

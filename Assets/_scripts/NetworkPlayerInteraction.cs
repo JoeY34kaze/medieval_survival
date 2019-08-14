@@ -109,6 +109,9 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
                          Izsis se kaj dodatnega da bo vedu da lohko direkt pobere - glow?
 
                          */
+                        if (interactable is Interactable_parenting_fix) { interactable = ((Interactable_parenting_fix)(interactable)).parent_interactable; }//tole je zato da se pohendla ce colliderja nimamo na prvem objektu ampak je nizje u hierarhiji. recimo za vrata
+
+
 
                         if ((interactable is Interactable_chest || interactable is ItemPickup || interactable is Interactable_door) && interactable != this.recent_interactable)
                         {

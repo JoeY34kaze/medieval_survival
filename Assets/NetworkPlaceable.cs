@@ -46,26 +46,26 @@ public class NetworkPlaceable : NetworkPlaceableBehavior
     {
         if (networkObject.IsServer) {
             GameObject player = FindByid(args.Info.SendingPlayer.NetworkId);
-            NetworkPlayerNeutralStateHandler ntrl = FindByid(args.Info.SendingPlayer.NetworkId).GetComponent<NetworkPlayerNeutralStateHandler>();
+            NetworkPlayerNeutralStateHandler neutral_state_handler = FindByid(args.Info.SendingPlayer.NetworkId).GetComponent<NetworkPlayerNeutralStateHandler>();
 
 
             if (networkObject.IsServer)
             {
-                Debug.Log("server - placing " + ntrl.current_placeable_item.Display_name);
+                Debug.Log("server - placing " + neutral_state_handler.current_placeable_item.Display_name);
 
                 Quaternion rot = args.GetNext<Quaternion>();
 
                 //get current placeable predmet!
-                Predmet p = ntrl.activePlaceable;
+                Predmet p = neutral_state_handler.activePlaceable;
                 Transform ch = transform.GetChild(args.GetNext<int>());
                 if (ch.GetComponent<AttachmentPoint>().attached_placeable != null) {
                     Debug.LogError("Attachment slot occupied");
                     return;
                 }
 
-                if (!ntrl.currentTransformOfPlaceableIsValid(ch.transform.position)) return;
+                if (!neutral_state_handler.currentTransformOfPlaceableIsValid(ch.transform.position)) return;
                 
-                NetworkPlaceable created = ntrl.NetworkPlaceableInstantiationServer(p, ch.position, rot);
+                NetworkPlaceable created = neutral_state_handler.NetworkPlaceableInstantiationServer(p, ch.position, rot);
 
                 ch.GetComponent<AttachmentPoint>().attachTryReverse(created.gameObject);//proba nrdit obojestransko referenco ce se vse izide, sicer samo v eno smer
 
@@ -76,9 +76,9 @@ public class NetworkPlaceable : NetworkPlaceableBehavior
                 
                 
 
-                player.GetComponent<NetworkPlayerInventory>().reduceCurrentActivePlaceable(ntrl.selected_index);//sicer vrne bool da nam pove ce smo pobral celotn stack, ampak nima veze ker rabmo poslat update za kvantiteto v vsakem primeru.
+                player.GetComponent<NetworkPlayerInventory>().reduceCurrentActivePlaceable(neutral_state_handler.selected_index);//sicer vrne bool da nam pove ce smo pobral celotn stack, ampak nima veze ker rabmo poslat update za kvantiteto v vsakem primeru.
                                                                                                                 //nastavi selected index na -1 ce smo pobral vse - da gre lepo v rpc             
-                ntrl.sendBarUpdate();
+                neutral_state_handler.sendBarUpdate();
             }
 
 
