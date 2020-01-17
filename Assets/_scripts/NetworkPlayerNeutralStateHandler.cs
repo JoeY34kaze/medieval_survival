@@ -76,6 +76,7 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
                     }
                 }
                 else if (this.current_placeable_item != null) {
+                    Debug.Log(this.current_placeable_item.Display_name);
                     if(this.CurrentLocalPlaceable.GetComponent<LocalPlaceableHelper>()!=null) this.CurrentLocalPlaceable.GetComponent<LocalPlaceableHelper>().isSnapping = false;
                     handlePlaceableLocalPlacementSelection();
                 }
@@ -180,15 +181,23 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
     internal bool currentTransformOfPlaceableIsValid(Vector3 placeable_position)//ce je placeable izrisan nima veze ker ga maska za raycast ignorira
     {
         //nevem kk bom se zrihtov tole tbh
-        if (Vector3.Distance(transform.position, placeable_position) < this.placementRange) 
+        if (Vector3.Distance(transform.position, placeable_position) < this.placementRange)
+        {
+            RaycastHit hitInfo;
             switch (this.current_placeable_item.PlacementType)
             {
                 case (Item.SnappableType.foundation):
                     //treba pogledat ce se dotika terena al pa nekej. kej ne vidmo dejanskga objekta se bo najbrz treba raycastat z nekje da vidmo ce je teren dovolj blizu.
-                    Ray ray;
+                    if (Physics.Raycast(placeable_position + Vector3.up * 1.5f, Vector3.down, out hitInfo, 3f, this.placement_layer_mask))//3f je nekak velikost nase kocke. zadet mora itak teren
+                    {
+                        return true;
+                    }
+                    return false;
+                    break;
+                case (Item.SnappableType.free_in_range):
+                    //tale case je prakticno kopiran case od foundationa
 
-                    RaycastHit hitInfo;
-                    if (Physics.Raycast(placeable_position+Vector3.up*1.5f, Vector3.down, out hitInfo, 3f, this.placement_layer_mask))//3f je nekak velikost nase kocke. zadet mora itak teren
+                    if (Physics.Raycast(placeable_position + Vector3.up * 1.5f, Vector3.down, out hitInfo, 3f, this.placement_layer_mask))//3f je nekak velikost nase kocke. zadet mora itak teren
                     {
                         return true;
                     }
@@ -199,6 +208,7 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
                     return true;
                     break;
             }
+        }
         return false;
     }
 
