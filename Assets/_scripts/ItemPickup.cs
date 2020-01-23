@@ -13,16 +13,20 @@ public class ItemPickup : Interactable {
     //zaenkrat smao pove da je item k se ga lahko pobere
 
     private Material glow;
-    public Material original_material;
-    private MeshRenderer renderer;
+    public Material[] original_materials;
+    private MeshRenderer[] renderers;
     private bool initialized = false;
     private void Start()
     {
-        if (this.renderer == null) this.renderer = GetComponent<MeshRenderer>();
-        if (this.renderer == null) this.renderer = GetComponentInChildren<MeshRenderer>();
+        if (this.renderers == null) this.renderers = GetComponentsInChildren<MeshRenderer>();
 
         this.glow = (Material)Resources.Load("Glow_green", typeof(Material));
-        this.original_material = this.renderer.material;
+        this.original_materials = new Material[this.renderers.Length];
+        for (int i = 0; i < this.renderers.Length; i++) {
+            this.original_materials[i] = this.renderers[i].material;
+        }
+
+
         this.local_lock = GetComponent<InteractableLocalLock>();
         this.initialized = true;
     }
@@ -183,17 +187,18 @@ public class ItemPickup : Interactable {
 
     public override void setMaterialGlow()
     {
-        if (this.renderer == null) this.renderer = GetComponent<MeshRenderer>();
-        if (this.renderer == null) this.renderer = GetComponentInChildren<MeshRenderer>();
-
+        if (this.renderers == null) this.renderers = GetComponentsInChildren<MeshRenderer>();
+        Debug.Log("adding glow to pickup");
         if(this.initialized)
-            this.renderer.material = this.glow;
+            for(int i=0;i<this.renderers.Length;i++)
+                this.renderers[i].material = this.glow;
     }
 
     public override void resetMaterial()
     {
-        if (this.renderer == null) this.renderer = GetComponent<MeshRenderer>();
-        if (this.renderer == null) this.renderer = GetComponentInChildren<MeshRenderer>();
-        this.renderer.material = this.original_material;
+        if (this.renderers == null) this.renderers = GetComponentsInChildren<MeshRenderer>();
+        Debug.Log("resetting materials ");
+        for (int i = 0; i < this.renderers.Length; i++)
+            this.renderers[i].material = this.original_materials[i];
     }
 }

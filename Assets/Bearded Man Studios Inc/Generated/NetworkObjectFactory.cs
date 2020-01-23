@@ -107,6 +107,10 @@ namespace BeardedManStudios.Forge.Networking.Generated
 						availableCallback = true;
 						obj = new NetworkStartupSynchronizerNetworkObject(networker, id, frame);
 						break;
+					case NetworkTrapNetworkObject.IDENTITY:
+						availableCallback = true;
+						obj = new NetworkTrapNetworkObject(networker, id, frame);
+						break;
 					case NetworkWorldManagerNetworkObject.IDENTITY:
 						availableCallback = true;
 						obj = new NetworkWorldManagerNetworkObject(networker, id, frame);

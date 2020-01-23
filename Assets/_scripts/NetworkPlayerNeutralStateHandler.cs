@@ -26,7 +26,7 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
     private Quaternion previously_valid_rotation;
     internal Item current_placeable_item;
     private BoxCollider currentPlaceableCollider;
-    private Renderer currentPlaceableRenderer;
+    private Renderer[] currentPlaceableRenderers;
 
     private float mouseWheelRotation;
     [SerializeField]
@@ -53,6 +53,7 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
     {
         if (networkObject.IsOwner) {
             if (bar_handler.gameObject.activeSelf) {
+
                 checkInputBar();
                 if (Input.GetButtonDown("Fire1"))
                 {
@@ -66,7 +67,7 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
                     {
                         //ce ni valid, se itak poslje zadnji valid transform ker se je tko updejtal na koncu metode v update pri nastavlanju pozicije
 
-                        Debug.Log("tukej bomo poslal rpc za postavlanje itema");
+                        //Debug.Log("tukej bomo poslal rpc za postavlanje itema");
                         
                         if (this.current_closest_attachment_point != null)
                             this.current_closest_attachment_point.local_placement_of_placeable_request(this.CurrentLocalPlaceable.transform.rotation);
@@ -76,7 +77,7 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
                     }
                 }
                 else if (this.current_placeable_item != null) {
-                    Debug.Log(this.current_placeable_item.Display_name);
+                    //Debug.Log(this.current_placeable_item.Display_name);
                     if(this.CurrentLocalPlaceable.GetComponent<LocalPlaceableHelper>()!=null) this.CurrentLocalPlaceable.GetComponent<LocalPlaceableHelper>().isSnapping = false;
                     handlePlaceableLocalPlacementSelection();
                 }
@@ -96,7 +97,8 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
         {
             this.previously_valid_position = this.CurrentLocalPlaceable.transform.position;
             this.previously_valid_rotation = this.CurrentLocalPlaceable.transform.rotation;
-            this.currentPlaceableRenderer.material = this.valid_material;
+            
+            set_material(this.valid_material);
 
         }
         else
@@ -107,7 +109,8 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
                 this.CurrentLocalPlaceable.transform.rotation = this.previously_valid_rotation;
                 
             }
-            this.currentPlaceableRenderer.material = this.invalid_material;
+            set_material(this.invalid_material);
+            
         }
     }
 
@@ -123,6 +126,11 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
         else return 180f;
     }
 
+    private void set_material(Material m) {
+
+        for (int i = 0; i < this.currentPlaceableRenderers.Length; i++)
+            this.currentPlaceableRenderers[i].material = m;
+    }
 
     /// <summary>
     /// klice se samo na lokalnemu ker dostopa do stvari k jih server ne vid, like raycast k smo g anrdil. server to posebej pohendla na podobn nacin
@@ -636,7 +644,7 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
         this.CurrentLocalPlaceable = null;
         this.current_placeable_item = null;
         this.currentPlaceableCollider = null;
-        this.currentPlaceableRenderer = null;
+        this.currentPlaceableRenderers = new Renderer[0];
         this.activePlaceable = null;
     }
 
@@ -647,10 +655,7 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
         this.current_placeable_item = i.item;
         this.activePlaceable = i;
         this.currentPlaceableCollider = this.CurrentLocalPlaceable.GetComponent<BoxCollider>();
-        this.currentPlaceableRenderer = this.CurrentLocalPlaceable.GetComponent<MeshRenderer>();
-        if (this.currentPlaceableRenderer == null) this.currentPlaceableRenderer= this.CurrentLocalPlaceable.GetComponentInChildren<MeshRenderer>();
-        if (this.currentPlaceableRenderer == null) this.currentPlaceableRenderer = this.CurrentLocalPlaceable.GetComponent<Renderer>();
-        if (this.currentPlaceableRenderer == null) this.currentPlaceableRenderer = this.CurrentLocalPlaceable.GetComponentInChildren<Renderer>();
+        this.currentPlaceableRenderers = this.CurrentLocalPlaceable.GetComponentsInChildren<MeshRenderer>();
         //SetToolSelected(null);
         //combat_handler.currently_equipped_weapon=null;
     }

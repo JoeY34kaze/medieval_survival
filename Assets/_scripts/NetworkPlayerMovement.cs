@@ -284,13 +284,17 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
     {
         //CameraInput();
 
-        if (!lockMovement && !stats.downed)
+        if (!lockMovement && !stats.downed)//ce je downed je treba clearat movement sicer se se vedno vozi naprej
         {
             MoveCharacter();
             SprintInput();
             CrouchedInput();
             JumpInput();
             DodgeInput();
+        }
+        else if (stats.downed) {//mora bit pri miru oziroma mogoce padat na tla/slidat se. ni pa nujno
+            input.x = 0;
+            input.y = 0;
         }
     }
 

@@ -32,6 +32,7 @@ MonoBehaviour:
   description: Common bear trap. Used for people. Only for people actually.
   placeable_Local_object: {fileID: 634029857424565624, guid: 1ec5a24506e5b574fa3909d479aad45e,
     type: 3}
-  placeable_networked_object: {fileID: 0}
+  placeable_networked_object: {fileID: 634029857424565624, guid: d858c1c681ae7934a8fcd824868139d3,
+    type: 3}
   ignorePlacementNormal: 0
   PlacementType: 12

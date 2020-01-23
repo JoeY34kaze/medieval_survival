@@ -8,7 +8,7 @@ namespace BeardedManStudios.Forge.Networking.Generated
 	[GeneratedInterpol("{\"inter\":[]")]
 	public partial class NetworkWorldManagerNetworkObject : NetworkObject
 	{
-		public const int IDENTITY = 22;
+		public const int IDENTITY = 23;
 
 		private byte[] _dirtyFields = new byte[0];
 

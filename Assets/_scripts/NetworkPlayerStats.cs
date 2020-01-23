@@ -49,6 +49,7 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
     public Transform soul;
 
     public string name_guild="no guild yet";
+
     public string tag_guild="no tag yet";
 
     internal panel_guild_handler GetPGH()
@@ -199,6 +200,8 @@ napadenmu playerju da si poupdejta health. ta player pol ko si je updejtov healt
         return this.team;
     }
 
+    #region TAKING DAMAGE
+
     public void take_weapon_damage_server_authority(Item weapon,string tag_passive ,uint passive_player_server_network_id, uint agressor_server_network_id)
     {
         
@@ -303,6 +306,87 @@ napadenmu playerju da si poupdejta health. ta player pol ko si je updejtov healt
             }
         }
     }
+
+    public void take_environmental_damage_server_authority(Item item, string tag)
+    {
+
+        //tag je za tag colliderja. coll_0 = headshot, coll_1 = body/torso, coll2=arms/legs
+        if (networkObject.IsServer)
+        {
+            if (this.dead) return;
+            if (npi == null) npi = GetComponent<NetworkPlayerInventory>();
+            float prev_hp = this.health;
+            float dmg = item.damage;
+
+
+            //-----------------------------------------DAMAGE MODIFIERS----------------------------------------------------
+            Debug.Log(tag);
+            float locational_damage_reduction = 0;
+            if (tag.Equals("coll_0")) locational_damage_reduction = head_damage_multiplier;
+            else if (tag.Equals("coll_1")) locational_damage_reduction = torso_damage_multiplier;
+            else if (tag.Equals("coll_2")) locational_damage_reduction = limb_damage_multiplier;
+
+            //-----------armor values
+            float armor_damage_reduction_modifier = 0;
+            Predmet temp;
+            if (tag.Equals("coll_0"))
+            {
+                temp = npi.getHeadItem();
+                if (temp != null)
+                    armor_damage_reduction_modifier = temp.item.damage_reduction;
+
+            }
+            else if (tag.Equals("coll_1"))
+            {
+                temp = npi.getChestItem();
+                if (temp != null)
+                    armor_damage_reduction_modifier = temp.item.damage_reduction;
+
+                temp = npi.getHandsItem();
+                if (temp != null)
+                    armor_damage_reduction_modifier += temp.item.damage_reduction;
+
+            }
+            else if (tag.Equals("coll_2"))
+            {
+                temp = npi.getLegsItem();
+                if (temp != null)
+                    armor_damage_reduction_modifier = temp.item.damage_reduction;
+
+                temp = npi.getFeetItem();
+                if (temp != null)
+                    armor_damage_reduction_modifier += temp.item.damage_reduction;
+            }
+
+            armor_damage_reduction_modifier = 1 - armor_damage_reduction_modifier;
+            float all_modifiers = locational_damage_reduction * armor_damage_reduction_modifier;
+            //-------------------------------------------------------------------------------------------------------------
+            float final_damage_taken = dmg * all_modifiers;
+            float new_hp = this.health - final_damage_taken;// - health bomo poslal po rpcju - tud host bo sam seb poslov tko da nima veze ce kdo spreminja network.
+            if (new_hp < 0) new_hp = 0;
+            //healthBar.fillAmount = (float)this.health / (float)this.max_health;
+
+            lock (myNetWorker.Players)
+            {
+                myNetWorker.IteratePlayers((player) =>
+                {
+                    if (player.NetworkId == networkObject.Owner.NetworkId) //passive target
+                    {
+                        //Debug.Log("Victim found! "+ passive_player_server_network_id);
+                        networkObject.SendRpc(RPC_SET_HEALTH, Receivers.All, new_hp, tag);
+                        if (prev_hp == 0 && final_damage_taken > 0)
+                        {
+                            //death
+                            handle_death_player(networkObject.Owner.NetworkId);
+                        }
+                    }
+                });
+
+            }
+        }
+    }
+
+    #endregion
 
     internal uint Get_server_id()
     {

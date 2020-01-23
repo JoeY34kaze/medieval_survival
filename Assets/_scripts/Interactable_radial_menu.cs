@@ -270,6 +270,11 @@ public class Interactable_radial_menu : MonoBehaviour
         menu.reDraw();
     }
 
+    internal void show_trap_interaction_menu(GameObject gameObject)
+    {
+        throw new NotImplementedException();
+    }
+
     internal void show_chest_interaction_menu(GameObject gameObject)
     {
         show_menu(gameObject);

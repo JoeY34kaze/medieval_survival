@@ -31,6 +31,7 @@ namespace BeardedManStudios.Forge.Networking.Unity
 		public GameObject[] NetworkPlayerStatsNetworkObject = null;
 		public GameObject[] NetworkResourceNetworkObject = null;
 		public GameObject[] NetworkStartupSynchronizerNetworkObject = null;
+		public GameObject[] NetworkTrapNetworkObject = null;
 		public GameObject[] NetworkWorldManagerNetworkObject = null;
 		public GameObject[] Network_bodyNetworkObject = null;
 		public GameObject[] TestNetworkObject = null;
@@ -534,6 +535,29 @@ namespace BeardedManStudios.Forge.Networking.Unity
 						objectInitialized(newObj, obj);
 				});
 			}
+			else if (obj is NetworkTrapNetworkObject)
+			{
+				MainThreadManager.Run(() =>
+				{
+					NetworkBehavior newObj = null;
+					if (!NetworkBehavior.skipAttachIds.TryGetValue(obj.NetworkId, out newObj))
+					{
+						if (NetworkTrapNetworkObject.Length > 0 && NetworkTrapNetworkObject[obj.CreateCode] != null)
+						{
+							var go = Instantiate(NetworkTrapNetworkObject[obj.CreateCode]);
+							newObj = go.GetComponent<NetworkTrapBehavior>();
+						}
+					}
+
+					if (newObj == null)
+						return;
+						
+					newObj.Initialize(obj);
+
+					if (objectInitialized != null)
+						objectInitialized(newObj, obj);
+				});
+			}
 			else if (obj is NetworkWorldManagerNetworkObject)
 			{
 				MainThreadManager.Run(() =>
@@ -860,6 +884,18 @@ namespace BeardedManStudios.Forge.Networking.Unity
 			var netBehavior = go.GetComponent<NetworkStartupSynchronizerBehavior>();
 			var obj = netBehavior.CreateNetworkObject(Networker, index);
 			go.GetComponent<NetworkStartupSynchronizerBehavior>().networkObject = (NetworkStartupSynchronizerNetworkObject)obj;
+
+			FinalizeInitialization(go, netBehavior, obj, position, rotation, sendTransform);
+			
+			return netBehavior;
+		}
+		[Obsolete("Use InstantiateNetworkTrap instead, its shorter and easier to type out ;)")]
+		public NetworkTrapBehavior InstantiateNetworkTrapNetworkObject(int index = 0, Vector3? position = null, Quaternion? rotation = null, bool sendTransform = true)
+		{
+			var go = Instantiate(NetworkTrapNetworkObject[index]);
+			var netBehavior = go.GetComponent<NetworkTrapBehavior>();
+			var obj = netBehavior.CreateNetworkObject(Networker, index);
+			go.GetComponent<NetworkTrapBehavior>().networkObject = (NetworkTrapNetworkObject)obj;
 
 			FinalizeInitialization(go, netBehavior, obj, position, rotation, sendTransform);
 			
@@ -1758,6 +1794,47 @@ namespace BeardedManStudios.Forge.Networking.Unity
 			}
 
 			go.GetComponent<NetworkStartupSynchronizerBehavior>().networkObject = (NetworkStartupSynchronizerNetworkObject)obj;
+
+			FinalizeInitialization(go, netBehavior, obj, position, rotation, sendTransform);
+			
+			return netBehavior;
+		}
+		public NetworkTrapBehavior InstantiateNetworkTrap(int index = 0, Vector3? position = null, Quaternion? rotation = null, bool sendTransform = true)
+		{
+			var go = Instantiate(NetworkTrapNetworkObject[index]);
+			var netBehavior = go.GetComponent<NetworkTrapBehavior>();
+
+			NetworkObject obj = null;
+			if (!sendTransform && position == null && rotation == null)
+				obj = netBehavior.CreateNetworkObject(Networker, index);
+			else
+			{
+				metadata.Clear();
+
+				if (position == null && rotation == null)
+				{
+					byte transformFlags = 0x1 | 0x2;
+					ObjectMapper.Instance.MapBytes(metadata, transformFlags);
+					ObjectMapper.Instance.MapBytes(metadata, go.transform.position, go.transform.rotation);
+				}
+				else
+				{
+					byte transformFlags = 0x0;
+					transformFlags |= (byte)(position != null ? 0x1 : 0x0);
+					transformFlags |= (byte)(rotation != null ? 0x2 : 0x0);
+					ObjectMapper.Instance.MapBytes(metadata, transformFlags);
+
+					if (position != null)
+						ObjectMapper.Instance.MapBytes(metadata, position.Value);
+
+					if (rotation != null)
+						ObjectMapper.Instance.MapBytes(metadata, rotation.Value);
+				}
+
+				obj = netBehavior.CreateNetworkObject(Networker, index, metadata.CompressBytes());
+			}
+
+			go.GetComponent<NetworkTrapBehavior>().networkObject = (NetworkTrapNetworkObject)obj;
 
 			FinalizeInitialization(go, netBehavior, obj, position, rotation, sendTransform);
 			

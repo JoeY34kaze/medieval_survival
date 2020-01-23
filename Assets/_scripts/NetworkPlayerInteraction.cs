@@ -85,24 +85,15 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
 
             if (Physics.Raycast(ray, out hit, 50))
             {
-
                 Debug.DrawRay(player_cam.position, player_cam.forward * 10, Color.blue);
-
                 //Debug.Log("raycast : "+hit.collider.name);
-
                 Interactable interactable = hit.collider.GetComponent<Interactable>();
                 if (interactable == null) interactable = hit.collider.GetComponentInParent<Interactable>();//je collider popravlen zarad neujemanja pivota ker je blender ziva nocna mora
-
-
                 if (interactable != null)
                 {
                     //izriši eno obrobo al pa nekej samo tolk da player vidi da lahko z stvarjo eventualno interacta?
                     /*
-                   
-                 
                  */
-
-
                     if (hit.distance <= radius)
                     {
                         /*
@@ -112,8 +103,7 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
                         if (interactable is Interactable_parenting_fix) { interactable = ((Interactable_parenting_fix)(interactable)).parent_interactable; }//tole je zato da se pohendla ce colliderja nimamo na prvem objektu ampak je nizje u hierarhiji. recimo za vrata
 
 
-
-                        if ((interactable is Interactable_chest || interactable is ItemPickup || interactable is Interactable_door) && interactable != this.recent_interactable)
+                        if ((interactable is Interactable_chest || interactable is ItemPickup || interactable is Interactable_door || interactable is Interactable_trap) && interactable != this.recent_interactable)
                         {
                             interactable.setMaterialGlow();
                             if (this.recent_interactable != null)
@@ -181,6 +171,10 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
 
                                 if (interactable is Interactable_chest)
                                     this.menu.show_chest_interaction_menu(interactable.gameObject);
+                                
+                                if (interactable is Interactable_trap)
+                                    this.menu.show_trap_interaction_menu(interactable.gameObject);
+
                             }
                         }
                     }
