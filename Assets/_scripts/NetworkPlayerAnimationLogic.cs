@@ -17,6 +17,9 @@ public class NetworkPlayerAnimationLogic : NetworkPlayerAnimationBehavior
     private NetworkPlayerStats stats;
     private NetworkPlayerCombatHandler combat_handler;
 
+    private bool IK_swing_active = false;
+    private Vector3 IK_swing_target;
+
     public bool hookChestRotation=true;
     // ---------------------------------FUNCTIONS-------------------------------------
     void Awake()
@@ -325,4 +328,32 @@ public class NetworkPlayerAnimationLogic : NetworkPlayerAnimationBehavior
 
         anim.SetTrigger("tool_activated");
     }
+
+    //--------------------   INVERSE KINEMATICS
+
+    public void on_weapon_or_tool_collision(Vector3 location) {
+        //sprozi se z weapona ali toola ko zadane nek objekt.
+
+        this.IK_swing_active = true;
+        this.IK_swing_target = location;
+
+    }
+
+    public void reset_swing_IK() {
+        this.IK_swing_active = false;
+        this.IK_swing_target = Vector3.zero;
+    }
+
+     void OnAnimatorIK(int layerIndex)
+    {
+        
+        if (this.IK_swing_active && this.IK_swing_target != Vector3.zero)
+        {
+            Debug.Log("IK!!");
+            anim.SetIKPosition(AvatarIKGoal.RightHand, this.IK_swing_target);
+            anim.SetIKPositionWeight(AvatarIKGoal.RightHand, 1);
+        }
+    }
+
+
 }

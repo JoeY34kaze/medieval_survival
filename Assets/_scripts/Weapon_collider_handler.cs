@@ -4,7 +4,12 @@ public class Weapon_collider_handler : MonoBehaviour
 {
     public Item item;
     private NetworkPlayerInventory inv;
-    
+    private NetworkPlayerAnimationLogic anim;
+
+    private void Start()
+    {
+        this.anim = gameObject.transform.root.gameObject.GetComponent<NetworkPlayerAnimationLogic>();
+    }
     void OnTriggerEnter(Collider other)//nima networkobjekta. ce je server se preverja v stats.
     {
         if (other.transform.root.name.Equals("NetworkPlayer(Clone)") && !other.transform.root.gameObject.Equals(transform.root.gameObject) && !other.transform.name.Equals("NetworkPlayer(Clone)")) {//ce je player && ce ni moj player && ce ni playerjev movement collider(kter je samo za movement)
@@ -22,6 +27,8 @@ public class Weapon_collider_handler : MonoBehaviour
                 other.transform.root.gameObject.GetComponent<NetworkPlayerStats>().take_weapon_damage_server_authority(this.item,other.tag, other.transform.root.gameObject.GetComponent<NetworkPlayerStats>().Get_server_id(), transform.root.gameObject.GetComponent<NetworkPlayerStats>().Get_server_id());
                 GetComponent<Collider>().enabled = false;
             }
+
+            set_swing_IK(other);
         }
 
         if (other.transform.tag.Equals("resource"))//ce smo zadel nek resource
@@ -33,11 +40,21 @@ public class Weapon_collider_handler : MonoBehaviour
             inv.requestResourceHitServer(this.item, other.gameObject);
             GetComponent<Collider>().enabled = false;
 
+            set_swing_IK(other);          
         }
 
     }
 
     public void set_offensive_colliders(bool b) { GetComponent<Collider>().enabled = b; }
+
+    private void set_swing_IK(Collider other) {
+        RaycastHit hit;
+        Vector3 dir = other.transform.position - transform.position;
+        if (Physics.Raycast(transform.position, dir, out hit))
+        {
+            anim.on_weapon_or_tool_collision(hit.point);
+        }
+    }
 
 
 

@@ -5,7 +5,12 @@ public class gathering_tool_collider_handler : MonoBehaviour
 {
     public Item item;
     private NetworkPlayerInventory inv;
+    private NetworkPlayerAnimationLogic anim;
 
+    private void Start()
+    {
+        this.anim = gameObject.transform.root.gameObject.GetComponent<NetworkPlayerAnimationLogic>();
+    }
     void OnTriggerEnter(Collider other)
     {
         print("Collision detected with trigger object " + other.name);
@@ -17,12 +22,12 @@ public class gathering_tool_collider_handler : MonoBehaviour
             if (this.inv == null) { this.inv = transform.root.GetComponent<NetworkPlayerInventory>(); }
             inv.requestResourceHitServer(this.item, other.gameObject);
             GetComponent<Collider>().enabled = false;
-
+            set_swing_IK(other);
         }
 
         if (other.transform.root.name.Equals("NetworkPlayer(Clone)") && !other.transform.root.gameObject.Equals(transform.root.gameObject) && !other.transform.name.Equals("NetworkPlayer(Clone)"))
         {//ce je player && ce ni moj player && ce ni playerjev movement collider(kter je samo za movement)
-
+            set_swing_IK(other);
 
             if (gameObject.CompareTag("block_player"))
             {
@@ -38,6 +43,14 @@ public class gathering_tool_collider_handler : MonoBehaviour
             }
         }
     }
-    
 
+    private void set_swing_IK(Collider other)
+    {
+        RaycastHit hit;
+        Vector3 dir = other.transform.position - transform.position;
+        if (Physics.Raycast(transform.position, dir, out hit))
+        {
+            anim.on_weapon_or_tool_collision(hit.point);
+        }
+    }
 }

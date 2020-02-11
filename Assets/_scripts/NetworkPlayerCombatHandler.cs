@@ -167,6 +167,7 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
     /// </summary>
     public void handleEndOfAttackAnimation() {
         this.in_attack_animation = false;
+        animator.reset_swing_IK();
     }
 
     /// <summary>
