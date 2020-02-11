@@ -9,12 +9,13 @@ using UnityEngine;
 public class Predmet 
 {
     public Item item;
-    public int quantity;
+    public int quantity=1;
     //public string creator;
     public int durability;
     public string creator = "some schmuk";
     public Predmet(Item i) {
         this.item = i;
+        this.quantity = 1;
     }
 
     public Predmet(Item i, int quantity) {

@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -38,5 +39,17 @@ public class Interactable_trap : Interactable
             this.currentPlaceableRenderers[i].materials = this.original_materials[i];
     }
 
+    internal void local_trap_reload_request()
+    {
+        //tole forwarda na networkedTrap
+        GetComponent<Networked_trap_bear>().local_trap_reload_request();
+        
+    }
 
+    internal void local_trap_pickup_request()
+    {
+        //tole forwarda na networkedTrap
+        GetComponent<Networked_trap_bear>().local_trap_pickup_request();
+        
+    }
 }

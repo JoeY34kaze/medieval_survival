@@ -452,15 +452,25 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
 
     internal void local_chest_pickup_request(GameObject target)
     {
-        //throw new NotImplementedException();
         Debug.Log("request to pickup chest");
         target.GetComponent<NetworkChest>().local_chest_pickup_request();
     }
 
     internal void local_chest_open_request(GameObject target)
     {
-        //throw new NotImplementedException();
         Debug.Log("request to open chest");
         target.GetComponent<NetworkChest>().local_chest_open_request();
+    }
+
+    internal void local_trap_reload_request(GameObject target)
+    {
+        Debug.Log("request to reload trap");
+        target.GetComponent<Interactable_trap>().local_trap_reload_request();
+    }
+
+    internal void local_trap_pickup_request(GameObject target)
+    {
+        Debug.Log("request to pickup trap");
+        target.GetComponent<Interactable_trap>().local_trap_pickup_request();
     }
 }

@@ -4,13 +4,16 @@ using UnityEngine;
 
 namespace BeardedManStudios.Forge.Networking.Generated
 {
-	[GeneratedRPC("{\"types\":[[\"int\"][][\"int\"]]")]
-	[GeneratedRPCVariableNames("{\"types\":[[\"state\"][][\"state\"]]")]
+	[GeneratedRPC("{\"types\":[[\"int\"][][\"int\"][][][]]")]
+	[GeneratedRPCVariableNames("{\"types\":[[\"state\"][][\"state\"][][][]]")]
 	public abstract partial class NetworkTrapBehavior : NetworkBehavior
 	{
 		public const byte RPC_SET_ANIMATION_STATE = 0 + 5;
 		public const byte RPC_NETWORK_REFRESH_REQUEST = 1 + 5;
 		public const byte RPC_REFRESH = 2 + 5;
+		public const byte RPC_RELOAD = 3 + 5;
+		public const byte RPC_PICKUP_REQUEST = 4 + 5;
+		public const byte RPC_DESTROY__WRAPPER = 5 + 5;
 		
 		public NetworkTrapNetworkObject networkObject = null;
 
@@ -27,6 +30,9 @@ namespace BeardedManStudios.Forge.Networking.Generated
 			networkObject.RegisterRpc("setAnimationState", setAnimationState, typeof(int));
 			networkObject.RegisterRpc("NetworkRefreshRequest", NetworkRefreshRequest);
 			networkObject.RegisterRpc("Refresh", Refresh, typeof(int));
+			networkObject.RegisterRpc("Reload", Reload);
+			networkObject.RegisterRpc("PickupRequest", PickupRequest);
+			networkObject.RegisterRpc("Destroy_Wrapper", Destroy_Wrapper);
 
 			networkObject.onDestroy += DestroyGameObject;
 
@@ -116,6 +122,18 @@ namespace BeardedManStudios.Forge.Networking.Generated
 		/// Arguments:
 		/// </summary>
 		public abstract void Refresh(RpcArgs args);
+		/// <summary>
+		/// Arguments:
+		/// </summary>
+		public abstract void Reload(RpcArgs args);
+		/// <summary>
+		/// Arguments:
+		/// </summary>
+		public abstract void PickupRequest(RpcArgs args);
+		/// <summary>
+		/// Arguments:
+		/// </summary>
+		public abstract void Destroy_Wrapper(RpcArgs args);
 
 		// DO NOT TOUCH, THIS GETS GENERATED PLEASE EXTEND THIS CLASS IF YOU WISH TO HAVE CUSTOM CODE ADDITIONS
 	}

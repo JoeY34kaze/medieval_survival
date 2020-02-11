@@ -85,10 +85,6 @@ public class ItemPickup : Interactable {
         }
 
         uint player_id = args.Info.SendingPlayer.NetworkId;
-
-
-
-
         //check players inventory and other shit if he can pick the item up.
         //destroy item if player can carry all or split it if player cant carry all
 
