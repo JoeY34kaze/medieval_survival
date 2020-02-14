@@ -112,12 +112,7 @@ public class NetworkPlaceable : NetworkPlaceableBehavior
                     {
                         p.attachTryReverse(this.transform.gameObject);
                     }
-            
-
         }
-
-
-
     }
 
     private AttachmentPoint[] GetAttachmentPointsInRangeForSnapping(AttachmentPoint[] all_valid)
@@ -196,5 +191,25 @@ public class NetworkPlaceable : NetworkPlaceableBehavior
     {
         //sendingPlayer je zmer server so..
         transform.GetChild(args.GetNext<int>()).GetComponent<AttachmentPoint>().setAttachedClient(args.GetNext<bool>());
+    }
+
+    internal bool is_placement_possible_for(Item current_placeable_item)
+    {
+        //gremo cez vse attachment pointe in ce najdemo en point ki je ze zaseden med blockerjim vrzemo false sicer true.
+        for (int i = 0; i < this.attachmentPoints.Length; i++) {
+            if (attachment_point_can_be_blocked_by(this.attachmentPoints[i], current_placeable_item.blocks_placements) ) {
+                if (this.attachmentPoints[i].attached_placeable != null) return false;
+            }
+        }
+        return true;
+    }
+
+    private bool attachment_point_can_be_blocked_by(AttachmentPoint attachmentPoint, Item.SnappableType[] blocks_placements)
+    {
+        for (int i = 0; i < blocks_placements.Length; i++)
+            for (int j = 0; j < attachmentPoint.allowed_attachment_types.Length; j++)
+                if (attachmentPoint.allowed_attachment_types[j] == blocks_placements[i])
+                    return true;
+        return false;
     }
 }

@@ -37,6 +37,8 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
     [SerializeField]
     private float placementRange = 6f;
 
+    private float current_placeable_rotation_offset = 0f;
+
     private AttachmentPoint current_closest_attachment_point;
 
     private void Start()
@@ -47,6 +49,7 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
         this.npi = GetComponent<NetworkPlayerInventory>();
         this.valid_material = (Material)Resources.Load("Glow_green", typeof(Material));
         this.invalid_material = (Material)Resources.Load("Glow_red", typeof(Material));
+
     }
 
     private void Update()
@@ -57,7 +60,7 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
                 checkInputBar();
                 if (Input.GetButtonDown("Fire1"))
                 {
-                    if (this.activeTool!=null && combat_handler.is_allowed_to_attack_local())//za weapone se checkira v combat handlerju
+                    if (this.activeTool != null && combat_handler.is_allowed_to_attack_local())//za weapone se checkira v combat handlerju
                     {
                         ///poslat request da nrdimo swing z tem tool-om
                         networkObject.SendRpc(RPC_TOOL_USAGE_REQUEST, Receivers.Server);
@@ -68,7 +71,7 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
                         //ce ni valid, se itak poslje zadnji valid transform ker se je tko updejtal na koncu metode v update pri nastavlanju pozicije
 
                         //Debug.Log("tukej bomo poslal rpc za postavlanje itema");
-                        
+
                         if (this.current_closest_attachment_point != null)
                             this.current_closest_attachment_point.local_placement_of_placeable_request(this.CurrentLocalPlaceable.transform.rotation);
                         else
@@ -76,14 +79,20 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
 
                     }
                 }
-                else if (this.current_placeable_item != null) {
+                else if (this.current_placeable_item != null)
+                {
                     //Debug.Log(this.current_placeable_item.Display_name);
-                    if(this.CurrentLocalPlaceable.GetComponent<LocalPlaceableHelper>()!=null) this.CurrentLocalPlaceable.GetComponent<LocalPlaceableHelper>().isSnapping = false;
+                    if (this.CurrentLocalPlaceable.GetComponent<LocalPlaceableHelper>() != null) this.CurrentLocalPlaceable.GetComponent<LocalPlaceableHelper>().isSnapping = false;
                     handlePlaceableLocalPlacementSelection();
+                }
+                else {
+                    this.current_placeable_rotation_offset = 0f;
                 }
             }
         }
     }
+
+    
 
     /// <summary>
     /// lokalno izrise placeable karkoli ze pac hocmo postavt
@@ -122,7 +131,7 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
         {
             return 0;
         }
-        else if (current_placeable_item.PlacementType == Item.SnappableType.foundation) return 90f;
+        else if (current_placeable_item.PlacementType == Item.SnappableType.foundation || current_placeable_item.PlacementType == Item.SnappableType.stairs_wide) return 90f;
         else return 180f;
     }
 
@@ -211,6 +220,10 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
                     }
                     return false;
                     break;
+                case (Item.SnappableType.stairs_wide):
+                    return check_validity_stairs();
+                case (Item.SnappableType.stairs_narrow):
+                    return check_validity_stairs();
                 default:
                     Debug.LogWarning("not checking placement validation for this placeable");
                     return true;
@@ -218,6 +231,12 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
             }
         }
         return false;
+    }
+
+    private bool check_validity_stairs() {
+        //imamo current_closest_attachment_point. pogledat mormo ce na parentu od tega ni ze postavlen ksn item na attachment point k bi mu sou nasprot.
+        NetworkPlaceable parent = this.current_closest_attachment_point.GetComponentInParent<NetworkPlaceable>();
+        return parent.is_placement_possible_for(this.current_placeable_item);
     }
 
     private void rotatePlaceableWithMouseFree(float allowedAngleChunk)
@@ -229,10 +248,13 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
         {
             
             this.CurrentLocalPlaceable.transform.Rotate(Vector3.up, this.mouseWheelRotation * 10);
+
+            
         }
         else{
             
             this.CurrentLocalPlaceable.transform.Rotate(CurrentLocalPlaceable.transform.up, (this.mouseWheelRotation/ this.mouseWheelRotation) * allowedAngleChunk);
+            
         }
     }
 
@@ -256,7 +278,6 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
             if (s == null)//ce je null in je foundation ga loh postavlamo na tla po zelji
             {
                 
-
                 if (this.current_placeable_item.PlacementType == Item.SnappableType.none || this.current_placeable_item.PlacementType == Item.SnappableType.free_in_range || this.current_placeable_item.PlacementType == Item.SnappableType.foundation)
                 {
                     Vector3 offsetOfColliderHeight = Vector3.up * this.currentPlaceableCollider.size.y / 2;
@@ -272,11 +293,8 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
                 }
             }
             else {//nalimej na tocko k smo jo dobil - snap sistem
-
-
-
-                this.CurrentLocalPlaceable.transform.position = s.transform.position;
                 this.CurrentLocalPlaceable.transform.rotation = s.transform.rotation;
+                this.CurrentLocalPlaceable.transform.position = s.transform.position;
                 this.CurrentLocalPlaceable.GetComponent<LocalPlaceableHelper>().isSnapping = true;
             }
         }

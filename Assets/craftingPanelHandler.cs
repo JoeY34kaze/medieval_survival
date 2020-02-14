@@ -228,7 +228,7 @@ public class craftingPanelHandler : MonoBehaviour
         if (!this.craftOrder.text.Equals(""))
             current = int.Parse(this.craftOrder.text);
         //if (current > 0)
-          //  current += 1;
+            current += 1;
         int max = GetMaxPossibleCraftsWithRegardsToCraftingQueue();
         if (current > max)
             current = max;

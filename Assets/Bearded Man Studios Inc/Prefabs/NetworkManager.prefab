@@ -95,6 +95,8 @@ MonoBehaviour:
   - {fileID: 2336698151731219390, guid: 0058c4c98ecfba242bda50d4803ad34b, type: 3}
   - {fileID: 8232459245449259890, guid: ffe2abeca5fe87d46a9eaef4b28055c5, type: 3}
   - {fileID: 634029857424565624, guid: d858c1c681ae7934a8fcd824868139d3, type: 3}
+  - {fileID: 754232109766947529, guid: 94c5a1e08e9bc7c428dca566da9c964f, type: 3}
+  - {fileID: 4421934177080679166, guid: 956a4a17fa7cc6c4da28ab8cb6a5e7e0, type: 3}
   NetworkPlayerAnimationNetworkObject: []
   NetworkPlayerCameraHandlerNetworkObject: []
   NetworkPlayerCombatNetworkObject: []
@@ -106,6 +108,7 @@ MonoBehaviour:
   - {fileID: 4050820139605508289, guid: 4127547ddec345c45ac98e9c5c48df12, type: 3}
   NetworkResourceNetworkObject: []
   NetworkStartupSynchronizerNetworkObject: []
+  NetworkTrapNetworkObject: []
   NetworkWorldManagerNetworkObject:
   - {fileID: 1347532028169199706, guid: 140fe84386e7bcc47ba346dc178afee3, type: 3}
   Network_bodyNetworkObject:

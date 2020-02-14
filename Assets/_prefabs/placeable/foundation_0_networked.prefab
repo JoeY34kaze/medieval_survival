@@ -1,5 +1,51 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &48258567920349924
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1992333548349408726}
+  - component: {fileID: 3752288949570031455}
+  m_Layer: 0
+  m_Name: attachmentPointStairsNarrow (16)
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1992333548349408726
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 48258567920349924}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -0.5, y: 1, z: -0.25}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 1805417395977712642}
+  m_RootOrder: 16
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &3752288949570031455
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 48258567920349924}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 718fa87116dc1e148aa7262ebdd9b341, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  allowed_attachment_types: 0f000000
+  distanceForSnappingHandling: 0.05
+  attached_placeable: {fileID: 0}
 --- !u!1 &671214792429555410
 GameObject:
   m_ObjectHideFlags: 0
@@ -44,6 +90,53 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   allowed_attachment_types: 030000000400000005000000
+  distanceForSnappingHandling: 0.05
+  attached_placeable: {fileID: 0}
+--- !u!1 &814789233322694960
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8794698074351283144}
+  - component: {fileID: 1875331961371219090}
+  m_Layer: 0
+  m_Name: attachmentPointStairsWide (10)
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &8794698074351283144
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 814789233322694960}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -0.5, y: 1, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 1805417395977712642}
+  m_RootOrder: 10
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1875331961371219090
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 814789233322694960}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 718fa87116dc1e148aa7262ebdd9b341, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  allowed_attachment_types: 0e0000000f000000
+  distanceForSnappingHandling: 0.05
   attached_placeable: {fileID: 0}
 --- !u!1 &1666765920771650768
 GameObject:
@@ -89,6 +182,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   allowed_attachment_types: 030000000400000005000000
+  distanceForSnappingHandling: 0.05
   attached_placeable: {fileID: 0}
 --- !u!1 &1805417395977712654
 GameObject:
@@ -130,6 +224,18 @@ Transform:
   - {fileID: 2782022428011012697}
   - {fileID: 618803137096422093}
   - {fileID: 6215688164847170191}
+  - {fileID: 6824306275897121233}
+  - {fileID: 8794698074351283144}
+  - {fileID: 5490880858465583500}
+  - {fileID: 5961805238953644422}
+  - {fileID: 7461832561566924006}
+  - {fileID: 6964554036944718162}
+  - {fileID: 7388892531650098708}
+  - {fileID: 1992333548349408726}
+  - {fileID: 5707828634573372981}
+  - {fileID: 1306609478320780315}
+  - {fileID: 8751851800040209896}
+  - {fileID: 3435233330029510093}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -203,8 +309,55 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2b298bb46440e6f49a63781f93d94be4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  distanceForSnappingHandling: 0.05
   snappableType: 1
   attachmentPoints: []
+--- !u!1 &2393035903075429117
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5490880858465583500}
+  - component: {fileID: 1100077747944965941}
+  m_Layer: 0
+  m_Name: attachmentPointStairsWide (11)
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &5490880858465583500
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2393035903075429117}
+  m_LocalRotation: {x: 0, y: 0.7071068, z: 0, w: 0.7071068}
+  m_LocalPosition: {x: 0, y: 1, z: 0.5}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 1805417395977712642}
+  m_RootOrder: 11
+  m_LocalEulerAnglesHint: {x: 0, y: 90, z: 0}
+--- !u!114 &1100077747944965941
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2393035903075429117}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 718fa87116dc1e148aa7262ebdd9b341, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  allowed_attachment_types: 0e0000000f000000
+  distanceForSnappingHandling: 0.05
+  attached_placeable: {fileID: 0}
 --- !u!1 &3329448774989093768
 GameObject:
   m_ObjectHideFlags: 0
@@ -249,6 +402,53 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   allowed_attachment_types: 030000000400000005000000
+  distanceForSnappingHandling: 0.05
+  attached_placeable: {fileID: 0}
+--- !u!1 &3815251638680842096
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 6964554036944718162}
+  - component: {fileID: 591670128473461057}
+  m_Layer: 0
+  m_Name: attachmentPointStairsNarrow (14)
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &6964554036944718162
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3815251638680842096}
+  m_LocalRotation: {x: 0, y: 1, z: 0, w: 0}
+  m_LocalPosition: {x: 0.5, y: 1, z: -0.25}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 1805417395977712642}
+  m_RootOrder: 14
+  m_LocalEulerAnglesHint: {x: 0, y: 180, z: 0}
+--- !u!114 &591670128473461057
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3815251638680842096}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 718fa87116dc1e148aa7262ebdd9b341, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  allowed_attachment_types: 0f000000
+  distanceForSnappingHandling: 0.05
   attached_placeable: {fileID: 0}
 --- !u!1 &3992017597429440343
 GameObject:
@@ -294,6 +494,145 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   allowed_attachment_types: 01000000
+  distanceForSnappingHandling: 0.05
+  attached_placeable: {fileID: 0}
+--- !u!1 &4580072853136005454
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8751851800040209896}
+  - component: {fileID: 464093695133105640}
+  m_Layer: 0
+  m_Name: attachmentPointStairsNarrow (19)
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &8751851800040209896
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4580072853136005454}
+  m_LocalRotation: {x: 0, y: 0.7071068, z: -0, w: -0.7071068}
+  m_LocalPosition: {x: 0.25, y: 1, z: -0.5}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 1805417395977712642}
+  m_RootOrder: 19
+  m_LocalEulerAnglesHint: {x: 0, y: 270, z: 0}
+--- !u!114 &464093695133105640
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4580072853136005454}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 718fa87116dc1e148aa7262ebdd9b341, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  allowed_attachment_types: 0f000000
+  distanceForSnappingHandling: 0.05
+  attached_placeable: {fileID: 0}
+--- !u!1 &5081465579249124624
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7388892531650098708}
+  - component: {fileID: 7575008214602752416}
+  m_Layer: 0
+  m_Name: attachmentPointStairsNarrow (15)
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7388892531650098708
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5081465579249124624}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -0.5, y: 1, z: 0.25}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 1805417395977712642}
+  m_RootOrder: 15
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &7575008214602752416
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5081465579249124624}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 718fa87116dc1e148aa7262ebdd9b341, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  allowed_attachment_types: 0f000000
+  distanceForSnappingHandling: 0.05
+  attached_placeable: {fileID: 0}
+--- !u!1 &5319203854520098720
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 6824306275897121233}
+  - component: {fileID: 8113323313024873277}
+  m_Layer: 0
+  m_Name: attachmentPointStairsWide (9)
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &6824306275897121233
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5319203854520098720}
+  m_LocalRotation: {x: 0, y: 1, z: 0, w: 0}
+  m_LocalPosition: {x: 0.5, y: 1, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 1805417395977712642}
+  m_RootOrder: 9
+  m_LocalEulerAnglesHint: {x: 0, y: 180, z: 0}
+--- !u!114 &8113323313024873277
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5319203854520098720}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 718fa87116dc1e148aa7262ebdd9b341, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  allowed_attachment_types: 0e0000000f000000
+  distanceForSnappingHandling: 0.05
   attached_placeable: {fileID: 0}
 --- !u!1 &5939978115833882438
 GameObject:
@@ -339,6 +678,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   allowed_attachment_types: 01000000
+  distanceForSnappingHandling: 0.05
   attached_placeable: {fileID: 0}
 --- !u!1 &6301800793856665652
 GameObject:
@@ -384,6 +724,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   allowed_attachment_types: 01000000
+  distanceForSnappingHandling: 0.05
   attached_placeable: {fileID: 0}
 --- !u!1 &6883590656388902354
 GameObject:
@@ -429,6 +770,53 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   allowed_attachment_types: 01000000
+  distanceForSnappingHandling: 0.05
+  attached_placeable: {fileID: 0}
+--- !u!1 &6940583604909389343
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5707828634573372981}
+  - component: {fileID: 3851348061437903575}
+  m_Layer: 0
+  m_Name: attachmentPointStairsNarrow (17)
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &5707828634573372981
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6940583604909389343}
+  m_LocalRotation: {x: 0, y: 0.7071068, z: 0, w: 0.7071068}
+  m_LocalPosition: {x: 0.25, y: 1, z: 0.5}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 1805417395977712642}
+  m_RootOrder: 17
+  m_LocalEulerAnglesHint: {x: 0, y: 90, z: 0}
+--- !u!114 &3851348061437903575
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6940583604909389343}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 718fa87116dc1e148aa7262ebdd9b341, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  allowed_attachment_types: 0f000000
+  distanceForSnappingHandling: 0.05
   attached_placeable: {fileID: 0}
 --- !u!1 &7301933098331460220
 GameObject:
@@ -474,6 +862,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   allowed_attachment_types: 030000000400000005000000
+  distanceForSnappingHandling: 0.05
   attached_placeable: {fileID: 0}
 --- !u!1 &8141640586863295391
 GameObject:
@@ -519,4 +908,189 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   allowed_attachment_types: 0d000000
+  distanceForSnappingHandling: 0.05
+  attached_placeable: {fileID: 0}
+--- !u!1 &8673427088189105799
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1306609478320780315}
+  - component: {fileID: 6827392049687377579}
+  m_Layer: 0
+  m_Name: attachmentPointStairsNarrow (18)
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1306609478320780315
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8673427088189105799}
+  m_LocalRotation: {x: 0, y: 0.7071068, z: 0, w: 0.7071068}
+  m_LocalPosition: {x: -0.25, y: 1, z: 0.5}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 1805417395977712642}
+  m_RootOrder: 18
+  m_LocalEulerAnglesHint: {x: 0, y: 90, z: 0}
+--- !u!114 &6827392049687377579
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8673427088189105799}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 718fa87116dc1e148aa7262ebdd9b341, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  allowed_attachment_types: 0f000000
+  distanceForSnappingHandling: 0.05
+  attached_placeable: {fileID: 0}
+--- !u!1 &8893971962969017630
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 3435233330029510093}
+  - component: {fileID: 4820405822967072113}
+  m_Layer: 0
+  m_Name: attachmentPointStairsNarrow (20)
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &3435233330029510093
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8893971962969017630}
+  m_LocalRotation: {x: 0, y: 0.7071068, z: -0, w: -0.7071068}
+  m_LocalPosition: {x: -0.25, y: 1, z: -0.5}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 1805417395977712642}
+  m_RootOrder: 20
+  m_LocalEulerAnglesHint: {x: 0, y: 270, z: 0}
+--- !u!114 &4820405822967072113
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8893971962969017630}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 718fa87116dc1e148aa7262ebdd9b341, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  allowed_attachment_types: 0f000000
+  distanceForSnappingHandling: 0.05
+  attached_placeable: {fileID: 0}
+--- !u!1 &8953663432124807826
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7461832561566924006}
+  - component: {fileID: 6303851406626166691}
+  m_Layer: 0
+  m_Name: attachmentPointStairsNarrow (13)
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7461832561566924006
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8953663432124807826}
+  m_LocalRotation: {x: 0, y: 1, z: 0, w: 0}
+  m_LocalPosition: {x: 0.5, y: 1, z: 0.25}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 1805417395977712642}
+  m_RootOrder: 13
+  m_LocalEulerAnglesHint: {x: 0, y: 180, z: 0}
+--- !u!114 &6303851406626166691
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8953663432124807826}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 718fa87116dc1e148aa7262ebdd9b341, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  allowed_attachment_types: 0f000000
+  distanceForSnappingHandling: 0.05
+  attached_placeable: {fileID: 0}
+--- !u!1 &9066416545991917793
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5961805238953644422}
+  - component: {fileID: 8203077247274265624}
+  m_Layer: 0
+  m_Name: attachmentPointStairsWide (12)
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &5961805238953644422
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9066416545991917793}
+  m_LocalRotation: {x: 0, y: 0.7071068, z: -0, w: -0.7071068}
+  m_LocalPosition: {x: 0, y: 1, z: -0.5}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 1805417395977712642}
+  m_RootOrder: 12
+  m_LocalEulerAnglesHint: {x: 0, y: 270, z: 0}
+--- !u!114 &8203077247274265624
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9066416545991917793}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 718fa87116dc1e148aa7262ebdd9b341, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  allowed_attachment_types: 0e0000000f000000
+  distanceForSnappingHandling: 0.05
   attached_placeable: {fileID: 0}

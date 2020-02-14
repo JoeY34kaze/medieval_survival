@@ -10205,6 +10205,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 96997f0d53c73f44abc19b13bbe1a5a7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  placeable_blocker: {fileID: 11400000, guid: 2c548a3c7ce348f4990ce9cbfed33029, type: 2}
   toolContainerOnHand: {fileID: 2691272318832156016}
   placement_layer_mask:
     serializedVersion: 2
