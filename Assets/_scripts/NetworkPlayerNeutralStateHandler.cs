@@ -28,6 +28,7 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
     private BoxCollider currentPlaceableCollider;
     private Renderer[] currentPlaceableRenderers;
 
+    private float distance_for_snapping_freely_or_on_gameobject_offset = 0.05f;
     private float mouseWheelRotation;
     [SerializeField]
     private LayerMask placement_layer_mask;
@@ -235,8 +236,12 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
 
     private bool check_validity_stairs() {
         //imamo current_closest_attachment_point. pogledat mormo ce na parentu od tega ni ze postavlen ksn item na attachment point k bi mu sou nasprot.
+        if (this.current_closest_attachment_point == null) return false;
+
         NetworkPlaceable parent = this.current_closest_attachment_point.GetComponentInParent<NetworkPlaceable>();
-        return parent.is_placement_possible_for(this.current_placeable_item);
+
+        if (parent == null) return false;
+        else return parent.is_placement_possible_for(this.current_placeable_item);
     }
 
     private void rotatePlaceableWithMouseFree(float allowedAngleChunk)
@@ -273,7 +278,7 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
             
             //pivot objekta je v sredini njegovga colliderja. tko da ga izrise not v zemljo. to rabmo compensatat
 
-            AttachmentPoint s = GetClosestValidSnapPointInRange(hitInfo.point, this.current_placeable_item.PlacementType);
+            AttachmentPoint s = GetClosestValidSnapPointInRange(hitInfo, this.current_placeable_item.PlacementType);
             this.current_closest_attachment_point = s;
             if (s == null)//ce je null in je foundation ga loh postavlamo na tla po zelji
             {
@@ -307,16 +312,30 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
     /// <param name="point"></param>
     /// <param name="current_snappable_type"></param>
     /// <returns></returns>
-    private AttachmentPoint GetClosestValidSnapPointInRange(Vector3 point, Item.SnappableType current_snappable_type)
+    private AttachmentPoint GetClosestValidSnapPointInRange(RaycastHit hit, Item.SnappableType current_snappable_type)
     {
-       
 
-       // if (current_snappable_type == Item.SnappableType.foundation)//we cant put switch because it would get messier than this crap
+
+        // if (current_snappable_type == Item.SnappableType.foundation)//we cant put switch because it would get messier than this crap
         //{
 
-            AttachmentPoint closestAttachmentPoint = getClosestAttachmentPoint_NoChecks(point, current_snappable_type);
+        //pogledat mormo ve ima objekt kterga trenutno gledamo snap point. prioriteta mora bit da se snapa na objekt kterga gledamo
+        AttachmentPoint closestAttachmentPoint_on_gameObject = getClosestAttachmentPoint_on_gameobject(hit, current_snappable_type);
+
+        AttachmentPoint closestAttachmentPoint_free = getClosestAttachmentPoint_NoChecks(hit.point, current_snappable_type);
+        AttachmentPoint closestAttachmentPoint = null;
+        //which of the two is closest?
+        if (closestAttachmentPoint_on_gameObject == null) closestAttachmentPoint = closestAttachmentPoint_free;
+        else if(closestAttachmentPoint_free!=null && closestAttachmentPoint_on_gameObject!=null)
+        {
+            closestAttachmentPoint = closestAttachmentPoint_on_gameObject;
+            float distance = Vector3.Distance(hit.point, closestAttachmentPoint_on_gameObject.transform.position);
+            if (Vector3.Distance(hit.point, closestAttachmentPoint_free.transform.position) < (distance - distance_for_snapping_freely_or_on_gameobject_offset))
+                closestAttachmentPoint = closestAttachmentPoint_free;
+        }
+
             if(closestAttachmentPoint!=null)
-                if (Vector3.Distance(point, closestAttachmentPoint.transform.position) < this.placeable_snapping_range)
+                if (Vector3.Distance(hit.point, closestAttachmentPoint.transform.position) < this.placeable_snapping_range)
                     return closestAttachmentPoint;
             return null;//ce je null al pa ce je predalec
 
@@ -347,6 +366,13 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
         */
         //return r;
     }
+
+    private AttachmentPoint getClosestAttachmentPoint_on_gameobject(RaycastHit hit, Item.SnappableType snappableType) {
+        AttachmentPoint[] all_AttachmentPoints = hit.collider.gameObject.GetComponentsInChildren<AttachmentPoint>();
+        AttachmentPoint current_closest = FindClosestPlaceableFromArray_noChecksForSlotTaken(all_AttachmentPoints, hit.point, snappableType);
+        return current_closest;
+    }
+
 
     private AttachmentPoint getClosestAttachmentPoint_NoChecks(Vector3 point, Item.SnappableType current_snappable_type)
     {
@@ -859,18 +885,23 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
     */
    
         if (networkObject.IsServer && args.Info.SendingPlayer.NetworkId == networkObject.Owner.NetworkId) {
-            Debug.Log("server - placing "+this.current_placeable_item.Display_name);
+            Debug.Log("server - trying to place "+this.current_placeable_item.Display_name);
 
-            Vector3 pos = args.GetNext<Vector3>();
-            Quaternion rot = args.GetNext <Quaternion>();
+            if (this.activePlaceable.item.PlacementType == Item.SnappableType.foundation || this.activePlaceable.item.PlacementType == Item.SnappableType.free_in_range || this.activePlaceable.item.PlacementType == Item.SnappableType.none || this.activePlaceable.item.PlacementType == Item.SnappableType.wall_attachment_free)
+            {
+                Vector3 pos = args.GetNext<Vector3>();
+                Quaternion rot = args.GetNext<Quaternion>();
+                //get current placeable predmet!
+                Predmet p = this.activePlaceable;
+                NetworkPlaceableInstantiationServer(p, pos, rot);
+                this.npi.reduceCurrentActivePlaceable(this.selected_index);//sicer vrne bool da nam pove ce smo pobral celotn stack, ampak nima veze ker rabmo poslat update za kvantiteto v vsakem primeru.
+                                                                           //nastavi selected index na -1 ce smo pobral vse - da gre lepo v rpc                       
+                networkObject.SendRpc(RPC_BAR_SLOT_SELECTION_RESPONSE, Receivers.All, (this.selected_index == -1) ? "-1" : npi.predmeti_hotbar[this.selected_index].toNetworkString(), this.selected_index, (this.selected_index_shield == -1) ? "-1" : npi.predmeti_hotbar[this.selected_index_shield].toNetworkString(), selected_index_shield);
 
-            //get current placeable predmet!
-            Predmet p = this.activePlaceable;
-            NetworkPlaceableInstantiationServer(p, pos, rot);
-            this.npi.reduceCurrentActivePlaceable(this.selected_index);//sicer vrne bool da nam pove ce smo pobral celotn stack, ampak nima veze ker rabmo poslat update za kvantiteto v vsakem primeru.
-                                                         //nastavi selected index na -1 ce smo pobral vse - da gre lepo v rpc             
-            
-            networkObject.SendRpc(RPC_BAR_SLOT_SELECTION_RESPONSE, Receivers.All, (this.selected_index == -1) ? "-1" : npi.predmeti_hotbar[this.selected_index].toNetworkString(), this.selected_index, (this.selected_index_shield == -1) ? "-1" : npi.predmeti_hotbar[this.selected_index_shield].toNetworkString(), selected_index_shield);
+            }
+            Debug.Log("trying to freely place item that is not allowed to be placed freely!");
+            return;
+
 
 
         }

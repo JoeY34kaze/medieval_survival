@@ -62,6 +62,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2b298bb46440e6f49a63781f93d94be4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  item: {fileID: 11400000, guid: 1995125fa09e4b941a1b633e75253b2a, type: 2}
   distanceForSnappingHandling: 0.05
   snappableType: 12
   attachmentPoints: []

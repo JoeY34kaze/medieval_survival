@@ -36,3 +36,4 @@ MonoBehaviour:
     type: 3}
   ignorePlacementNormal: 1
   PlacementType: 1
+  blocks_placements: 0100000002000000

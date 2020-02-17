@@ -103,7 +103,7 @@ GameObject:
   - component: {fileID: 4421934177080444638}
   - component: {fileID: 7776870418838202266}
   m_Layer: 0
-  m_Name: stairs_narrow 1
+  m_Name: stairs_narrow_networked_0
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -136,6 +136,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2b298bb46440e6f49a63781f93d94be4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  item: {fileID: 11400000, guid: 4a7bafd4eeb4c4543840ecc199ebefc4, type: 2}
   distanceForSnappingHandling: 0.05
   snappableType: 15
   attachmentPoints: []

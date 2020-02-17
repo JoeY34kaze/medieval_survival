@@ -9,6 +9,8 @@ public class AttachmentPoint : MonoBehaviour
     [SerializeField]
     private float distanceForSnappingHandling = 0.05f;
 
+    public  bool blocking = false;
+
     public GameObject attached_placeable = null;
 
     internal bool acceptsAttachmentOfType(Item.SnappableType s)
@@ -19,7 +21,7 @@ public class AttachmentPoint : MonoBehaviour
 
     internal bool isFree()
     {
-        return this.attached_placeable==null;
+        return !this.blocking && this.attached_placeable==null;
     }
 
     internal void local_placement_of_placeable_request(Quaternion rotation)
@@ -30,12 +32,14 @@ public class AttachmentPoint : MonoBehaviour
     internal void attach(GameObject gameObject)
     {
         this.attached_placeable = gameObject;
+        this.blocking = true;
         GetComponentInParent<NetworkPlaceable>().sendAttachmentUpdate(transform.GetSiblingIndex(), true);
     }
 
     internal void detach()
     {
         this.attached_placeable = null;
+        this.blocking = false;
         GetComponentInParent<NetworkPlaceable>().sendAttachmentUpdate(transform.GetSiblingIndex(), false);
     }
 
@@ -48,24 +52,42 @@ public class AttachmentPoint : MonoBehaviour
         if (stat)
         {//occupied
             this.attached_placeable = gameObject;//bomo kr nrdil pointer samga nase good enough. za unicevanje pa take fore bomo pa na serverju spawnal in client nerab met. stability bo pa field k se nastav ob dodajanju / odstranjevanju objektov in se zracuna na serverju pa nastavi clientim i guess
+            this.blocking = true;
         }
-        else this.attached_placeable = null;
+        else { this.attached_placeable = null; this.blocking = false; }
     }
 
     internal void attachTryReverse(GameObject gameObject)
     {
+        Item i = gameObject.GetComponent<NetworkPlaceable>().item;
         attach(gameObject);
 
         //poiskat vse valid attachemnt pointe in izbrat najblizjo
 
-        foreach (AttachmentPoint p in gameObject.GetComponentsInChildren<AttachmentPoint>()) {
-            if (p.isFree())
-                if (p.acceptsAttachmentOfType(GetComponentInParent<NetworkPlaceable>().snappableType))
-                    if (Vector3.Distance(p.gameObject.transform.position, this.transform.parent.position) < this.distanceForSnappingHandling)
-                    {//naceloma bi mogu bit samo edn so
-                        p.attach(this.transform.parent.gameObject);
-                    }
+
+        //tole je za iskat foundatione
+        if (i.PlacementType == Item.SnappableType.foundation)
+            foreach (AttachmentPoint p in gameObject.GetComponentsInChildren<AttachmentPoint>())
+            {
+                if (p.isFree())
+                    if (p.acceptsAttachmentOfType(GetComponentInParent<NetworkPlaceable>().snappableType))
+                        if (Vector3.Distance(p.gameObject.transform.position, this.transform.parent.position) < this.distanceForSnappingHandling)
+                        {//naceloma bi mogu bit samo edn so
+                            p.attach(this.transform.parent.gameObject);
+                        }
+            }
+        else if (i.PlacementType == Item.SnappableType.stairs_narrow || i.PlacementType == Item.SnappableType.stairs_wide) {
+            //na tem foundationu poiskat vse attackment pointe k so valid za stenge in jih disablat
+            foreach (AttachmentPoint p in this.gameObject.transform.parent.GetComponentsInChildren<AttachmentPoint>()) {
+                if (p.acceptsAttachmentOfType(i.PlacementType))
+                    p.block_placements();
+            }
         }
 
+    }
+
+    private void block_placements()
+    {
+        this.blocking = true;
     }
 }

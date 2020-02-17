@@ -12,6 +12,9 @@ using BeardedManStudios.Forge.Networking;
 public class NetworkPlaceable : NetworkPlaceableBehavior
 {
     [SerializeField]
+    public Item item;
+
+    [SerializeField]
     private float distanceForSnappingHandling = 0.05f;
 
     public Predmet p;
@@ -19,7 +22,7 @@ public class NetworkPlaceable : NetworkPlaceableBehavior
     public Item.SnappableType snappableType;
 
     [SerializeField]
-    private AttachmentPoint[] attachmentPoints; 
+    private AttachmentPoint[] attachmentPoints;
 
     public void init(Predmet p)
     {
@@ -93,15 +96,13 @@ public class NetworkPlaceable : NetworkPlaceableBehavior
     /// <param name="networkPlaceable"></param>
     private void refreshAttachmentPointOccupancy()
     {
-
-
         //poisc vse attachment pointe v dolocenem rangeu (1f recimo)
 
         AttachmentPoint[] all_AttachmentPoints = (AttachmentPoint[])GameObject.FindObjectsOfType<AttachmentPoint>();
         if (all_AttachmentPoints == null) return;
         all_AttachmentPoints = removeTakenAttachmentPoints(all_AttachmentPoints);
         if (all_AttachmentPoints == null) return;
-        all_AttachmentPoints = removeNotValidSnappableTypeAttachmentPoints(all_AttachmentPoints, this.snappableType);
+        all_AttachmentPoints = removeNotValidSnappableTypeAttachmentPoints(all_AttachmentPoints, this.item.blocks_placements);
 
         foreach (AttachmentPoint p in all_AttachmentPoints) {
 
@@ -139,11 +140,23 @@ public class NetworkPlaceable : NetworkPlaceableBehavior
         return all_AttachmentPoints;
     }
 
-    private AttachmentPoint[] removeNotValidSnappableTypeAttachmentPoints(AttachmentPoint[] all_AttachmentPoints, Item.SnappableType current_snappable_type)
+    private AttachmentPoint[] removeNotValidSnappableTypeAttachmentPoints(AttachmentPoint[] all_AttachmentPoints, Item.SnappableType snappable_type)
     {
         List<AttachmentPoint> l = new List<AttachmentPoint>();
-        foreach (AttachmentPoint p in all_AttachmentPoints) if (p.acceptsAttachmentOfType(current_snappable_type)) l.Add(p);
+        foreach (AttachmentPoint p in all_AttachmentPoints)
+        {
+                if (p.acceptsAttachmentOfType(snappable_type)) l.Add(p);
+        }
+        return l.ToArray();
+    }
 
+    private AttachmentPoint[] removeNotValidSnappableTypeAttachmentPoints(AttachmentPoint[] all_AttachmentPoints, Item.SnappableType[] snappable_types)
+    {
+        List<AttachmentPoint> l = new List<AttachmentPoint>();
+        foreach (AttachmentPoint p in all_AttachmentPoints) {
+            foreach(Item.SnappableType t in snappable_types)
+            if (p.acceptsAttachmentOfType(t)) l.Add(p);
+        }
         return l.ToArray();
     }
 

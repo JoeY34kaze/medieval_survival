@@ -92,11 +92,13 @@ MonoBehaviour:
   - {fileID: 132834, guid: c005470ae31f1f146bdda4536f3e9be5, type: 3}
   - {fileID: 1805417395977712654, guid: 9b6fabd4b2753604eaf462dd7510042a, type: 3}
   - {fileID: 1805417395977712654, guid: 4421f8c75a3bc0c41ac145bf11a3fbf6, type: 3}
-  - {fileID: 2336698151731219390, guid: 0058c4c98ecfba242bda50d4803ad34b, type: 3}
+  - {fileID: 1469634279016249563, guid: cddb02731c87feb43b0c426d9beae4fe, type: 3}
   - {fileID: 8232459245449259890, guid: ffe2abeca5fe87d46a9eaef4b28055c5, type: 3}
   - {fileID: 634029857424565624, guid: d858c1c681ae7934a8fcd824868139d3, type: 3}
   - {fileID: 754232109766947529, guid: 94c5a1e08e9bc7c428dca566da9c964f, type: 3}
   - {fileID: 4421934177080679166, guid: 956a4a17fa7cc6c4da28ab8cb6a5e7e0, type: 3}
+  - {fileID: 3972517851848812556, guid: af4573d26c7b34443a69cf2f960cb761, type: 3}
+  - {fileID: 4103599921800810234, guid: ebaa22677fc84994db20d23af88110d8, type: 3}
   NetworkPlayerAnimationNetworkObject: []
   NetworkPlayerCameraHandlerNetworkObject: []
   NetworkPlayerCombatNetworkObject: []
