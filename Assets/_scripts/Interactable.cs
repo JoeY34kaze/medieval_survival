@@ -126,4 +126,9 @@ public class Interactable : Interactable_objectBehavior
     {
         throw new NotImplementedException();
     }
+
+    public override void OnClientAfterPickup(RpcArgs args)
+    {
+        throw new NotImplementedException();
+    }
 }

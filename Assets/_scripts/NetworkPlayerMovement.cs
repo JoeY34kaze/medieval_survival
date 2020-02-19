@@ -737,7 +737,7 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
 
             return angle;
         }
-        Debug.LogWarning("Couldnt get data for ground slope");
+        //Debug.LogWarning("Couldnt get data for ground slope");
         return 0;
     }
 

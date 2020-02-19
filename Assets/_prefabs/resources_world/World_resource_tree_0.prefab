@@ -118,10 +118,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   max_hp: 200
   hp: 200
-  max_size: 1.5
+  max_size: 1
   min_size: 0.5
+  sound_effect_position: {x: 0, y: 0, z: 0}
   resourceItem: {fileID: 11400000, guid: 46a13300836ed05499f0beab60b8f4bf, type: 2}
   type: 1
+  sound_effects_on_hit:
+  - {fileID: 2312515853737920592, guid: 034a7bff0ebe15c42bbb0c12939f88dc, type: 3}
+  - {fileID: 2312515853737920592, guid: cdb808e915c74774c8562a6a7a770033, type: 3}
+  - {fileID: 2312515853737920592, guid: 4616ad0c19f44d64a9dbfcccd6a7c910, type: 3}
+  - {fileID: 2312515853737920592, guid: 55eb399fc8c07114cb10d867a91d21ef, type: 3}
+  sound_effects_on_depletion:
+  - {fileID: 2312515853737920592, guid: e82c319e51251374ea525ef99912871e, type: 3}
 --- !u!21 &21747917604555870
 Material:
   serializedVersion: 6

@@ -41,10 +41,7 @@ public class NetworkWorldManager : NetworkWorldManagerBehavior
     {
         if (args.Info.SendingPlayer.NetworkId == 0) {
             foreach (Transform child in transform) {
-                if (!child.gameObject.activeSelf) {
-                    child.gameObject.SetActive(true);
                     child.GetComponent<NetworkResource>().onRefresh();
-                }
             }
         }
     }

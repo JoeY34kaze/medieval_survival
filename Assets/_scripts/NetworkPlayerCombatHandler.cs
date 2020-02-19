@@ -276,7 +276,7 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
     private void play_main_attack_sound_effect()
     {
         //poisc kter je taprav sound effect za predvajat, zaenkrat je samo edn
-        GameObject clip = GameObject.Instantiate(combat_sound_effects[0]);
+        GameObject clip = GameObject.Instantiate(combat_sound_effects[0], transform.position, transform.rotation);
         clip.transform.parent = transform;
     }
 
@@ -425,6 +425,8 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
             }
             //vsi - animacije
             animator.setFire1();//animator in inAttackAnimation
+            //sound i guess. to dodajam po dolgem cajtu in mogoce ni pravilno
+            play_main_attack_sound_effect();
         }
 
     }

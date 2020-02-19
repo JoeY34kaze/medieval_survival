@@ -14,19 +14,31 @@ public class NetworkResource : NetworkResourceBehavior
     public float max_size = 2f;
     public float min_size = 0.5f;
 
+    private bool recently_depleted = false;
+
+    private Vector3 start_position;
+    private Quaternion start_rotation;
+
+    public Vector3 sound_effect_position;
+
     public Item resourceItem;/// <summary>
     /// item od tega resourca. stone recimo za stone
     /// </summary>
 
     public enum ResourceType { stone, wood, iron};
     public ResourceType type;
+    public GameObject[] sound_effects_on_hit;
+    public GameObject[] sound_effects_on_depletion;
 
     private void Start()
     {
         transform.localScale = new Vector3(max_size, max_size, max_size);
-
         StartCoroutine(setupParentDelayed());
 
+        this.start_position = transform.position;
+        this.start_rotation = transform.rotation;
+        
+        
     }
 
     private IEnumerator setupParentDelayed()
@@ -75,8 +87,18 @@ public class NetworkResource : NetworkResourceBehavior
     /// </summary>
     internal void onRefresh()
     {
-        this.hp = max_hp;
-        transform.localScale = new Vector3(max_size, max_size, max_size);
+        if (!this.recently_depleted)
+        {
+            this.hp = max_hp;
+            transform.localScale = new Vector3(max_size, max_size, max_size);
+            transform.position = this.start_position;
+            transform.rotation = this.start_rotation;
+
+
+            if (GetComponent<Collider>() != null) GetComponent<Collider>().enabled = true;
+            if (GetComponent<MeshRenderer>() != null) GetComponent<MeshRenderer>().enabled = true;
+            if (GetComponent<Rigidbody>() != null) Destroy(GetComponent<Rigidbody>());
+        }
     }
 
     public override void setHp(RpcArgs args)
@@ -85,9 +107,86 @@ public class NetworkResource : NetworkResourceBehavior
             this.hp = args.GetNext<float>();
             float new_scale = getScale();
             transform.localScale = new Vector3(new_scale, new_scale, new_scale);
+            on_resource_hit_sound();
 
-            if (this.hp == 0) gameObject.SetActive(false);
+
+            if (this.hp == 0) {
+                on_resource_depleted();
+                
+            }
         }
+    }
+
+    private void on_resource_hit_sound() {
+
+        if (this.sound_effects_on_hit.Length > 0) {
+            instantiate_random_gameobject_from_array(this.sound_effects_on_hit);
+        }
+    }
+
+    private void on_resource_depleted()
+    {
+        this.recently_depleted = true;
+
+        if(this.sound_effects_on_depletion.Length>0)
+            instantiate_random_gameobject_from_array(this.sound_effects_on_depletion);
+        switch (this.type) {
+            case ResourceType.wood:
+                on_tree_depleted();
+                break;
+            case ResourceType.stone:
+                on_stone_depleted();
+                break;
+            case ResourceType.iron:
+                on_iron_depleted();
+                break;
+            default:
+                gameObject.SetActive(false);
+            return;
+        }
+    }
+
+    private void on_tree_depleted()
+    {
+        if (GetComponent<Rigidbody>() == null) gameObject.AddComponent<Rigidbody>();
+        GetComponent<Rigidbody>().mass = 500;
+        StartCoroutine("disable_resource_delayed", 10);
+
+    }
+
+    private void on_stone_depleted()
+    {
+        disable_resource();
+    }
+
+    private void on_iron_depleted()
+    {
+        disable_resource();
+    }
+
+    private IEnumerator disable_resource_delayed(float t) {
+        yield return new WaitForSecondsRealtime(t);
+        disable_resource();
+    }
+
+    private void disable_resource() {
+
+        this.recently_depleted = false;
+        if (GetComponent<Collider>() != null) GetComponent<Collider>().enabled = false;
+        if (GetComponent<MeshRenderer>() != null) GetComponent<MeshRenderer>().enabled = false;
+        if (GetComponent<Rigidbody>() != null) Destroy(GetComponent<Rigidbody>());
+    }
+
+
+    /// <summary>
+    /// arr je array of prefab sound effects with onInstantiated -> play sound
+    /// </summary>
+    /// <param name="arr"></param>
+    private void instantiate_random_gameobject_from_array(GameObject[] arr) {
+        System.Random r = new System.Random();
+        int rInt = r.Next(0, arr.Length-1);
+        GameObject g = GameObject.Instantiate(arr[rInt], gameObject.transform.position+this.sound_effect_position, gameObject.transform.rotation);
+        g.transform.SetParent(null);
     }
 
     private float getScale() {

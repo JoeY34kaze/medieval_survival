@@ -10127,6 +10127,8 @@ MonoBehaviour:
   dragged_gameobjectSiblingIndex: -1
   draggedParent_parent_sibling_index: -1
   space: 20
+  pickup_sound_effect: {fileID: 2312515853737920592, guid: 1feaaad38172c384ab6c1f15a320c89f,
+    type: 3}
   panel_personalInventorySlots:
   - {fileID: 1320395275798434348}
   - {fileID: 7134690727078649963}
@@ -10205,7 +10207,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 96997f0d53c73f44abc19b13bbe1a5a7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  placeable_blocker: {fileID: 11400000, guid: 2c548a3c7ce348f4990ce9cbfed33029, type: 2}
   toolContainerOnHand: {fileID: 2691272318832156016}
   placement_layer_mask:
     serializedVersion: 2

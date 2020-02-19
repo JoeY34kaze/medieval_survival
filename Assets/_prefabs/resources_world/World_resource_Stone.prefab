@@ -137,7 +137,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   max_hp: 50
   hp: 50
-  max_size: 2
+  max_size: 1
   min_size: 0.5
+  sound_effect_position: {x: 0, y: 0, z: 0}
   resourceItem: {fileID: 11400000, guid: 70201cfae2de73b48963ec5e984cc33d, type: 2}
   type: 0
+  sound_effects_on_hit:
+  - {fileID: 2312515853737920592, guid: 987f4674764cb0c4490a0abfc7c4b21a, type: 3}
+  - {fileID: 2312515853737920592, guid: 996f25fe199c8464d9c390d2ca82318e, type: 3}
+  sound_effects_on_depletion:
+  - {fileID: 2312515853737920592, guid: c3ce1e30c873f074ab29b9252fd7d73e, type: 3}

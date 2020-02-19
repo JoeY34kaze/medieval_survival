@@ -91,7 +91,7 @@ public class ItemPickup : Interactable {
         //handle_response_from_server(item_id,quantity,args.Info.SendingPlayer);//args.Info is a godsend
 
         if(FindByid(player_id).GetComponent <NetworkPlayerInventory>().handleItemPickup(this.p))//ce mu uspe pobrat -> unic item
-            handle_network_destruction_server();
+            handle_network_destruction_server(args.Info.SendingPlayer);
         return;
 
         
@@ -99,13 +99,13 @@ public class ItemPickup : Interactable {
 
    
 
-    private void handle_network_destruction_server()
+    private void handle_network_destruction_server(NetworkingPlayer sending_client)
     {
         if (this.local_lock == null) this.local_lock = GetComponent<InteractableLocalLock>();
         local_lock.item_allows_interaction = false;
         local_lock.item_waiting_for_destruction = true;
         //StartCoroutine(DestroyDelayed());
-
+        networkObject.SendRpc(sending_client, RPC_ON_CLIENT_AFTER_PICKUP, transform.position);
         networkObject.SendRpc(RPC_DESTROY_WRAPPER, Receivers.All);//tole je da disabla interakcijo drugje pa da zacne fadeout al pa nekej. uglavnem nekej casa mora pretect predn se ga unici
         //yield return new WaitForSeconds(0.1f);
         if (!networkObject.IsOwner)
@@ -114,11 +114,18 @@ public class ItemPickup : Interactable {
 
     }
 
+    public override void OnClientAfterPickup(RpcArgs args)
+    {
+        if (args.Info.SendingPlayer.NetworkId != 0) return;
+        Vector3 p = args.GetNext<Vector3>();
+        GameObject.Instantiate(Mapper.instance.pickup_sound_effects[0], p, Quaternion.identity).transform.SetParent(null);
+    }
+
     IEnumerator DestroyDelayed()//sends vertical and horizontal speed to network
     {
 
         networkObject.SendRpc(RPC_DESTROY_WRAPPER, Receivers.All);//tole je da disabla interakcijo drugje pa da zacne fadeout al pa nekej. uglavnem nekej casa mora pretect predn se ga unici
-        yield return new WaitForSeconds(0.1f);
+        yield return new WaitForSeconds(0.5f);
         if (!networkObject.IsOwner)
             Debug.Log("NOT OWNER!!");
         networkObject.Destroy();

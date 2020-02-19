@@ -4,8 +4,8 @@ using UnityEngine;
 
 namespace BeardedManStudios.Forge.Networking.Generated
 {
-	[GeneratedRPC("{\"types\":[[][][\"Vector3\", \"Vector3\"][\"uint\"][][\"int\"][\"bool\"][\"string\"]]")]
-	[GeneratedRPCVariableNames("{\"types\":[[][][\"pos\", \"dir\"][\"helper_id\"][][\"tip\"][\"Closed\"][\"p\"]]")]
+	[GeneratedRPC("{\"types\":[[][][\"Vector3\", \"Vector3\"][\"uint\"][][\"int\"][\"bool\"][\"string\"][\"Vector3\"]]")]
+	[GeneratedRPCVariableNames("{\"types\":[[][][\"pos\", \"dir\"][\"helper_id\"][][\"tip\"][\"Closed\"][\"p\"][\"position\"]]")]
 	public abstract partial class Interactable_objectBehavior : NetworkBehavior
 	{
 		public const byte RPC_DESTROY_WRAPPER = 0 + 5;
@@ -16,6 +16,7 @@ namespace BeardedManStudios.Forge.Networking.Generated
 		public const byte RPC_DOOR_INTERACTION_REQUEST = 5 + 5;
 		public const byte RPC_DOOR_STATE_UPDATE = 6 + 5;
 		public const byte RPC_SET_PREDMET_FOR_PICKUP = 7 + 5;
+		public const byte RPC_ON_CLIENT_AFTER_PICKUP = 8 + 5;
 		
 		public Interactable_objectNetworkObject networkObject = null;
 
@@ -37,6 +38,7 @@ namespace BeardedManStudios.Forge.Networking.Generated
 			networkObject.RegisterRpc("DoorInteractionRequest", DoorInteractionRequest, typeof(int));
 			networkObject.RegisterRpc("DoorStateUpdate", DoorStateUpdate, typeof(bool));
 			networkObject.RegisterRpc("SetPredmetForPickup", SetPredmetForPickup, typeof(string));
+			networkObject.RegisterRpc("OnClientAfterPickup", OnClientAfterPickup, typeof(Vector3));
 
 			networkObject.onDestroy += DestroyGameObject;
 
@@ -145,6 +147,10 @@ namespace BeardedManStudios.Forge.Networking.Generated
 		/// Arguments:
 		/// </summary>
 		public abstract void SetPredmetForPickup(RpcArgs args);
+		/// <summary>
+		/// Arguments:
+		/// </summary>
+		public abstract void OnClientAfterPickup(RpcArgs args);
 
 		// DO NOT TOUCH, THIS GETS GENERATED PLEASE EXTEND THIS CLASS IF YOU WISH TO HAVE CUSTOM CODE ADDITIONS
 	}
