@@ -176,6 +176,9 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 4a7bafd4eeb4c4543840ecc199ebefc4, type: 2}
   - {fileID: 11400000, guid: 4acd4ff1836730744aa50c5507e8dbb4, type: 2}
   - {fileID: 11400000, guid: ae2a89ee067ab7c4384f51d826cd5b92, type: 2}
+  - {fileID: 11400000, guid: 5683596249133a9458322e966baf37ea, type: 2}
+  - {fileID: 11400000, guid: de6f5cc5a88849044b30c8595732ef9d, type: 2}
+  - {fileID: 11400000, guid: ff998dd403bd38241b596f2e252c3d9d, type: 2}
   recepies:
   - {fileID: 11400000, guid: f9caf05e7002c3f4bbe9f2e5b8380a06, type: 2}
   - {fileID: 11400000, guid: e6c0bea530fe58647b364bea19644366, type: 2}

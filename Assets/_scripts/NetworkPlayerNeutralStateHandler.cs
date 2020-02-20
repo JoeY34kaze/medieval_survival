@@ -865,7 +865,7 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
     /// klice animation event v layer movement na animaciji za uporabo toolov kot so kramp, sekira, in podobno kar rabi collider
     /// </summary>
     public void OnToolSwingEnd() {
-        getCurrentTool().GetComponent<Collider>().enabled = false;
+        if(getCurrentTool()!=null) getCurrentTool().GetComponent<Collider>().enabled = false;
     }
 
     #region BUILDING

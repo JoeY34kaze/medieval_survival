@@ -1,0 +1,202 @@
+fileFormatVersion: 2
+guid: 8fb845cac7a744321acda751cbe6501b
+ModelImporter:
+  serializedVersion: 23
+  fileIDToRecycleName:
+    100000: Gold_vein_ores Sphere_1
+    100002: Gold_vein_ores Sphere_11
+    100004: Gold_vein_ores Sphere_2
+    100006: Gold_vein_ores Sphere_3
+    100008: Gold_vein_ores Sphere_4
+    100010: Gold_vein_ores Sphere_5
+    100012: Gold_vein_Rock
+    100014: //RootNode
+    100016: Gold_vein_ores_Sphere_1
+    100018: Gold_vein_ores_Sphere_11
+    100020: Gold_vein_ores_Sphere_2
+    100022: Gold_vein_ores_Sphere_3
+    100024: Gold_vein_ores_Sphere_4
+    100026: Gold_vein_ores_Sphere_5
+    400000: Gold_vein_ores Sphere_1
+    400002: Gold_vein_ores Sphere_11
+    400004: Gold_vein_ores Sphere_2
+    400006: Gold_vein_ores Sphere_3
+    400008: Gold_vein_ores Sphere_4
+    400010: Gold_vein_ores Sphere_5
+    400012: Gold_vein_Rock
+    400014: //RootNode
+    400016: Gold_vein_ores_Sphere_1
+    400018: Gold_vein_ores_Sphere_11
+    400020: Gold_vein_ores_Sphere_2
+    400022: Gold_vein_ores_Sphere_3
+    400024: Gold_vein_ores_Sphere_4
+    400026: Gold_vein_ores_Sphere_5
+    2300000: Gold_vein_ores Sphere_1
+    2300002: Gold_vein_ores Sphere_11
+    2300004: Gold_vein_ores Sphere_2
+    2300006: Gold_vein_ores Sphere_3
+    2300008: Gold_vein_ores Sphere_4
+    2300010: Gold_vein_ores Sphere_5
+    2300012: Gold_vein_Rock
+    2300014: Gold_vein_ores_Sphere_1
+    2300016: Gold_vein_ores_Sphere_11
+    2300018: Gold_vein_ores_Sphere_2
+    2300020: Gold_vein_ores_Sphere_3
+    2300022: Gold_vein_ores_Sphere_4
+    2300024: Gold_vein_ores_Sphere_5
+    3300000: Gold_vein_ores Sphere_1
+    3300002: Gold_vein_ores Sphere_11
+    3300004: Gold_vein_ores Sphere_2
+    3300006: Gold_vein_ores Sphere_3
+    3300008: Gold_vein_ores Sphere_4
+    3300010: Gold_vein_ores Sphere_5
+    3300012: Gold_vein_Rock
+    3300014: Gold_vein_ores_Sphere_1
+    3300016: Gold_vein_ores_Sphere_11
+    3300018: Gold_vein_ores_Sphere_2
+    3300020: Gold_vein_ores_Sphere_3
+    3300022: Gold_vein_ores_Sphere_4
+    3300024: Gold_vein_ores_Sphere_5
+    4300000: Gold_vein_ores Sphere_1
+    4300002: Gold_vein_ores Sphere_11
+    4300004: Gold_vein_ores Sphere_2
+    4300006: Gold_vein_ores Sphere_3
+    4300008: Gold_vein_ores Sphere_4
+    4300010: Gold_vein_ores Sphere_5
+    4300012: Gold_vein_Rock
+    4300014: Gold_vein_ores_Sphere_1
+    4300016: Gold_vein_ores_Sphere_11
+    4300018: Gold_vein_ores_Sphere_2
+    4300020: Gold_vein_ores_Sphere_3
+    4300022: Gold_vein_ores_Sphere_4
+    4300024: Gold_vein_ores_Sphere_5
+    6400000: Gold_vein_ores_Sphere_1
+    6400002: Gold_vein_ores_Sphere_11
+    6400004: Gold_vein_ores_Sphere_2
+    6400006: Gold_vein_ores_Sphere_3
+    6400008: Gold_vein_ores_Sphere_4
+    6400010: Gold_vein_ores_Sphere_5
+    6400012: Gold_vein_Rock
+    9500000: //RootNode
+    2186277476908879412: ImportLogs
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Gold_vein_RockMat
+    second: {fileID: 2100000, guid: 074c927063212470bb5808384f7b22b9, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Gold_vein_ores_Sphere_11Mat
+    second: {fileID: 2100000, guid: 00adbd39bf093544790b190f0cb9142e, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Gold_vein_ores_Sphere_1Mat
+    second: {fileID: 2100000, guid: 4eda10efc9a0f6544afe9095aae78c25, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Gold_vein_ores_Sphere_2Mat
+    second: {fileID: 2100000, guid: 5153b9aeb6cc97146b892c9644c511a4, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Gold_vein_ores_Sphere_3Mat
+    second: {fileID: 2100000, guid: ca89616b0dd23bb4f960afc83e6fa8ab, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Gold_vein_ores_Sphere_4Mat
+    second: {fileID: 2100000, guid: 277ed188f6d580141b8a58a688b7e3d3, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Gold_vein_ores_Sphere_5Mat
+    second: {fileID: 2100000, guid: fdf03afe9e83e564f8a6a42a4731e9af, type: 2}
+  materials:
+    importMaterials: 1
+    materialName: 0
+    materialSearch: 1
+    materialLocation: 0
+  animations:
+    legacyGenerateAnimations: 4
+    bakeSimulation: 0
+    resampleCurves: 1
+    optimizeGameObjects: 0
+    motionNodeName: 
+    rigImportErrors: 
+    rigImportWarnings: 
+    animationImportErrors: 
+    animationImportWarnings: 
+    animationRetargetingWarnings: 
+    animationDoRetargetingWarnings: 0
+    importAnimatedCustomProperties: 0
+    importConstraints: 0
+    animationCompression: 1
+    animationRotationError: 0.5
+    animationPositionError: 0.5
+    animationScaleError: 0.5
+    animationWrapMode: 0
+    extraExposedTransformPaths: []
+    extraUserProperties: []
+    clipAnimations: []
+    isReadable: 1
+  meshes:
+    lODScreenPercentages: []
+    globalScale: 0.006
+    meshCompression: 0
+    addColliders: 1
+    useSRGBMaterialColor: 1
+    importVisibility: 0
+    importBlendShapes: 1
+    importCameras: 0
+    importLights: 0
+    swapUVChannels: 0
+    generateSecondaryUV: 0
+    useFileUnits: 1
+    optimizeMeshForGPU: 1
+    keepQuads: 0
+    weldVertices: 1
+    preserveHierarchy: 0
+    indexFormat: 1
+    secondaryUVAngleDistortion: 8
+    secondaryUVAreaDistortion: 15.000001
+    secondaryUVHardAngle: 88
+    secondaryUVPackMargin: 4
+    useFileScale: 0
+    previousCalculatedGlobalScale: 0.006
+    hasPreviousCalculatedGlobalScale: 1
+  tangentSpace:
+    normalSmoothAngle: 60
+    normalImportMode: 0
+    tangentImportMode: 4
+    normalCalculationMode: 0
+    legacyComputeAllNormalsFromSmoothingGroupsWhenMeshHasBlendShapes: 1
+    blendShapeNormalImportMode: 1
+    normalSmoothingSource: 0
+  importAnimation: 1
+  copyAvatar: 0
+  humanDescription:
+    serializedVersion: 2
+    human: []
+    skeleton: []
+    armTwist: 0.5
+    foreArmTwist: 0.5
+    upperLegTwist: 0.5
+    legTwist: 0.5
+    armStretch: 0.05
+    legStretch: 0.05
+    feetSpacing: 0
+    rootMotionBoneName: 
+    hasTranslationDoF: 0
+    hasExtraRoot: 0
+    skeletonHasParents: 0
+  lastHumanDescriptionAvatarSource: {instanceID: 0}
+  animationType: 2
+  humanoidOversampling: 1
+  additionalBone: 1
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

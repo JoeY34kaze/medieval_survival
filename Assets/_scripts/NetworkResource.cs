@@ -11,9 +11,6 @@ public class NetworkResource : NetworkResourceBehavior
     public float max_hp;
     public float hp; // == amount of resource
 
-    public float max_size = 2f;
-    public float min_size = 0.5f;
-
     private bool recently_depleted = false;
 
     private Vector3 start_position;
@@ -25,14 +22,13 @@ public class NetworkResource : NetworkResourceBehavior
     /// item od tega resourca. stone recimo za stone
     /// </summary>
 
-    public enum ResourceType { stone, wood, iron};
+    public enum ResourceType { stone, wood, ore};
     public ResourceType type;
     public GameObject[] sound_effects_on_hit;
     public GameObject[] sound_effects_on_depletion;
 
     private void Start()
     {
-        transform.localScale = new Vector3(max_size, max_size, max_size);
         StartCoroutine(setupParentDelayed());
 
         this.start_position = transform.position;
@@ -57,6 +53,9 @@ public class NetworkResource : NetworkResourceBehavior
             switch (this.type)
             {
                 case ResourceType.stone:
+                    this.hp -= tool.stone_gather_rate;
+                    break;
+                case ResourceType.ore:
                     this.hp -= tool.stone_gather_rate;
                     break;
                 case ResourceType.wood:
@@ -90,7 +89,6 @@ public class NetworkResource : NetworkResourceBehavior
         if (!this.recently_depleted)
         {
             this.hp = max_hp;
-            transform.localScale = new Vector3(max_size, max_size, max_size);
             transform.position = this.start_position;
             transform.rotation = this.start_rotation;
 
@@ -105,9 +103,7 @@ public class NetworkResource : NetworkResourceBehavior
     {
         if (args.Info.SendingPlayer.NetworkId == 0) {
             this.hp = args.GetNext<float>();
-            float new_scale = getScale();
-            transform.localScale = new Vector3(new_scale, new_scale, new_scale);
-            on_resource_hit_sound();
+            on_resource_hit_effects();
 
 
             if (this.hp == 0) {
@@ -115,6 +111,12 @@ public class NetworkResource : NetworkResourceBehavior
                 
             }
         }
+    }
+
+    private void on_resource_hit_effects() {
+
+
+        on_resource_hit_sound();
     }
 
     private void on_resource_hit_sound() {
@@ -135,10 +137,10 @@ public class NetworkResource : NetworkResourceBehavior
                 on_tree_depleted();
                 break;
             case ResourceType.stone:
-                on_stone_depleted();
+                on_stone_node_depleted();
                 break;
-            case ResourceType.iron:
-                on_iron_depleted();
+            case ResourceType.ore:
+                on_ore_node_depleted();
                 break;
             default:
                 gameObject.SetActive(false);
@@ -154,12 +156,12 @@ public class NetworkResource : NetworkResourceBehavior
 
     }
 
-    private void on_stone_depleted()
+    private void on_stone_node_depleted()
     {
         disable_resource();
     }
 
-    private void on_iron_depleted()
+    private void on_ore_node_depleted()
     {
         disable_resource();
     }
@@ -187,10 +189,6 @@ public class NetworkResource : NetworkResourceBehavior
         int rInt = r.Next(0, arr.Length-1);
         GameObject g = GameObject.Instantiate(arr[rInt], gameObject.transform.position+this.sound_effect_position, gameObject.transform.rotation);
         g.transform.SetParent(null);
-    }
-
-    private float getScale() {
-        return this.min_size + (this.hp / this.max_hp) * max_size;
     }
 }
 
