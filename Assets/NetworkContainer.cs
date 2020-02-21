@@ -78,6 +78,10 @@ public class NetworkContainer : NetworkContainerBehavior
     #endregion
     #region LOCAL CALLS
 
+    internal virtual void local_open_container_request() {
+        networkObject.SendRpc(RPC_OPEN_REQUEST, Receivers.Server);
+    }
+
     internal virtual void localRequestPersonalToContainer(int indexFrom, int indexTo) {
         throw new NotImplementedException();
     }
@@ -127,4 +131,21 @@ public class NetworkContainer : NetworkContainerBehavior
         throw new NotImplementedException();
     }
     #endregion
+
+    protected GameObject FindByid(uint targetNetworkId) //koda kopširana v network_body.cs in Interactable.cs
+    {
+        //Debug.Log("interactable.findplayerById");
+        //Debug.Log(targetNetworkId);
+        foreach (GameObject p in GameObject.FindGameObjectsWithTag("Player"))
+        {//very fucking inefficient ampak uno k je spodej nedela. nevem kaj je fora une kode ker networker,NetworkObjects niso playerji, so networkani objekti k drzijo playerje in njihova posizija znotraj lista se spreminja. kojikurac
+         //    Debug.Log(p.GetComponent<NetworkPlayerStats>().server_id);
+            if (p.GetComponent<NetworkPlayerStats>().Get_server_id() == targetNetworkId) return p;
+        }
+        //Debug.Log("TARGET PLAYER NOT FOUND!");
+        // NetworkBehavior networkBehavior = (NetworkBehavior)NetworkManager.Instance.Networker.NetworkObjects[(uint)targetNetworkId].AttachedBehavior;
+        // GameObject obj = networkBehavior.gameObject;
+
+
+        return null;
+    }
 }

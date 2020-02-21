@@ -41,81 +41,15 @@ public class NetworkCraftingStation : NetworkCraftingStationBehavior
         }
     }
 
-    /// <summary>
-    /// client klice serverju da nj mu pokaze kaj se nahaja v tem inventoriju
-    /// </summary>
-    internal void local_inventory_open_request()
-    {
-        //if (networkObject.IsOwner)  to je zmer false?????? kako imam to na chestu what
-            networkObject.SendRpc(RPC_INVENTORY_REQUEST, Receivers.Server);
-    }
 
 
-    /// <summary>
-    /// client calls when he tries to deposit an item into the inventory of the crafting station
-    /// </summary>
-    /// <param name="args"></param>
-    public override void Deposit(RpcArgs args)
-    {
-        throw new System.NotImplementedException();
-    }
-    /// <summary>
-    /// client calls when he tries to open the inventory of the crafting station. used to prevent ESP hacks since he had to physically be there to see the updated contents.
-    /// </summary>
-    /// <param name="args"></param>
-    public override void InventoryRequest(RpcArgs args)
-    {
-        if (networkObject.IsServer)
-        {
-            //nekej securityja pa autorizacije rabmo ko bomo mel guilde pa tak
-
-            if (isPlayerAuthorizedToOpen(args.Info.SendingPlayer.NetworkId))
-            {
-                networkObject.SendRpc(args.Info.SendingPlayer, RPC_INVENTORY_RESPONSE, 1, this.container.getItemsNetwork());//ta metoda se klice tudi v vsakmu tipu requesta za manipulacijo z itemi
-            }
-            else
-            {//fail, send fail response. pr rust bi ga kljucavnca shokirala recimo
-                networkObject.SendRpc(args.Info.SendingPlayer, RPC_INVENTORY_RESPONSE, 0, "-1");
-            }
-        }
-    }
-
-    /// <summary>
-    /// called by the client to take an item from the crafting station.
-    /// </summary>
-    /// <param name="args"></param>
-    public override void Withdraw(RpcArgs args)
+    public override void ToggleActiveRequest(RpcArgs args)
     {
         throw new System.NotImplementedException();
     }
 
-
-    private bool isPlayerAuthorizedToOpen(uint networkId)
+    public override void SendActiveUpdate(RpcArgs args)
     {
-        Debug.LogWarning("no security");
-        return true;
-    }
-
-    public override void InventoryResponse(RpcArgs args)
-    {
-        //to mora vsak station pohendlat po svoje
         throw new System.NotImplementedException();
-    }
-
-    public GameObject FindByid(uint targetNetworkId) //koda kopširana v network_body.cs in Interactable.cs
-    {
-        //Debug.Log("interactable.findplayerById");
-        //Debug.Log(targetNetworkId);
-        foreach (GameObject p in GameObject.FindGameObjectsWithTag("Player"))
-        {//very fucking inefficient ampak uno k je spodej nedela. nevem kaj je fora une kode ker networker,NetworkObjects niso playerji, so networkani objekti k drzijo playerje in njihova posizija znotraj lista se spreminja. kojikurac
-         //    Debug.Log(p.GetComponent<NetworkPlayerStats>().server_id);
-            if (p.GetComponent<NetworkPlayerStats>().Get_server_id() == targetNetworkId) return p;
-        }
-        //Debug.Log("TARGET PLAYER NOT FOUND!");
-        // NetworkBehavior networkBehavior = (NetworkBehavior)NetworkManager.Instance.Networker.NetworkObjects[(uint)targetNetworkId].AttachedBehavior;
-        // GameObject obj = networkBehavior.gameObject;
-
-
-        return null;
     }
 }

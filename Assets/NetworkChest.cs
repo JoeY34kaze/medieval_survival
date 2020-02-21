@@ -57,10 +57,11 @@ public class NetworkChest : NetworkContainer
         networkObject.SendRpc(RPC_PICKUP_REQUEST, Receivers.Server);
     }
 
-    internal void local_chest_open_request()
+    internal override void local_open_container_request()
     {
-        if (networkObject.IsOwner)
-            networkObject.SendRpc(RPC_OPEN_REQUEST, Receivers.Server);
+        //if (networkObject.IsOwner)
+        //networkObject.SendRpc(RPC_OPEN_REQUEST, Receivers.Server);
+        base.local_open_container_request();
     }
 
     public override void pickupRequest(RpcArgs args)
@@ -101,23 +102,6 @@ public class NetworkChest : NetworkContainer
         return true;
     }
 
-    public GameObject FindByid(uint targetNetworkId) //koda kopširana v network_body.cs in Interactable.cs
-    {
-        //Debug.Log("interactable.findplayerById");
-        //Debug.Log(targetNetworkId);
-        foreach (GameObject p in GameObject.FindGameObjectsWithTag("Player"))
-        {//very fucking inefficient ampak uno k je spodej nedela. nevem kaj je fora une kode ker networker,NetworkObjects niso playerji, so networkani objekti k drzijo playerje in njihova posizija znotraj lista se spreminja. kojikurac
-         //    Debug.Log(p.GetComponent<NetworkPlayerStats>().server_id);
-            if (p.GetComponent<NetworkPlayerStats>().Get_server_id() == targetNetworkId) return p;
-        }
-        //Debug.Log("TARGET PLAYER NOT FOUND!");
-        // NetworkBehavior networkBehavior = (NetworkBehavior)NetworkManager.Instance.Networker.NetworkObjects[(uint)targetNetworkId].AttachedBehavior;
-        // GameObject obj = networkBehavior.gameObject;
-
-
-        return null;
-    }
-
     /// <summary>
     /// od serverja dobi podatke o itemih k so u chestu.
     /// </summary>
@@ -128,7 +112,7 @@ public class NetworkChest : NetworkContainer
             if (args.GetNext<int>() == 1)
             {
                 Predmet[] predmeti = this.nci.parseItemsNetworkFormat(args.GetNext<string>());
-                FindByid(networkObject.Networker.Me.NetworkId).GetComponent<NetworkPlayerInventory>().onChestOpen(this,predmeti);
+                FindByid(networkObject.Networker.Me.NetworkId).GetComponent<NetworkPlayerInventory>().onContainerOpen(this,predmeti);
             }
             else {//fail - nismo authorized al pa kej tazga
                 FindByid(networkObject.Networker.Me.NetworkId).GetComponentInChildren<UILogic>().clear();//da se miska zbrise
@@ -190,8 +174,6 @@ public class NetworkChest : NetworkContainer
     }
 
     //  RPCJI NA SERVERJU
-
-
     /// <summary>
     /// nekka je napisan tud za desni klik
     /// </summary>

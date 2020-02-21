@@ -21,11 +21,14 @@ public class UILogic : MonoBehaviour
     private NetworkGuildManager ngm;
     private NetworkPlayerInventory npi;
 
-    public GameObject chest_slot20;
-    public GameObject chest_slot40;
-    public GameObject chest_slot80;
+    public GameObject container_panel_10_slots;
+    public GameObject container_panel_20_slots;
+    public GameObject container_panel_40_slots;
+    public GameObject container_panel_80_slots;
 
-    private GameObject activeChestPanel;
+    
+
+    private GameObject active_container_panel;
     public GameObject[] panelsPredmetiContainer;
     internal NetworkContainer currentActiveContainer;//tole se posreduje npi-ju med premikanjem predmetov. z npi v tole in obratno
 
@@ -140,7 +143,7 @@ public class UILogic : MonoBehaviour
     }
 
     public void DisableMouse() {
-        if (this.hasOpenWindow || this.activeChestPanel != null) { Debug.Log("NOT disabling mouse curson because we still have open windows!."); return; }
+        if (this.hasOpenWindow || this.active_container_panel != null) { Debug.Log("NOT disabling mouse curson because we still have open windows!."); return; }
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
     }
@@ -174,42 +177,46 @@ public class UILogic : MonoBehaviour
     }
 
     internal void clearContainerPanel() {
-        if(this.activeChestPanel!=null)
-            if (this.activeChestPanel.activeSelf) {
+        if(this.active_container_panel!=null)
+            if (this.active_container_panel.activeSelf) {
                 clearChestPanelPredmeti();
-                this.activeChestPanel.SetActive(false);
-                this.activeChestPanel = null;
+                this.active_container_panel.SetActive(false);
+                this.active_container_panel = null;
                 this.panelsPredmetiContainer = null;
             }
         this.currentActiveContainer = null;
     }
 
-    internal void setContainerPanelActiveForChest(Predmet[] predmeti)
+    internal void setContainerPanelActiveForContainer(Predmet[] predmeti)
     {
-        if (this.activeChestPanel == null)//ce je samo updejt itemov skipamo inicializacijo panele
+        if (this.active_container_panel == null)//ce je samo updejt itemov skipamo inicializacijo panele
         {
             showInventory();
             this.containerPanel.SetActive(true);
             this.panelsPredmetiContainer = new GameObject[predmeti.Length];
 
             //bi blo tle mogoce fajn nrdit prefabe ui elementov za razlicne cheste al pa crafting statione? pa sam nalimas gor kar rabs
-            if (predmeti.Length == 20)
+            if (predmeti.Length == 10)
             {
-                this.activeChestPanel = this.chest_slot20;
+                this.active_container_panel = this.container_panel_10_slots;
+            }
+            else if (predmeti.Length == 20)
+            {
+                this.active_container_panel = this.container_panel_20_slots;
             }
             else if (predmeti.Length == 40)
             {
-                this.activeChestPanel = this.chest_slot40;
+                this.active_container_panel = this.container_panel_40_slots;
             }
             else if (predmeti.Length == 80)
             {
-                this.activeChestPanel = this.chest_slot80;
+                this.active_container_panel = this.container_panel_80_slots;
             }
-            this.activeChestPanel.SetActive(true);
+            this.active_container_panel.SetActive(true);
 
-            for (int i = 0; i < this.activeChestPanel.transform.childCount; i++)
+            for (int i = 0; i < this.active_container_panel.transform.childCount; i++)
             {
-                this.panelsPredmetiContainer[i] = this.activeChestPanel.transform.GetChild(i).gameObject;
+                this.panelsPredmetiContainer[i] = this.active_container_panel.transform.GetChild(i).gameObject;
             }
         }
 
@@ -219,15 +226,15 @@ public class UILogic : MonoBehaviour
 
     private void UpdateActiveChestPanel(Predmet[] predmeti)
     {
-        if (this.activeChestPanel != null)
-            for (int i = 0; i < this.activeChestPanel.transform.childCount; i++) {
+        if (this.active_container_panel != null)
+            for (int i = 0; i < this.active_container_panel.transform.childCount; i++) {
                 this.panelsPredmetiContainer[i].GetComponent<InventorySlotContainer>().AddPredmet(predmeti[i]);
             }
     }
 
     private void clearChestPanelPredmeti() {
-        if (this.activeChestPanel != null)
-            for (int i = 0; i < this.activeChestPanel.transform.childCount; i++)
+        if (this.active_container_panel != null)
+            for (int i = 0; i < this.active_container_panel.transform.childCount; i++)
             {
                 this.panelsPredmetiContainer[i].GetComponent<InventorySlotContainer>().AddPredmet(null);
             }
@@ -245,8 +252,5 @@ public class UILogic : MonoBehaviour
         
     }
 
-    internal void setContainerPanelActiveForCampfire(Predmet[] predmeti)
-    {
-        throw new NotImplementedException();
-    }
+
 }

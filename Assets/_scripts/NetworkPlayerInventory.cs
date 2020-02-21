@@ -2351,17 +2351,10 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
 
     #region containers
     //naceloma vsi containerji. crafting tables in take fore ce bojo ble. zaenkrat je samo chest
-    internal void onChestOpen(NetworkContainer container,Predmet[] predmeti)
-    {
-        GetComponentInChildren<UILogic>().setContainerPanelActiveForChest(predmeti);
-        GetComponentInChildren<UILogic>().setCurrentActiveContainer(container);
-    }
-
-    //naceloma vsi containerji. crafting tables in take fore ce bojo ble. zaenkrat je samo chest
-    internal void onCampfireOpen(NetworkContainer container, Predmet[] predmeti)
+    internal void onContainerOpen(NetworkContainer container, Predmet[] predmeti)
     {
         Debug.LogWarning("Trying to open campfire. no panels implemented yet tho. UI stops here");
-        GetComponentInChildren<UILogic>().setContainerPanelActiveForCampfire(predmeti);
+        GetComponentInChildren<UILogic>().setContainerPanelActiveForContainer(predmeti);
         GetComponentInChildren<UILogic>().setCurrentActiveContainer(container);
     }
 

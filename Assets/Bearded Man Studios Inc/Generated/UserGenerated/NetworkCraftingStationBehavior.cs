@@ -4,14 +4,12 @@ using UnityEngine;
 
 namespace BeardedManStudios.Forge.Networking.Generated
 {
-	[GeneratedRPC("{\"types\":[[][\"int\", \"int\"][\"int\"][\"int\", \"string\"]]")]
-	[GeneratedRPCVariableNames("{\"types\":[[][\"id\", \"amount\"][\"index\"][\"succ\", \"data\"]]")]
+	[GeneratedRPC("{\"types\":[[][\"bool\"]]")]
+	[GeneratedRPCVariableNames("{\"types\":[[][\"active\"]]")]
 	public abstract partial class NetworkCraftingStationBehavior : NetworkBehavior
 	{
-		public const byte RPC_INVENTORY_REQUEST = 0 + 5;
-		public const byte RPC_DEPOSIT = 1 + 5;
-		public const byte RPC_WITHDRAW = 2 + 5;
-		public const byte RPC_INVENTORY_RESPONSE = 3 + 5;
+		public const byte RPC_TOGGLE_ACTIVE_REQUEST = 0 + 5;
+		public const byte RPC_SEND_ACTIVE_UPDATE = 1 + 5;
 		
 		public NetworkCraftingStationNetworkObject networkObject = null;
 
@@ -25,10 +23,8 @@ namespace BeardedManStudios.Forge.Networking.Generated
 			networkObject.AttachedBehavior = this;
 
 			base.SetupHelperRpcs(networkObject);
-			networkObject.RegisterRpc("InventoryRequest", InventoryRequest);
-			networkObject.RegisterRpc("Deposit", Deposit, typeof(int), typeof(int));
-			networkObject.RegisterRpc("Withdraw", Withdraw, typeof(int));
-			networkObject.RegisterRpc("InventoryResponse", InventoryResponse, typeof(int), typeof(string));
+			networkObject.RegisterRpc("ToggleActiveRequest", ToggleActiveRequest);
+			networkObject.RegisterRpc("SendActiveUpdate", SendActiveUpdate, typeof(bool));
 
 			networkObject.onDestroy += DestroyGameObject;
 
@@ -108,19 +104,11 @@ namespace BeardedManStudios.Forge.Networking.Generated
 		/// <summary>
 		/// Arguments:
 		/// </summary>
-		public abstract void InventoryRequest(RpcArgs args);
+		public abstract void ToggleActiveRequest(RpcArgs args);
 		/// <summary>
 		/// Arguments:
 		/// </summary>
-		public abstract void Deposit(RpcArgs args);
-		/// <summary>
-		/// Arguments:
-		/// </summary>
-		public abstract void Withdraw(RpcArgs args);
-		/// <summary>
-		/// Arguments:
-		/// </summary>
-		public abstract void InventoryResponse(RpcArgs args);
+		public abstract void SendActiveUpdate(RpcArgs args);
 
 		// DO NOT TOUCH, THIS GETS GENERATED PLEASE EXTEND THIS CLASS IF YOU WISH TO HAVE CUSTOM CODE ADDITIONS
 	}

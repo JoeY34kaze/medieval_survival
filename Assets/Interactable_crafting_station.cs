@@ -42,6 +42,7 @@ public class Interactable_crafting_station : Interactable
 
     internal void local_inventory_request()
     {
-        GetComponent<NetworkCraftingStation>().local_inventory_open_request();
+        GetComponent<NetworkContainer_craftingStation>().local_open_container_request();
+
     }
 }
