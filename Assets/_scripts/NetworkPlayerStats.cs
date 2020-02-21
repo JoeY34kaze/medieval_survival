@@ -538,7 +538,7 @@ napadenmu playerju da si poupdejta health. ta player pol ko si je updejtov healt
 
 
         string tag = args.GetNext<string>();
-        if (!tag.Equals("block_player") && !tag.Equals("revive")) GameObject.Instantiate(this.sound_effects_on_player[0]);//tag ni od objekta al pa kej. je samo kot parameter da se ve, da smo pobral cloveka
+        if (!tag.Equals("block_player") && !tag.Equals("revive")) GameObject.Instantiate(this.sound_effects_on_player[0], transform.position, transform.rotation);//tag ni od objekta al pa kej. je samo kot parameter da se ve, da smo pobral cloveka
         this.healthBar.fillAmount = this.health / (this.max_health);
         FindByid(NetworkManager.Instance.Networker.Me.NetworkId).GetComponent<NetworkPlayerStats>().team_panel.refreshHp(Get_server_id(), this.healthBar.fillAmount);
         

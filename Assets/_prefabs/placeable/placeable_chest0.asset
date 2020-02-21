@@ -35,3 +35,5 @@ MonoBehaviour:
   placeable_networked_object: {fileID: 132834, guid: c005470ae31f1f146bdda4536f3e9be5,
     type: 3}
   ignorePlacementNormal: 0
+  PlacementType: 12
+  blocks_placements: 

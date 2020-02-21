@@ -349,7 +349,7 @@ public class NetworkPlayerAnimationLogic : NetworkPlayerAnimationBehavior
         
         if (this.IK_swing_active && this.IK_swing_target != Vector3.zero)
         {
-            Debug.Log("IK!!");
+            //Debug.Log("IK!!");
             anim.SetIKPosition(AvatarIKGoal.RightHand, this.IK_swing_target);
             anim.SetIKPositionWeight(AvatarIKGoal.RightHand, 1);
         }

@@ -81,6 +81,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2b298bb46440e6f49a63781f93d94be4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  item: {fileID: 11400000, guid: 408cb180addef0b4faa547522a042224, type: 2}
+  distanceForSnappingHandling: 0.05
+  snappableType: 12
+  attachmentPoints: []
 --- !u!114 &8685349548693095672
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -117,6 +121,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ebff755f63cc1d84d9dc38133ce0bf0b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  original_material: {fileID: 0}
 --- !u!1 &185024
 GameObject:
   m_ObjectHideFlags: 0

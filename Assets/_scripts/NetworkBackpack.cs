@@ -18,7 +18,7 @@ public class NetworkBackpack : NetworkBackpackBehavior
     {
         nci = GetComponent<NetworkContainer_items>();
         if (networkObject.IsServer) {
-            nci.init(Mapper.instance.getItemById(GetComponent<identifier_helper>().id).backpack_capacity);
+            nci.init(Mapper.instance.getItemById(GetComponent<identifier_helper>().id).capacity);
         }
             
         r = GetComponent<Rigidbody>();
@@ -262,7 +262,7 @@ public class NetworkBackpack : NetworkBackpackBehavior
         if (networkObject.IsOwner)
         {
             this.panel_handler = this.npi.backpackPanel;
-            this.panel_handler.init(item.backpack_capacity, this.nci);//nastav samo slote
+            this.panel_handler.init(item.capacity, this.nci);//nastav samo slote
             networkObject.SendRpc(RPC_BACKPACK_INTERACTION_REQUEST, Receivers.Server, (byte)1);//posle request da mu updejta iteme
         }
     }

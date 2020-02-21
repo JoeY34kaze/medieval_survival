@@ -19,6 +19,7 @@ namespace BeardedManStudios.Forge.Networking.Unity
 		public GameObject[] NetworkCameraNetworkObject = null;
 		public GameObject[] NetworkContainerItemsNetworkObject = null;
 		public GameObject[] NetworkContainerNetworkObject = null;
+		public GameObject[] NetworkCraftingStationNetworkObject = null;
 		public GameObject[] NetworkGuildManagerNetworkObject = null;
 		public GameObject[] NetworkPlaceableNetworkObject = null;
 		public GameObject[] NetworkPlayerAnimationNetworkObject = null;
@@ -247,6 +248,29 @@ namespace BeardedManStudios.Forge.Networking.Unity
 						{
 							var go = Instantiate(NetworkContainerNetworkObject[obj.CreateCode]);
 							newObj = go.GetComponent<NetworkContainerBehavior>();
+						}
+					}
+
+					if (newObj == null)
+						return;
+						
+					newObj.Initialize(obj);
+
+					if (objectInitialized != null)
+						objectInitialized(newObj, obj);
+				});
+			}
+			else if (obj is NetworkCraftingStationNetworkObject)
+			{
+				MainThreadManager.Run(() =>
+				{
+					NetworkBehavior newObj = null;
+					if (!NetworkBehavior.skipAttachIds.TryGetValue(obj.NetworkId, out newObj))
+					{
+						if (NetworkCraftingStationNetworkObject.Length > 0 && NetworkCraftingStationNetworkObject[obj.CreateCode] != null)
+						{
+							var go = Instantiate(NetworkCraftingStationNetworkObject[obj.CreateCode]);
+							newObj = go.GetComponent<NetworkCraftingStationBehavior>();
 						}
 					}
 
@@ -740,6 +764,18 @@ namespace BeardedManStudios.Forge.Networking.Unity
 			var netBehavior = go.GetComponent<NetworkContainerBehavior>();
 			var obj = netBehavior.CreateNetworkObject(Networker, index);
 			go.GetComponent<NetworkContainerBehavior>().networkObject = (NetworkContainerNetworkObject)obj;
+
+			FinalizeInitialization(go, netBehavior, obj, position, rotation, sendTransform);
+			
+			return netBehavior;
+		}
+		[Obsolete("Use InstantiateNetworkCraftingStation instead, its shorter and easier to type out ;)")]
+		public NetworkCraftingStationBehavior InstantiateNetworkCraftingStationNetworkObject(int index = 0, Vector3? position = null, Quaternion? rotation = null, bool sendTransform = true)
+		{
+			var go = Instantiate(NetworkCraftingStationNetworkObject[index]);
+			var netBehavior = go.GetComponent<NetworkCraftingStationBehavior>();
+			var obj = netBehavior.CreateNetworkObject(Networker, index);
+			go.GetComponent<NetworkCraftingStationBehavior>().networkObject = (NetworkCraftingStationNetworkObject)obj;
 
 			FinalizeInitialization(go, netBehavior, obj, position, rotation, sendTransform);
 			
@@ -1302,6 +1338,47 @@ namespace BeardedManStudios.Forge.Networking.Unity
 			}
 
 			go.GetComponent<NetworkContainerBehavior>().networkObject = (NetworkContainerNetworkObject)obj;
+
+			FinalizeInitialization(go, netBehavior, obj, position, rotation, sendTransform);
+			
+			return netBehavior;
+		}
+		public NetworkCraftingStationBehavior InstantiateNetworkCraftingStation(int index = 0, Vector3? position = null, Quaternion? rotation = null, bool sendTransform = true)
+		{
+			var go = Instantiate(NetworkCraftingStationNetworkObject[index]);
+			var netBehavior = go.GetComponent<NetworkCraftingStationBehavior>();
+
+			NetworkObject obj = null;
+			if (!sendTransform && position == null && rotation == null)
+				obj = netBehavior.CreateNetworkObject(Networker, index);
+			else
+			{
+				metadata.Clear();
+
+				if (position == null && rotation == null)
+				{
+					byte transformFlags = 0x1 | 0x2;
+					ObjectMapper.Instance.MapBytes(metadata, transformFlags);
+					ObjectMapper.Instance.MapBytes(metadata, go.transform.position, go.transform.rotation);
+				}
+				else
+				{
+					byte transformFlags = 0x0;
+					transformFlags |= (byte)(position != null ? 0x1 : 0x0);
+					transformFlags |= (byte)(rotation != null ? 0x2 : 0x0);
+					ObjectMapper.Instance.MapBytes(metadata, transformFlags);
+
+					if (position != null)
+						ObjectMapper.Instance.MapBytes(metadata, position.Value);
+
+					if (rotation != null)
+						ObjectMapper.Instance.MapBytes(metadata, rotation.Value);
+				}
+
+				obj = netBehavior.CreateNetworkObject(Networker, index, metadata.CompressBytes());
+			}
+
+			go.GetComponent<NetworkCraftingStationBehavior>().networkObject = (NetworkCraftingStationNetworkObject)obj;
 
 			FinalizeInitialization(go, netBehavior, obj, position, rotation, sendTransform);
 			

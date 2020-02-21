@@ -244,4 +244,9 @@ public class UILogic : MonoBehaviour
         NetworkGuildManager.Instance.OnButtonModifyClick();
         
     }
+
+    internal void setContainerPanelActiveForCampfire(Predmet[] predmeti)
+    {
+        throw new NotImplementedException();
+    }
 }

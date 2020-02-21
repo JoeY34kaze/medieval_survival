@@ -246,21 +246,25 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
 
     private void rotatePlaceableWithMouseFree(float allowedAngleChunk)
     {
+        Debug.Log("rotacija : "+this.CurrentLocalPlaceable.transform.rotation);
         this.mouseWheelRotation = Input.mouseScrollDelta.y;
-        if (this.mouseWheelRotation == 0) return;
+        
 
         if (allowedAngleChunk <1)
         {
             
-            this.CurrentLocalPlaceable.transform.Rotate(Vector3.up, this.mouseWheelRotation * 10);
 
-            
+            this.current_placeable_rotation_offset += this.mouseWheelRotation * 10;
+
+
         }
         else{
             
-            this.CurrentLocalPlaceable.transform.Rotate(CurrentLocalPlaceable.transform.up, (this.mouseWheelRotation/ this.mouseWheelRotation) * allowedAngleChunk);
             
+            this.current_placeable_rotation_offset += (this.mouseWheelRotation / this.mouseWheelRotation) * allowedAngleChunk;
         }
+
+        
     }
 
     private RaycastHit local_MoveCurrentPlaceableObjectToMouseRay()
@@ -289,6 +293,7 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
                     if (!this.current_placeable_item.ignorePlacementNormal)
                     {
                         this.CurrentLocalPlaceable.transform.rotation = Quaternion.FromToRotation(Vector3.up, hitInfo.normal);//ce hocmo da je zmer alignan z terenom - chesti pa take stvari
+                        this.CurrentLocalPlaceable.transform.Rotate(Vector3.up, this.current_placeable_rotation_offset);
                         offsetOfColliderHeight = Vector3.up * this.currentPlaceableCollider.size.y / 2;
 
                         offsetOfColliderHeight = hitInfo.normal * this.currentPlaceableCollider.size.y / 2;
@@ -596,7 +601,7 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
             string predmet2 = args.GetNext<string>();//za shield rabmo met 2 indexa in tko
             int index2 = args.GetNext<int>();
 
-            Debug.Log("bar update - " + index);
+            //Debug.Log("bar update - " + index);
             Predmet p = Predmet.createNewPredmet(predmet1);
 
 
@@ -631,8 +636,8 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
     /// </summary>
     /// <param name="i"></param>
     private void setSelectedItems(Predmet i, Predmet shield) {//item je lahko null
-        if(i!=null)Debug.Log("Trying to place " + i.item.Display_name + " in the hands");
-        else Debug.Log("Trying to clear everything currently in the hands");
+        //if(i!=null)Debug.Log("Trying to place " + i.item.Display_name + " in the hands");
+        //else Debug.Log("Trying to clear everything currently in the hands");
 
 
         clearAllPossiblySelected();//ne cleara shielda
@@ -653,10 +658,10 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
             }
             else if (i.item.type == Item.Type.placeable)
             {
-                Debug.Log("lets try to place down " + i.item.Display_name);
+                //Debug.Log("lets try to place down " + i.item.Display_name);
                 setPlaceableState(i);
             }
-            else { Debug.Log("item youre trying to equip cannot be equipped : " + i.item.Display_name);
+            else {// Debug.Log("item youre trying to equip cannot be equipped : " + i.item.Display_name);
 
             }
         }
@@ -899,7 +904,8 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
                 networkObject.SendRpc(RPC_BAR_SLOT_SELECTION_RESPONSE, Receivers.All, (this.selected_index == -1) ? "-1" : npi.predmeti_hotbar[this.selected_index].toNetworkString(), this.selected_index, (this.selected_index_shield == -1) ? "-1" : npi.predmeti_hotbar[this.selected_index_shield].toNetworkString(), selected_index_shield);
 
             }
-            Debug.Log("trying to freely place item that is not allowed to be placed freely!");
+            else
+                Debug.Log("trying to freely place item that is not allowed to be placed freely!");
             return;
 
 

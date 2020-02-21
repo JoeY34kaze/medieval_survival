@@ -145,7 +145,7 @@ public class craftingPanelHandler : MonoBehaviour
     {
         clearRecepiePanel();
         foreach (Item.Type t in allowed_types) {
-            Debug.Log("adding recepies for type "+t.ToString());
+            //Debug.Log("adding recepies for type "+t.ToString());
             List<PredmetRecepie> recepti = Mapper.instance.getRecepiesForType(t);
             foreach (PredmetRecepie p in recepti) {
                 AddRecepieToPanel(p);
@@ -183,7 +183,7 @@ public class craftingPanelHandler : MonoBehaviour
         this.currentlySelectedItem = p.Product;
         this.currentlySelectedRecipe = p;
 
-        Debug.Log("selected recipe " + p.Product.Display_name);
+        //Debug.Log("selected recipe " + p.Product.Display_name);
         foreach (Transform child in this.material_cost_panel) Destroy(child.gameObject);
 
         this.recipeProductName.text=p.Product.Display_name;

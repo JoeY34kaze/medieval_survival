@@ -23,6 +23,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
     //public GameObject panel_inventory; //celotna panela za inventorij, to se izrise ko prtisnes "i"
 
     public Transform[] panel_personalInventorySlots;
+
     InventorySlotPersonal[] slots;  // predstavlajo slote v inventoriju, vsak drzi en item. 
 
 
@@ -1985,7 +1986,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
                     s = s + "|-1";
             }
         }
-        Debug.Log(s);
+        //Debug.Log(s);
         return s;
     }
 
@@ -2058,7 +2059,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
 
     internal void localStartCraftingRequest(Item i, int current, int skin)
     {
-        Debug.Log("sending crafting request! " + i.Display_name + " x" + current);
+        //Debug.Log("sending crafting request! " + i.Display_name + " x" + current);
         if (networkObject.IsOwner)
             networkObject.SendRpc(RPC_ITEM_CRAFTING_REQUEST, Receivers.Server, i.id, current, skin);
 
@@ -2356,6 +2357,13 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         GetComponentInChildren<UILogic>().setCurrentActiveContainer(container);
     }
 
+    //naceloma vsi containerji. crafting tables in take fore ce bojo ble. zaenkrat je samo chest
+    internal void onCampfireOpen(NetworkContainer container, Predmet[] predmeti)
+    {
+        Debug.LogWarning("Trying to open campfire. no panels implemented yet tho. UI stops here");
+        GetComponentInChildren<UILogic>().setContainerPanelActiveForCampfire(predmeti);
+        GetComponentInChildren<UILogic>().setCurrentActiveContainer(container);
+    }
 
     //--------Te metode tipa handleBackpackToContainer(RectTransform invSlot) se klicejo direkt z ItemDropHandler.OnDrop(PointerEventData eventData)
 

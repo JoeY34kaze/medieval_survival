@@ -15,7 +15,7 @@ public class Item : ScriptableObject
     public bool hasDurability;
     public int durability = 1000;//max durability na itemu. staticno - mora bit
     public int stackSize = 100;
-    public int backpack_capacity;
+    public int capacity;
     public float damage_reduction = 0;
     public int id;
     public GameObject prefab_pickup;//rabmo za iskanje network_Id-ja

@@ -9978,7 +9978,7 @@ MonoBehaviour:
   limb_damage_multiplier: 0.75
   block_damage_reduction: 0.025
   sound_effects_on_player:
-  - {fileID: 2312515853737920592, guid: 60bafb51ae267014e9c4a7125a00fad0, type: 3}
+  - {fileID: 2312515853737920592, guid: 971e1b9c167bba9428386108452a3d3e, type: 3}
   decision_handler: {fileID: 7871121373493097964}
   team_panel: {fileID: 2197244956197406113}
   soul: {fileID: 6109354980734300486}
@@ -10127,8 +10127,6 @@ MonoBehaviour:
   dragged_gameobjectSiblingIndex: -1
   draggedParent_parent_sibling_index: -1
   space: 20
-  pickup_sound_effect: {fileID: 2312515853737920592, guid: 1feaaad38172c384ab6c1f15a320c89f,
-    type: 3}
   panel_personalInventorySlots:
   - {fileID: 1320395275798434348}
   - {fileID: 7134690727078649963}

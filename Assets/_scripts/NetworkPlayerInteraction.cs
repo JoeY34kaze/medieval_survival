@@ -103,7 +103,7 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
                         if (interactable is Interactable_parenting_fix) { interactable = ((Interactable_parenting_fix)(interactable)).parent_interactable; }//tole je zato da se pohendla ce colliderja nimamo na prvem objektu ampak je nizje u hierarhiji. recimo za vrata
 
 
-                        if ((interactable is Interactable_chest || interactable is ItemPickup || interactable is Interactable_door || interactable is Interactable_trap) && interactable != this.recent_interactable)
+                        if ((interactable is Interactable_chest || interactable is ItemPickup || interactable is Interactable_door || interactable is Interactable_trap || interactable is Interactable_crafting_station) && interactable != this.recent_interactable)
                         {
                             interactable.setMaterialGlow();
                             if (this.recent_interactable != null)
@@ -141,6 +141,9 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
 
                             if (interactable is Interactable_chest)
                                 local_chest_open_request(interactable.gameObject);
+
+                            if (interactable is Interactable_crafting_station)
+                                local_crafting_station_open_inventory_request(interactable.gameObject);
                                 
 
                         }
@@ -174,6 +177,9 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
                                 
                                 if (interactable is Interactable_trap)
                                     this.menu.show_trap_interaction_menu(interactable.gameObject);
+
+                                if (interactable is Interactable_crafting_station)
+                                    this.menu.show_craftingStation_menu(interactable.gameObject);
 
                             }
                         }
@@ -218,10 +224,6 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
         }
     }
 
-
-
-
-
     private bool time_passed_interaction(float limit)
     {
         double time_released = (DateTime.Now - this.baseDate).TotalMilliseconds;
@@ -248,7 +250,14 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
     {
         this.player_cam = Camera.main.transform;
     }
-    //                                                                                       -----------------Player interactions--------------------
+
+    internal void local_crafting_station_open_inventory_request(GameObject target )
+    {
+        //poslat mormo rpc na target
+        target.GetComponent<Interactable_crafting_station>().local_inventory_request();
+    }
+
+    //        --------------------------------------------------------- -----------------Player interactions--------------------
     internal void local_player_interaction_execution_request(GameObject target)
     {
         target.GetComponent<Interactable_player>().local_player_execution_request(stats.Get_server_id());

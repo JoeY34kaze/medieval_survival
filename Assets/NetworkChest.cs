@@ -43,7 +43,7 @@ public class NetworkChest : NetworkContainer
             networkObject.TakeOwnership();//server prevzame ownership
             this.nci = GetComponent<NetworkContainer_items>();
             if (this.p != null)
-                this.nci.init(p.item.backpack_capacity);
+                this.nci.init(p.item.capacity);
             else this.nci.init(30);
         }
     }
@@ -103,14 +103,14 @@ public class NetworkChest : NetworkContainer
 
     public GameObject FindByid(uint targetNetworkId) //koda kopširana v network_body.cs in Interactable.cs
     {
-        Debug.Log("interactable.findplayerById");
+        //Debug.Log("interactable.findplayerById");
         //Debug.Log(targetNetworkId);
         foreach (GameObject p in GameObject.FindGameObjectsWithTag("Player"))
         {//very fucking inefficient ampak uno k je spodej nedela. nevem kaj je fora une kode ker networker,NetworkObjects niso playerji, so networkani objekti k drzijo playerje in njihova posizija znotraj lista se spreminja. kojikurac
          //    Debug.Log(p.GetComponent<NetworkPlayerStats>().server_id);
             if (p.GetComponent<NetworkPlayerStats>().Get_server_id() == targetNetworkId) return p;
         }
-        Debug.Log("TARGET PLAYER NOT FOUND!");
+        //Debug.Log("TARGET PLAYER NOT FOUND!");
         // NetworkBehavior networkBehavior = (NetworkBehavior)NetworkManager.Instance.Networker.NetworkObjects[(uint)targetNetworkId].AttachedBehavior;
         // GameObject obj = networkBehavior.gameObject;
 
