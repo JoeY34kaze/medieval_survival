@@ -2230,19 +2230,14 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
 
     //this is where magic happens pobrat mormo resource, jih zbrisat in ustvart nov item. ce se umes zalomi mormo obnovit nazaj stanje - dodat material nazaj
     private void CraftingTransaction(PredmetRecepie p)
-    {
-        //zaenkrat lahko iteme dobimo samo od personal inventorija, backpacka al pa hotbara. 
+    {   //zaenkrat lahko iteme dobimo samo od personal inventorija, backpacka al pa hotbara. 
         //vemo da mamo dovolj itemov nekje ker smo to pregledal predn smo skocil v to metodo kar pomen da nerabmo? vracat itemov ker naceloma nesmemo failat
-
-
         //loop cez vse matse in jih brisemo iz inventorija dokler ne zbrisemo zadost.
-
         for (int i = 0; i < p.ingredients.Length; i++)
         {
             int q = p.ingredient_quantities[i];//tolkle moramo zbrisat iz nekje
             DeleteIngredients(p.ingredients[i], q);
         }
-
         Predmet a_baby = new Predmet(p.Product, p.final_quantity, p.Product.durability, stats.playerName);
         handleItemPickup(a_baby);//POSLJE TUD POTREBNI NETWORKUPDATE
     }
@@ -2254,7 +2249,6 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
     /// <param name="q"></param>
     private void DeleteIngredients(Item item, int q)
     {
-
         if (q > 0)//najprej bi spraznil hotbar
             for (int i = 0; i < this.predmeti_hotbar.Length; i++)
             {
@@ -2353,9 +2347,11 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
     //naceloma vsi containerji. crafting tables in take fore ce bojo ble. zaenkrat je samo chest
     internal void onContainerOpen(NetworkContainer container, Predmet[] predmeti)
     {
-        Debug.LogWarning("Trying to open campfire. no panels implemented yet tho. UI stops here");
-        GetComponentInChildren<UILogic>().setContainerPanelActiveForContainer(predmeti);
-        GetComponentInChildren<UILogic>().setCurrentActiveContainer(container);
+        if (GetComponentInChildren<UILogic>().allows_UI_opening)
+        {
+            GetComponentInChildren<UILogic>().setContainerPanelActiveForContainer(predmeti);
+            GetComponentInChildren<UILogic>().setCurrentActiveContainer(container);
+        }
     }
 
     //--------Te metode tipa handleBackpackToContainer(RectTransform invSlot) se klicejo direkt z ItemDropHandler.OnDrop(PointerEventData eventData)

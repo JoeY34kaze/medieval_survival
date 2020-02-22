@@ -14,5 +14,7 @@ public class PredmetRecepie : ScriptableObject
 
     public int tier = 0;
     public int crafting_time;
+
+    public bool craftable_by_player = true;
     
 }

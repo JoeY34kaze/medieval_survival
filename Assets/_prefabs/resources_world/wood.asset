@@ -18,8 +18,8 @@ MonoBehaviour:
   damage: 0
   hasDurability: 0
   durability: 1000
-  stackSize: 100
-  backpack_capacity: 0
+  stackSize: 1000
+  capacity: 0
   damage_reduction: 0
   id: 101
   prefab_pickup: {fileID: 4344458020859959958, guid: 4d857fb3f3804e540b9c4ac4ce5da7b1,
@@ -30,3 +30,8 @@ MonoBehaviour:
   wood_gather_rate: 0
   flesh_gather_rate: 0
   description: no description yet.
+  placeable_Local_object: {fileID: 0}
+  placeable_networked_object: {fileID: 0}
+  ignorePlacementNormal: 0
+  PlacementType: 0
+  blocks_placements: 

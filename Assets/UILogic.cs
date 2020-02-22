@@ -34,6 +34,8 @@ public class UILogic : MonoBehaviour
 
     bool chatActive = false;
 
+    public bool allows_UI_opening = false;
+
     private void Start()
     {
         this.ngm = GameObject.FindGameObjectWithTag("GuildManager").GetComponent<NetworkGuildManager>();
@@ -159,6 +161,9 @@ public class UILogic : MonoBehaviour
         this.hasOpenWindow = false;
         this.currentActiveContainer = null;
         this.panelsPredmetiContainer = null;
+
+        this.allows_UI_opening = false;
+
         NetworkGuildManager.Instance.SetMemberPanel(false);
 
         DisableMouse();

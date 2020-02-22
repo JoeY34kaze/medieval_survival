@@ -36,6 +36,32 @@ public class NetworkContainer_items : NetworkContainerItemsBehavior
             this.predmeti[i] = null;
     }
 
+    internal void Remove(Item item, int q)
+    {
+        //zarad craftingstationa moramo met logiko da pobere samo del stacka in ne celega.
+
+
+        for (int i = 0; i < this.predmeti.Length; i++)
+        {
+
+            if (this.predmeti[i] != null)
+                if (this.predmeti[i].item.Equals(item))
+                {
+                    if (this.predmeti[i].quantity <= q)
+                    {
+                        //pobral bomo cel stack.
+                        q -= this.predmeti[i].quantity;
+                        this.predmeti[i] = null;
+                    }
+                    else
+                    {//poberemo samo del stacka in smo zakljucli
+                        this.predmeti[i].quantity -= q;
+                        return;
+                    }
+                }
+        }
+    }
+
     public Predmet getPredmet(int index) {
         //if (networkObject.IsServer || networkObject.IsOwner)
             return this.predmeti[index];
@@ -100,14 +126,33 @@ public class NetworkContainer_items : NetworkContainerItemsBehavior
         return getEmptySpace() > 0;
     }
 
-    public bool containsAmount(Item i, int amount) {
+    public bool hasSpace(Predmet p) {
+        return getEmptySpace() > 0 || CanBePlacedOnExistingStacksInFull(p);
+    }
+
+    private bool CanBePlacedOnExistingStacksInFull(Predmet p)
+    {
+        int kol = p.quantity;
+        foreach (Predmet stack in this.predmeti)
+            if (stack != null)
+                if (stack.item != null)
+                    if (stack.item.Equals(p.item))
+                        if (stack.quantity < stack.item.stackSize)
+                        {
+                            kol -= stack.item.stackSize - stack.quantity;
+                            if (kol <= 0) return true;
+                        }
+        return false;
+    }
+
+    internal bool containsAmount(Item i, int amount) {
         int q = 0;
         foreach (Predmet p in this.predmeti)
             if (p.item.id == i.id) q += p.quantity;
         return (q >= amount) ? true : false;
     }
 
-    public bool contains(int id, int amount)
+    internal bool contains(int id, int amount)
     {
         if (!networkObject.IsServer) return false;
         int number_of_items = getNumberofItems(id);
@@ -116,14 +161,14 @@ public class NetworkContainer_items : NetworkContainerItemsBehavior
 
     }
 
-    public void setAll(Predmet[] all) {//tle se nekje zabugga in jih posle 21!
+    internal void setAll(Predmet[] all) {//tle se nekje zabugga in jih posle 21!
         if (this.predmeti.Length == all.Length || !networkObject.IsServer)
             this.predmeti = all;
         else
             Debug.LogError("Trying to set array when sizes mismatch..");
     }
 
-    public Predmet[] getAll()
+    internal Predmet[] getAll()
     {
         return this.predmeti;
     }
@@ -155,15 +200,46 @@ public class NetworkContainer_items : NetworkContainerItemsBehavior
         return rez;
     }
 
-    public void putFirst(Predmet predmet) {
-        if (!networkObject.IsServer) return;
+    internal Predmet putFirst(Predmet predmet) {
+        if (!networkObject.IsServer) return predmet;
         for (int i = 0; i < this.size; i++) {
             if (this.predmeti[i] == null)
             {
                 setPredmet(i, predmet);
-                return;
+                return null;
             }
         }
+        return predmet;
+    }
+
+    
+
+    /// <summary>
+    /// pogleda ves inventorij in poskusi dodat ze obstojecim stackom tega itema. vrne del itema, ki ga ni mogu dat na stack, vrne celoten item nazaj ce ni nobenga stacka, vrne null ce mu je uspelo vse dat na nek stack.
+    /// </summary>
+    /// <param name="resp"></param>
+    /// <returns></returns>
+    internal Predmet tryToAddPredmetToExistingStack(Predmet resp)
+    {
+        Predmet p = resp;
+        foreach (Predmet stack in this.predmeti)
+            if (stack != null)
+                if (stack.item != null)
+                    if (stack.item.Equals(p.item))
+                        if (stack.quantity < stack.item.stackSize)
+                        {
+                            p = stack.addQuantity(p);
+                            if (p == null)
+                                return null;
+                        }
+        return p;
+    }
+
+    internal bool Add(Predmet p) {
+        p = tryToAddPredmetToExistingStack(p);
+        if (p != null)
+            this.putFirst(p);
+        return p == null;
     }
 
     internal void swap(int p, int v)

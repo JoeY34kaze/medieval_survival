@@ -18,8 +18,8 @@ MonoBehaviour:
   damage: 0
   hasDurability: 0
   durability: 1000
-  stackSize: 100
-  backpack_capacity: 0
+  stackSize: 1000
+  capacity: 0
   damage_reduction: 0
   id: 104
   prefab_pickup: {fileID: 4344458020859959958, guid: 4d857fb3f3804e540b9c4ac4ce5da7b1,

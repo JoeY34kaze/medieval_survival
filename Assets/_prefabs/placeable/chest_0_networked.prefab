@@ -12,9 +12,9 @@ GameObject:
   - component: {fileID: 20569220}
   - component: {fileID: 7352577363110337176}
   - component: {fileID: 2227153110446272298}
-  - component: {fileID: 8685349548693095672}
   - component: {fileID: 2475404524576968028}
   - component: {fileID: 6959688678832067451}
+  - component: {fileID: 4143963731782087096}
   m_Layer: 0
   m_Name: chest_0_networked
   m_TagString: Untagged
@@ -85,18 +85,6 @@ MonoBehaviour:
   distanceForSnappingHandling: 0.05
   snappableType: 12
   attachmentPoints: []
---- !u!114 &8685349548693095672
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 132834}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9948433a173d2094ba30a0706e789822, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &2475404524576968028
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -122,6 +110,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   original_material: {fileID: 0}
+--- !u!114 &4143963731782087096
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 132834}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9396681d26a97554ea887edacd00d4a9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &185024
 GameObject:
   m_ObjectHideFlags: 0

@@ -30,7 +30,8 @@ public class NetworkPlaceable : NetworkPlaceableBehavior
 
         this.p = p;
         //server mu nastavi vse stvari k jih rab nastavt ob instanciaciji objekta.
-        if (GetComponent<NetworkChest>() != null) GetComponent<NetworkChest>().init(this.p);
+        if (GetComponent<NetworkContainer>() != null) GetComponent<NetworkContainer>().init(this.p);
+
         if (GetComponent<NetworkCraftingStation>() != null) GetComponent<NetworkCraftingStation>().init(this.p);
     }
 

@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4746d1fc3f566dd42a210e3e3bb489aa, type: 3}
+  m_Name: copper_crafting_station
+  m_EditorClassIdentifier: 
+  Product: {fileID: 11400000, guid: 5cce2dcb3b9db734790cad1592e7087b, type: 2}
+  final_quantity: 1
+  ingredients:
+  - {fileID: 11400000, guid: 5683596249133a9458322e966baf37ea, type: 2}
+  ingredient_quantities: 01000000
+  tier: 0
+  crafting_time: 4
+  craftable_by_player: 0

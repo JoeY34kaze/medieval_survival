@@ -1,0 +1,37 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5ba0d0d991d7fd84490deca31f6fb3d9, type: 3}
+  m_Name: coal
+  m_EditorClassIdentifier: 
+  Display_name: Coal
+  type: 10
+  icon: {fileID: 21300000, guid: 3db57d3aa00b9b64e998da45dfe99eb9, type: 3}
+  damage: 0
+  hasDurability: 0
+  durability: 1000
+  stackSize: 1000
+  capacity: 0
+  damage_reduction: 0
+  id: 105
+  prefab_pickup: {fileID: 4344458020859959958, guid: 4d857fb3f3804e540b9c4ac4ce5da7b1,
+    type: 3}
+  weapon_animation_class: 0
+  uma_item_recipe_name: 
+  stone_gather_rate: 0
+  wood_gather_rate: 0
+  flesh_gather_rate: 0
+  description: Raw gold ore. Can be refined into ingots inside a furnace.
+  placeable_Local_object: {fileID: 0}
+  placeable_networked_object: {fileID: 0}
+  ignorePlacementNormal: 0
+  PlacementType: 0
+  blocks_placements: 

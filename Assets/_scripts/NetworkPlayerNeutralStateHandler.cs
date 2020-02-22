@@ -289,14 +289,14 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
                 
                 if (this.current_placeable_item.PlacementType == Item.SnappableType.none || this.current_placeable_item.PlacementType == Item.SnappableType.free_in_range || this.current_placeable_item.PlacementType == Item.SnappableType.foundation)
                 {
-                    Vector3 offsetOfColliderHeight = Vector3.up * this.currentPlaceableCollider.size.y / 2;
+                    Vector3 offsetOfColliderHeight = Vector3.up *( this.currentPlaceableCollider.size.y / 2 - this.currentPlaceableCollider.center.y);
                     if (!this.current_placeable_item.ignorePlacementNormal)
                     {
                         this.CurrentLocalPlaceable.transform.rotation = Quaternion.FromToRotation(Vector3.up, hitInfo.normal);//ce hocmo da je zmer alignan z terenom - chesti pa take stvari
                         this.CurrentLocalPlaceable.transform.Rotate(Vector3.up, this.current_placeable_rotation_offset);
                         offsetOfColliderHeight = Vector3.up * this.currentPlaceableCollider.size.y / 2;
 
-                        offsetOfColliderHeight = hitInfo.normal * this.currentPlaceableCollider.size.y / 2;
+                        offsetOfColliderHeight = hitInfo.normal*(this.currentPlaceableCollider.size.y / 2 - this.currentPlaceableCollider.center.y);
 
                     }
                     this.CurrentLocalPlaceable.transform.position = hitInfo.point + offsetOfColliderHeight;

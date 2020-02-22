@@ -148,7 +148,7 @@ public class craftingPanelHandler : MonoBehaviour
             //Debug.Log("adding recepies for type "+t.ToString());
             List<PredmetRecepie> recepti = Mapper.instance.getRecepiesForType(t);
             foreach (PredmetRecepie p in recepti) {
-                AddRecepieToPanel(p);
+                if(p.craftable_by_player)AddRecepieToPanel(p);
             }
         }
     }
