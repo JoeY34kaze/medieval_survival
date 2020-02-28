@@ -67,6 +67,10 @@ namespace BeardedManStudios.Forge.Networking.Generated
 						availableCallback = true;
 						obj = new NetworkGuildManagerNetworkObject(networker, id, frame);
 						break;
+					case NetworkLandClaimObjectNetworkObject.IDENTITY:
+						availableCallback = true;
+						obj = new NetworkLandClaimObjectNetworkObject(networker, id, frame);
+						break;
 					case NetworkPlaceableNetworkObject.IDENTITY:
 						availableCallback = true;
 						obj = new NetworkPlaceableNetworkObject(networker, id, frame);

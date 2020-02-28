@@ -9645,13 +9645,12 @@ GameObject:
   m_Component:
   - component: {fileID: 6033069015708515165}
   - component: {fileID: 5867151814611109803}
-  - component: {fileID: 6031131577149352456}
   - component: {fileID: 3892905277538553002}
   - component: {fileID: 8125306655700330277}
-  - component: {fileID: 1834403961108987376}
   - component: {fileID: 1148551434901908737}
   - component: {fileID: 2094019548554391671}
   - component: {fileID: 4860433327543582831}
+  - component: {fileID: 645040323669188223}
   m_Layer: 0
   m_Name: placeable_campfire_networked
   m_TagString: Untagged
@@ -9705,24 +9704,6 @@ LODGroup:
     renderers:
     - renderer: {fileID: 6045400050294178447}
   m_Enabled: 1
---- !u!114 &6031131577149352456
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6031131577149352457}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 88d9ccc119e67ef4a83ccfa9feb78435, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  active: 1
-  index_of_variable_material: 2
-  active_mat: {fileID: 2100000, guid: 13f1178d97c789540af96daa8851ff9f, type: 2}
-  inactive_mat: {fileID: 2100000, guid: dc4f5cb8f4162b64b8ae6e668f8bd17d, type: 2}
-  rend: {fileID: 6045427760390286145}
-  sound_effect: {fileID: 6044051031362900713}
 --- !u!114 &3892905277538553002
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -9752,24 +9733,6 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 0.7989197, y: 0.29738617, z: 0.88323975}
   m_Center: {x: 0.022079468, y: 0.13144684, z: -0.0033874512}
---- !u!114 &1834403961108987376
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6031131577149352457}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9ddba80ffaca7ea46b54c5de0ac6094e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  require_fuel: 1
-  fuel_recipe: {fileID: 11400000, guid: d12bb7bb2944c9e4f9a88a9c4d3d3091, type: 2}
-  valid_recipes:
-  - {fileID: 11400000, guid: 73d8748cf3c17d243a08a0ae5d7854de, type: 2}
-  - {fileID: 11400000, guid: 5a1a7285ca3cc6342a475a52830132df, type: 2}
-  - {fileID: 11400000, guid: 6ddc831c26bf1ba468c4cbac81c33e18, type: 2}
 --- !u!114 &1148551434901908737
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -9807,6 +9770,29 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9396681d26a97554ea887edacd00d4a9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &645040323669188223
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6031131577149352457}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 446bcabea84942849acc4240304de950, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  distance_for_interaction: 5
+  crafting_tick: 5
+  require_fuel: 1
+  fuel_recipe: {fileID: 11400000, guid: d12bb7bb2944c9e4f9a88a9c4d3d3091, type: 2}
+  valid_recipes: []
+  active: 0
+  index_of_material: 2
+  active_mat: {fileID: 2100000, guid: 13f1178d97c789540af96daa8851ff9f, type: 2}
+  inactive_mat: {fileID: 2100000, guid: dc4f5cb8f4162b64b8ae6e668f8bd17d, type: 2}
+  sound_effect: {fileID: 6044051031362900713}
+  rend: {fileID: 6045427760390286145}
 --- !u!1 &6031490583586245865
 GameObject:
   m_ObjectHideFlags: 0

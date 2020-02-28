@@ -21,6 +21,7 @@ namespace BeardedManStudios.Forge.Networking.Unity
 		public GameObject[] NetworkContainerNetworkObject = null;
 		public GameObject[] NetworkCraftingStationNetworkObject = null;
 		public GameObject[] NetworkGuildManagerNetworkObject = null;
+		public GameObject[] NetworkLandClaimObjectNetworkObject = null;
 		public GameObject[] NetworkPlaceableNetworkObject = null;
 		public GameObject[] NetworkPlayerAnimationNetworkObject = null;
 		public GameObject[] NetworkPlayerCameraHandlerNetworkObject = null;
@@ -294,6 +295,29 @@ namespace BeardedManStudios.Forge.Networking.Unity
 						{
 							var go = Instantiate(NetworkGuildManagerNetworkObject[obj.CreateCode]);
 							newObj = go.GetComponent<NetworkGuildManagerBehavior>();
+						}
+					}
+
+					if (newObj == null)
+						return;
+						
+					newObj.Initialize(obj);
+
+					if (objectInitialized != null)
+						objectInitialized(newObj, obj);
+				});
+			}
+			else if (obj is NetworkLandClaimObjectNetworkObject)
+			{
+				MainThreadManager.Run(() =>
+				{
+					NetworkBehavior newObj = null;
+					if (!NetworkBehavior.skipAttachIds.TryGetValue(obj.NetworkId, out newObj))
+					{
+						if (NetworkLandClaimObjectNetworkObject.Length > 0 && NetworkLandClaimObjectNetworkObject[obj.CreateCode] != null)
+						{
+							var go = Instantiate(NetworkLandClaimObjectNetworkObject[obj.CreateCode]);
+							newObj = go.GetComponent<NetworkLandClaimObjectBehavior>();
 						}
 					}
 
@@ -788,6 +812,18 @@ namespace BeardedManStudios.Forge.Networking.Unity
 			var netBehavior = go.GetComponent<NetworkGuildManagerBehavior>();
 			var obj = netBehavior.CreateNetworkObject(Networker, index);
 			go.GetComponent<NetworkGuildManagerBehavior>().networkObject = (NetworkGuildManagerNetworkObject)obj;
+
+			FinalizeInitialization(go, netBehavior, obj, position, rotation, sendTransform);
+			
+			return netBehavior;
+		}
+		[Obsolete("Use InstantiateNetworkLandClaimObject instead, its shorter and easier to type out ;)")]
+		public NetworkLandClaimObjectBehavior InstantiateNetworkLandClaimObjectNetworkObject(int index = 0, Vector3? position = null, Quaternion? rotation = null, bool sendTransform = true)
+		{
+			var go = Instantiate(NetworkLandClaimObjectNetworkObject[index]);
+			var netBehavior = go.GetComponent<NetworkLandClaimObjectBehavior>();
+			var obj = netBehavior.CreateNetworkObject(Networker, index);
+			go.GetComponent<NetworkLandClaimObjectBehavior>().networkObject = (NetworkLandClaimObjectNetworkObject)obj;
 
 			FinalizeInitialization(go, netBehavior, obj, position, rotation, sendTransform);
 			
@@ -1420,6 +1456,47 @@ namespace BeardedManStudios.Forge.Networking.Unity
 			}
 
 			go.GetComponent<NetworkGuildManagerBehavior>().networkObject = (NetworkGuildManagerNetworkObject)obj;
+
+			FinalizeInitialization(go, netBehavior, obj, position, rotation, sendTransform);
+			
+			return netBehavior;
+		}
+		public NetworkLandClaimObjectBehavior InstantiateNetworkLandClaimObject(int index = 0, Vector3? position = null, Quaternion? rotation = null, bool sendTransform = true)
+		{
+			var go = Instantiate(NetworkLandClaimObjectNetworkObject[index]);
+			var netBehavior = go.GetComponent<NetworkLandClaimObjectBehavior>();
+
+			NetworkObject obj = null;
+			if (!sendTransform && position == null && rotation == null)
+				obj = netBehavior.CreateNetworkObject(Networker, index);
+			else
+			{
+				metadata.Clear();
+
+				if (position == null && rotation == null)
+				{
+					byte transformFlags = 0x1 | 0x2;
+					ObjectMapper.Instance.MapBytes(metadata, transformFlags);
+					ObjectMapper.Instance.MapBytes(metadata, go.transform.position, go.transform.rotation);
+				}
+				else
+				{
+					byte transformFlags = 0x0;
+					transformFlags |= (byte)(position != null ? 0x1 : 0x0);
+					transformFlags |= (byte)(rotation != null ? 0x2 : 0x0);
+					ObjectMapper.Instance.MapBytes(metadata, transformFlags);
+
+					if (position != null)
+						ObjectMapper.Instance.MapBytes(metadata, position.Value);
+
+					if (rotation != null)
+						ObjectMapper.Instance.MapBytes(metadata, rotation.Value);
+				}
+
+				obj = netBehavior.CreateNetworkObject(Networker, index, metadata.CompressBytes());
+			}
+
+			go.GetComponent<NetworkLandClaimObjectBehavior>().networkObject = (NetworkLandClaimObjectNetworkObject)obj;
 
 			FinalizeInitialization(go, netBehavior, obj, position, rotation, sendTransform);
 			

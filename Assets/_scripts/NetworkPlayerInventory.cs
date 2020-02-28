@@ -2344,13 +2344,15 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
 
 
     #region containers
-    //naceloma vsi containerji. crafting tables in take fore ce bojo ble. zaenkrat je samo chest
     internal void onContainerOpen(NetworkContainer container, Predmet[] predmeti)
     {
         if (GetComponentInChildren<UILogic>().allows_UI_opening)
         {
-            GetComponentInChildren<UILogic>().setContainerPanelActiveForContainer(predmeti);
-            GetComponentInChildren<UILogic>().setCurrentActiveContainer(container);
+            if (GetComponentInChildren<UILogic>().currently_openened_container.Equals(container))
+            {
+                GetComponentInChildren<UILogic>().setContainerPanelActiveForContainer(predmeti);
+                GetComponentInChildren<UILogic>().setCurrentActiveContainer(container);
+            }
         }
     }
 

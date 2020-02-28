@@ -297,20 +297,93 @@ public class Interactable_radial_menu : MonoBehaviour
         menu.reDraw();
     }
 
+    internal void show_flag_menu(GameObject target, bool authorized)
+    {
+        if (authorized) 
+        {
+            show_menu(target);
+            this.number_of_elements = 5;
+            menu.angleOffset = (360f / this.number_of_elements);
+            center_label.text = target.GetComponent<NetworkPlaceable>().item.Display_name;
+
+            GameObject btn_0_r = Resources.Load<GameObject>("radial_menu_elements/interaction_flag_open");
+            GameObject btn_1_r = Resources.Load<GameObject>("radial_menu_elements/interaction_clear_all");
+            GameObject btn_2_r = Resources.Load<GameObject>("radial_menu_elements/interaction_deauthorize");
+            GameObject btn_3_r = Resources.Load<GameObject>("radial_menu_elements/interaction_flag_upload_image");
+            GameObject btn_4_r = Resources.Load<GameObject>("radial_menu_elements/interaction_player_steal");
+            GameObject btn_0 = GameObject.Instantiate(btn_0_r);
+            GameObject btn_1 = GameObject.Instantiate(btn_1_r);
+            GameObject btn_2 = GameObject.Instantiate(btn_2_r);
+            GameObject btn_3 = GameObject.Instantiate(btn_3_r);
+            GameObject btn_4 = GameObject.Instantiate(btn_4_r);
+            menu.elements.Clear();
+            setup_button(btn_0, menu.angleOffset * 0);
+            setup_button(btn_1, menu.angleOffset * 1);
+            setup_button(btn_2, menu.angleOffset * 2);
+            setup_button(btn_3, menu.angleOffset * 3);
+            setup_button(btn_4, menu.angleOffset * 4);
+
+            Button button = btn_0.transform.GetComponentInChildren<Button>();
+            button.onClick.RemoveAllListeners();
+            button.onClick.AddListener(delegate { player_interaction_flag_open_request(); });
+
+            button = btn_1.transform.GetComponentInChildren<Button>();
+            button.onClick.RemoveAllListeners();
+            button.onClick.AddListener(delegate { player_interaction_flag_clear_all_request(); });
+
+            button = btn_2.transform.GetComponentInChildren<Button>();
+            button.onClick.RemoveAllListeners();
+            button.onClick.AddListener(delegate { player_interaction_flag_toggle_authorized_request(); });
+
+            button = btn_3.transform.GetComponentInChildren<Button>();
+            button.onClick.RemoveAllListeners();
+            button.onClick.AddListener(delegate { player_interaction_upload_flag_request(); });
+
+            button = btn_4.transform.GetComponentInChildren<Button>();
+            button.onClick.RemoveAllListeners();
+            button.onClick.AddListener(delegate { player_interaction_flag_pickup_request(); });
+
+            menu.reDraw();
+        }
+        else {
+            show_menu(target);
+            this.number_of_elements = 1;
+            menu.angleOffset = (360f / this.number_of_elements);
+            center_label.text = target.GetComponent<NetworkPlaceable>().item.Display_name;
+
+            GameObject btn_0_r = Resources.Load<GameObject>("radial_menu_elements/interaction_authorize");
+           
+            GameObject btn_0 = GameObject.Instantiate(btn_0_r);
+
+            menu.elements.Clear();
+            setup_button(btn_0, menu.angleOffset * 0);
+
+
+            Button button = btn_0.transform.GetComponentInChildren<Button>();
+            button.onClick.RemoveAllListeners();
+            button.onClick.AddListener(delegate { player_interaction_flag_toggle_authorized_request(); });
+
+            menu.reDraw();
+        }
+    }
+
     internal void show_craftingStation_menu(GameObject target)
     {
         show_menu(target);
-        this.number_of_elements = 2;
+        this.number_of_elements = 3;
         menu.angleOffset = (360f / this.number_of_elements);
         center_label.text = target.GetComponent<NetworkPlaceable>().item.Display_name;
 
         GameObject btn_0_r = Resources.Load<GameObject>("radial_menu_elements/interaction_chest_open");
         GameObject btn_1_r = Resources.Load<GameObject>("radial_menu_elements/interaction_player_steal");
+        GameObject btn_2_r = Resources.Load<GameObject>("radial_menu_elements/interaction_reload");
         GameObject btn_0 = GameObject.Instantiate(btn_0_r);
         GameObject btn_1 = GameObject.Instantiate(btn_1_r);
+        GameObject btn_2 = GameObject.Instantiate(btn_2_r);
         menu.elements.Clear();
         setup_button(btn_0, menu.angleOffset * 0);
         setup_button(btn_1, menu.angleOffset * 1);
+        setup_button(btn_2, menu.angleOffset * 2);
         //menu.textLabel.text = "Downed Player";
 
         Button button = btn_0.transform.GetComponentInChildren<Button>();
@@ -318,6 +391,10 @@ public class Interactable_radial_menu : MonoBehaviour
         button.onClick.AddListener(delegate { player_interaction_crafting_station_inventory_open_request(); });
 
         button = btn_1.transform.GetComponentInChildren<Button>();
+        button.onClick.RemoveAllListeners();
+        button.onClick.AddListener(delegate { player_interaction_crafting_station_pickup_request(); });
+
+        button = btn_2.transform.GetComponentInChildren<Button>();
         button.onClick.RemoveAllListeners();
         button.onClick.AddListener(delegate { player_interaction_crafting_station_toggle_request(); });
 
@@ -631,9 +708,18 @@ public class Interactable_radial_menu : MonoBehaviour
         interaction.local_trap_pickup_request(this.target);
     }
 
+    private void player_interaction_crafting_station_pickup_request()
+    {
+        hide_radial_menu();
+
+        interaction.local_crafting_station_pickup_request(this.target);
+    }
+
     private void player_interaction_crafting_station_toggle_request()
     {
-        throw new NotImplementedException();
+        hide_radial_menu();
+
+        interaction.local_crafting_station_toggle_request(this.target);
     }
 
     private void player_interaction_crafting_station_inventory_open_request()
@@ -647,6 +733,43 @@ public class Interactable_radial_menu : MonoBehaviour
         this.radialMenu.SetActive(false);
 
         interaction.local_crafting_station_open_inventory_request(this.target);
+    }
+
+    private void player_interaction_flag_open_request()
+    {
+        menu.elements.Clear();
+        foreach (Transform child in elements)
+        {
+            GameObject.Destroy(child.gameObject);
+        }
+        center_label.text = "";
+        this.radialMenu.SetActive(false);
+
+        interaction.local_flag_open_request(this.target);
+    }
+
+    private void player_interaction_flag_clear_all_request()
+    {
+        hide_radial_menu();
+        interaction.local_flag_clear_all_request(this.target);
+    }
+
+    private void player_interaction_upload_flag_request()
+    {
+        hide_radial_menu();
+        interaction.local_flag_upload_image_request(this.target);
+    }
+
+    private void player_interaction_flag_pickup_request()
+    {
+        hide_radial_menu();
+        interaction.local_flag_pickup_request(this.target);
+    }
+
+    private void player_interaction_flag_toggle_authorized_request()
+    {
+        hide_radial_menu();
+        interaction.local_flag_toggle_authorized_request(this.target);
     }
 
 }

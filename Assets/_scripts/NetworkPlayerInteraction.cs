@@ -103,7 +103,7 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
                         if (interactable is Interactable_parenting_fix) { interactable = ((Interactable_parenting_fix)(interactable)).parent_interactable; }//tole je zato da se pohendla ce colliderja nimamo na prvem objektu ampak je nizje u hierarhiji. recimo za vrata
 
 
-                        if ((interactable is Interactable_chest || interactable is ItemPickup || interactable is Interactable_door || interactable is Interactable_trap || interactable is Interactable_crafting_station) && interactable != this.recent_interactable)
+                        if ((interactable is Interactable_chest || interactable is ItemPickup || interactable is Interactable_door || interactable is Interactable_trap || interactable is Interactable_crafting_station || interactable is Interactable_guild_flag) && interactable != this.recent_interactable)
                         {
                             interactable.setMaterialGlow();
                             if (this.recent_interactable != null)
@@ -144,7 +144,12 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
 
                             if (interactable is Interactable_crafting_station)
                                 local_crafting_station_open_inventory_request(interactable.gameObject);
-                                
+
+                            if (interactable is Interactable_guild_flag)
+                                if (interactable.GetComponent<NetworkGuildFlag>().is_player_authorized(networkObject.Owner.NetworkId))
+                                    local_guild_flag_open_request(interactable.gameObject);
+                                else
+                                    local_guild_flag_toggle_authorized_request(interactable.gameObject);
 
                         }
                         else if (Input.GetButton("Interact") && this.time_pressed_interaction > 0 && time_passed_interaction(150f) && !(Input.GetButton("Alert") || this.time_pressed_alert > 0))
@@ -180,6 +185,9 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
 
                                 if (interactable is Interactable_crafting_station)
                                     this.menu.show_craftingStation_menu(interactable.gameObject);
+
+                                if (interactable is Interactable_guild_flag)
+                                    this.menu.show_flag_menu(interactable.gameObject, interactable.GetComponent<NetworkGuildFlag>().is_player_authorized(networkObject.Owner.NetworkId));
 
                             }
                         }
@@ -224,6 +232,16 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
         }
     }
 
+    private void local_guild_flag_toggle_authorized_request(GameObject gameObject)
+    {
+        throw new NotImplementedException();
+    }
+
+    private void local_guild_flag_open_request(GameObject gameObject)
+    {
+        throw new NotImplementedException();
+    }
+
     private bool time_passed_interaction(float limit)
     {
         double time_released = (DateTime.Now - this.baseDate).TotalMilliseconds;
@@ -255,6 +273,14 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
     {
         //poslat mormo rpc na target
         target.GetComponent<Interactable_crafting_station>().local_inventory_request();
+    }
+
+    internal void local_crafting_station_pickup_request(GameObject target) {
+        target.GetComponent<Interactable_crafting_station>().local_pickup_request();
+    }
+
+    internal void local_crafting_station_toggle_request(GameObject target) {
+        target.GetComponent<Interactable_crafting_station>().local_toggle_request();
     }
 
     //        --------------------------------------------------------- -----------------Player interactions--------------------
@@ -481,5 +507,30 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
     {
         Debug.Log("request to pickup trap");
         target.GetComponent<Interactable_trap>().local_trap_pickup_request();
+    }
+
+    internal void local_flag_open_request(GameObject target)
+    {
+        target.GetComponent<NetworkContainer>().local_open_container_request();
+    }
+
+    internal void local_flag_clear_all_request(GameObject target)
+    {
+        target.GetComponent<NetworkGuildFlag>().local_clear_all_request();
+    }
+
+    internal void local_flag_upload_image_request(GameObject target)
+    {
+        target.GetComponent<NetworkGuildFlag>().local_flag_upload_image_request();
+    }
+
+    internal void local_flag_pickup_request(GameObject target)
+    {
+        target.GetComponent<NetworkContainer>().local_container_pickup_request();
+    }
+
+    internal void local_flag_toggle_authorized_request(GameObject target)
+    {
+        target.GetComponent<NetworkGuildFlag>().local_flag_toggle_authorized_request();
     }
 }

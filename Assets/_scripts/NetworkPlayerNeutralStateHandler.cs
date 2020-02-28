@@ -27,6 +27,7 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
     internal Item current_placeable_item;
     private BoxCollider currentPlaceableCollider;
     private Renderer[] currentPlaceableRenderers;
+    private bool placeable_currently_valid = false;
 
     private float distance_for_snapping_freely_or_on_gameobject_offset = 0.05f;
     private float mouseWheelRotation;
@@ -76,7 +77,8 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
                         if (this.current_closest_attachment_point != null)
                             this.current_closest_attachment_point.local_placement_of_placeable_request(this.CurrentLocalPlaceable.transform.rotation);
                         else
-                            networkObject.SendRpc(RPC_PLACEMENTOF_ITEM_REQUEST, Receivers.Server, this.CurrentLocalPlaceable.transform.position, this.CurrentLocalPlaceable.transform.rotation);
+                            if(this.placeable_currently_valid)
+                                networkObject.SendRpc(RPC_PLACEMENTOF_ITEM_REQUEST, Receivers.Server, this.CurrentLocalPlaceable.transform.position, this.CurrentLocalPlaceable.transform.rotation);
 
                     }
                 }
@@ -92,9 +94,7 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
             }
         }
     }
-
     
-
     /// <summary>
     /// lokalno izrise placeable karkoli ze pac hocmo postavt
     /// </summary>
@@ -109,7 +109,7 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
             this.previously_valid_rotation = this.CurrentLocalPlaceable.transform.rotation;
             
             set_material(this.valid_material);
-
+            this.placeable_currently_valid = true;
         }
         else
         {
@@ -120,7 +120,7 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
                 
             }
             set_material(this.invalid_material);
-            
+            this.placeable_currently_valid = false;
         }
     }
 
@@ -142,6 +142,32 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
             this.currentPlaceableRenderers[i].material = m;
     }
 
+    public static bool has_building_privilege(NetworkingPlayer p ,Vector3 point)
+    {
+        //ce ni nbene zastave u rangeu -> ima privilege
+
+        //ce je kšn npc privilegij u rangeu (mesta recimo, monumemnti) nima privilegija
+        //ce je kšn enemy flag u rangeu in ni v svojem flag rangeu -> nima privilegija
+        //ce je v svojem flag rangeu in se ne overlapa z nobenmu -> ima privilegij
+        //ce je v svojem flag rangeu in se overlapa z drugimi se uposteva privilegij flaga, ki ima najmanjši integer/id whatever
+
+        if (is_in_npc_building_blocked_zone()) return false;
+        else {
+            NetworkGuildFlag dominant_flag = NetworkGuildFlag.get_dominant_guild_flag_in_range(point);
+            if (dominant_flag != null)
+                return dominant_flag.is_player_authorized(p.NetworkId);
+                 
+                
+        }
+        return true;
+    }
+
+    private static bool is_in_npc_building_blocked_zone()
+    {
+        return false;
+    }
+
+
     /// <summary>
     /// klice se samo na lokalnemu ker dostopa do stvari k jih server ne vid, like raycast k smo g anrdil. server to posebej pohendla na podobn nacin
     /// </summary>
@@ -149,6 +175,9 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
     /// <returns></returns>
     private bool currentTransformOfPlaceableIsValid(RaycastHit h)
     {
+
+        if (!has_building_privilege(networkObject.Owner, h.point)) return false;
+
         //server side check k ga izvedemo prej lokalno da neb slucajno passov lokaln check pa failov na serverju. passat mora oba, ce faila koga nj faila na clientu, ce passa ni take panike
         if (!currentTransformOfPlaceableIsValid(this.CurrentLocalPlaceable.transform.position)) return false;
 
@@ -895,6 +924,8 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
             if (this.activePlaceable.item.PlacementType == Item.SnappableType.foundation || this.activePlaceable.item.PlacementType == Item.SnappableType.free_in_range || this.activePlaceable.item.PlacementType == Item.SnappableType.none || this.activePlaceable.item.PlacementType == Item.SnappableType.wall_attachment_free)
             {
                 Vector3 pos = args.GetNext<Vector3>();
+                if (!has_building_privilege(networkObject.Owner, pos)) return;
+
                 Quaternion rot = args.GetNext<Quaternion>();
                 //get current placeable predmet!
                 Predmet p = this.activePlaceable;
@@ -925,7 +956,7 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
         NetworkPlaceableBehavior b = NetworkManager.Instance.InstantiateNetworkPlaceable(net_id, pos, rot);
 
         //apply force on clients, sets predmet
-        b.gameObject.GetComponent<NetworkPlaceable>().init(p);
+        b.gameObject.GetComponent<NetworkPlaceable>().init(p, networkObject.Owner.NetworkId);
         return b.gameObject.GetComponent<NetworkPlaceable>();
     }
 

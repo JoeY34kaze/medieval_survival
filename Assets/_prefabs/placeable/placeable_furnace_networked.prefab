@@ -26,7 +26,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2104080901685630768}
   m_LocalRotation: {x: -0.70710677, y: -0, z: -0, w: 0.7071068}
-  m_LocalPosition: {x: 0, y: 0.33599997, z: 0}
+  m_LocalPosition: {x: 0, y: 0.153, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 2105785870403427618}
@@ -14222,12 +14222,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 446bcabea84942849acc4240304de950, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  distance_for_interaction: 5
+  crafting_tick: 5
   require_fuel: 1
   fuel_recipe: {fileID: 11400000, guid: d12bb7bb2944c9e4f9a88a9c4d3d3091, type: 2}
   valid_recipes:
   - {fileID: 11400000, guid: 73d8748cf3c17d243a08a0ae5d7854de, type: 2}
   - {fileID: 11400000, guid: 5a1a7285ca3cc6342a475a52830132df, type: 2}
   - {fileID: 11400000, guid: 6ddc831c26bf1ba468c4cbac81c33e18, type: 2}
+  active: 0
+  index_of_material: 2
+  active_mat: {fileID: 0}
+  inactive_mat: {fileID: 0}
+  sound_effect: {fileID: 2312515853737920592, guid: 1f3e8766b78ceb448bc6733b70db7d32,
+    type: 3}
+  rend: {fileID: 0}
 --- !u!114 &4445803464193567816
 MonoBehaviour:
   m_ObjectHideFlags: 0
