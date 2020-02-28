@@ -13,7 +13,7 @@ public class Item : ScriptableObject
     public Sprite icon = null;
     public int damage;
     public bool hasDurability;
-    public int durability = 1000;//max durability na itemu. staticno - mora bit
+    public float Max_durability = 1000;//max durability na itemu. staticno - mora bit
     public int stackSize = 100;
     public int capacity;
     public float damage_reduction = 0;
@@ -30,4 +30,6 @@ public class Item : ScriptableObject
     public bool ignorePlacementNormal;
     public SnappableType PlacementType;
     public SnappableType[] blocks_placements;
+    public bool needs_upkeep;
+    public PredmetRecepie recepie;
 }

@@ -36,7 +36,7 @@ public class NetworkContainer_items : NetworkContainerItemsBehavior
             this.predmeti[i] = null;
     }
 
-    internal void Remove(Item item, int q)
+    internal bool Remove(Item item, int q)
     {
         //zarad craftingstationa moramo met logiko da pobere samo del stacka in ne celega.
 
@@ -56,10 +56,11 @@ public class NetworkContainer_items : NetworkContainerItemsBehavior
                     else
                     {//poberemo samo del stacka in smo zakljucli
                         this.predmeti[i].quantity -= q;
-                        return;
+                        return true ;
                     }
                 }
         }
+        return q == 0;
     }
 
     public Predmet getPredmet(int index) {

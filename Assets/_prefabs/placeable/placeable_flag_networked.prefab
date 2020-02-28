@@ -372,10 +372,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2b298bb46440e6f49a63781f93d94be4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  item: {fileID: 11400000, guid: 7b6cef5e3ac88614497c526b0f21c56e, type: 2}
+  creator: 0
   distanceForSnappingHandling: 0.05
   snappableType: 12
   attachmentPoints: []
+  upkeep_flag: {fileID: 0}
 --- !u!114 &5173460654324167942
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -395,6 +396,11 @@ MonoBehaviour:
   try_flag: 0
   authorized_players: 
   owner: 0
+  placeables_for_upkeep: []
+  wood: {fileID: 11400000, guid: 46a13300836ed05499f0beab60b8f4bf, type: 2}
+  stone: {fileID: 11400000, guid: 70201cfae2de73b48963ec5e984cc33d, type: 2}
+  iron: {fileID: 11400000, guid: 2463247dc12a18c4ebeccee73c7c78d6, type: 2}
+  gold: {fileID: 11400000, guid: c5482efa8eff23c42b29ea35a798ac6d, type: 2}
 --- !u!114 &2309376783101275181
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -407,6 +413,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 15a5a74b6bfcb274aaae3bf41df9e564, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  original_material: {fileID: 0}
 --- !u!1 &4116918404208757100
 GameObject:
   m_ObjectHideFlags: 0

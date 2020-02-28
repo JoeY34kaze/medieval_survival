@@ -246,7 +246,7 @@ public class NetworkCraftingStation : NetworkCraftingStationBehavior
             int q = p.ingredient_quantities[i];//tolkle moramo zbrisat iz nekje
             this.container.Remove(p.ingredients[i], q);
         }
-        Predmet the_baby = new Predmet(p.Product, p.final_quantity, p.Product.durability, this.p.creator);
+        Predmet the_baby = new Predmet(p.Product, p.final_quantity, p.Product.Max_durability, this.p.creator);
         this.container.try_to_add_predmet(the_baby);//POSLJE TUD POTREBNI NETWORKUPDATE
     }
 

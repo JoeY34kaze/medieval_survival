@@ -43,7 +43,7 @@ public abstract class InventorySlot : MonoBehaviour
             if (this.durability_bar != null)
             {
                 this.durability_bar.transform.parent.gameObject.SetActive(true);
-                this.durability_bar.fillAmount = p.durability / p.item.durability;
+                this.durability_bar.fillAmount = p.current_durabilty / p.item.Max_durability;
             }
         }
         else {

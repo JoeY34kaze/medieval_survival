@@ -17,9 +17,9 @@ MonoBehaviour:
   icon: {fileID: 21300000, guid: 411c1ef1a67a85b488b547312d34571d, type: 3}
   damage: 0
   hasDurability: 1
-  durability: 1000
+  Max_durability: 1000
   stackSize: 100
-  backpack_capacity: 0
+  capacity: 0
   damage_reduction: 0
   id: 51
   prefab_pickup: {fileID: 4344458020859959958, guid: 4d857fb3f3804e540b9c4ac4ce5da7b1,
@@ -37,3 +37,5 @@ MonoBehaviour:
   ignorePlacementNormal: 1
   PlacementType: 1
   blocks_placements: 0100000002000000
+  needs_upkeep: 1
+  recepie: {fileID: 11400000, guid: ec6c0d647de33bd488f9a25875f0f37d, type: 2}

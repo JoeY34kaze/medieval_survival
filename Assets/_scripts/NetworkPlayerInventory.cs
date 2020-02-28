@@ -508,7 +508,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         {
             while (pobran_objekt.quantity > pobran_objekt.item.stackSize)
             {
-                Predmet k = new Predmet(pobran_objekt.item, pobran_objekt.item.stackSize, pobran_objekt.durability, pobran_objekt.creator);
+                Predmet k = new Predmet(pobran_objekt.item, pobran_objekt.item.stackSize, pobran_objekt.current_durabilty, pobran_objekt.creator);
                 pobran_objekt.quantity -= pobran_objekt.item.stackSize;
                 handleItemPickup(k, true);
             }
@@ -2238,7 +2238,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
             int q = p.ingredient_quantities[i];//tolkle moramo zbrisat iz nekje
             DeleteIngredients(p.ingredients[i], q);
         }
-        Predmet a_baby = new Predmet(p.Product, p.final_quantity, p.Product.durability, stats.playerName);
+        Predmet a_baby = new Predmet(p.Product, p.final_quantity, p.Product.Max_durability, stats.playerName);
         handleItemPickup(a_baby);//POSLJE TUD POTREBNI NETWORKUPDATE
     }
 

@@ -59,7 +59,7 @@ public class AttachmentPoint : MonoBehaviour
 
     internal void attachTryReverse(GameObject gameObject)
     {
-        Item i = gameObject.GetComponent<NetworkPlaceable>().item;
+        Item i = gameObject.GetComponent<NetworkPlaceable>().p.item;
         attach(gameObject);
 
         //poiskat vse valid attachemnt pointe in izbrat najblizjo

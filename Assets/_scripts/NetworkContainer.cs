@@ -14,6 +14,17 @@ public class NetworkContainer : NetworkContainerBehavior
     protected Predmet p;
 
 
+    internal bool Remove(Item i, int amount)
+    {
+        if (this.nci.containsAmount(i, amount))
+        {
+            return this.nci.Remove(i, amount);
+
+        }
+        return false;
+    }
+
+
     #region RPC
 
     protected override void NetworkStart()
@@ -38,11 +49,7 @@ public class NetworkContainer : NetworkContainerBehavior
         
     }
 
-    internal void Remove(Item i,int q)
-    {
-        this.nci.Remove(i, q);
 
-    }
     public void interact()
     {
         Debug.Log("Interacting. this is it");

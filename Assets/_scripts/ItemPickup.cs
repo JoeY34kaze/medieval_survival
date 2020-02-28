@@ -52,12 +52,12 @@ public class ItemPickup : Interactable {
         if(this.local_lock==null)this.local_lock = GetComponent<InteractableLocalLock>();
         if (local_lock.item_allows_interaction)
         {
-            Debug.Log("Sending from local object to server for aprooval");
+            //Debug.Log("Sending from local object to server for aprooval");
             networkObject.SendRpc(RPC_HANDLE_ITEM_PICKUP_SERVER_SIDE, Receivers.Server);
             local_lock.setupInteractionLocalLock();
         }
         else {
-            Debug.Log("Cannot interact with the object because you interacted recently or server disallowed it.");
+            //Debug.Log("Cannot interact with the object because you interacted recently or server disallowed it.");
         }
     }
 
@@ -184,14 +184,14 @@ public class ItemPickup : Interactable {
         {
             Predmet k = Predmet.createNewPredmet(args.GetNext<string>());
             this.p = k;
-            Debug.Log("predmer on pickup set to " + p.item.Display_name);
+            //Debug.Log("predmer on pickup set to " + p.item.Display_name);
         }
     }
 
     public override void setMaterialGlow()
     {
         if (this.renderers == null) this.renderers = GetComponentsInChildren<MeshRenderer>();
-        Debug.Log("adding glow to pickup");
+        //Debug.Log("adding glow to pickup");
         if(this.initialized)
             for(int i=0;i<this.renderers.Length;i++)
                 this.renderers[i].material = this.glow;
@@ -200,7 +200,7 @@ public class ItemPickup : Interactable {
     public override void resetMaterial()
     {
         if (this.renderers == null) this.renderers = GetComponentsInChildren<MeshRenderer>();
-        Debug.Log("resetting materials ");
+        //Debug.Log("resetting materials ");
         for (int i = 0; i < this.renderers.Length; i++)
             this.renderers[i].material = this.original_materials[i];
     }

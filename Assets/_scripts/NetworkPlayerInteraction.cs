@@ -232,14 +232,14 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
         }
     }
 
-    private void local_guild_flag_toggle_authorized_request(GameObject gameObject)
+    private void local_guild_flag_toggle_authorized_request(GameObject flag)
     {
-        throw new NotImplementedException();
+        flag.GetComponent<NetworkGuildFlag>().local_flag_toggle_authorized_request();
     }
 
-    private void local_guild_flag_open_request(GameObject gameObject)
+    private void local_guild_flag_open_request(GameObject flag)
     {
-        throw new NotImplementedException();
+        flag.GetComponent<NetworkContainer>().local_open_container_request();
     }
 
     private bool time_passed_interaction(float limit)

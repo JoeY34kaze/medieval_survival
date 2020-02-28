@@ -304,7 +304,7 @@ public class Interactable_radial_menu : MonoBehaviour
             show_menu(target);
             this.number_of_elements = 5;
             menu.angleOffset = (360f / this.number_of_elements);
-            center_label.text = target.GetComponent<NetworkPlaceable>().item.Display_name;
+            center_label.text = target.GetComponent<NetworkPlaceable>().p.item.Display_name;
 
             GameObject btn_0_r = Resources.Load<GameObject>("radial_menu_elements/interaction_flag_open");
             GameObject btn_1_r = Resources.Load<GameObject>("radial_menu_elements/interaction_clear_all");
@@ -349,7 +349,7 @@ public class Interactable_radial_menu : MonoBehaviour
             show_menu(target);
             this.number_of_elements = 1;
             menu.angleOffset = (360f / this.number_of_elements);
-            center_label.text = target.GetComponent<NetworkPlaceable>().item.Display_name;
+            center_label.text = target.GetComponent<NetworkPlaceable>().p.item.Display_name;
 
             GameObject btn_0_r = Resources.Load<GameObject>("radial_menu_elements/interaction_authorize");
            
@@ -372,7 +372,7 @@ public class Interactable_radial_menu : MonoBehaviour
         show_menu(target);
         this.number_of_elements = 3;
         menu.angleOffset = (360f / this.number_of_elements);
-        center_label.text = target.GetComponent<NetworkPlaceable>().item.Display_name;
+        center_label.text = target.GetComponent<NetworkPlaceable>().p.item.Display_name;
 
         GameObject btn_0_r = Resources.Load<GameObject>("radial_menu_elements/interaction_chest_open");
         GameObject btn_1_r = Resources.Load<GameObject>("radial_menu_elements/interaction_player_steal");

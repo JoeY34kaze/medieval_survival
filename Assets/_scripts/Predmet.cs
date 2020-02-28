@@ -11,8 +11,9 @@ public class Predmet
     public Item item;
     public int quantity=1;
     //public string creator;
-    public int durability;
+    public float current_durabilty;
     public string creator = "some schmuk";
+    public int tier = 0;
     public Predmet(Item i) {
         this.item = i;
         this.quantity = 1;
@@ -23,17 +24,17 @@ public class Predmet
         this.quantity = quantity;
     }
 
-    public Predmet(Item i, int quantity, int durability) {
+    public Predmet(Item i, int quantity, float durability) {
         this.item = i;
         this.quantity = quantity;
-        this.durability = durability;
+        this.current_durabilty = durability;
     }
 
-    public Predmet(Item i, int quantity, int durability, string creator)
+    public Predmet(Item i, int quantity, float durability, string creator)
     {
         this.item = i;
         this.quantity = quantity;
-        this.durability = durability;
+        this.current_durabilty = durability;
         this.creator = creator;
     }
 
@@ -43,7 +44,7 @@ public class Predmet
     /// <returns></returns>
     internal string toNetworkString()
     {
-        return this.item.id + "," + this.quantity + "," + this.durability + "," + this.creator;
+        return this.item.id + "," + this.quantity + "," + this.current_durabilty + "," + this.creator;
     }
 
     /// <summary>
@@ -57,7 +58,7 @@ public class Predmet
 
         this.item = Mapper.instance.getItemById(Int32.Parse(parametri[0]));
         this.quantity = Int32.Parse(parametri[1]);
-        this.durability = Int32.Parse(parametri[2]);
+        this.current_durabilty = Int32.Parse(parametri[2]);
         this.creator = parametri[3];
     }
 

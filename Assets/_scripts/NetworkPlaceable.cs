@@ -15,9 +15,6 @@ public class NetworkPlaceable : NetworkPlaceableBehavior
     private uint creator;
 
     [SerializeField]
-    public Item item;
-
-    [SerializeField]
     private float distanceForSnappingHandling = 0.05f;
 
     public Predmet p;
@@ -29,7 +26,9 @@ public class NetworkPlaceable : NetworkPlaceableBehavior
 
     [SerializeField]
     internal NetworkGuildFlag upkeep_flag;
+    private int tier = 0;
 
+    
     public void init(Predmet p, uint creator)
     {
         this.attachmentPoints = GetComponentsInChildren<AttachmentPoint>();
@@ -68,6 +67,27 @@ public class NetworkPlaceable : NetworkPlaceableBehavior
         //vrne playerja, ki je postavil ta objekt. naceloma se klice samo na serverju imo
         return this.creator;
         
+    }
+
+    internal void on_upkeep_pay() {
+        Debug.Log("Paying upkeep for " + this.p.item.Display_name);
+        if (this.upkeep_flag == null || !this.upkeep_flag.pay_upkeep_for(this))//ce ni flaga ali pa placevanje upkeepa faila
+            take_damage((int)this.p.item.Max_durability / 24);
+    }
+
+    private void take_damage(int d) {
+        this.p.current_durabilty -= d;
+        if (this.p.current_durabilty <= 0)
+            handle_object_destruction();
+    }
+
+    private void handle_object_destruction() {
+        //p0ohendlat attached objekte in podobne reči.
+
+        Debug.LogWarning("This object should have been destroyed but there is no code yet.");
+
+
+
     }
 
     public override void NetworkPlaceableAttachmentRequest(RpcArgs args)
@@ -129,7 +149,7 @@ public class NetworkPlaceable : NetworkPlaceableBehavior
         if (all_AttachmentPoints == null) return;
         all_AttachmentPoints = removeTakenAttachmentPoints(all_AttachmentPoints);
         if (all_AttachmentPoints == null) return;
-        all_AttachmentPoints = removeNotValidSnappableTypeAttachmentPoints(all_AttachmentPoints, this.item.blocks_placements);
+        all_AttachmentPoints = removeNotValidSnappableTypeAttachmentPoints(all_AttachmentPoints, this.p.item.blocks_placements);
 
         foreach (AttachmentPoint p in all_AttachmentPoints) {
 

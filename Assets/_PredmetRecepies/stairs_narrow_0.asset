@@ -16,6 +16,7 @@ MonoBehaviour:
   final_quantity: 1
   ingredients:
   - {fileID: 11400000, guid: 46a13300836ed05499f0beab60b8f4bf, type: 2}
-  ingredient_quantities: 32000000
+  ingredient_quantities: 4b000000
   tier: 0
   crafting_time: 1
+  craftable_by_player: 1

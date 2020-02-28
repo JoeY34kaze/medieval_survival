@@ -27,6 +27,12 @@ public class NetworkGuildFlag : NetworkLandClaimObjectBehavior
 
     public List<NetworkPlaceable> placeables_for_upkeep;
 
+    private float upkeep_rate=0.5f; //% per tick
+
+    public Item wood;
+    public Item stone;
+    public Item iron;
+    public Item gold;
 
     private void Start()
     {
@@ -88,6 +94,52 @@ public class NetworkGuildFlag : NetworkLandClaimObjectBehavior
         this.flag_rend.material.mainTexture = user_texture;           // put the new image into the current material as defuse material for testing.
         this.flag_texture = user_texture;
         local_send_flag_texture_to_server();
+    }
+
+    internal bool pay_upkeep_for(NetworkPlaceable p)
+    {
+        //upkeep 
+        //vzel bomo prvo vrednost iz arraya recepta. recept za placeable iteme bo zmer biu samo wood - kolicina. kaj se placa je odvisn od tiera objekta.
+        //t0 -wood
+        //w1 - stone -> iron
+        if (p.p.item.recepie.ingredient_quantities.Length < 1) return true;
+        int cost = p.p.item.recepie.ingredient_quantities[0];
+        cost = (int)(cost * upkeep_rate);
+
+        //upkeep resourcov
+        switch (p.p.tier) {
+            case 0:
+                if (!remove_from_container(this.wood, cost)) return false;
+                break;
+            case 1:
+                if (!remove_from_container(this.stone, cost)) return false;
+                break;
+            case 2:
+                if (!remove_from_container(this.iron, cost)) return false;
+                break;
+            case 3:
+                if (!remove_from_container(this.iron, 2*cost)) return false;
+                break;
+            case 4:
+                if (!remove_from_container(this.iron, 4*cost)) return false;
+                break;
+            default:
+                break;
+        }
+        //upkeep golda
+        if (!remove_from_container(this.gold, p.p.tier * cost / 5)) return false;
+        return true;
+    }
+
+    /// <summary>
+    /// returns false if not enough resources
+    /// </summary>
+    /// <param name="i"></param>
+    /// <param name="amount"></param>
+    /// <returns></returns>
+    private bool remove_from_container(Item i, int amount) {
+        return GetComponent<NetworkContainer>().Remove(i, amount);
+        
     }
 
     public Texture2D get_random_texture()
