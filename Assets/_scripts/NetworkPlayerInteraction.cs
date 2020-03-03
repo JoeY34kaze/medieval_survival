@@ -26,6 +26,8 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
 
     public GameObject[] alert_world_prefab;
 
+    public NetworkPlaceable current_placeable_for_durability_lookup = null;
+
     public Greyman.OffScreenIndicator offscreen_indicator;//kupljen asset
     private void Start()
     {
@@ -70,6 +72,8 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
         //if (Input.GetButton("Interact")) return;
         //if(mapper==null)mapper = GameObject.Find("Mapper").GetComponent<Mapper>();
 
+        
+
         if (player_cam == null)
         {
             setup_player_cam();
@@ -87,139 +91,152 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
             {
                 Debug.DrawRay(player_cam.position, player_cam.forward * 10, Color.blue);
                 //Debug.Log("raycast : "+hit.collider.name);
-                Interactable interactable = hit.collider.GetComponent<Interactable>();
-                if (interactable == null) interactable = hit.collider.GetComponentInParent<Interactable>();//je collider popravlen zarad neujemanja pivota ker je blender ziva nocna mora
-                if (interactable != null)
-                {
-                    //izriši eno obrobo al pa nekej samo tolk da player vidi da lahko z stvarjo eventualno interacta?
-                    /*
-                 */
-                    if (hit.distance <= radius)
+
+                if (is_holding_a_repair_hammer())
+                {//repair hammer -> disable interaction
+                    if (hit.collider.gameObject.GetComponent<NetworkPlaceable>() != null)
+                        setup_placeable_for_durability_lookup(hit.collider.gameObject.GetComponent<NetworkPlaceable>());
+                    else
+                        clear_placeable_for_durability_lookup();
+                }
+                else {//navadna interakcija
+                    clear_placeable_for_durability_lookup();
+
+                    Interactable interactable = hit.collider.GetComponent<Interactable>();
+                    if (interactable == null) interactable = hit.collider.GetComponentInParent<Interactable>();//je collider popravlen zarad neujemanja pivota ker je blender ziva nocna mora
+                    if (interactable != null)
                     {
+                        //izriši eno obrobo al pa nekej samo tolk da player vidi da lahko z stvarjo eventualno interacta?
                         /*
-                         Izsis se kaj dodatnega da bo vedu da lohko direkt pobere - glow?
-
-                         */
-                        if (interactable is Interactable_parenting_fix) { interactable = ((Interactable_parenting_fix)(interactable)).parent_interactable; }//tole je zato da se pohendla ce colliderja nimamo na prvem objektu ampak je nizje u hierarhiji. recimo za vrata
-
-
-                        if ((interactable is Interactable_chest || interactable is ItemPickup || interactable is Interactable_door || interactable is Interactable_trap || interactable is Interactable_crafting_station || interactable is Interactable_guild_flag) && interactable != this.recent_interactable)
+                     */
+                        if (hit.distance <= radius)
                         {
-                            interactable.setMaterialGlow();
-                            if (this.recent_interactable != null)
-                                this.recent_interactable.resetMaterial();
-                            this.recent_interactable = interactable;
-                        }
+                            /*
+                             Izsis se kaj dodatnega da bo vedu da lohko direkt pobere - glow?
+
+                             */
+                            if (interactable is Interactable_parenting_fix) { interactable = ((Interactable_parenting_fix)(interactable)).parent_interactable; }//tole je zato da se pohendla ce colliderja nimamo na prvem objektu ampak je nizje u hierarhiji. recimo za vrata
 
 
-                        if (Input.GetButtonDown("Interact") && this.time_pressed_interaction == 0f && !(Input.GetButton("Alert") || this.time_pressed_alert > 0))
-                        {
-
-                            TimeSpan diff = DateTime.Now - baseDate;
-                            this.time_pressed_interaction = diff.TotalMilliseconds;
-                        }
-                        else if (Input.GetButtonUp("Interact") && this.time_pressed_interaction > 0 && !(Input.GetButton("Alert") || this.time_pressed_alert > 0))
-                        {
-
-                            Debug.Log("quick press");
-                            this.time_pressed_interaction = 0;
-                            //Debug.Log("quick press" + (time_released - this.time_pressed));
-                            if (interactable is ItemPickup)//pobere item
-                                interactable.Interact();
-
-                            if (interactable is Interactable_Backpack)//pobere backpack
-                                                                      //this.menu.show_backpack_interaction_menu(interactable.gameObject);
-                                interactable.GetComponent<NetworkBackpack>().local_player_equip_request();
-
-                            if (interactable is Interactible_ArmorStand)
+                            if ((interactable is Interactable_chest || interactable is ItemPickup || interactable is Interactable_door || interactable is Interactable_trap || interactable is Interactable_crafting_station || interactable is Interactable_guild_flag) && interactable != this.recent_interactable)
                             {
-                                ((Interactible_ArmorStand)interactable).local_player_interaction_swap_request(stats.Get_server_id());
+                                interactable.setMaterialGlow();
+                                if (this.recent_interactable != null)
+                                    this.recent_interactable.resetMaterial();
+                                this.recent_interactable = interactable;
                             }
 
-                            if (interactable is Interactable_door)
-                                interactable.localPlayer_interaction_request(0);
 
-                            if (interactable is Interactable_chest)
-                                local_chest_open_request(interactable.gameObject);
-
-                            if (interactable is Interactable_crafting_station)
-                                local_crafting_station_open_inventory_request(interactable.gameObject);
-
-                            if (interactable is Interactable_guild_flag)
-                                if (interactable.GetComponent<NetworkGuildFlag>().is_player_authorized(networkObject.Owner.NetworkId))
-                                    local_guild_flag_open_request(interactable.gameObject);
-                                else
-                                    local_guild_flag_toggle_authorized_request(interactable.gameObject);
-
-                        }
-                        else if (Input.GetButton("Interact") && this.time_pressed_interaction > 0 && time_passed_interaction(150f) && !(Input.GetButton("Alert") || this.time_pressed_alert > 0))
-                        {
-                            this.time_pressed_interaction = 0;
-                            //long hold - odpri radial menu
-                            Debug.Log("long hold");
-                            Debug.Log("Interacting with " + hit.collider.name + " with distance of " + hit.distance);
-                            if (!stats.downed && !stats.dead)//ce je prayer ziv
+                            if (Input.GetButtonDown("Interact") && this.time_pressed_interaction == 0f && !(Input.GetButton("Alert") || this.time_pressed_alert > 0))
                             {
-                                // -----------------------------------------    Inventory item / weapon /gear ---------------------------------------------------
-                                if (interactable is ItemPickup)
-                                    interactable.Interact();//full inventory se mora handlat drugje
-                                                                           //-------------------------------------------  player ---------------------------------------------------------------
-                                if (interactable is Interactable_player)
-                                {
-                                    if (!interactable.transform.root.Equals(transform))//ce nismo raycastal samo nase ( recimo ce smo gledal dol na lastno nogo/roko al pa kej
-                                        this.menu.show_player_interaction_menu(interactable.gameObject);
-                                }
-                                //-----------------------------------------------------ARMOR STAND-------------------------------
+
+                                TimeSpan diff = DateTime.Now - baseDate;
+                                this.time_pressed_interaction = diff.TotalMilliseconds;
+                            }
+                            else if (Input.GetButtonUp("Interact") && this.time_pressed_interaction > 0 && !(Input.GetButton("Alert") || this.time_pressed_alert > 0))
+                            {
+
+                                Debug.Log("quick press");
+                                this.time_pressed_interaction = 0;
+                                //Debug.Log("quick press" + (time_released - this.time_pressed));
+                                if (interactable is ItemPickup)//pobere item
+                                    interactable.Interact();
+
+                                if (interactable is Interactable_Backpack)//pobere backpack
+                                                                          //this.menu.show_backpack_interaction_menu(interactable.gameObject);
+                                    interactable.GetComponent<NetworkBackpack>().local_player_equip_request();
+
                                 if (interactable is Interactible_ArmorStand)
                                 {
-                                    this.menu.show_ArmorStand_interaction_menu(interactable.gameObject);
+                                    ((Interactible_ArmorStand)interactable).local_player_interaction_swap_request(stats.Get_server_id());
                                 }
-                                if (interactable is Interactable_Backpack)
-                                    this.menu.show_backpack_interaction_menu(interactable.gameObject);
+
+                                if (interactable is Interactable_door)
+                                    interactable.localPlayer_interaction_request(0);
 
                                 if (interactable is Interactable_chest)
-                                    this.menu.show_chest_interaction_menu(interactable.gameObject);
-                                
-                                if (interactable is Interactable_trap)
-                                    this.menu.show_trap_interaction_menu(interactable.gameObject);
+                                    local_chest_open_request(interactable.gameObject);
 
                                 if (interactable is Interactable_crafting_station)
-                                    this.menu.show_craftingStation_menu(interactable.gameObject);
+                                    local_crafting_station_open_inventory_request(interactable.gameObject);
 
                                 if (interactable is Interactable_guild_flag)
-                                    this.menu.show_flag_menu(interactable.gameObject, interactable.GetComponent<NetworkGuildFlag>().is_player_authorized(networkObject.Owner.NetworkId));
+                                    if (interactable.GetComponent<NetworkGuildFlag>().is_player_authorized(networkObject.Owner.NetworkId))
+                                        local_guild_flag_open_request(interactable.gameObject);
+                                    else
+                                        local_guild_flag_toggle_authorized_request(interactable.gameObject);
 
+                            }
+                            else if (Input.GetButton("Interact") && this.time_pressed_interaction > 0 && time_passed_interaction(150f) && !(Input.GetButton("Alert") || this.time_pressed_alert > 0))
+                            {
+                                this.time_pressed_interaction = 0;
+                                //long hold - odpri radial menu
+                                Debug.Log("long hold");
+                                Debug.Log("Interacting with " + hit.collider.name + " with distance of " + hit.distance);
+                                if (!stats.downed && !stats.dead)//ce je prayer ziv
+                                {
+                                    // -----------------------------------------    Inventory item / weapon /gear ---------------------------------------------------
+                                    if (interactable is ItemPickup)
+                                        interactable.Interact();//full inventory se mora handlat drugje
+                                                                //-------------------------------------------  player ---------------------------------------------------------------
+                                    if (interactable is Interactable_player)
+                                    {
+                                        if (!interactable.transform.root.Equals(transform))//ce nismo raycastal samo nase ( recimo ce smo gledal dol na lastno nogo/roko al pa kej
+                                            this.menu.show_player_interaction_menu(interactable.gameObject);
+                                    }
+                                    //-----------------------------------------------------ARMOR STAND-------------------------------
+                                    if (interactable is Interactible_ArmorStand)
+                                    {
+                                        this.menu.show_ArmorStand_interaction_menu(interactable.gameObject);
+                                    }
+                                    if (interactable is Interactable_Backpack)
+                                        this.menu.show_backpack_interaction_menu(interactable.gameObject);
+
+                                    if (interactable is Interactable_chest)
+                                        this.menu.show_chest_interaction_menu(interactable.gameObject);
+
+                                    if (interactable is Interactable_trap)
+                                        this.menu.show_trap_interaction_menu(interactable.gameObject);
+
+                                    if (interactable is Interactable_crafting_station)
+                                        this.menu.show_craftingStation_menu(interactable.gameObject);
+
+                                    if (interactable is Interactable_guild_flag)
+                                        this.menu.show_flag_menu(interactable.gameObject, interactable.GetComponent<NetworkGuildFlag>().is_player_authorized(networkObject.Owner.NetworkId));
+
+                                }
                             }
                         }
                     }
-                }
-                else
-                {
-                    if (this.recent_interactable != null)
-                        this.recent_interactable.resetMaterial();
-                    this.recent_interactable = null;
-                }
+                    else
+                    {
+                        if (this.recent_interactable != null)
+                            this.recent_interactable.resetMaterial();
+                        this.recent_interactable = null;
+                    }
 
-                // ------------------- za alerte 
-                if (Input.GetButtonDown("Alert") && this.time_pressed_alert == 0f && !(Input.GetButton("Interact") || this.time_pressed_interaction > 0))
-                {
-                    TimeSpan diff = DateTime.Now - baseDate;
-                    this.time_pressed_alert = diff.TotalMilliseconds;
-                    Debug.Log("ALERT start");
+                    // ------------------- za alerte 
+                    if (Input.GetButtonDown("Alert") && this.time_pressed_alert == 0f && !(Input.GetButton("Interact") || this.time_pressed_interaction > 0))
+                    {
+                        TimeSpan diff = DateTime.Now - baseDate;
+                        this.time_pressed_alert = diff.TotalMilliseconds;
+                        Debug.Log("ALERT start");
+                    }
+                    else if (Input.GetButtonUp("Alert") && this.time_pressed_alert > 0 && !(Input.GetButton("Interact") || this.time_pressed_interaction > 0))
+                    {
+                        this.time_pressed_alert = 0;
+                        Debug.Log("ALERT quick");
+                        local_send_alert(hit.point, 1);
+                    }
+                    else if (Input.GetButton("Alert") && this.time_pressed_alert > 0 && time_passed_alert(150f) && !(Input.GetButton("Interact") || this.time_pressed_interaction > 0))
+                    {
+                        this.time_pressed_alert = 0;
+                        Debug.Log("ALERT long");
+                        this.menu.show_alert_menu(hit.point);
+                    }
+                    //----------------- konc alertov
+
                 }
-                else if (Input.GetButtonUp("Alert") && this.time_pressed_alert > 0 && !(Input.GetButton("Interact") || this.time_pressed_interaction > 0))
-                {
-                    this.time_pressed_alert = 0;
-                    Debug.Log("ALERT quick");
-                    local_send_alert(hit.point, 1);
-                }
-                else if (Input.GetButton("Alert") && this.time_pressed_alert > 0 && time_passed_alert(150f) && !(Input.GetButton("Interact") || this.time_pressed_interaction > 0))
-                {
-                    this.time_pressed_alert = 0;
-                    Debug.Log("ALERT long");
-                    this.menu.show_alert_menu(hit.point);
-                }
-                //----------------- konc alertov
             }
             else
             {
@@ -230,6 +247,32 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
         {
             this.menu.hide_radial_menu();
         }
+    }
+
+
+    private void clear_placeable_for_durability_lookup()
+    {
+        if (this.current_placeable_for_durability_lookup != null)
+        {
+            this.current_placeable_for_durability_lookup = null;
+            gameObject.GetComponentInChildren<UILogic>().clear_placeable_durability_lookup();
+        }
+    }
+
+    private void setup_placeable_for_durability_lookup(NetworkPlaceable p)
+    {
+        if (this.current_placeable_for_durability_lookup == p || p==null) {
+                return;
+        }
+
+        this.current_placeable_for_durability_lookup = p;
+        gameObject.GetComponentInChildren<UILogic>().setup_placeable_durability_lookup(p);
+        p.local_player_predmet_update_request();
+    }
+
+    private bool is_holding_a_repair_hammer()
+    {
+        return GetComponentInChildren(typeof(repair_hammer_collider_handler),true).gameObject.activeInHierarchy;
     }
 
     private void local_guild_flag_toggle_authorized_request(GameObject flag)

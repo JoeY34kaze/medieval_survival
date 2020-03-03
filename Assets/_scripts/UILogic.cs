@@ -16,6 +16,7 @@ public class UILogic : MonoBehaviour
     public GameObject crafting_panel;
     public GameObject chatInput;
     public GameObject containerPanel;
+    public GameObject panel_durability;
 
     public bool hasOpenWindow=false;
     private NetworkGuildManager ngm;
@@ -26,7 +27,15 @@ public class UILogic : MonoBehaviour
     public GameObject container_panel_40_slots;
     public GameObject container_panel_80_slots;
 
+    public GameObject container_panel_10_slots_with_upkeep;
+
+    public Text wood_upkeep_label;
+    public Text stone_upkeep_label;
+    public Text iron_upkeep_label;
+    public Text gold_upkeep_label;
+
     public NetworkContainer currently_openened_container = null;
+    public NetworkPlaceable placeable_for_durability_check = null;
 
     private GameObject active_container_panel;
     public GameObject[] panelsPredmetiContainer;
@@ -70,7 +79,7 @@ public class UILogic : MonoBehaviour
         if (Input.GetButtonDown("Guild") && !chatInput.GetComponent<InputField>().isFocused)
         {
             bool was_active = this.GuildPanel.activeSelf;
-            clear();
+            ClearAll();
             if (was_active)
             {
             }
@@ -85,7 +94,7 @@ public class UILogic : MonoBehaviour
         if (Input.GetButtonDown("Inventory") && !chatInput.GetComponent<InputField>().isFocused)
         {
             bool was_active = this.inventoryPanel.activeSelf;
-            clear();
+            ClearAll();
             if (was_active)
             {
             }
@@ -101,7 +110,7 @@ public class UILogic : MonoBehaviour
         if (Input.GetButtonDown("Crafting") && !chatInput.GetComponent<InputField>().isFocused)
         {
             bool was_active = this.crafting_panel.activeSelf;
-            clear();
+            ClearAll();
             if (was_active)
             {
                 //nc
@@ -118,7 +127,7 @@ public class UILogic : MonoBehaviour
     private void handleEscapePressed()
     {
         //ce je odprto ksno okno ga zapri, sicer prikaz main menu
-        if (this.hasOpenWindow) clear();
+        if (this.hasOpenWindow) ClearAll();
         else { Application.Quit(); }//prikazat main menu
     }
 
@@ -134,7 +143,7 @@ public class UILogic : MonoBehaviour
             GetComponentInParent<NetworkPlayerMovement>().lockMovement = false;
         }
         else {
-            clear();
+            ClearAll();
         }
 
     }
@@ -150,7 +159,7 @@ public class UILogic : MonoBehaviour
         Cursor.visible = false;
     }
 
-    public void clear() {
+    public void ClearAll() {
         this.inventoryPanel.SetActive(false);
         this.guildModificationPanel.SetActive(false);
         if (this.GuildPanel.activeSelf) ngm.SetMemberPanel(false);
@@ -164,6 +173,8 @@ public class UILogic : MonoBehaviour
 
         this.allows_UI_opening = false;
         this.currently_openened_container = null;
+
+        clear_placeable_durability_lookup();
 
         NetworkGuildManager.Instance.SetMemberPanel(false);
 
@@ -189,6 +200,7 @@ public class UILogic : MonoBehaviour
                 this.active_container_panel.SetActive(false);
                 this.active_container_panel = null;
                 this.panelsPredmetiContainer = null;
+                clear_upkeep_values();
             }
         this.currentActiveContainer = null;
     }
@@ -230,19 +242,61 @@ public class UILogic : MonoBehaviour
 
     }
 
+
+    internal void setContainerPanelActiveForFlagContainer(Predmet[] predmeti, int a, int b, int c,int d )
+    {
+        if (this.active_container_panel == null)//ce je samo updejt itemov skipamo inicializacijo panele
+        {
+            showInventory();
+            this.containerPanel.SetActive(true);
+            this.panelsPredmetiContainer = new GameObject[predmeti.Length];
+            
+            this.active_container_panel = this.container_panel_10_slots_with_upkeep;
+            
+            this.active_container_panel.SetActive(true);
+
+            for (int i = 0; i < this.active_container_panel.transform.childCount; i++)//hacky
+            {
+                if(this.active_container_panel.transform.GetChild(i).gameObject.GetComponent<InventorySlotContainer>()!=null)
+                    this.panelsPredmetiContainer[i] = this.active_container_panel.transform.GetChild(i).gameObject;
+            }
+        }
+        update_upkeep_values(a,b,c,d);
+        UpdateActiveChestPanel(predmeti);
+        
+
+    }
+
+    private void update_upkeep_values(int a, int b, int c, int d) {
+        this.wood_upkeep_label.text = "× " + a;
+        this.stone_upkeep_label.text = "× " + b;
+        this.iron_upkeep_label.text = "× " + c;
+        this.gold_upkeep_label.text = "× " + d;
+    }
+    private void clear_upkeep_values() {
+        this.wood_upkeep_label.text = "×: " + 0;
+        this.stone_upkeep_label.text = "×: " + 0;
+        this.iron_upkeep_label.text = "×: " + 0;
+        this.gold_upkeep_label.text = "×: " + 0;
+    }
+
+
     private void UpdateActiveChestPanel(Predmet[] predmeti)
     {
+  
         if (this.active_container_panel != null)
-            for (int i = 0; i < this.active_container_panel.transform.childCount; i++) {
-                this.panelsPredmetiContainer[i].GetComponent<InventorySlotContainer>().AddPredmet(predmeti[i]);
+            for (int i = 0; i < this.panelsPredmetiContainer.Length; i++) {
+                if(this.panelsPredmetiContainer[i].GetComponent<InventorySlotContainer>()!=null)
+                    this.panelsPredmetiContainer[i].GetComponent<InventorySlotContainer>().AddPredmet(predmeti[i]);
             }
     }
 
     private void clearChestPanelPredmeti() {
         if (this.active_container_panel != null)
-            for (int i = 0; i < this.active_container_panel.transform.childCount; i++)
+            for (int i = 0; i < this.panelsPredmetiContainer.Length; i++)
             {
-                this.panelsPredmetiContainer[i].GetComponent<InventorySlotContainer>().AddPredmet(null);
+                if (this.panelsPredmetiContainer[i].GetComponent<InventorySlotContainer>() != null)
+                    this.panelsPredmetiContainer[i].GetComponent<InventorySlotContainer>().AddPredmet(null);
             }
     }
 
@@ -252,11 +306,28 @@ public class UILogic : MonoBehaviour
     }
 
     public void OnGuildModificationButtonClick() {
-        clear();
+        ClearAll();
         enableMouse();
         NetworkGuildManager.Instance.OnButtonModifyClick();
         
     }
 
+    internal void setup_placeable_durability_lookup(NetworkPlaceable p)
+    {
+        this.placeable_for_durability_check = p;//samo anredi referenco da jo lahko primerja, ko dobi odgovor z serverja
+    }
 
+    internal void clear_placeable_durability_lookup()
+    {
+        this.placeable_for_durability_check = null;
+        this.panel_durability.SetActive(false);
+    }
+
+    internal void try_drawing_durability_for_placeable(NetworkPlaceable p)
+    {
+        if (this.placeable_for_durability_check == p) {
+            this.panel_durability.SetActive(true);
+            this.panel_durability.GetComponentInChildren<Text>().text = "" + p.p.current_durabilty + " / " + p.p.item.Max_durability;
+        }
+    }
 }

@@ -4,8 +4,8 @@ using UnityEngine;
 
 namespace BeardedManStudios.Forge.Networking.Generated
 {
-	[GeneratedRPC("{\"types\":[[\"int\", \"int\"][\"int\", \"int\"][\"int\", \"int\"][\"int\", \"int\"][\"int\", \"int\"][\"int\", \"int\"][\"int\", \"int\"][\"int\", \"int\"][][][\"int\", \"string\"][\"int\", \"int\"][\"int\"]]")]
-	[GeneratedRPCVariableNames("{\"types\":[[\"p\", \"c\"][\"c\", \"p\"][\"b\", \"c\"][\"c\", \"b\"][\"b\", \"c\"][\"c\", \"b\"][\"l\", \"c\"][\"c\", \"l\"][][][\"succ\", \"items\"][\"f\", \"t\"][\"index\"]]")]
+	[GeneratedRPC("{\"types\":[[\"int\", \"int\"][\"int\", \"int\"][\"int\", \"int\"][\"int\", \"int\"][\"int\", \"int\"][\"int\", \"int\"][\"int\", \"int\"][\"int\", \"int\"][][][\"int\", \"string\"][\"int\", \"int\"][\"int\"][\"int\", \"string\", \"int\", \"int\", \"int\", \"int\"]]")]
+	[GeneratedRPCVariableNames("{\"types\":[[\"p\", \"c\"][\"c\", \"p\"][\"b\", \"c\"][\"c\", \"b\"][\"b\", \"c\"][\"c\", \"b\"][\"l\", \"c\"][\"c\", \"l\"][][][\"succ\", \"items\"][\"f\", \"t\"][\"index\"][\"succ\", \"items\", \"wood_upkeep\", \"stone_upkeep\", \"iron_upkeep\", \"gold_upkeep\"]]")]
 	public abstract partial class NetworkContainerBehavior : NetworkBehavior
 	{
 		public const byte RPC_PERSONAL_TO_CONTAINER = 0 + 5;
@@ -21,6 +21,7 @@ namespace BeardedManStudios.Forge.Networking.Generated
 		public const byte RPC_OPEN_RESPONSE = 10 + 5;
 		public const byte RPC_CONTAINER_TO_CONTAINER = 11 + 5;
 		public const byte RPC_DROP_ITEM = 12 + 5;
+		public const byte RPC_OPEN_RESPONSE_WITH_UPKEEP = 13 + 5;
 		
 		public NetworkContainerNetworkObject networkObject = null;
 
@@ -47,6 +48,7 @@ namespace BeardedManStudios.Forge.Networking.Generated
 			networkObject.RegisterRpc("openResponse", openResponse, typeof(int), typeof(string));
 			networkObject.RegisterRpc("ContainerToContainer", ContainerToContainer, typeof(int), typeof(int));
 			networkObject.RegisterRpc("dropItem", dropItem, typeof(int));
+			networkObject.RegisterRpc("openResponseWithUpkeep", openResponseWithUpkeep, typeof(int), typeof(string), typeof(int), typeof(int), typeof(int), typeof(int));
 
 			networkObject.onDestroy += DestroyGameObject;
 
@@ -191,6 +193,10 @@ namespace BeardedManStudios.Forge.Networking.Generated
 		/// Arguments:
 		/// </summary>
 		public abstract void dropItem(RpcArgs args);
+		/// <summary>
+		/// Arguments:
+		/// </summary>
+		public abstract void openResponseWithUpkeep(RpcArgs args);
 
 		// DO NOT TOUCH, THIS GETS GENERATED PLEASE EXTEND THIS CLASS IF YOU WISH TO HAVE CUSTOM CODE ADDITIONS
 	}

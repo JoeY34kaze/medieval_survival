@@ -29,7 +29,7 @@ TagManager:
   - world_model
   - Resource
   - Placeable_local
-  - 
+  - ignore_slope_for_walking
   - 
   - 
   - 

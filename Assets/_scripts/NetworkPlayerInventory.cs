@@ -107,6 +107,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         if (networkObject.IsOwner) UpdateUI();//bugfix
     }
 
+
     // Update the inventory UI by:
     //		- Adding items
     //		- Clearing empty slots
@@ -2351,6 +2352,18 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
             if (GetComponentInChildren<UILogic>().currently_openened_container.Equals(container))
             {
                 GetComponentInChildren<UILogic>().setContainerPanelActiveForContainer(predmeti);
+                GetComponentInChildren<UILogic>().setCurrentActiveContainer(container);
+            }
+        }
+    }
+
+    internal void onContainerOpenWithUpkeep(NetworkContainer container, Predmet[] predmeti, int a,int b, int c, int d)
+    {
+        if (GetComponentInChildren<UILogic>().allows_UI_opening)
+        {
+            if (GetComponentInChildren<UILogic>().currently_openened_container.Equals(container))
+            {
+                GetComponentInChildren<UILogic>().setContainerPanelActiveForFlagContainer(predmeti, a,b,c,d);
                 GetComponentInChildren<UILogic>().setCurrentActiveContainer(container);
             }
         }

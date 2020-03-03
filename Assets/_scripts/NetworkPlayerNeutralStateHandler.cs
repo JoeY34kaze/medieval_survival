@@ -451,6 +451,7 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
         }
         return kandidat;
     }
+    
     /// <summary>
     /// vrne true ce je izbran tool u roki. neglede kdo klice
     /// </summary>
@@ -458,14 +459,13 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
     private bool hasToolSelected()
     {
         foreach (Transform t in this.toolContainerOnHand) {
-            if (t.gameObject.activeSelf && t.GetComponent<gathering_tool_collider_handler>() != null) {
-                //ce ima to skripto nalimano pomen da je tool
+            if (t.gameObject.activeSelf && is_tool(t)) {
                 return true;
             }
         }
         return false;
     }
-
+    
 
     /// <summary>
     /// 1,2,3,4,5,6,7,8,9,0 - tko kot so na tipkovnci!
@@ -740,29 +740,57 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
 
     private void SetToolSelected(Predmet i) {
         this.activeTool = i;
-        gathering_tool_collider_handler temp;
+        gathering_tool_collider_handler temp = null;
         foreach (Transform child in this.toolContainerOnHand)
         {
-            temp = child.GetComponent<gathering_tool_collider_handler>();
-            if (temp.item != null)
+            if (is_gathering_tool(child))
             {
-                if (i != null)
+                temp = child.GetComponent<gathering_tool_collider_handler>();
+                if (temp.item != null)
                 {
-                    if (temp.item.id == i.item.id)
+                    if (i != null)
                     {
-                        child.gameObject.SetActive(true);
+                        if (temp.item.id == i.item.id)
+                        {
+                            child.gameObject.SetActive(true);
+                        }
+                        else
+                        {
+                            child.gameObject.SetActive(false);
+                        }
                     }
                     else
-                    {
+                    {//i == null ->clear all
                         child.gameObject.SetActive(false);
                     }
                 }
-                else
-                {//i == null ->clear all
-                    child.gameObject.SetActive(false);
+            }
+            else if (is_repair_hammer(child)) {
+                repair_hammer_collider_handler hammer = child.GetComponent<repair_hammer_collider_handler>();
+                if (hammer.item != null)
+                {
+                    if (i != null)
+                    {
+                        if (hammer.item.id == i.item.id)
+                        {
+                            child.gameObject.SetActive(true);
+                        }
+                        else
+                        {
+                            child.gameObject.SetActive(false);
+                        }
+                    }
+                    else
+                    {//i == null ->clear all
+                        child.gameObject.SetActive(false);
+                    }
                 }
             }
         }
+
+
+
+
     }
 
     /// <summary>
@@ -879,7 +907,7 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
     private GameObject getCurrentTool() {
         foreach (Transform t in this.toolContainerOnHand)
         {
-            if (t.gameObject.activeSelf && t.GetComponent<gathering_tool_collider_handler>() != null)
+            if (t.gameObject.activeSelf &&  is_tool(t))
             {
                  return t.gameObject;
             }
@@ -887,6 +915,19 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
         return null;
 
 
+    }
+
+    internal bool is_tool(Transform t) {
+        return is_gathering_tool(t) || is_repair_hammer(t);
+    }
+
+    internal bool is_gathering_tool(Transform t) {
+        return t.GetComponent<gathering_tool_collider_handler>() != null;
+    }
+
+    internal bool is_repair_hammer(Transform t)
+    {
+        return t.GetComponent<repair_hammer_collider_handler>() != null;
     }
 
     /// <summary>

@@ -131,6 +131,71 @@ public class NetworkGuildFlag : NetworkLandClaimObjectBehavior
         return true;
     }
 
+    private int[] get_upkeep_for_single_block_per_tick(NetworkPlaceable p) {
+
+        int[] r = new int[4];//wood,stone,iron,gold
+        for (int i = 0; i < r.Length; i++) r[i] = 0;
+        int cost = p.p.item.recepie.ingredient_quantities[0];
+        cost = (int)(cost * upkeep_rate);
+
+        switch (p.p.tier)
+        {
+            case 0:
+                r[0]+= cost;
+                break;
+            case 1:
+                r[1] += cost;
+                break;
+            case 2:
+                r[2] += cost;
+                break;
+            case 3:
+                r[2] += 2*cost;
+                break;
+            case 4:
+                r[2] += 4*cost;
+                break;
+            default:
+                break;
+        }
+        r[3] += p.p.tier * cost / 5;
+
+        return r;
+    }
+
+    internal int[] get_upkeep_for_24h()
+    {
+        int[] r = new int[4];
+
+        r = get_upkeep_for_single_tick();
+        for (int i = 0; i < r.Length; i++) {
+            r[i] = r[i] * 24;
+        }
+        return r;
+    }
+
+    private int[] get_upkeep_for_single_tick()
+    {
+        int[] r = new int[4];//wood, stone, iron, gold
+        for (int i = 0; i < r.Length; i++) r[i] = 0;
+
+        foreach (NetworkPlaceable p in this.placeables_for_upkeep) {
+                if (p.p.item.needs_upkeep)
+                {
+                    int[] s = get_upkeep_for_single_block_per_tick(p);
+                    for (int i = 0; i < r.Length; i++) {
+                        r[i] += s[i];
+                    }
+                }
+        }
+        return r;
+    }
+
+    private bool is_in_range(NetworkGuildFlag f, NetworkPlaceable p)
+    {
+        throw new NotImplementedException();
+    }
+
     /// <summary>
     /// returns false if not enough resources
     /// </summary>

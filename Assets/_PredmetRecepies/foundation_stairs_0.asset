@@ -14,8 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Product: {fileID: 11400000, guid: 4acd4ff1836730744aa50c5507e8dbb4, type: 2}
   final_quantity: 1
-  ingredients:
-  - {fileID: 11400000, guid: 46a13300836ed05499f0beab60b8f4bf, type: 2}
-  ingredient_quantities: c8000000
+  ingredients: []
+  ingredient_quantities: 
   tier: 0
   crafting_time: 1
+  craftable_by_player: 1

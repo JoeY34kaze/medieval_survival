@@ -23,6 +23,7 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
     [Header("---! Layers !---")]
     [Tooltip("Layers that the character can walk on")]
     public LayerMask groundLayer = 1 << 0;
+    public LayerMask groundLayerForSliding;
     [Tooltip("Distance to became not grounded")]
     [SerializeField]
     protected float groundMinDistance = 0.2f;
@@ -468,7 +469,7 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
         RaycastHit hitinfo;
         Ray ray = new Ray(transform.position, -transform.up);
 
-        if (Physics.Raycast(ray, out hitinfo, 1f, groundLayer))
+        if (Physics.Raycast(ray, out hitinfo, 1f, groundLayerForSliding))
         {
             groundAngleTwo = Vector3.Angle(Vector3.up, hitinfo.normal);
         }

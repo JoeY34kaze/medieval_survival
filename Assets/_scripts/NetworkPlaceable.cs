@@ -26,9 +26,10 @@ public class NetworkPlaceable : NetworkPlaceableBehavior
 
     [SerializeField]
     internal NetworkGuildFlag upkeep_flag;
-    private int tier = 0;
 
-    
+    public static float repair_rate=0.1f;
+    public static readonly float max_distance_for_durability_check = 5f;
+
     public void init(Predmet p, uint creator)
     {
         this.attachmentPoints = GetComponentsInChildren<AttachmentPoint>();
@@ -271,5 +272,54 @@ public class NetworkPlaceable : NetworkPlaceableBehavior
                 if (attachmentPoint.allowed_attachment_types[j] == blocks_placements[i])
                     return true;
         return false;
+    }
+
+    internal void durability_repair_request_server()//durability se nebo prenašal na cliente. client ne rabi vedt za vsak block kolk ima lajfa skos. to se mu pošle na začetku pa ce pogleda na block z hammerjem v roki
+    {
+        if (networkObject.IsServer) {
+            if (is_allowed_to_be_repaired()) {
+                if (burn_resources_for_repair())
+                    this.p.current_durabilty += this.p.item.Max_durability * NetworkPlaceable.repair_rate;
+                if (this.p.current_durabilty > this.p.item.Max_durability) this.p.current_durabilty = this.p.item.Max_durability;
+            }
+        }
+    }
+
+
+    private bool burn_resources_for_repair() {
+        Debug.LogWarning("not implemented yet, - burning resources for repair");
+        return true;
+    }
+
+    internal bool is_allowed_to_be_repaired() {
+        Debug.LogWarning("not implemented yet, - checking is it is being raided");
+        return true;
+    }
+
+    public override void ClientDurabilityRequest(RpcArgs args)
+    {
+        if (networkObject.IsServer) {
+            //tole bi lahko naredil brez enega network calla. da se direkt chekira na serverju pa samo pošilja playerju mogoce
+            GameObject p = FindByid(args.Info.SendingPlayer.NetworkId);
+            if (p != null)
+                if (Vector3.Distance(p.transform.position, transform.position) < NetworkPlaceable.max_distance_for_durability_check)
+                {
+                    networkObject.SendRpc(args.Info.SendingPlayer, RPC_SERVER_UPDATE_PREDMET, this.p.toNetworkString());
+                }
+        }
+    }
+
+    public override void ServerUpdatePredmet(RpcArgs args)
+    {
+        if (args.Info.SendingPlayer.IsHost) {
+            string pred = args.GetNext<String>();
+            this.p.setParametersFromNetworkString(pred);
+            FindByid(networkObject.MyPlayerId).GetComponentInChildren<UILogic>().try_drawing_durability_for_placeable(this);
+        }
+    }
+
+    internal void local_player_predmet_update_request()
+    {
+        networkObject.SendRpc(RPC_CLIENT_DURABILITY_REQUEST, Receivers.Server);
     }
 }

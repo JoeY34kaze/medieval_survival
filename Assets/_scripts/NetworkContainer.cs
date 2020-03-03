@@ -113,6 +113,9 @@ public class NetworkContainer : NetworkContainerBehavior
 
             if (isPlayerAuthorizedToOpen(args.Info.SendingPlayer.NetworkId))
             {
+                if (this.is_with_upkeep()) {
+                    this.send_rpc_response_with_upkeep_cost(args);
+                }else
                 networkObject.SendRpc(args.Info.SendingPlayer, RPC_OPEN_RESPONSE, 1, this.nci.getItemsNetwork());//ta metoda se klice tudi v vsakmu tipu requesta za manipulacijo z itemi
             }
             else
@@ -120,6 +123,20 @@ public class NetworkContainer : NetworkContainerBehavior
                 networkObject.SendRpc(args.Info.SendingPlayer, RPC_OPEN_RESPONSE, 0, "-1");
             }
         }
+    }
+
+    private void send_rpc_response_with_upkeep_cost(RpcArgs args)
+    {
+        if (gameObject.GetComponent<NetworkGuildFlag>() != null)
+        {
+            int[] a = gameObject.GetComponent<NetworkGuildFlag>().get_upkeep_for_24h();
+            networkObject.SendRpc(args.Info.SendingPlayer, RPC_OPEN_RESPONSE_WITH_UPKEEP, 1, this.nci.getItemsNetwork(), a[0], a[1], a[2], a[3]);
+        }
+        
+    }
+
+    private bool is_with_upkeep() {
+        return gameObject.GetComponent<NetworkGuildFlag>() != null;
     }
 
     internal void send_container_update_crafting_station() {
@@ -138,8 +155,16 @@ public class NetworkContainer : NetworkContainerBehavior
         return this.nci.isEmpty();
     }
 
-    private bool isPlayerAuthorizedToOpen(uint networkId)
+    private bool isPlayerAuthorizedToOpen(uint id)
     {
+
+        //what kind of container is this?
+        NetworkGuildFlag f = gameObject.GetComponent<NetworkGuildFlag>();
+        if (f != null) {
+            return f.is_player_authorized(id);
+        }
+
+
         Debug.LogWarning("no security");
         return true;
     }
@@ -159,7 +184,28 @@ public class NetworkContainer : NetworkContainerBehavior
             }
             else
             {//fail - nismo authorized al pa kej tazga
-                FindByid(networkObject.Networker.Me.NetworkId).GetComponentInChildren<UILogic>().clear();//da se miska zbrise
+                FindByid(networkObject.Networker.Me.NetworkId).GetComponentInChildren<UILogic>().ClearAll();//da se miska zbrise
+            }
+        }
+    }
+
+    //za flag trenutno
+    public override void openResponseWithUpkeep(RpcArgs args)
+    {
+        if (args.Info.SendingPlayer.NetworkId == 0)
+        {
+            if (args.GetNext<int>() == 1)
+            {
+                Predmet[] predmeti = this.nci.parseItemsNetworkFormat(args.GetNext<string>());
+                int a = args.GetNext<int>();
+                int b = args.GetNext<int>();
+                int c = args.GetNext<int>();
+                int d = args.GetNext<int>();
+                FindByid(networkObject.Networker.Me.NetworkId).GetComponent<NetworkPlayerInventory>().onContainerOpenWithUpkeep(this, predmeti, a,b,c,d);
+            }
+            else
+            {//fail - nismo authorized al pa kej tazga
+                FindByid(networkObject.Networker.Me.NetworkId).GetComponentInChildren<UILogic>().ClearAll();//da se miska zbrise
             }
         }
     }

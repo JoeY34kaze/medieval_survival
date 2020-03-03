@@ -149,10 +149,11 @@ public class NetworkContainer_items : NetworkContainerItemsBehavior
     internal bool containsAmount(Item i, int amount) {
         int q = 0;
         foreach (Predmet p in this.predmeti)
-            if (p.item.id == i.id) q += p.quantity;
+            if(p!=null)
+                if (p.item.id == i.id) q += p.quantity;
         return (q >= amount) ? true : false;
     }
-
+    /*
     internal bool contains(int id, int amount)
     {
         if (!networkObject.IsServer) return false;
@@ -161,7 +162,7 @@ public class NetworkContainer_items : NetworkContainerItemsBehavior
         return false;
 
     }
-
+    */
     internal void setAll(Predmet[] all) {//tle se nekje zabugga in jih posle 21!
         if (this.predmeti.Length == all.Length || !networkObject.IsServer)
             this.predmeti = all;
