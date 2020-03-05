@@ -330,4 +330,11 @@ public class UILogic : MonoBehaviour
             this.panel_durability.GetComponentInChildren<Text>().text = "" + p.p.current_durabilty + " / " + p.p.item.Max_durability;
         }
     }
+
+    internal void clear_durability_panel_for_placeable(NetworkPlaceable p)
+    {
+        if (this.placeable_for_durability_check == p) {
+            clear_placeable_durability_lookup();
+        }
+    }
 }

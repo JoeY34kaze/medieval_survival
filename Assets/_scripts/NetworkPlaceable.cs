@@ -12,7 +12,7 @@ using BeardedManStudios.Forge.Networking;
 public class NetworkPlaceable : NetworkPlaceableBehavior
 {
     [SerializeField]
-    private uint creator;
+    private uint player_who_placed_this;
 
     [SerializeField]
     private float distanceForSnappingHandling = 0.05f;
@@ -37,14 +37,24 @@ public class NetworkPlaceable : NetworkPlaceableBehavior
     private void Start()
     {
         this.gibs = GetComponentInChildren<gibs_handler>(true);
+         
     }
 
-    public void init(Predmet p, uint creator)
+    protected override void NetworkStart()
+    {
+        base.NetworkStart();
+        if (networkObject.IsServer)
+        {
+            networkObject.TakeOwnership();//server prevzame ownership
+        }
+    }
+
+    public void init(Predmet p, uint player_who_placed_this)
     {
         this.attachmentPoints = GetComponentsInChildren<AttachmentPoint>();
 
         this.p = p;
-        this.creator = creator;
+        this.player_who_placed_this = player_who_placed_this;
         //server mu nastavi vse stvari k jih rab nastavt ob instanciaciji objekta.
         if (GetComponent<NetworkGuildFlag>() != null) GetComponent<NetworkGuildFlag>().init();
         if (GetComponent<NetworkContainer>() != null) GetComponent<NetworkContainer>().init(this.p);
@@ -78,7 +88,7 @@ public class NetworkPlaceable : NetworkPlaceableBehavior
     internal uint get_creator()
     {
         //vrne playerja, ki je postavil ta objekt. naceloma se klice samo na serverju imo
-        return this.creator;
+        return this.player_who_placed_this;
         
     }
 
@@ -88,23 +98,47 @@ public class NetworkPlaceable : NetworkPlaceableBehavior
             take_damage((int)this.p.item.Max_durability / 24);
     }
 
+    internal void take_weapon_damage(Predmet p) {
+        if (p == null)
+        {
+            Debug.LogWarning("weapon predmet is null!");
+            take_damage(250);
+        }
+        else
+            take_damage(p.item.damage);
+    }
+
     private void take_damage(int d) {
-        this.p.current_durabilty -= d;
-        if (this.p.current_durabilty <= 0)
-            handle_object_destruction();
+        if (networkObject.IsServer)
+        {
+            this.p.current_durabilty -= d;
+            send_update_to_all_nearby();
+            if (this.p.current_durabilty <= 0)
+                handle_object_destruction();
+        }
     }
 
     internal void handle_object_destruction() {
-        //p0ohendlat attached objekte in podobne reči.
+        if (networkObject.IsServer)
+        {
+            //p0ohendlat attached objekte in podobne reči.
 
-        Debug.LogWarning("This object should have been destroyed but there is no code yet.");
-        if (!this.gibs.gameObject.activeSelf) this.gibs.gameObject.SetActive(true);
-        this.gibs.enableGibs();
 
-        if (networkObject != null)
-            networkObject.Destroy();
-        else
-            Destroy(gameObject);
+            todo
+            //treba je nrdit subscriberja na ondestroyed event indexer to kodok je tle not dat ke u tisto metodo. tle samo klicemo networkobject.destroy in se potem na vsah playerjih izvede koda za gibs pa ui brisat za durability..
+
+
+            ///
+
+            Debug.LogWarning("This object should have been destroyed but there is no code yet.");
+            if (!this.gibs.gameObject.activeSelf) this.gibs.gameObject.SetActive(true);
+            this.gibs.enableGibs();
+
+            if (networkObject != null)
+                networkObject.Destroy();
+            else
+                Destroy(gameObject);
+        }
     }
 
     public override void NetworkPlaceableAttachmentRequest(RpcArgs args)
@@ -241,21 +275,6 @@ public class NetworkPlaceable : NetworkPlaceableBehavior
         return null;
     }
 
-    protected override void NetworkStart()
-    {
-        base.NetworkStart();
-        if (networkObject.IsServer)
-        {
-            networkObject.TakeOwnership();//server prevzame ownership
-
-
-            /*
-         networking sinhronizacija...... kaj se nrdi ob connectu, kko poupdejtamo med clienti pa take fore    
-         
-         */
-        }
-    }
-
     public List<AttachmentPoint> getAttachmentPointsForType(Item.SnappableType s) {
         List<AttachmentPoint> r = new List<AttachmentPoint>();
         foreach (AttachmentPoint t in this.attachmentPoints) {
@@ -312,11 +331,10 @@ public class NetworkPlaceable : NetworkPlaceableBehavior
         return true;
     }
 
-    private void end_update_to_all_nearby() {
+    private void send_update_to_all_nearby() {
         GameObject temp=null;
         lock (myNetWorker.Players)
         {
-
             myNetWorker.IteratePlayers((player) =>
             {
                 temp = FindByid(player.NetworkId);
@@ -353,8 +371,15 @@ public class NetworkPlaceable : NetworkPlaceableBehavior
         }
     }
 
+    private BeardedManStudios.Forge.Networking.NetWorker.BaseNetworkEvent clear_potential_ui_durability_panel() {
+        FindByid(networkObject.MyPlayerId).GetComponentInChildren<UILogic>().clear_durability_panel_for_placeable(this);
+        return null;
+    }
+
     internal void local_player_predmet_update_request()
     {
         networkObject.SendRpc(RPC_CLIENT_DURABILITY_REQUEST, Receivers.Server);
     }
+
+
 }

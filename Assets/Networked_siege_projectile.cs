@@ -11,6 +11,10 @@ public class Networked_siege_projectile : NetworkedSiegeProjectileBehavior
     private Predmet p;
     private local_siege_projectile local_projectile;
 
+    internal void init(Predmet p) {
+        this.p = p;
+    }
+
     private void Start()
     {
         this.local_projectile = GetComponent<local_siege_projectile>();
@@ -41,15 +45,18 @@ public class Networked_siege_projectile : NetworkedSiegeProjectileBehavior
 
     void OnCollisionEnter(Collision collisionInfo)
     {
-       
-        print("Detected collision between " + gameObject.name + " and " + collisionInfo.collider.name);
-        print("There are " + collisionInfo.contacts.Length + " point(s) of contacts");
-        print("Their relative velocity is " + collisionInfo.relativeVelocity);
+        if (networkObject.IsServer)
+        {
+            print("Detected collision between " + gameObject.name + " and " + collisionInfo.collider.name);
+            print("There are " + collisionInfo.contacts.Length + " point(s) of contacts");
+            print("Their relative velocity is " + collisionInfo.relativeVelocity);
 
-        this.local_projectile.handle_on_hit_effects();
-        Debug.LogWarning("DEBUG CODE!");
-        if (collisionInfo.collider.gameObject.GetComponent<NetworkPlaceable>() != null) {
-            collisionInfo.collider.gameObject.GetComponent<NetworkPlaceable>().handle_object_destruction();
+            this.local_projectile.handle_on_hit_effects();
+            Debug.LogWarning("DEBUG CODE!");
+            if (collisionInfo.collider.gameObject.GetComponent<NetworkPlaceable>() != null)
+            {
+                collisionInfo.collider.gameObject.GetComponent<NetworkPlaceable>().take_weapon_damage(this.p);
+            }
         }
     }
 

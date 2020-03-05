@@ -941,8 +941,9 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
     }
 
     internal bool is_repair_hammer_active() {
-
-        return is_repair_hammer(getCurrentTool().transform);
+        if(getCurrentTool()!=null)
+            return is_repair_hammer(getCurrentTool().transform);
+        return false;
     }
 
     /// <summary>
