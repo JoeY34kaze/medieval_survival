@@ -40,6 +40,7 @@ public class NetworkPlaceable : NetworkPlaceableBehavior
          
     }
 
+
     protected override void NetworkStart()
     {
         base.NetworkStart();
@@ -118,28 +119,7 @@ public class NetworkPlaceable : NetworkPlaceableBehavior
         }
     }
 
-    internal void handle_object_destruction() {
-        if (networkObject.IsServer)
-        {
-            //p0ohendlat attached objekte in podobne reči.
 
-
-            todo
-            //treba je nrdit subscriberja na ondestroyed event indexer to kodok je tle not dat ke u tisto metodo. tle samo klicemo networkobject.destroy in se potem na vsah playerjih izvede koda za gibs pa ui brisat za durability..
-
-
-            ///
-
-            Debug.LogWarning("This object should have been destroyed but there is no code yet.");
-            if (!this.gibs.gameObject.activeSelf) this.gibs.gameObject.SetActive(true);
-            this.gibs.enableGibs();
-
-            if (networkObject != null)
-                networkObject.Destroy();
-            else
-                Destroy(gameObject);
-        }
-    }
 
     public override void NetworkPlaceableAttachmentRequest(RpcArgs args)
     {
@@ -371,15 +351,33 @@ public class NetworkPlaceable : NetworkPlaceableBehavior
         }
     }
 
-    private BeardedManStudios.Forge.Networking.NetWorker.BaseNetworkEvent clear_potential_ui_durability_panel() {
+    private void clear_potential_ui_durability_panel() {
         FindByid(networkObject.MyPlayerId).GetComponentInChildren<UILogic>().clear_durability_panel_for_placeable(this);
-        return null;
-    }
+          }
+
+   
 
     internal void local_player_predmet_update_request()
     {
         networkObject.SendRpc(RPC_CLIENT_DURABILITY_REQUEST, Receivers.Server);
     }
 
+    private void OnDestroy()
+    {
+        if (!this.gibs.gameObject.activeSelf) this.gibs.gameObject.SetActive(true);
+        this.gibs.enableGibs();
+        clear_potential_ui_durability_panel();
+    }
 
+
+    /// <summary>
+    /// klice lahko samo host. ubije objekt
+    /// </summary>
+    internal void handle_object_destruction()
+    {
+        if (networkObject.IsServer)
+        {
+            networkObject.Destroy();
+        }
+    }
 }
