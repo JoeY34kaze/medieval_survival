@@ -27,8 +27,17 @@ public class NetworkPlaceable : NetworkPlaceableBehavior
     [SerializeField]
     internal NetworkGuildFlag upkeep_flag;
 
+    private NetWorker myNetWorker;
+
+    private gibs_handler gibs;
+
     public static float repair_rate=0.1f;
     public static readonly float max_distance_for_durability_check = 5f;
+
+    private void Start()
+    {
+        this.gibs = GetComponentInChildren<gibs_handler>(true);
+    }
 
     public void init(Predmet p, uint creator)
     {
@@ -42,7 +51,10 @@ public class NetworkPlaceable : NetworkPlaceableBehavior
         if (GetComponent<NetworkCraftingStation>() != null) GetComponent<NetworkCraftingStation>().init(this.p);
 
         if (networkObject.IsServer)
+        {
+            myNetWorker = GameObject.Find("NetworkManager(Clone)").GetComponent<NetworkManager>().Networker;
             attach_land_claim_object();
+        }
     }
 
     private void attach_land_claim_object() {
@@ -82,13 +94,17 @@ public class NetworkPlaceable : NetworkPlaceableBehavior
             handle_object_destruction();
     }
 
-    private void handle_object_destruction() {
+    internal void handle_object_destruction() {
         //p0ohendlat attached objekte in podobne reči.
 
         Debug.LogWarning("This object should have been destroyed but there is no code yet.");
+        if (!this.gibs.gameObject.activeSelf) this.gibs.gameObject.SetActive(true);
+        this.gibs.enableGibs();
 
-
-
+        if (networkObject != null)
+            networkObject.Destroy();
+        else
+            Destroy(gameObject);
     }
 
     public override void NetworkPlaceableAttachmentRequest(RpcArgs args)
@@ -295,6 +311,25 @@ public class NetworkPlaceable : NetworkPlaceableBehavior
         Debug.LogWarning("not implemented yet, - checking is it is being raided");
         return true;
     }
+
+    private void end_update_to_all_nearby() {
+        GameObject temp=null;
+        lock (myNetWorker.Players)
+        {
+
+            myNetWorker.IteratePlayers((player) =>
+            {
+                temp = FindByid(player.NetworkId);
+                if (Vector3.Distance(temp.transform.position, transform.position)<=NetworkPlaceable.max_distance_for_durability_check && temp.GetComponent<NetworkPlayerNeutralStateHandler>().is_repair_hammer_active()) //passive target
+                {
+                    networkObject.SendRpc(player, RPC_SERVER_UPDATE_PREDMET, this.p.toNetworkString());
+                }
+            });
+
+        }
+    }
+
+
 
     public override void ClientDurabilityRequest(RpcArgs args)
     {

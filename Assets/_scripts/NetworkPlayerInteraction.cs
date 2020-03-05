@@ -94,7 +94,7 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
 
                 if (is_holding_a_repair_hammer())
                 {//repair hammer -> disable interaction
-                    if (hit.collider.gameObject.GetComponent<NetworkPlaceable>() != null)
+                    if (hit.collider.gameObject.GetComponent<NetworkPlaceable>() != null && Vector3.Distance(transform.position, hit.collider.transform.position)<NetworkPlaceable.max_distance_for_durability_check)
                         setup_placeable_for_durability_lookup(hit.collider.gameObject.GetComponent<NetworkPlaceable>());
                     else
                         clear_placeable_for_durability_lookup();

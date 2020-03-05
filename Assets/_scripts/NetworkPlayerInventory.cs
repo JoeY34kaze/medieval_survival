@@ -373,6 +373,8 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
     }
 
 
+
+
     /// <summary>
     /// proba upgrejdat loadout z itemom i. vrne item i ce ni upgrade. vrne item s katermu ga je zamenov ce je upgrade bil, vrne null ce je biu prazn slot prej
     /// </summary>

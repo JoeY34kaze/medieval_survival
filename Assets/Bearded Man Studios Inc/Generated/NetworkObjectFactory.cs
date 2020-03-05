@@ -63,6 +63,10 @@ namespace BeardedManStudios.Forge.Networking.Generated
 						availableCallback = true;
 						obj = new NetworkCraftingStationNetworkObject(networker, id, frame);
 						break;
+					case NetworkedSiegeProjectileNetworkObject.IDENTITY:
+						availableCallback = true;
+						obj = new NetworkedSiegeProjectileNetworkObject(networker, id, frame);
+						break;
 					case NetworkGuildManagerNetworkObject.IDENTITY:
 						availableCallback = true;
 						obj = new NetworkGuildManagerNetworkObject(networker, id, frame);

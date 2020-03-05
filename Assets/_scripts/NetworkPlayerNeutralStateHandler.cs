@@ -832,9 +832,12 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
     {
         foreach (Transform t in this.toolContainerOnHand)
         {
-            if (t.gameObject.activeSelf && t.GetComponent<gathering_tool_collider_handler>() != null)
+            if (t.gameObject.activeSelf && is_tool(t))
             {
-                return t.GetComponent<gathering_tool_collider_handler>().item;
+                if(is_gathering_tool(t))
+                    return t.GetComponent<gathering_tool_collider_handler>().item;
+                else if(is_repair_hammer(t))
+                    return t.GetComponent<repair_hammer_collider_handler>().item;
             }
         }
         return null;
@@ -880,9 +883,16 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
     {
         foreach (Transform t in this.toolContainerOnHand)
         {
-            if (t.gameObject.activeSelf && t.GetComponent<gathering_tool_collider_handler>() != null)
+            if (t.gameObject.activeSelf && is_tool(t))
             {
-                if (t.GetComponent<gathering_tool_collider_handler>().item.id == item_id) return t.gameObject;
+                if (is_gathering_tool(t))
+                {
+                    if (t.GetComponent<gathering_tool_collider_handler>().item.id == item_id) return t.gameObject;
+                }
+                else if (is_repair_hammer(t))
+                {
+                    if (t.GetComponent<repair_hammer_collider_handler>().item.id == item_id) return t.gameObject;
+                }
             }
         }
         return null;
@@ -928,6 +938,11 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
     internal bool is_repair_hammer(Transform t)
     {
         return t.GetComponent<repair_hammer_collider_handler>() != null;
+    }
+
+    internal bool is_repair_hammer_active() {
+
+        return is_repair_hammer(getCurrentTool().transform);
     }
 
     /// <summary>

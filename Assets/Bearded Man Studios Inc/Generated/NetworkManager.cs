@@ -20,6 +20,7 @@ namespace BeardedManStudios.Forge.Networking.Unity
 		public GameObject[] NetworkContainerItemsNetworkObject = null;
 		public GameObject[] NetworkContainerNetworkObject = null;
 		public GameObject[] NetworkCraftingStationNetworkObject = null;
+		public GameObject[] NetworkedSiegeProjectileNetworkObject = null;
 		public GameObject[] NetworkGuildManagerNetworkObject = null;
 		public GameObject[] NetworkLandClaimObjectNetworkObject = null;
 		public GameObject[] NetworkPlaceableNetworkObject = null;
@@ -272,6 +273,29 @@ namespace BeardedManStudios.Forge.Networking.Unity
 						{
 							var go = Instantiate(NetworkCraftingStationNetworkObject[obj.CreateCode]);
 							newObj = go.GetComponent<NetworkCraftingStationBehavior>();
+						}
+					}
+
+					if (newObj == null)
+						return;
+						
+					newObj.Initialize(obj);
+
+					if (objectInitialized != null)
+						objectInitialized(newObj, obj);
+				});
+			}
+			else if (obj is NetworkedSiegeProjectileNetworkObject)
+			{
+				MainThreadManager.Run(() =>
+				{
+					NetworkBehavior newObj = null;
+					if (!NetworkBehavior.skipAttachIds.TryGetValue(obj.NetworkId, out newObj))
+					{
+						if (NetworkedSiegeProjectileNetworkObject.Length > 0 && NetworkedSiegeProjectileNetworkObject[obj.CreateCode] != null)
+						{
+							var go = Instantiate(NetworkedSiegeProjectileNetworkObject[obj.CreateCode]);
+							newObj = go.GetComponent<NetworkedSiegeProjectileBehavior>();
 						}
 					}
 
@@ -800,6 +824,18 @@ namespace BeardedManStudios.Forge.Networking.Unity
 			var netBehavior = go.GetComponent<NetworkCraftingStationBehavior>();
 			var obj = netBehavior.CreateNetworkObject(Networker, index);
 			go.GetComponent<NetworkCraftingStationBehavior>().networkObject = (NetworkCraftingStationNetworkObject)obj;
+
+			FinalizeInitialization(go, netBehavior, obj, position, rotation, sendTransform);
+			
+			return netBehavior;
+		}
+		[Obsolete("Use InstantiateNetworkedSiegeProjectile instead, its shorter and easier to type out ;)")]
+		public NetworkedSiegeProjectileBehavior InstantiateNetworkedSiegeProjectileNetworkObject(int index = 0, Vector3? position = null, Quaternion? rotation = null, bool sendTransform = true)
+		{
+			var go = Instantiate(NetworkedSiegeProjectileNetworkObject[index]);
+			var netBehavior = go.GetComponent<NetworkedSiegeProjectileBehavior>();
+			var obj = netBehavior.CreateNetworkObject(Networker, index);
+			go.GetComponent<NetworkedSiegeProjectileBehavior>().networkObject = (NetworkedSiegeProjectileNetworkObject)obj;
 
 			FinalizeInitialization(go, netBehavior, obj, position, rotation, sendTransform);
 			
@@ -1415,6 +1451,47 @@ namespace BeardedManStudios.Forge.Networking.Unity
 			}
 
 			go.GetComponent<NetworkCraftingStationBehavior>().networkObject = (NetworkCraftingStationNetworkObject)obj;
+
+			FinalizeInitialization(go, netBehavior, obj, position, rotation, sendTransform);
+			
+			return netBehavior;
+		}
+		public NetworkedSiegeProjectileBehavior InstantiateNetworkedSiegeProjectile(int index = 0, Vector3? position = null, Quaternion? rotation = null, bool sendTransform = true)
+		{
+			var go = Instantiate(NetworkedSiegeProjectileNetworkObject[index]);
+			var netBehavior = go.GetComponent<NetworkedSiegeProjectileBehavior>();
+
+			NetworkObject obj = null;
+			if (!sendTransform && position == null && rotation == null)
+				obj = netBehavior.CreateNetworkObject(Networker, index);
+			else
+			{
+				metadata.Clear();
+
+				if (position == null && rotation == null)
+				{
+					byte transformFlags = 0x1 | 0x2;
+					ObjectMapper.Instance.MapBytes(metadata, transformFlags);
+					ObjectMapper.Instance.MapBytes(metadata, go.transform.position, go.transform.rotation);
+				}
+				else
+				{
+					byte transformFlags = 0x0;
+					transformFlags |= (byte)(position != null ? 0x1 : 0x0);
+					transformFlags |= (byte)(rotation != null ? 0x2 : 0x0);
+					ObjectMapper.Instance.MapBytes(metadata, transformFlags);
+
+					if (position != null)
+						ObjectMapper.Instance.MapBytes(metadata, position.Value);
+
+					if (rotation != null)
+						ObjectMapper.Instance.MapBytes(metadata, rotation.Value);
+				}
+
+				obj = netBehavior.CreateNetworkObject(Networker, index, metadata.CompressBytes());
+			}
+
+			go.GetComponent<NetworkedSiegeProjectileBehavior>().networkObject = (NetworkedSiegeProjectileNetworkObject)obj;
 
 			FinalizeInitialization(go, netBehavior, obj, position, rotation, sendTransform);
 			

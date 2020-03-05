@@ -44,6 +44,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   allowed_attachment_types: 07000000
+  distanceForSnappingHandling: 0.05
+  blocking: 0
   attached_placeable: {fileID: 0}
 --- !u!1 &1805417395977712654
 GameObject:
@@ -74,7 +76,7 @@ Transform:
   m_GameObject: {fileID: 1805417395977712654}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 323.47968, y: 39.382854, z: 560.56244}
-  m_LocalScale: {x: 3, y: 3, z: 0.1}
+  m_LocalScale: {x: 0.1, y: 3, z: 3}
   m_Children:
   - {fileID: 6541884847683801426}
   - {fileID: 1890495656593776934}
@@ -154,8 +156,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2b298bb46440e6f49a63781f93d94be4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  creator: 0
+  distanceForSnappingHandling: 0.05
   snappableType: 3
   attachmentPoints: []
+  upkeep_flag: {fileID: 0}
 --- !u!1 &2323690305195563505
 GameObject:
   m_ObjectHideFlags: 0
@@ -200,6 +205,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   allowed_attachment_types: 06000000
+  distanceForSnappingHandling: 0.05
+  blocking: 0
   attached_placeable: {fileID: 0}
 --- !u!1 &2655355743377841507
 GameObject:
@@ -245,6 +252,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   allowed_attachment_types: 030000000400000005000000
+  distanceForSnappingHandling: 0.05
+  blocking: 0
   attached_placeable: {fileID: 0}
 --- !u!1 &6362109341589513492
 GameObject:
@@ -290,6 +299,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   allowed_attachment_types: 030000000400000005000000
+  distanceForSnappingHandling: 0.05
+  blocking: 0
   attached_placeable: {fileID: 0}
 --- !u!1 &8099553031875206581
 GameObject:
@@ -335,4 +346,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   allowed_attachment_types: 030000000400000005000000
+  distanceForSnappingHandling: 0.05
+  blocking: 0
   attached_placeable: {fileID: 0}
