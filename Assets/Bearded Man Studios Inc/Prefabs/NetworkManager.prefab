@@ -87,8 +87,10 @@ MonoBehaviour:
   NetworkContainerItemsNetworkObject: []
   NetworkContainerNetworkObject: []
   NetworkCraftingStationNetworkObject: []
+  NetworkedSiegeProjectileNetworkObject: []
   NetworkGuildManagerNetworkObject:
   - {fileID: 5449284050390073438, guid: d3a22c092c333f94e812346308e5bb63, type: 3}
+  NetworkLandClaimObjectNetworkObject: []
   NetworkPlaceableNetworkObject:
   - {fileID: 132834, guid: c005470ae31f1f146bdda4536f3e9be5, type: 3}
   - {fileID: 1805417395977712654, guid: 9b6fabd4b2753604eaf462dd7510042a, type: 3}
@@ -103,6 +105,7 @@ MonoBehaviour:
   - {fileID: 6031131577149352457, guid: f2aabc59f06798e4d9dbf6765c8a654f, type: 3}
   - {fileID: 2335539397820284529, guid: 8a09cad9e6d4fa7469c58c42b0d3ad6d, type: 3}
   - {fileID: 4116918404208757098, guid: 29c693bfbe24f3741aad183f4c608531, type: 3}
+  - {fileID: 1616697468978594, guid: dff42d25a9bec43be91dd687d17b5b68, type: 3}
   NetworkPlayerAnimationNetworkObject: []
   NetworkPlayerCameraHandlerNetworkObject: []
   NetworkPlayerCombatNetworkObject: []

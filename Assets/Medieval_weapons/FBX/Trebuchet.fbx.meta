@@ -1,0 +1,390 @@
+fileFormatVersion: 2
+guid: 27cba75a263584ba9a4bc06c3fc682f6
+timeCreated: 1574437543
+licenseType: Store
+ModelImporter:
+  serializedVersion: 22
+  fileIDToRecycleName:
+    100000: //RootNode
+    100002: bras
+    100004: cable_charge_L_filet
+    100006: cable_charge_L_filet_end
+    100008: cable_charge_R_filet
+    100010: cable_charge_R_filet_end
+    100012: cable_charge_R_goal
+    100014: cable_charge_R_goal_end
+    100016: contre_poid
+    100018: contre_poid_end
+    100020: filet_base
+    100022: fillet
+    100024: fillet.001
+    100026: fillet.002
+    100028: levie_01
+    100030: levie_01_end
+    100032: levier_02
+    100034: levier_02_end
+    100036: lock_levier_01
+    100038: lock_levier_01_end
+    100040: lock_levier_02
+    100042: lock_levier_02_end
+    100044: poulie_rappel
+    100046: poulie_rappel_end
+    100048: poulie_traction
+    100050: poulie_traction.001
+    100052: poulie_traction.001_end
+    100054: rappel_begin
+    100056: rappel_begin_end
+    100058: rappel_end
+    100060: rappel_end_end
+    100062: structure
+    100064: trebuchet_arms
+    100066: trebuchet_back_lev
+    100068: trebuchet_bag
+    100070: trebuchet_bag.001
+    100072: trebuchet_bag_base
+    100074: trebuchet_bag_stop
+    100076: trebuchet_front_lev
+    100078: trebuchet_pulley_down
+    100080: trebuchet_pulley_top
+    100082: trebuchet_rig
+    100084: trebuchet_rigid
+    100086: trebuchet_ring_metal
+    100088: trebuchet_rope_ring
+    100090: trebuchet_rope_sec
+    100092: trebuchet_rope_track
+    100094: trebuchet_rotor
+    100096: trebuchet_rotor_back
+    100098: trebuchet_rotors_axes
+    100100: trebuchet_sand_charge
+    100102: trebuchet_stair
+    100104: trebuchet_stair_poly
+    100106: trebuchet_stop
+    100108: trebuchet_structure
+    100110: trebuchet_structure sec
+    100112: trebuchet_top_rope
+    400000: //RootNode
+    400002: bras
+    400004: cable_charge_L_filet
+    400006: cable_charge_L_filet_end
+    400008: cable_charge_R_filet
+    400010: cable_charge_R_filet_end
+    400012: cable_charge_R_goal
+    400014: cable_charge_R_goal_end
+    400016: contre_poid
+    400018: contre_poid_end
+    400020: filet_base
+    400022: fillet
+    400024: fillet.001
+    400026: fillet.002
+    400028: levie_01
+    400030: levie_01_end
+    400032: levier_02
+    400034: levier_02_end
+    400036: lock_levier_01
+    400038: lock_levier_01_end
+    400040: lock_levier_02
+    400042: lock_levier_02_end
+    400044: poulie_rappel
+    400046: poulie_rappel_end
+    400048: poulie_traction
+    400050: poulie_traction.001
+    400052: poulie_traction.001_end
+    400054: rappel_begin
+    400056: rappel_begin_end
+    400058: rappel_end
+    400060: rappel_end_end
+    400062: structure
+    400064: trebuchet_arms
+    400066: trebuchet_back_lev
+    400068: trebuchet_bag
+    400070: trebuchet_bag.001
+    400072: trebuchet_bag_base
+    400074: trebuchet_bag_stop
+    400076: trebuchet_front_lev
+    400078: trebuchet_pulley_down
+    400080: trebuchet_pulley_top
+    400082: trebuchet_rig
+    400084: trebuchet_rigid
+    400086: trebuchet_ring_metal
+    400088: trebuchet_rope_ring
+    400090: trebuchet_rope_sec
+    400092: trebuchet_rope_track
+    400094: trebuchet_rotor
+    400096: trebuchet_rotor_back
+    400098: trebuchet_rotors_axes
+    400100: trebuchet_sand_charge
+    400102: trebuchet_stair
+    400104: trebuchet_stair_poly
+    400106: trebuchet_stop
+    400108: trebuchet_structure
+    400110: trebuchet_structure sec
+    400112: trebuchet_top_rope
+    2300000: trebuchet_bag
+    2300002: trebuchet_stair
+    2300004: trebuchet_stair_poly
+    3300000: trebuchet_bag
+    3300002: trebuchet_stair
+    3300004: trebuchet_stair_poly
+    4300000: trebuchet_stair_poly
+    4300002: trebuchet_bag
+    4300004: trebuchet_bag.001
+    4300006: trebuchet_bag_base
+    4300008: trebuchet_arms
+    4300010: trebuchet_sand_charge
+    4300012: trebuchet_rigid
+    4300014: trebuchet_structure
+    4300016: trebuchet_rotors_axes
+    4300018: trebuchet_structure sec
+    4300020: trebuchet_bag_stop
+    4300022: trebuchet_stop
+    4300024: trebuchet_rope_sec
+    4300026: trebuchet_rotor_back
+    4300028: trebuchet_back_lev
+    4300030: trebuchet_ring_metal
+    4300032: trebuchet_rotor
+    4300034: trebuchet_front_lev
+    4300036: trebuchet_pulley_down
+    4300038: trebuchet_pulley_top
+    4300040: trebuchet_top_rope
+    4300042: trebuchet_rope_track
+    4300044: trebuchet_rope_ring
+    4300046: trebuchet_stair
+    7400000: Trebuchet_Default
+    7400002: trebuchet_rig|PlaneAction
+    7400004: trebuchet_rig|PlaneAction.003
+    7400006: trebuchet_rig|rigid.001Action
+    7400008: Trebuchet_Default
+    7400010: trebuchet_bag|CameraAction
+    7400012: trebuchet_bag|PlaneAction
+    7400014: trebuchet_bag|PlaneAction.003
+    7400016: trebuchet_bag|rigid.001Action
+    7400018: Trebuchet_Loaded
+    7400020: Trebuchet_Shot
+    7400022: Trebuchet_Reload
+    9500000: //RootNode
+    13700000: trebuchet_arms
+    13700002: trebuchet_back_lev
+    13700004: trebuchet_bag.001
+    13700006: trebuchet_bag_base
+    13700008: trebuchet_bag_stop
+    13700010: trebuchet_front_lev
+    13700012: trebuchet_pulley_down
+    13700014: trebuchet_pulley_top
+    13700016: trebuchet_rigid
+    13700018: trebuchet_ring_metal
+    13700020: trebuchet_rope_ring
+    13700022: trebuchet_rope_sec
+    13700024: trebuchet_rope_track
+    13700026: trebuchet_rotor
+    13700028: trebuchet_rotor_back
+    13700030: trebuchet_rotors_axes
+    13700032: trebuchet_sand_charge
+    13700034: trebuchet_stop
+    13700036: trebuchet_structure
+    13700038: trebuchet_structure sec
+    13700040: trebuchet_top_rope
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: ladder
+    second: {fileID: 2100000, guid: a81b9a9ecedb7476c90b695d09671e80, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: rope_net
+    second: {fileID: 2100000, guid: 42ef5b77839ca43d7b94b4a041807e79, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: trebuchet
+    second: {fileID: 2100000, guid: d47ada4eb2abf4ee280df7819e62497a, type: 2}
+  materials:
+    importMaterials: 1
+    materialName: 0
+    materialSearch: 1
+    materialLocation: 0
+  animations:
+    legacyGenerateAnimations: 4
+    bakeSimulation: 0
+    resampleCurves: 0
+    optimizeGameObjects: 0
+    motionNodeName: 
+    rigImportErrors: 
+    rigImportWarnings: 
+    animationImportErrors: 
+    animationImportWarnings: 
+    animationRetargetingWarnings: 
+    animationDoRetargetingWarnings: 0
+    importAnimatedCustomProperties: 0
+    animationCompression: 1
+    animationRotationError: 0.5
+    animationPositionError: 0.5
+    animationScaleError: 0.5
+    animationWrapMode: 0
+    extraExposedTransformPaths: []
+    extraUserProperties: []
+    clipAnimations:
+    - serializedVersion: 16
+      name: Trebuchet_Default
+      takeName: trebuchet_rig|trebuchet_All_action
+      firstFrame: 0
+      lastFrame: 1
+      wrapMode: 0
+      orientationOffsetY: 0
+      level: 0
+      cycleOffset: 0
+      loop: 0
+      hasAdditiveReferencePose: 0
+      loopTime: 0
+      loopBlend: 0
+      loopBlendOrientation: 0
+      loopBlendPositionY: 0
+      loopBlendPositionXZ: 0
+      keepOriginalOrientation: 0
+      keepOriginalPositionY: 1
+      keepOriginalPositionXZ: 0
+      heightFromFeet: 0
+      mirror: 0
+      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+      curves: []
+      events: []
+      transformMask: []
+      maskType: 3
+      maskSource: {instanceID: 0}
+      additiveReferencePoseFrame: 0
+    - serializedVersion: 16
+      name: Trebuchet_Loaded
+      takeName: trebuchet_rig|trebuchet_All_action
+      firstFrame: 30
+      lastFrame: 31
+      wrapMode: 0
+      orientationOffsetY: 0
+      level: 0
+      cycleOffset: 0
+      loop: 0
+      hasAdditiveReferencePose: 0
+      loopTime: 0
+      loopBlend: 0
+      loopBlendOrientation: 0
+      loopBlendPositionY: 0
+      loopBlendPositionXZ: 0
+      keepOriginalOrientation: 0
+      keepOriginalPositionY: 1
+      keepOriginalPositionXZ: 0
+      heightFromFeet: 0
+      mirror: 0
+      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+      curves: []
+      events: []
+      transformMask: []
+      maskType: 3
+      maskSource: {instanceID: 0}
+      additiveReferencePoseFrame: 0
+    - serializedVersion: 16
+      name: Trebuchet_Shot
+      takeName: trebuchet_rig|trebuchet_All_action
+      firstFrame: 30
+      lastFrame: 235
+      wrapMode: 0
+      orientationOffsetY: 0
+      level: 0
+      cycleOffset: 0
+      loop: 0
+      hasAdditiveReferencePose: 0
+      loopTime: 0
+      loopBlend: 0
+      loopBlendOrientation: 0
+      loopBlendPositionY: 0
+      loopBlendPositionXZ: 0
+      keepOriginalOrientation: 0
+      keepOriginalPositionY: 1
+      keepOriginalPositionXZ: 0
+      heightFromFeet: 0
+      mirror: 0
+      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+      curves: []
+      events: []
+      transformMask: []
+      maskType: 3
+      maskSource: {instanceID: 0}
+      additiveReferencePoseFrame: 0
+    - serializedVersion: 16
+      name: Trebuchet_Reload
+      takeName: trebuchet_rig|trebuchet_All_action
+      firstFrame: 235
+      lastFrame: 312
+      wrapMode: 0
+      orientationOffsetY: 0
+      level: 0
+      cycleOffset: 0
+      loop: 0
+      hasAdditiveReferencePose: 0
+      loopTime: 0
+      loopBlend: 0
+      loopBlendOrientation: 0
+      loopBlendPositionY: 0
+      loopBlendPositionXZ: 0
+      keepOriginalOrientation: 0
+      keepOriginalPositionY: 1
+      keepOriginalPositionXZ: 0
+      heightFromFeet: 0
+      mirror: 0
+      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+      curves: []
+      events: []
+      transformMask: []
+      maskType: 3
+      maskSource: {instanceID: 0}
+      additiveReferencePoseFrame: 0
+    isReadable: 1
+  meshes:
+    lODScreenPercentages: []
+    globalScale: 1
+    meshCompression: 0
+    addColliders: 0
+    importVisibility: 1
+    importBlendShapes: 1
+    importCameras: 1
+    importLights: 1
+    swapUVChannels: 0
+    generateSecondaryUV: 0
+    useFileUnits: 1
+    optimizeMeshForGPU: 1
+    keepQuads: 0
+    weldVertices: 1
+    secondaryUVAngleDistortion: 8
+    secondaryUVAreaDistortion: 15.000001
+    secondaryUVHardAngle: 88
+    secondaryUVPackMargin: 4
+    useFileScale: 1
+  tangentSpace:
+    normalSmoothAngle: 60
+    normalImportMode: 0
+    tangentImportMode: 3
+    normalCalculationMode: 4
+  importAnimation: 1
+  copyAvatar: 0
+  humanDescription:
+    serializedVersion: 2
+    human: []
+    skeleton: []
+    armTwist: 0.5
+    foreArmTwist: 0.5
+    upperLegTwist: 0.5
+    legTwist: 0.5
+    armStretch: 0.05
+    legStretch: 0.05
+    feetSpacing: 0
+    rootMotionBoneName: 
+    rootMotionBoneRotation: {x: 0, y: 0, z: 0, w: 1}
+    hasTranslationDoF: 0
+    hasExtraRoot: 0
+    skeletonHasParents: 1
+  lastHumanDescriptionAvatarSource: {instanceID: 0}
+  animationType: 2
+  humanoidOversampling: 1
+  additionalBone: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

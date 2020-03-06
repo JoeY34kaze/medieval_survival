@@ -240,7 +240,7 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
                         return true;
                     }
                     return false;
-                    break;
+                    
                 case (Item.SnappableType.free_in_range):
                     //tale case je prakticno kopiran case od foundationa
 
@@ -249,7 +249,7 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
                         return true;
                     }
                     return false;
-                    break;
+                    
                 case (Item.SnappableType.stairs_wide):
                     return check_validity_stairs();
                 case (Item.SnappableType.stairs_narrow):
@@ -257,7 +257,7 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
                 default:
                     Debug.LogWarning("not checking placement validation for this placeable");
                     return true;
-                    break;
+                    
             }
         }
         return false;

@@ -1,0 +1,52 @@
+Medieval weapons
+----------------
+
+Description
+-----------------------------------------------------------
+Ce glorieux package contient 3 modèles d'armes statiques médiévales de grande taille (Trébuchet, Baliste et catapulte). Chaque arme possède des animations propres articulées autour d'un contrôleur d'animations dédié. Ces derniers vous permettront de rendre des animations du chargement au tir et au rechargement, d'une manière simple et facile grâce aux paramètres. Ces assets vous permettront d'obtenir des reproductions d'armes près à l'emploi pour vos jeux en 2,5D ou en 3D.
+Attention: les projectiles sont présents sous forme d'asset, mais aucun script ne gère la physique balistique dans ce package, il n'appartient qu'à vous de les lier à votre convenance dans votre projet aux 3 armes statiques grace à vos scripts.
+
+Les modèles 3D
+-----------------------------------------------------------
+Trebuchet 1698 Faces (3432 Tris), 1 Matériel
+Baliste 3097 Faces (6032 Tris), 1 Matériel
+Catapult 5510 Faces (11102 Tris), 1 Matériel
+Balista_arrow_fire 167 Faces (316 Tris), 1 Matériel
+Balista_arrow_large 118 Faces (236 Tris), 1 Matériel
+Balista_arrow_normal 70 Faces (140 Tris), 1 Matériel
+Rock 24 Faces (48 Tris), 1 Matériel
+Big_rock 24 Faces (48 Tris), 1 Matériel
+
+Utilisation des animation controllers
+-----------------------------------------------------------
+Trebuchet
+	Parameters : Trebuchet 0 1 2 3
+		0 : position par défaut
+		1 : chargement du trebuchet
+		2 : tir
+		3 : retour a la position par défaut
+Baliste
+	Parameters : baliste 0 1 2
+		0 : position par défaut
+		1 : chargement de la baliste
+		2 : tir
+Catapult
+	Parameters : Catapult 0 1 2
+		0 : position par défaut
+		1 : chargement de la Catapult
+		2 : tir
+
+Script
+-----------------------------------------------------------
+Flikering_Light (ballista_spears_fire/Point Light)
+Ce script crée une variation d'intensité lumineuse en fonction des FPS (pour recréer un effet de feu crépitant).
+
+Shaders
+-----------------------------------------------------------
+Bumpet Double Sided : 
+Simple shader pour rendre le maillage du filet du trebuchet en double transparence. Ce shader est compatible mobile mais peut subir une perte de qualité sur les appareils par suffisamment puissants.
+
+Support
+-----------------------------------------------------------
+Si vous avez un problème, faites le nous savoir
+Nous avons une adresse de support: info@underside.be

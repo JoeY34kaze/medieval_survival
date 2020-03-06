@@ -116,6 +116,7 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
             NetworkGuildManager.Instance.Init();
             StartCoroutine(serverPlayerInitDelayer(1));
         }
+
     }
 
 
@@ -128,6 +129,7 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
 
     public void Update()
     {
+
         if (test) {
             test = false;
             networkObject.SendRpc(RPC_SET_HEALTH, Receivers.All, 0f, "coll_0");
