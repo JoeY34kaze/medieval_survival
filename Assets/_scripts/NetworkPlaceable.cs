@@ -300,6 +300,10 @@ public class NetworkPlaceable : NetworkPlaceableBehavior
         }
     }
 
+    internal bool is_player_owner(uint myPlayerId)
+    {
+        return this.player_who_placed_this == myPlayerId;
+    }
 
     private bool burn_resources_for_repair() {
         Debug.LogWarning("not implemented yet, - burning resources for repair");

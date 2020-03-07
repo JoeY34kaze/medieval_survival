@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -8,6 +9,7 @@ public class LocalPlaceableHelper : MonoBehaviour
     private bool isInCollisionWithTerrain;//za foundation recimo
     private bool setup = false;
 
+    [SerializeField] private BoxCollider collider_for_placement;
     internal bool isCollidingWithTerrain()
     {
         if (this.setup) return this.isInCollisionWithTerrain;
@@ -29,5 +31,11 @@ public class LocalPlaceableHelper : MonoBehaviour
     {
         if (collision.collider is TerrainCollider) this.isInCollisionWithTerrain = true;
         this.setup = true;
+    }
+
+    internal BoxCollider getColliderForPlacement()
+    {
+        if (this.collider_for_placement == null) return GetComponent<BoxCollider>();
+        else return this.collider_for_placement;
     }
 }

@@ -166,6 +166,10 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
                                     else
                                         local_guild_flag_toggle_authorized_request(interactable.gameObject);
 
+                                if (interactable is interactable_trebuchet) {
+                                    local_player_siege_weapon_advance_fire_state_request(interactable.gameObject);
+                                }
+
                             }
                             else if (Input.GetButton("Interact") && this.time_pressed_interaction > 0 && time_passed_interaction(150f) && !(Input.GetButton("Alert") || this.time_pressed_alert > 0))
                             {
@@ -204,6 +208,9 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
                                     if (interactable is Interactable_guild_flag)
                                         this.menu.show_flag_menu(interactable.gameObject, interactable.GetComponent<NetworkGuildFlag>().is_player_authorized(networkObject.Owner.NetworkId));
 
+                                    if (interactable is interactable_trebuchet) {
+                                        this.menu.show_trebuchet_menu(interactable.gameObject, interactable.GetComponent<NetworkPlaceable>().is_player_owner(networkObject.MyPlayerId));
+                                    }
                                 }
                             }
                         }
@@ -250,6 +257,7 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
     }
 
 
+
     private void clear_placeable_for_durability_lookup()
     {
         if (this.current_placeable_for_durability_lookup != null)
@@ -274,6 +282,7 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
     {
         return GetComponentInChildren(typeof(repair_hammer_collider_handler),true).gameObject.activeInHierarchy;
     }
+
 
     private void local_guild_flag_toggle_authorized_request(GameObject flag)
     {
@@ -575,5 +584,30 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
     internal void local_flag_toggle_authorized_request(GameObject target)
     {
         target.GetComponent<NetworkGuildFlag>().local_flag_toggle_authorized_request();
+    }
+
+    internal void local_player_siege_weapon_rotate_request(GameObject target)
+    {
+        
+    }
+
+    internal void local_player_siege_weapon_trajectory_change_request(GameObject target)
+    {
+        throw new NotImplementedException();
+    }
+
+    internal void local_player_siege_weapon_open_container_request(GameObject target)
+    {
+        throw new NotImplementedException();
+    }
+
+    internal void local_player_siege_weapon_pickup_request(GameObject target)
+    {
+        throw new NotImplementedException();
+    }
+
+    internal void local_player_siege_weapon_advance_fire_state_request(GameObject gameObject)
+    {
+        throw new NotImplementedException();
     }
 }

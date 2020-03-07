@@ -37,7 +37,7 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
     [SerializeField]
     private float placeable_snapping_range = 8f;
     [SerializeField]
-    private float placementRange = 6f;
+    private float regular_placement_range = 6f;
 
     private float current_placeable_rotation_offset = 0f;
 
@@ -137,7 +137,6 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
     }
 
     private void set_material(Material m) {
-
         for (int i = 0; i < this.currentPlaceableRenderers.Length; i++)
             this.currentPlaceableRenderers[i].material = m;
     }
@@ -181,16 +180,14 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
         //server side check k ga izvedemo prej lokalno da neb slucajno passov lokaln check pa failov na serverju. passat mora oba, ce faila koga nj faila na clientu, ce passa ni take panike
         if (!currentTransformOfPlaceableIsValid(this.CurrentLocalPlaceable.transform.position)) return false;
 
-
-
         //Tole so pa samo checki za clienta
         if (current_placeable_item.PlacementType == Item.SnappableType.none || current_placeable_item.PlacementType == Item.SnappableType.free_in_range)
-            if (Vector3.Distance(transform.position, this.CurrentLocalPlaceable.transform.position) < this.placementRange && Vector3.Angle(Vector3.up, h.normal) < 50f)
+            if (is_in_range_for_placement(this.CurrentLocalPlaceable.transform.position) && Vector3.Angle(Vector3.up, h.normal) < 50f)
                 return true;
             else return false;
         else if (current_placeable_item.PlacementType == Item.SnappableType.foundation)
         {
-            if (Vector3.Distance(transform.position, this.CurrentLocalPlaceable.transform.position) < this.placementRange & currentPlaceableIsCollidingWithTerrain())
+            if (is_in_range_for_placement(this.CurrentLocalPlaceable.transform.position) & currentPlaceableIsCollidingWithTerrain())
                 if (this.CurrentLocalPlaceable.GetComponent<LocalPlaceableHelper>().isSnapping)
                 {
                     if (this.current_closest_attachment_point.isFree())//ces se ne snappa na ze zaseden spot
@@ -200,10 +197,15 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
                     return true;
             else return false;
         }
+        else if (current_placeable_item.PlacementType == Item.SnappableType.siege_weapon) {
+            if (is_in_range_for_placement(this.CurrentLocalPlaceable.transform.position))
+                return true;
+            else return false;
+        }
         else //if (current_placeable_item.PlacementType == Item.SnappableType.wall || current_placeable_item.PlacementType == Item.SnappableType.door_frame || current_placeable_item.PlacementType == Item.SnappableType.windows_frame)
         {
             //tle bo sicer treba prevert ce se snapa na pravi objekt pa ob postavlanju poslat na server kam nj bi se to prlimal.
-            if (Vector3.Distance(transform.position, this.CurrentLocalPlaceable.transform.position) < this.placementRange)
+            if (is_in_range_for_placement(this.CurrentLocalPlaceable.transform.position))
                 if (this.CurrentLocalPlaceable.GetComponent<LocalPlaceableHelper>().isSnapping)
                 {
                     if (this.current_closest_attachment_point.isFree())//ces se ne snappa na ze zaseden spot
@@ -228,7 +230,7 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
     internal bool currentTransformOfPlaceableIsValid(Vector3 placeable_position)//ce je placeable izrisan nima veze ker ga maska za raycast ignorira
     {
         //nevem kk bom se zrihtov tole tbh
-        if (Vector3.Distance(transform.position, placeable_position) < this.placementRange)
+        if (is_in_range_for_placement(placeable_position))
         {
             RaycastHit hitInfo;
             switch (this.current_placeable_item.PlacementType)
@@ -254,6 +256,8 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
                     return check_validity_stairs();
                 case (Item.SnappableType.stairs_narrow):
                     return check_validity_stairs();
+                case (Item.SnappableType.siege_weapon):
+                    return check_validity_siege_weapon();
                 default:
                     Debug.LogWarning("not checking placement validation for this placeable");
                     return true;
@@ -261,6 +265,20 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
             }
         }
         return false;
+    }
+
+    private bool is_in_range_for_placement(Vector3 placeable_position)
+    {
+        float range = this.regular_placement_range;
+        if (this.activePlaceable.item.PlacementType == Item.SnappableType.siege_weapon) range = 30f;
+
+        float distance = Vector3.Distance(transform.position, placeable_position);
+        return distance < range;
+    }
+
+    private bool check_validity_siege_weapon()
+    {
+        return true;
     }
 
     private bool check_validity_stairs() {
@@ -316,7 +334,7 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
             if (s == null)//ce je null in je foundation ga loh postavlamo na tla po zelji
             {
                 
-                if (this.current_placeable_item.PlacementType == Item.SnappableType.none || this.current_placeable_item.PlacementType == Item.SnappableType.free_in_range || this.current_placeable_item.PlacementType == Item.SnappableType.foundation)
+                if (this.current_placeable_item.PlacementType == Item.SnappableType.none || this.current_placeable_item.PlacementType == Item.SnappableType.free_in_range || this.current_placeable_item.PlacementType == Item.SnappableType.foundation || this.current_placeable_item.PlacementType==Item.SnappableType.siege_weapon)
                 {
                     Vector3 offsetOfColliderHeight = Vector3.up *( this.currentPlaceableCollider.size.y / 2 - this.currentPlaceableCollider.center.y);
                     if (!this.current_placeable_item.ignorePlacementNormal)
@@ -732,7 +750,7 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
         this.CurrentLocalPlaceable = Instantiate(i.item.placeable_Local_object);
         this.current_placeable_item = i.item;
         this.activePlaceable = i;
-        this.currentPlaceableCollider = this.CurrentLocalPlaceable.GetComponent<BoxCollider>();
+        this.currentPlaceableCollider = this.CurrentLocalPlaceable.GetComponent<LocalPlaceableHelper>().getColliderForPlacement();
         this.currentPlaceableRenderers = this.CurrentLocalPlaceable.GetComponentsInChildren<MeshRenderer>();
         //SetToolSelected(null);
         //combat_handler.currently_equipped_weapon=null;
@@ -974,11 +992,12 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
         -   ce ni valid je konc
         -   ce je valid networkInstantiatamo ta placeable in vrnemo playerju odgovor kšn zgleda zdj njegov nov hotbar.
     */
+        Debug.LogWarning("Server placement of item request still has 0 security checks for velidity.");
    
         if (networkObject.IsServer && args.Info.SendingPlayer.NetworkId == networkObject.Owner.NetworkId) {
             Debug.Log("server - trying to place "+this.current_placeable_item.Display_name);
 
-            if (this.activePlaceable.item.PlacementType == Item.SnappableType.foundation || this.activePlaceable.item.PlacementType == Item.SnappableType.free_in_range || this.activePlaceable.item.PlacementType == Item.SnappableType.none || this.activePlaceable.item.PlacementType == Item.SnappableType.wall_attachment_free)
+            if (this.activePlaceable.item.PlacementType == Item.SnappableType.foundation || this.activePlaceable.item.PlacementType == Item.SnappableType.free_in_range || this.activePlaceable.item.PlacementType == Item.SnappableType.none || this.activePlaceable.item.PlacementType == Item.SnappableType.wall_attachment_free || this.activePlaceable.item.PlacementType == Item.SnappableType.siege_weapon)
             {
                 Vector3 pos = args.GetNext<Vector3>();
                 if (!has_building_privilege(networkObject.Owner, pos)) return;
@@ -1009,7 +1028,7 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
     {
         if (!networkObject.IsServer) { Debug.LogError("instanciacija na clientu ne na serverju!"); return null; }
         int net_id = getPlaceableNetworkIdFromItem(p.item);
-        if (net_id == -1) return null;//item is not interactable object
+        if (net_id == -1) return null;//item is not placeable object
         NetworkPlaceableBehavior b = NetworkManager.Instance.InstantiateNetworkPlaceable(net_id, pos, rot);
 
         //apply force on clients, sets predmet
@@ -1027,7 +1046,7 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
                 return i;
         }
 
-        Debug.LogWarning("Id of item not found.");
+        Debug.LogWarning("Id of item not found from networkedPlaceable. ");
         return -1;
 
     }

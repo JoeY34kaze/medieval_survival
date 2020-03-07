@@ -367,6 +367,101 @@ public class Interactable_radial_menu : MonoBehaviour
         }
     }
 
+
+
+    internal void show_trebuchet_menu(GameObject target, bool owner)
+    {
+        if (owner)
+        {
+            show_menu(target);
+            this.number_of_elements = 5;
+            menu.angleOffset = (360f / this.number_of_elements);
+            center_label.text = target.GetComponent<NetworkPlaceable>().p.item.Display_name;
+
+            GameObject btn_0_r = Resources.Load<GameObject>("radial_menu_elements/interaction_chest_open");
+            GameObject btn_1_r = Resources.Load<GameObject>("radial_menu_elements/interaction_siege_fire");
+            GameObject btn_2_r = Resources.Load<GameObject>("radial_menu_elements/interaction_player_steal");
+            GameObject btn_3_r = Resources.Load<GameObject>("radial_menu_elements/interaction_siege_trajectory_change");
+            GameObject btn_4_r = Resources.Load<GameObject>("radial_menu_elements/interaction_siege_rotate");
+
+            GameObject btn_0 = GameObject.Instantiate(btn_0_r);
+            GameObject btn_1 = GameObject.Instantiate(btn_1_r);
+            GameObject btn_2 = GameObject.Instantiate(btn_2_r);
+            GameObject btn_3 = GameObject.Instantiate(btn_3_r);
+            GameObject btn_4 = GameObject.Instantiate(btn_4_r);
+            menu.elements.Clear();
+            setup_button(btn_0, menu.angleOffset * 0);
+            setup_button(btn_1, menu.angleOffset * 1);
+            setup_button(btn_2, menu.angleOffset * 2);
+            setup_button(btn_3, menu.angleOffset * 3);
+            setup_button(btn_4, menu.angleOffset * 4);
+
+            Button button = btn_0.transform.GetComponentInChildren<Button>();
+            button.onClick.RemoveAllListeners();
+            button.onClick.AddListener(delegate { player_interaction_trebuchet_open_request(); });
+
+            button = btn_1.transform.GetComponentInChildren<Button>();
+            button.onClick.RemoveAllListeners();
+            button.onClick.AddListener(delegate { player_interaction_trebuchet_fire_state_advance_request(); });
+
+            button = btn_2.transform.GetComponentInChildren<Button>();
+            button.onClick.RemoveAllListeners();
+            button.onClick.AddListener(delegate { player_interaction_trebuchet_pickup_request(); });
+
+            button = btn_3.transform.GetComponentInChildren<Button>();
+            button.onClick.RemoveAllListeners();
+            button.onClick.AddListener(delegate { player_interaction_trebuchet_trajectory_change_request(); });
+
+            button = btn_4.transform.GetComponentInChildren<Button>();
+            button.onClick.RemoveAllListeners();
+            button.onClick.AddListener(delegate { player_interaction_trebuchet_rotate_request(); });
+
+            menu.reDraw();
+        }
+        else
+        {
+            show_menu(target);
+            this.number_of_elements = 4;
+            menu.angleOffset = (360f / this.number_of_elements);
+            center_label.text = target.GetComponent<NetworkPlaceable>().p.item.Display_name;
+
+            GameObject btn_0_r = Resources.Load<GameObject>("radial_menu_elements/interaction_chest_open");
+            GameObject btn_1_r = Resources.Load<GameObject>("radial_menu_elements/interaction_siege_fire");
+            GameObject btn_3_r = Resources.Load<GameObject>("radial_menu_elements/interaction_siege_trajectory_change");
+            GameObject btn_4_r = Resources.Load<GameObject>("radial_menu_elements/interaction_siege_rotate");
+
+            GameObject btn_0 = GameObject.Instantiate(btn_0_r);
+            GameObject btn_1 = GameObject.Instantiate(btn_1_r);
+
+            GameObject btn_3 = GameObject.Instantiate(btn_3_r);
+            GameObject btn_4 = GameObject.Instantiate(btn_4_r);
+            menu.elements.Clear();
+            setup_button(btn_0, menu.angleOffset * 0);
+            setup_button(btn_1, menu.angleOffset * 1);
+            setup_button(btn_3, menu.angleOffset * 3);
+            setup_button(btn_4, menu.angleOffset * 4);
+
+            Button button = btn_0.transform.GetComponentInChildren<Button>();
+            button.onClick.RemoveAllListeners();
+            button.onClick.AddListener(delegate { player_interaction_trebuchet_open_request(); });
+
+            button = btn_1.transform.GetComponentInChildren<Button>();
+            button.onClick.RemoveAllListeners();
+            button.onClick.AddListener(delegate { player_interaction_trebuchet_fire_state_advance_request(); });
+
+            button = btn_3.transform.GetComponentInChildren<Button>();
+            button.onClick.RemoveAllListeners();
+            button.onClick.AddListener(delegate { player_interaction_trebuchet_trajectory_change_request(); });
+
+            button = btn_4.transform.GetComponentInChildren<Button>();
+            button.onClick.RemoveAllListeners();
+            button.onClick.AddListener(delegate { player_interaction_trebuchet_rotate_request(); });
+
+            menu.reDraw();
+        }
+    }
+
+
     internal void show_craftingStation_menu(GameObject target)
     {
         show_menu(target);
@@ -770,6 +865,38 @@ public class Interactable_radial_menu : MonoBehaviour
     {
         hide_radial_menu();
         interaction.local_flag_toggle_authorized_request(this.target);
+    }
+
+
+    private void player_interaction_trebuchet_rotate_request()
+    {
+        hide_radial_menu();
+        interaction.local_player_siege_weapon_rotate_request(this.target);
+
+    }
+
+    private void player_interaction_trebuchet_trajectory_change_request()
+    {
+        hide_radial_menu();
+        interaction.local_player_siege_weapon_trajectory_change_request(this.target);
+    }
+
+    private void player_interaction_trebuchet_fire_state_advance_request()
+    {
+        hide_radial_menu();
+        interaction.local_player_siege_weapon_advance_fire_state_request(this.target);
+    }
+
+    private void player_interaction_trebuchet_open_request()
+    {
+        hide_radial_menu();
+        interaction.local_player_siege_weapon_open_container_request(this.target);
+    }
+
+    private void player_interaction_trebuchet_pickup_request()
+    {
+        hide_radial_menu();
+        interaction.local_player_siege_weapon_pickup_request(this.target);
     }
 
 }

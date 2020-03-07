@@ -18,19 +18,20 @@ public class NetworkWorldManager : NetworkWorldManagerBehavior
         if (networkObject.IsServer)//bi dau u start ampak je izjemno pomembna metoda in bi blo treba chekirat skos če dela l pa ne. bolš bi blo da se na vsake par minut chekira ampak update je ured pomoje ker je check cist dzabe
             if (this.upkeep_checker == null)
             {
-                this.upkeep_checker = upkeep_checker_coroutine();
+                this.upkeep_checker = Upkeep_checker_coroutine();
                 StartCoroutine(this.upkeep_checker);
             }
     }
 
-    private IEnumerator upkeep_checker_coroutine()
+    private IEnumerator Upkeep_checker_coroutine()
     {
         while (true)
         {
             foreach (NetworkPlaceable p in GameObject.FindObjectsOfType<NetworkPlaceable>())
             {
-                if (p.p.item.needs_upkeep)
-                    p.on_upkeep_pay();
+                if(p!=null)
+                    if (p.p.item.needs_upkeep)
+                        p.on_upkeep_pay();
             }
             yield return new WaitForSecondsRealtime(30);
         }
@@ -51,7 +52,7 @@ public class NetworkWorldManager : NetworkWorldManagerBehavior
             networkObject.TakeOwnership();
             StartCoroutine(serverResourceRefresh(resourceRefreshTime));
 
-            this.upkeep_checker = upkeep_checker_coroutine();
+            this.upkeep_checker = Upkeep_checker_coroutine();
             StartCoroutine(this.upkeep_checker);
         }
 

@@ -21,6 +21,7 @@ namespace BeardedManStudios.Forge.Networking.Unity
 		public GameObject[] NetworkContainerNetworkObject = null;
 		public GameObject[] NetworkCraftingStationNetworkObject = null;
 		public GameObject[] NetworkedSiegeProjectileNetworkObject = null;
+		public GameObject[] NetworkedSiegeWeaponNetworkObject = null;
 		public GameObject[] NetworkGuildManagerNetworkObject = null;
 		public GameObject[] NetworkLandClaimObjectNetworkObject = null;
 		public GameObject[] NetworkPlaceableNetworkObject = null;
@@ -296,6 +297,29 @@ namespace BeardedManStudios.Forge.Networking.Unity
 						{
 							var go = Instantiate(NetworkedSiegeProjectileNetworkObject[obj.CreateCode]);
 							newObj = go.GetComponent<NetworkedSiegeProjectileBehavior>();
+						}
+					}
+
+					if (newObj == null)
+						return;
+						
+					newObj.Initialize(obj);
+
+					if (objectInitialized != null)
+						objectInitialized(newObj, obj);
+				});
+			}
+			else if (obj is NetworkedSiegeWeaponNetworkObject)
+			{
+				MainThreadManager.Run(() =>
+				{
+					NetworkBehavior newObj = null;
+					if (!NetworkBehavior.skipAttachIds.TryGetValue(obj.NetworkId, out newObj))
+					{
+						if (NetworkedSiegeWeaponNetworkObject.Length > 0 && NetworkedSiegeWeaponNetworkObject[obj.CreateCode] != null)
+						{
+							var go = Instantiate(NetworkedSiegeWeaponNetworkObject[obj.CreateCode]);
+							newObj = go.GetComponent<NetworkedSiegeWeaponBehavior>();
 						}
 					}
 
@@ -836,6 +860,18 @@ namespace BeardedManStudios.Forge.Networking.Unity
 			var netBehavior = go.GetComponent<NetworkedSiegeProjectileBehavior>();
 			var obj = netBehavior.CreateNetworkObject(Networker, index);
 			go.GetComponent<NetworkedSiegeProjectileBehavior>().networkObject = (NetworkedSiegeProjectileNetworkObject)obj;
+
+			FinalizeInitialization(go, netBehavior, obj, position, rotation, sendTransform);
+			
+			return netBehavior;
+		}
+		[Obsolete("Use InstantiateNetworkedSiegeWeapon instead, its shorter and easier to type out ;)")]
+		public NetworkedSiegeWeaponBehavior InstantiateNetworkedSiegeWeaponNetworkObject(int index = 0, Vector3? position = null, Quaternion? rotation = null, bool sendTransform = true)
+		{
+			var go = Instantiate(NetworkedSiegeWeaponNetworkObject[index]);
+			var netBehavior = go.GetComponent<NetworkedSiegeWeaponBehavior>();
+			var obj = netBehavior.CreateNetworkObject(Networker, index);
+			go.GetComponent<NetworkedSiegeWeaponBehavior>().networkObject = (NetworkedSiegeWeaponNetworkObject)obj;
 
 			FinalizeInitialization(go, netBehavior, obj, position, rotation, sendTransform);
 			
@@ -1492,6 +1528,47 @@ namespace BeardedManStudios.Forge.Networking.Unity
 			}
 
 			go.GetComponent<NetworkedSiegeProjectileBehavior>().networkObject = (NetworkedSiegeProjectileNetworkObject)obj;
+
+			FinalizeInitialization(go, netBehavior, obj, position, rotation, sendTransform);
+			
+			return netBehavior;
+		}
+		public NetworkedSiegeWeaponBehavior InstantiateNetworkedSiegeWeapon(int index = 0, Vector3? position = null, Quaternion? rotation = null, bool sendTransform = true)
+		{
+			var go = Instantiate(NetworkedSiegeWeaponNetworkObject[index]);
+			var netBehavior = go.GetComponent<NetworkedSiegeWeaponBehavior>();
+
+			NetworkObject obj = null;
+			if (!sendTransform && position == null && rotation == null)
+				obj = netBehavior.CreateNetworkObject(Networker, index);
+			else
+			{
+				metadata.Clear();
+
+				if (position == null && rotation == null)
+				{
+					byte transformFlags = 0x1 | 0x2;
+					ObjectMapper.Instance.MapBytes(metadata, transformFlags);
+					ObjectMapper.Instance.MapBytes(metadata, go.transform.position, go.transform.rotation);
+				}
+				else
+				{
+					byte transformFlags = 0x0;
+					transformFlags |= (byte)(position != null ? 0x1 : 0x0);
+					transformFlags |= (byte)(rotation != null ? 0x2 : 0x0);
+					ObjectMapper.Instance.MapBytes(metadata, transformFlags);
+
+					if (position != null)
+						ObjectMapper.Instance.MapBytes(metadata, position.Value);
+
+					if (rotation != null)
+						ObjectMapper.Instance.MapBytes(metadata, rotation.Value);
+				}
+
+				obj = netBehavior.CreateNetworkObject(Networker, index, metadata.CompressBytes());
+			}
+
+			go.GetComponent<NetworkedSiegeWeaponBehavior>().networkObject = (NetworkedSiegeWeaponNetworkObject)obj;
 
 			FinalizeInitialization(go, netBehavior, obj, position, rotation, sendTransform);
 			

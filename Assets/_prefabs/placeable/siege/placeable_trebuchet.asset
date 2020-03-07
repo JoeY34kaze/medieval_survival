@@ -30,11 +30,11 @@ MonoBehaviour:
   wood_gather_rate: 0
   flesh_gather_rate: 0
   description: no description yet.
-  placeable_Local_object: {fileID: 1616697468978594, guid: 5a4b022842442984d88b4ec9c76ac107,
+  placeable_Local_object: {fileID: 1616697468978594, guid: dff42d25a9bec43be91dd687d17b5b68,
     type: 3}
-  placeable_networked_object: {fileID: 1616697468978594, guid: dff42d25a9bec43be91dd687d17b5b68,
+  placeable_networked_object: {fileID: 1616697468978594, guid: bababd91b5aa20c46afaa8778dcf42e0,
     type: 3}
-  ignorePlacementNormal: 0
+  ignorePlacementNormal: 1
   PlacementType: 16
   blocks_placements: 
   needs_upkeep: 0
