@@ -17,7 +17,7 @@ MonoBehaviour:
   icon: {fileID: 21300000, guid: 1579c9cb7b7321744ab6f00eb354a601, type: 3}
   damage: 0
   hasDurability: 0
-  durability: 200
+  Max_durability: 1000
   stackSize: 10
   capacity: 20
   damage_reduction: 0
@@ -32,8 +32,10 @@ MonoBehaviour:
   description: no description yet.
   placeable_Local_object: {fileID: 132834, guid: bbf727fd541b7b84097fc3ad3f8e0a5c,
     type: 3}
-  placeable_networked_object: {fileID: 132834, guid: c005470ae31f1f146bdda4536f3e9be5,
+  networked_physical_instantiated_object: {fileID: 132834, guid: c005470ae31f1f146bdda4536f3e9be5,
     type: 3}
   ignorePlacementNormal: 0
   PlacementType: 12
   blocks_placements: 
+  needs_upkeep: 0
+  recepie: {fileID: 0}

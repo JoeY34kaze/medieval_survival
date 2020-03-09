@@ -32,7 +32,7 @@ MonoBehaviour:
   description: no description yet.
   placeable_Local_object: {fileID: 4859765243381674479, guid: 7082fcc515a998d4fb4f4c4eb9a86ffc,
     type: 3}
-  placeable_networked_object: {fileID: 3972517851848812556, guid: af4573d26c7b34443a69cf2f960cb761,
+  networked_physical_instantiated_object: {fileID: 3972517851848812556, guid: af4573d26c7b34443a69cf2f960cb761,
     type: 3}
   ignorePlacementNormal: 1
   PlacementType: 1

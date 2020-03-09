@@ -17,6 +17,7 @@ public class UILogic : MonoBehaviour
     public GameObject chatInput;
     public GameObject containerPanel;
     public GameObject panel_durability;
+    public GameObject trebuchet_rotation_panel;
 
     public bool hasOpenWindow=false;
     private NetworkGuildManager ngm;
@@ -40,6 +41,12 @@ public class UILogic : MonoBehaviour
     private GameObject active_container_panel;
     public GameObject[] panelsPredmetiContainer;
     internal NetworkContainer currentActiveContainer;//tole se posreduje npi-ju med premikanjem predmetov. z npi v tole in obratno
+
+    private NetworkSiegeTrebuchet active_trebuchet = null;
+    public GameObject Button_trebuchet_rotation;
+    public Slider slider_trebuchet_rotation;
+    public InputField input_trebuchet_rotation;
+    private Quaternion original_trebuchet_rotation;
 
     bool chatActive = false;
 
@@ -148,6 +155,44 @@ public class UILogic : MonoBehaviour
 
     }
 
+
+    internal void show_trebuchet_rotation_panel(NetworkSiegeTrebuchet trebuchet) {
+        this.active_trebuchet = trebuchet;
+        this.original_trebuchet_rotation = trebuchet.get_rotation_of_platform(); ;
+        this.trebuchet_rotation_panel.SetActive(true);
+        this.hasOpenWindow = true;
+        enableMouse();
+    }
+
+    public void on_rotation_set_button_clicked() {
+        this.active_trebuchet.local_player_change_rotation_request();
+        ClearAll();
+
+    }
+
+    public void on_rotation_slider_changed() {
+        //get float
+        float add_rotation = this.slider_trebuchet_rotation.value;
+        //update transform rotation
+        this.active_trebuchet.platform.rotation = Quaternion.Euler(this.active_trebuchet.platform.rotation.eulerAngles.x,this.original_trebuchet_rotation.eulerAngles.y+add_rotation, this.active_trebuchet.platform.rotation.eulerAngles.z);
+        //set value to input
+        this.input_trebuchet_rotation.text = add_rotation + " degrees";
+        Debug.Log("rotation slider changed");
+    }
+
+    public void on_rotation_input_changed()
+    {
+        //get float
+        float add_rotation = 500;
+        float.TryParse(this.input_trebuchet_rotation.text, out add_rotation);
+        if (add_rotation == 500) return;
+        //update transform rotation
+        this.active_trebuchet.platform.rotation = Quaternion.Euler(this.active_trebuchet.platform.rotation.eulerAngles.x, this.original_trebuchet_rotation.eulerAngles.y + add_rotation, this.active_trebuchet.platform.rotation.eulerAngles.z);
+        //set value to slider ?
+        this.slider_trebuchet_rotation.value=add_rotation;
+        Debug.Log("rotation input changed");
+    }
+
     public void enableMouse() {
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
@@ -160,6 +205,8 @@ public class UILogic : MonoBehaviour
     }
 
     public void ClearAll() {
+        this.active_trebuchet = null;
+        this.trebuchet_rotation_panel.SetActive(false);
         this.inventoryPanel.SetActive(false);
         this.guildModificationPanel.SetActive(false);
         if (this.GuildPanel.activeSelf) ngm.SetMemberPanel(false);
@@ -182,6 +229,7 @@ public class UILogic : MonoBehaviour
         GetComponentInParent<NetworkPlayerAnimationLogic>().hookChestRotation = true;
         GetComponentInParent<NetworkPlayerMovement>().lockMovement = false;
         GetComponentInParent<player_camera_handler>().lockCamera = false;
+        this.input_trebuchet_rotation.text = "0 degrees";
     }
 
 

@@ -7,7 +7,7 @@ using UnityEngine;
 public class Item : ScriptableObject
 {
     public string Display_name = "New item";
-    public enum Type { head, chest, hands, feet, legs, ranged, weapon, shield, backpack,tool,resource, placeable };
+    public enum Type { head, chest, hands, feet, legs, ranged, weapon, shield, backpack,tool,resource, placeable, ammunition };
     public enum SnappableType { none, foundation, ceiling,wall, door_frame,windows_frame, wall_attachment_top, wall_attachment_side,wall_attachment_free, door, window, window_attachment, free_in_range, pillar, stairs_wide, stairs_narrow, siege_weapon
     }//tle so opisani kaksnega tipa so objekti. snappable foundation recimo pomen da je foundation
     public Type type;
@@ -27,7 +27,7 @@ public class Item : ScriptableObject
     public int flesh_gather_rate;
     public string description="no description yet.";
     public GameObject placeable_Local_object;
-    public GameObject placeable_networked_object;
+    public GameObject networked_physical_instantiated_object;
     public bool ignorePlacementNormal;
     public SnappableType PlacementType;
     public SnappableType[] blocks_placements;

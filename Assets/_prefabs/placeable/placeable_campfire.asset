@@ -32,7 +32,7 @@ MonoBehaviour:
   description: Camp fire for cooking food.
   placeable_Local_object: {fileID: 6031131577149352457, guid: d98508a1dcda3e44da1d733718978ae9,
     type: 3}
-  placeable_networked_object: {fileID: 6031131577149352457, guid: f2aabc59f06798e4d9dbf6765c8a654f,
+  networked_physical_instantiated_object: {fileID: 6031131577149352457, guid: f2aabc59f06798e4d9dbf6765c8a654f,
     type: 3}
   ignorePlacementNormal: 0
   PlacementType: 12

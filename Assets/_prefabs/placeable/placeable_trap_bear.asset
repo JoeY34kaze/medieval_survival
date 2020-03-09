@@ -17,9 +17,9 @@ MonoBehaviour:
   icon: {fileID: 21300000, guid: 85c55afd3799ac942b23c1239b0e83af, type: 3}
   damage: 55
   hasDurability: 1
-  durability: 1000
+  Max_durability: 1000
   stackSize: 5
-  backpack_capacity: 0
+  capacity: 0
   damage_reduction: 0
   id: 48
   prefab_pickup: {fileID: 4344458020859959958, guid: 4d857fb3f3804e540b9c4ac4ce5da7b1,
@@ -32,8 +32,10 @@ MonoBehaviour:
   description: Common bear trap. Used for people. Only for people actually.
   placeable_Local_object: {fileID: 634029857424565624, guid: 1ec5a24506e5b574fa3909d479aad45e,
     type: 3}
-  placeable_networked_object: {fileID: 634029857424565624, guid: d858c1c681ae7934a8fcd824868139d3,
+  networked_physical_instantiated_object: {fileID: 634029857424565624, guid: d858c1c681ae7934a8fcd824868139d3,
     type: 3}
   ignorePlacementNormal: 0
   PlacementType: 12
   blocks_placements: 01000000
+  needs_upkeep: 0
+  recepie: {fileID: 0}

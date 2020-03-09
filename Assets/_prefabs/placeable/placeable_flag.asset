@@ -32,7 +32,7 @@ MonoBehaviour:
   description: Guild flag, used for claiming territory.
   placeable_Local_object: {fileID: 4116918404208757098, guid: dc930c56585e1ac47b45e61d97295c24,
     type: 3}
-  placeable_networked_object: {fileID: 4116918404208757098, guid: 29c693bfbe24f3741aad183f4c608531,
+  networked_physical_instantiated_object: {fileID: 4116918404208757098, guid: 29c693bfbe24f3741aad183f4c608531,
     type: 3}
   ignorePlacementNormal: 1
   PlacementType: 12

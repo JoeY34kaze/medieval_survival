@@ -10,9 +10,24 @@ public class Networked_siege_projectile : NetworkedSiegeProjectileBehavior
 
     private Predmet p;
     private local_siege_projectile local_projectile;
+    public static readonly float destroy_wait_time=60f;
+    public static readonly float destroychance = 0.1f;
+    [SerializeField] Rigidbody rb;
 
-    internal void init(Predmet p) {
+    internal void init(Predmet p, Vector3 spawn, Vector3 direction, float force) {
+        if (!networkObject.IsServer) return;
         this.p = p;
+
+        //nastavt tud na serverju - velocity and such
+        
+        if (this.rb == null) GetComponent<Rigidbody>();
+
+        this.rb.AddForce(direction * force);
+
+
+        //poslat vsem clientim!!
+
+        //razen seveda trenutno ker je nrjen z fieldi in ne rpcji..... - to eb changed before release trenutno ne nrdi nic, samo groundwork za presaltanje na rpcje
     }
 
     private void Start()
@@ -56,8 +71,17 @@ public class Networked_siege_projectile : NetworkedSiegeProjectileBehavior
             if (collisionInfo.collider.gameObject.GetComponent<NetworkPlaceable>() != null)
             {
                 collisionInfo.collider.gameObject.GetComponent<NetworkPlaceable>().take_weapon_damage(this.p);
+                networkObject.SendRpc(RPC_SEND_HIT_TO_CLIENTS, Receivers.OthersProximity);
+                if (destroy_on_impact_chance())
+                    networkObject.Destroy();
             }
         }
+    }
+
+    private bool destroy_on_impact_chance() {
+        float f = UnityEngine.Random.value;//Returns a random number between 0.0 [inclusive] and 1.0 [inclusive] (Read Only).
+        if (Networked_siege_projectile.destroychance <= f) return true;
+        else return false;
     }
 
     /// <summary>

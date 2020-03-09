@@ -87,7 +87,9 @@ MonoBehaviour:
   NetworkContainerItemsNetworkObject: []
   NetworkContainerNetworkObject: []
   NetworkCraftingStationNetworkObject: []
-  NetworkedSiegeProjectileNetworkObject: []
+  NetworkedSiegeProjectileNetworkObject:
+  - {fileID: 8955512442893744167, guid: 757d9e7cb6829f047bd4d55b9f3ca606, type: 3}
+  NetworkedSiegeWeaponNetworkObject: []
   NetworkGuildManagerNetworkObject:
   - {fileID: 5449284050390073438, guid: d3a22c092c333f94e812346308e5bb63, type: 3}
   NetworkLandClaimObjectNetworkObject: []

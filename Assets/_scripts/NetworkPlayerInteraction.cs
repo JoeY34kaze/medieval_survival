@@ -586,28 +586,28 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
         target.GetComponent<NetworkGuildFlag>().local_flag_toggle_authorized_request();
     }
 
-    internal void local_player_siege_weapon_rotate_request(GameObject target)
+    internal void local_player_siege_weapon_rotate_request(GameObject t)
     {
-        
+        GetComponentInChildren<UILogic>().show_trebuchet_rotation_panel(t.GetComponent<NetworkSiegeTrebuchet>());
     }
 
-    internal void local_player_siege_weapon_trajectory_change_request(GameObject target)
+    internal void local_player_siege_weapon_trajectory_change_request(GameObject t)
+    {
+        t.GetComponent<NetworkSiegeTrebuchet>().local_player_siege_weapon_change_trajectory_request();
+    }
+
+    internal void local_player_siege_weapon_open_container_request(GameObject t)
     {
         throw new NotImplementedException();
     }
 
-    internal void local_player_siege_weapon_open_container_request(GameObject target)
+    internal void local_player_siege_weapon_pickup_request(GameObject t)
     {
         throw new NotImplementedException();
     }
 
-    internal void local_player_siege_weapon_pickup_request(GameObject target)
+    internal void local_player_siege_weapon_advance_fire_state_request(GameObject t)
     {
-        throw new NotImplementedException();
-    }
-
-    internal void local_player_siege_weapon_advance_fire_state_request(GameObject gameObject)
-    {
-        throw new NotImplementedException();
+        t.GetComponent<NetworkSiegeTrebuchet>().local_player_siege_weapon_advance_fire_state_request();
     }
 }

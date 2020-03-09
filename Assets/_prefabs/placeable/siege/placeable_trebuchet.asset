@@ -32,10 +32,10 @@ MonoBehaviour:
   description: no description yet.
   placeable_Local_object: {fileID: 1616697468978594, guid: dff42d25a9bec43be91dd687d17b5b68,
     type: 3}
-  placeable_networked_object: {fileID: 1616697468978594, guid: bababd91b5aa20c46afaa8778dcf42e0,
+  networked_physical_instantiated_object: {fileID: 1616697468978594, guid: bababd91b5aa20c46afaa8778dcf42e0,
     type: 3}
   ignorePlacementNormal: 1
   PlacementType: 16
   blocks_placements: 
   needs_upkeep: 0
-  recepie: {fileID: 0}
+  recepie: {fileID: 11400000, guid: bdabdbb49dd9d944d847bf757f452b0b, type: 2}

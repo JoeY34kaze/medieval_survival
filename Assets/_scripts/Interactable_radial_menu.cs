@@ -870,7 +870,15 @@ public class Interactable_radial_menu : MonoBehaviour
 
     private void player_interaction_trebuchet_rotate_request()
     {
-        hide_radial_menu();
+        menu.elements.Clear();
+        foreach (Transform child in elements)
+        {
+            GameObject.Destroy(child.gameObject);
+        }
+        center_label.text = "";
+        this.radialMenu.SetActive(false);
+
+
         interaction.local_player_siege_weapon_rotate_request(this.target);
 
     }

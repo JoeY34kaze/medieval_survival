@@ -1042,7 +1042,7 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
 
         for (int i = 0; i < prefabs.Length; i++)
         {
-            if (prefabs[i].Equals(item.placeable_networked_object))
+            if (prefabs[i].Equals(item.networked_physical_instantiated_object))
                 return i;
         }
 

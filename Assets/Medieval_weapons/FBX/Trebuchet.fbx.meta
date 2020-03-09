@@ -567,7 +567,8 @@ ModelImporter:
     rigImportErrors: 
     rigImportWarnings: 
     animationImportErrors: 
-    animationImportWarnings: 
+    animationImportWarnings: Event reset_animation_bool has a time (3.208333) outside
+      the clip's valid range (0.000000..3.208333). It will never be fired
     animationRetargetingWarnings: 
     animationDoRetargetingWarnings: 0
     importAnimatedCustomProperties: 0
@@ -671,6 +672,14 @@ ModelImporter:
         floatParameter: 0
         intParameter: 0
         messageOptions: 0
+      - time: 0.135514
+        functionName: local_spawn_siege_projectile_server
+        data: 
+        objectReferenceParameter: {fileID: 11500000, guid: 718c49a0c9d28fe4b90d5480f033c80d,
+          type: 3}
+        floatParameter: 0
+        intParameter: 0
+        messageOptions: 0
       transformMask: []
       maskType: 3
       maskSource: {instanceID: 0}
@@ -706,7 +715,7 @@ ModelImporter:
         objectReferenceParameter: {fileID: 11500000, guid: 718c49a0c9d28fe4b90d5480f033c80d,
           type: 3}
         floatParameter: 0
-        intParameter: 0
+        intParameter: -1
         messageOptions: 0
       transformMask: []
       maskType: 3
