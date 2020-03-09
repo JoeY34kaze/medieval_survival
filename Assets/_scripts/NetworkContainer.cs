@@ -165,7 +165,7 @@ public class NetworkContainer : NetworkContainerBehavior
         }
 
 
-        Debug.LogWarning("no security");
+        Debug.LogWarning("no security unless specifically locked i suppose");
         return true;
     }
 

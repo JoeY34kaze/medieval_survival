@@ -66,9 +66,10 @@ public class NetworkSiegeTrebuchet : NetworkedSiegeWeaponBehavior
                 return true;
             }
         }
-        Debug.LogWarning("We didnt load anything! we are faking output!");
-        this.ready_shot = this.allowed_projectiles[0];
-        return true;
+        this.ready_shot = null;
+        return true; //ce hocemo da strelja v prazno. i think i want that
+
+
     }
 
     private bool is_player_allowed_to_interact_with_this(uint networkId)
@@ -202,5 +203,10 @@ public class NetworkSiegeTrebuchet : NetworkedSiegeWeaponBehavior
     {
         if (args.Info.SendingPlayer.IsHost)
             this.platform.rotation = args.GetNext<Quaternion>();
+    }
+
+    internal void local_player_siege_weapon_open_container_request()
+    {
+        this.container.local_open_container_request();
     }
 }

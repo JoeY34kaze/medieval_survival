@@ -598,7 +598,7 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
 
     internal void local_player_siege_weapon_open_container_request(GameObject t)
     {
-        throw new NotImplementedException();
+        t.GetComponent<NetworkSiegeTrebuchet>().local_player_siege_weapon_open_container_request();
     }
 
     internal void local_player_siege_weapon_pickup_request(GameObject t)
