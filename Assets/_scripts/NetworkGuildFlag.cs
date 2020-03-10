@@ -135,6 +135,8 @@ public class NetworkGuildFlag : NetworkLandClaimObjectBehavior
 
         int[] r = new int[4];//wood,stone,iron,gold
         for (int i = 0; i < r.Length; i++) r[i] = 0;
+        if (p.p.item.recepie.ingredient_quantities.Length == 0) return r;
+
         int cost = p.p.item.recepie.ingredient_quantities[0];
         cost = (int)(cost * upkeep_rate);
 

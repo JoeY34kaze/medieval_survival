@@ -25,6 +25,7 @@ public class NetworkSiegeTrebuchet : NetworkedSiegeWeaponBehavior
     public float debug_projectile_force;
 
     public Transform platform;
+    public direction_vector_helper direction;
 
     private void Start()
     {
@@ -109,7 +110,8 @@ public class NetworkSiegeTrebuchet : NetworkedSiegeWeaponBehavior
     }
 
     private Vector3 get_direction_vector() {
-        return Vector3.Normalize(transform.forward + transform.up * Mathf.Clamp(this.current_vertical_coefficient,this.min_vertical_coeff,max_vertical_coeff));
+        
+        return Vector3.Normalize(this.direction.getForward() + transform.up * Mathf.Clamp(this.current_vertical_coefficient,this.min_vertical_coeff,max_vertical_coeff));
     }
 
     private float get_force() {

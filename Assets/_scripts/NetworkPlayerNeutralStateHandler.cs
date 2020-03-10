@@ -59,15 +59,15 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
             if (bar_handler.gameObject.activeSelf) {
 
                 checkInputBar();
-                if (Input.GetButtonDown("Fire1"))
+                if (Input.GetButtonDown("Fire1") && combat_handler.is_allowed_to_attack_local())
                 {
-                    if (this.activeTool != null && combat_handler.is_allowed_to_attack_local())//za weapone se checkira v combat handlerju
+                    if (this.activeTool != null )//za weapone se checkira v combat handlerju
                     {
                         ///poslat request da nrdimo swing z tem tool-om
                         networkObject.SendRpc(RPC_TOOL_USAGE_REQUEST, Receivers.Server);
                     }
 
-                    else if (this.CurrentLocalPlaceable != null)
+                    else if (this.CurrentLocalPlaceable != null )
                     {
                         //ce ni valid, se itak poslje zadnji valid transform ker se je tko updejtal na koncu metode v update pri nastavlanju pozicije
 
