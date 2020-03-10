@@ -29,7 +29,7 @@ Transform:
   m_GameObject: {fileID: 7092655340888159166}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0.5}
-  m_LocalScale: {x: 1, y: 0.8, z: 0.8}
+  m_LocalScale: {x: 1.25, y: 0.7, z: 0.68}
   m_Children: []
   m_Father: {fileID: 7095032335632418472}
   m_RootOrder: 0
@@ -56,6 +56,7 @@ MeshRenderer:
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -67,6 +68,7 @@ MeshRenderer:
   m_ProbeAnchor: {fileID: 0}
   m_LightProbeVolumeOverride: {fileID: 0}
   m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
   m_PreserveUVs: 0
   m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0
@@ -170,10 +172,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2b298bb46440e6f49a63781f93d94be4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  item: {fileID: 11400000, guid: e647d490ac0eab3488619b78e79ebd2d, type: 2}
+  player_who_placed_this: 0
   distanceForSnappingHandling: 0.05
   snappableType: 9
   attachmentPoints: []
+  upkeep_flag: {fileID: 0}
 --- !u!114 &8232459245449259895
 MonoBehaviour:
   m_ObjectHideFlags: 0

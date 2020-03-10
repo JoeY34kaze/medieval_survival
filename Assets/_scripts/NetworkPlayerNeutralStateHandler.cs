@@ -30,7 +30,7 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
     private bool placeable_currently_valid = false;
 
     private float distance_for_snapping_freely_or_on_gameobject_offset = 0.05f;
-    private float mouseWheelRotation;
+  
     [SerializeField]
     private LayerMask placement_layer_mask;
 
@@ -39,7 +39,6 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
     [SerializeField]
     private float regular_placement_range = 6f;
 
-    private float current_placeable_rotation_offset = 0f;
 
     private AttachmentPoint current_closest_attachment_point;
 
@@ -74,22 +73,25 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
 
                         //Debug.Log("tukej bomo poslal rpc za postavlanje itema");
 
-                        if (this.current_closest_attachment_point != null)
+                        if (this.current_closest_attachment_point != null && this.placeable_currently_valid)
+                        {
                             this.current_closest_attachment_point.local_placement_of_placeable_request(this.CurrentLocalPlaceable.transform.rotation);
-                        else
-                            if(this.placeable_currently_valid)
-                                networkObject.SendRpc(RPC_PLACEMENTOF_ITEM_REQUEST, Receivers.Server, this.CurrentLocalPlaceable.transform.position, this.CurrentLocalPlaceable.transform.rotation);
 
+                        }
+                        else
+                            if (this.placeable_currently_valid)
+                        {
+                            networkObject.SendRpc(RPC_PLACEMENTOF_ITEM_REQUEST, Receivers.Server, this.CurrentLocalPlaceable.transform.position, this.CurrentLocalPlaceable.transform.rotation);
+                        }
                     }
                 }
                 else if (this.current_placeable_item != null)
                 {
                     //Debug.Log(this.current_placeable_item.Display_name);
                     if (this.CurrentLocalPlaceable.GetComponent<LocalPlaceableHelper>() != null) this.CurrentLocalPlaceable.GetComponent<LocalPlaceableHelper>().isSnapping = false;
-                    handlePlaceableLocalPlacementSelection();
+                    check_local_placeable_validity_of_placement();
                 }
                 else {
-                    this.current_placeable_rotation_offset = 0f;
                 }
             }
         }
@@ -98,26 +100,26 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
     /// <summary>
     /// lokalno izrise placeable karkoli ze pac hocmo postavt
     /// </summary>
-    private void handlePlaceableLocalPlacementSelection()
+    private void check_local_placeable_validity_of_placement()
     {
-        RaycastHit h= local_MoveCurrentPlaceableObjectToMouseRay();
-        rotatePlaceableWithMouseFree(GetAllowedAngleRotationFromCurrentPlaceable());
+        RaycastHit h= local_MoveCurrentPlaceableObjectToMouseRay();//tle applya ze rotacijo od snappable objekta
+
+        set_rotation_parameters_from_mouse_info(GetAllowedAngleRotationFromCurrentPlaceable());
 
         if (currentTransformOfPlaceableIsValid(h))
         {
             this.previously_valid_position = this.CurrentLocalPlaceable.transform.position;
             this.previously_valid_rotation = this.CurrentLocalPlaceable.transform.rotation;
-            
+
             set_material(this.valid_material);
             this.placeable_currently_valid = true;
         }
         else
         {
-            if (this.previously_valid_position != Vector3.zero && this.previously_valid_rotation != Quaternion.identity)
+            if (this.previously_valid_position != Vector3.zero &&  (!this.CurrentLocalPlaceable.GetComponent<LocalPlaceableHelper>().isSnapping))
             {
                 this.CurrentLocalPlaceable.transform.position = this.previously_valid_position;
                 this.CurrentLocalPlaceable.transform.rotation = this.previously_valid_rotation;
-                
             }
             set_material(this.invalid_material);
             this.placeable_currently_valid = false;
@@ -291,27 +293,25 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
         else return parent.is_placement_possible_for(this.current_placeable_item);
     }
 
-    private void rotatePlaceableWithMouseFree(float allowedAngleChunk)
+    private void set_rotation_parameters_from_mouse_info(float allowedAngleChunk)
     {
-        Debug.Log("rotacija : "+this.CurrentLocalPlaceable.transform.rotation);
-        this.mouseWheelRotation = Input.mouseScrollDelta.y;
+     
         
 
-        if (allowedAngleChunk <1)
+        if (allowedAngleChunk <1 &&  (!this.CurrentLocalPlaceable.GetComponent<LocalPlaceableHelper>().isSnapping))
         {
-            
 
-            this.current_placeable_rotation_offset += this.mouseWheelRotation * 10;
+
+            this.CurrentLocalPlaceable.transform.Rotate(this.CurrentLocalPlaceable.transform.up, Input.mouseScrollDelta.y);
 
 
         }
         else{
-            
-            
-            this.current_placeable_rotation_offset += (this.mouseWheelRotation / this.mouseWheelRotation) * allowedAngleChunk;
+
+            if(Input.mouseScrollDelta.y!=0)
+                this.CurrentLocalPlaceable.transform.Rotate(this.CurrentLocalPlaceable.transform.up, ((Input.mouseScrollDelta.y / Input.mouseScrollDelta.y) * allowedAngleChunk));
         }
 
-        
     }
 
     private RaycastHit local_MoveCurrentPlaceableObjectToMouseRay()
@@ -340,7 +340,7 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
                     if (!this.current_placeable_item.ignorePlacementNormal)
                     {
                         this.CurrentLocalPlaceable.transform.rotation = Quaternion.FromToRotation(Vector3.up, hitInfo.normal);//ce hocmo da je zmer alignan z terenom - chesti pa take stvari
-                        this.CurrentLocalPlaceable.transform.Rotate(Vector3.up, this.current_placeable_rotation_offset);
+                        //this.CurrentLocalPlaceable.transform.Rotate(Vector3.up, this.current_placeable_rotation_offset);
                         offsetOfColliderHeight = Vector3.up * this.currentPlaceableCollider.size.y / 2;
 
                         offsetOfColliderHeight = hitInfo.normal*(this.currentPlaceableCollider.size.y / 2 - this.currentPlaceableCollider.center.y);

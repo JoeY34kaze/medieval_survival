@@ -86,8 +86,19 @@ public class AttachmentPoint : MonoBehaviour
 
     }
 
-    private void block_placements()
+    internal void block_placements()
     {
         this.blocking = true;
+    }
+
+    internal bool is_sibling_attachment_point_occupied_by(GameObject blocker)
+    {
+        foreach (AttachmentPoint sibling in transform.parent.GetComponentsInChildren<AttachmentPoint>()) {
+            if (!sibling.Equals(this)) {
+                if (sibling.attached_placeable.Equals(blocker))
+                    return true;
+            }
+        }
+        return false;
     }
 }

@@ -187,10 +187,19 @@ public class NetworkPlaceable : NetworkPlaceableBehavior
 
             if (p.isFree())
                 if (p.acceptsAttachmentOfType(this.snappableType))
+                {
+
+                    if (this.p.item.PlacementType == Item.SnappableType.door) { //ce je vrata, mora poblikirat vsa druga vrata na parent objektu.
+                        if (p.is_sibling_attachment_point_occupied_by(this.gameObject)) { //to mora poblokirat sicer bi na en frame vrat nalimal lahko dvoje vrat, vsaka pod svojim kotom
+                            p.attach(this.gameObject);
+                        }
+                    }
+
                     if (Vector3.Distance(p.gameObject.transform.position, this.transform.position) < this.distanceForSnappingHandling)
                     {
                         p.attachTryReverse(this.transform.gameObject);
                     }
+                }
         }
     }
 

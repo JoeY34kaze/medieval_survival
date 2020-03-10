@@ -17,5 +17,5 @@ MonoBehaviour:
   ingredients: []
   ingredient_quantities: 
   tier: 0
-  crafting_time: 1
+  crafting_time: 0
   craftable_by_player: 1
