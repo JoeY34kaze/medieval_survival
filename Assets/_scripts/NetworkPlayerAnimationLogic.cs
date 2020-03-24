@@ -16,6 +16,7 @@ public class NetworkPlayerAnimationLogic : NetworkPlayerAnimationBehavior
     public Transform _camera_framework;
     private NetworkPlayerStats stats;
     private NetworkPlayerCombatHandler combat_handler;
+    private NetworkPlayerMovement movement;
 
     private bool IK_swing_active = false;
     private Vector3 IK_swing_target;
@@ -27,6 +28,7 @@ public class NetworkPlayerAnimationLogic : NetworkPlayerAnimationBehavior
         anim = gameObject.GetComponent<Animator>();
         stats = GetComponent<NetworkPlayerStats>();
         combat_handler = GetComponent<NetworkPlayerCombatHandler>();
+        movement = GetComponent<NetworkPlayerMovement>();
     }
 
 
@@ -45,6 +47,13 @@ public class NetworkPlayerAnimationLogic : NetworkPlayerAnimationBehavior
 
     private float[] getVerticalAndHorizontalRounded() {
         float[] result = new float[2];
+
+        if (movement.lockMovement) {
+            result[0] = 0;
+            result[1] = 0;
+            return result;
+        }
+
 
         float round = 0.0f;
         float round_h = 0.0f;

@@ -10,12 +10,6 @@ public class panel_guild_handler : MonoBehaviour
     public Transform listTransform;
     public Text GuildNameText;
     public Text GuildMasterName;
-    private NetworkGuildManager ngm;
-
-    private void Start()
-    {
-        this.ngm=GameObject.FindGameObjectWithTag("GuildManager").GetComponent<NetworkGuildManager>();
-    }
 
     public void Clear() {
         foreach (Transform child in listTransform) Destroy(child.gameObject);
@@ -33,7 +27,7 @@ public class panel_guild_handler : MonoBehaviour
     /// leave guild lahko klikne samo lokalni player itak tko da samo poslemo rpc
     /// </summary>
     public void OnLeaveGuildClicked() {
-        ngm.leaveGuildRequest();
+        NetworkGuildManager.Instance.leaveGuildRequest();
     }
 
     internal void initGm(uint gm, string playerName, bool isGm)
@@ -49,7 +43,7 @@ public class panel_guild_handler : MonoBehaviour
     /// <param name="designated_player"></param>
     internal void localKickRequest(uint designated_player)
     {
-        ngm.localKickRequest((designated_player));
+        NetworkGuildManager.Instance.localKickRequest((designated_player));
 
     }
 }

@@ -46,7 +46,7 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
     {
         this.combat_handler = GetComponent<NetworkPlayerCombatHandler>();
         this.anim_logic = GetComponent<NetworkPlayerAnimationLogic>();
-        this.bar_handler = GetComponentInChildren<panel_bar_handler>();
+        this.bar_handler = UILogic.Instance.gameObject.GetComponentInChildren<panel_bar_handler>();
         this.npi = GetComponent<NetworkPlayerInventory>();
         this.valid_material = (Material)Resources.Load("Glow_green", typeof(Material));
         this.invalid_material = (Material)Resources.Load("Glow_red", typeof(Material));

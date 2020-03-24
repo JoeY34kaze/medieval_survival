@@ -35,17 +35,17 @@ public class Interactable_radial_menu : MonoBehaviour
 
     private int number_of_elements = 0;
 
-    private void Start()
+    internal void init()
     {
-        this.player = transform.root.gameObject;
+        this.player = UILogic.localPlayerGameObject;
         this.radialMenu = transform.GetChild(0).gameObject;
         this.menu = this.radialMenu.GetComponent<RMF_RadialMenu>();
-        this.interaction = transform.root.GetComponent<NetworkPlayerInteraction>();
+        this.interaction = UILogic.localPlayerGameObject.GetComponent<NetworkPlayerInteraction>();
     }
 
     private void show_menu()
     {
-
+        if (this.menu == null) init();
         //pobris od prejsnjega za vsak slucaj ceprav bi moral bit ze prazno
         menu.elements.Clear();
         foreach (Transform child in elements)
@@ -61,7 +61,7 @@ public class Interactable_radial_menu : MonoBehaviour
 
 
     private void show_menu(GameObject target) {
-
+        if (this.menu == null) init();
         //pobris od prejsnjega za vsak slucaj ceprav bi moral bit ze prazno
         menu.elements.Clear();
         foreach (Transform child in elements)
@@ -613,7 +613,8 @@ public class Interactable_radial_menu : MonoBehaviour
 
 
     public void hide_radial_menu() {//pobrise vse kar smo dodal pa take fore
-       // Debug.Log("Hiding radial menu.");
+                                    // Debug.Log("Hiding radial menu.");
+        if (this.menu == null) init();
         menu.elements.Clear();
         foreach (Transform child in elements)
         {
@@ -621,7 +622,7 @@ public class Interactable_radial_menu : MonoBehaviour
         }
         center_label.text = "";
         this.radialMenu.SetActive(false);
-        GetComponentInParent<UILogic>().DisableMouse();
+       UILogic.Instance.DisableMouse();
     }
 
     public void player_interaction_button_execution()

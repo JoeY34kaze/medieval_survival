@@ -360,12 +360,12 @@ public class NetworkPlaceable : NetworkPlaceableBehavior
         if (args.Info.SendingPlayer.IsHost) {
             string pred = args.GetNext<String>();
             this.p.setParametersFromNetworkString(pred);
-            FindByid(networkObject.MyPlayerId).GetComponentInChildren<UILogic>().try_drawing_durability_for_placeable(this);
+            UILogic.Instance.try_drawing_durability_for_placeable(this);
         }
     }
 
     private void clear_potential_ui_durability_panel() {
-        FindByid(networkObject.MyPlayerId).GetComponentInChildren<UILogic>().clear_durability_panel_for_placeable(this);
+        UILogic.Instance.clear_durability_panel_for_placeable(this);
           }
 
    

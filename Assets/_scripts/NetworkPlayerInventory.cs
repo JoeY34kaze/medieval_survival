@@ -20,27 +20,22 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
     public delegate void OnItemChanged();
     public OnItemChanged onItemChangedCallback;
 
-    //public GameObject panel_inventory; //celotna panela za inventorij, to se izrise ko prtisnes "i"
-
-    public Transform[] panel_personalInventorySlots;
-
-    InventorySlotPersonal[] slots;  // predstavlajo slote v inventoriju, vsak drzi en item. 
-
-
+   
+    internal InventorySlotPersonal[] personal_inventory_slots;  // predstavlajo slote v inventoriju, vsak drzi en item. 
 
     private DynamicCharacterAvatar avatar;
-    public NetworkPlayerCombatHandler combatHandler;
+    internal NetworkPlayerCombatHandler combatHandler;
     //-------------------------------LOADOUT SLOTS-----------------------------
-    public InventorySlotLoadout loadout_head;
-    public InventorySlotLoadout loadout_chest;
-    public InventorySlotLoadout loadout_hands;
-    public InventorySlotLoadout loadout_legs;
-    public InventorySlotLoadout loadout_feet;
-    public InventorySlotLoadout loadout_backpack;//ni loadout item ubistvu. logika je cist locena ker je prioriteta da se backpack lahko cimlazje fukne dol. tle ga mam samo za izrisovanje v inventorij panel
+    internal InventorySlotLoadout loadout_head;
+    internal InventorySlotLoadout loadout_chest;
+    internal InventorySlotLoadout loadout_hands;
+    internal InventorySlotLoadout loadout_legs;
+    internal InventorySlotLoadout loadout_feet;
+    internal InventorySlotLoadout loadout_backpack;//ni loadout item ubistvu. logika je cist locena ker je prioriteta da se backpack lahko cimlazje fukne dol. tle ga mam samo za izrisovanje v inventorij panel
 
-    public InventorySlotBar[] bar_slots;
+    internal InventorySlotBar[] bar_slots;
     [SerializeField]
-    public Predmet[] predmeti_hotbar;
+    internal Predmet[] predmeti_hotbar;
 
     private Predmet head;
     private Predmet chest;
@@ -79,21 +74,19 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         this.neutralStateHandler = GetComponent<NetworkPlayerNeutralStateHandler>();
         this.avatar = GetComponent<DynamicCharacterAvatar>();
         this.stats = GetComponent<NetworkPlayerStats>();
-        predmeti_hotbar = new Predmet[this.bar_slots.Length];
 
-        slots = new InventorySlotPersonal[panel_personalInventorySlots.Length];
-        for (int i = 0; i < slots.Length; i++)
-            slots[i] = panel_personalInventorySlots[i].GetComponent<InventorySlotPersonal>();
-        predmeti_personal = new Predmet[slots.Length];
 
     }
 
-
+    internal void on_UI_linked() {//klice se z UILogic.on_local_player_linked
+        predmeti_hotbar = new Predmet[this.bar_slots.Length];
+        predmeti_personal = new Predmet[personal_inventory_slots.Length];
+    }
 
     protected override void NetworkStart()
     {
         base.NetworkStart();
-
+        
         if (networkObject.IsOwner)
         {
             onItemChangedCallback += UpdateUI;    // Subscribe to the onItemChanged callback
@@ -117,17 +110,17 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
     {
         if (!networkObject.IsOwner) return;
         //personal inventory
-        if (slots == null) return;
-        for (int i = 0; i < slots.Length; i++)
+        if (personal_inventory_slots == null) return;
+        for (int i = 0; i < personal_inventory_slots.Length; i++)
         {
             if (predmeti_personal[i] != null)  // If there is an item to add
             {
-                slots[i].AddPredmet(this.predmeti_personal[i]);   // Add it
+                personal_inventory_slots[i].AddPredmet(this.predmeti_personal[i]);   // Add it
             }
             else
             {
                 // Otherwise clear the slot
-                slots[i].ClearSlot();
+                personal_inventory_slots[i].ClearSlot();
             }
         }
 
@@ -426,8 +419,6 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
             default:
                 break;
         }
-        if (onItemChangedCallback != null && networkObject.IsServer)//ker se nkol ne izvede na clientu ta metoda in server itak nebo nkol vidu inventorija od drugih na ekranu.. probably
-            onItemChangedCallback.Invoke();
         return r;
     }
 
@@ -654,8 +645,8 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
 
     internal void OnRightClickPersonalInventory(GameObject g)//tole lahko potem pri ciscenju kode z malo preurejanja damo v uno tavelko metodo
     {
-        if (GetComponentInChildren<UILogic>().currentActiveContainer != null) {//personal -> chest
-            NetworkContainer ncbh = GetComponentInChildren<UILogic>().currentActiveContainer;
+        if (UILogic.Instance.currentActiveContainer != null) {//personal -> chest
+            NetworkContainer ncbh = UILogic.Instance.currentActiveContainer;
 
             InventorySlot from = g.GetComponent<InventorySlot>();
             int indexFrom = getIndexFromName(from.name);
@@ -671,9 +662,9 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
     {
         if (networkObject.IsOwner)
         {
-            if (GetComponentInChildren<UILogic>().currentActiveContainer != null)
+            if (UILogic.Instance.currentActiveContainer != null)
             {// -> chest
-                NetworkContainer ncbh = GetComponentInChildren<UILogic>().currentActiveContainer;
+                NetworkContainer ncbh = UILogic.Instance.currentActiveContainer;
 
                 InventorySlot from = g.GetComponent<InventorySlot>();
                 int indexFrom = getIndexFromName(from.name);
@@ -691,9 +682,9 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
 
     internal void OnRightClickBar(GameObject g)//tole lahko potem pri ciscenju kode z malo preurejanja damo v uno tavelko metodo
     {
-        if (GetComponentInChildren<UILogic>().currentActiveContainer != null)
+        if (UILogic.Instance.currentActiveContainer != null)
         {// -> chest
-            NetworkContainer ncbh = GetComponentInChildren<UILogic>().currentActiveContainer;
+            NetworkContainer ncbh = UILogic.Instance.currentActiveContainer;
 
             InventorySlot from = g.GetComponent<InventorySlot>();
             int indexFrom = getIndexFromName(from.name);
@@ -707,9 +698,9 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
 
     internal void OnRightClickLoadout(GameObject g)//tole lahko potem pri ciscenju kode z malo preurejanja damo v uno tavelko metodo
     {
-        if (GetComponentInChildren<UILogic>().currentActiveContainer!=null)
+        if (UILogic.Instance.currentActiveContainer!=null)
         {//personal -> chest
-            NetworkContainer ncbh = GetComponentInChildren<UILogic>().currentActiveContainer;
+            NetworkContainer ncbh = UILogic.Instance.currentActiveContainer;
 
             InventorySlot from = g.GetComponent<InventorySlot>();
             int indexFrom = (int)((InventorySlotLoadout)from).type;//getIndexFromName(from.name);
@@ -723,9 +714,9 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
 
     internal void OnRightClickContainer(GameObject g)//tole lahko potem pri ciscenju kode z malo preurejanja damo v uno tavelko metodo
     {
-        if (GetComponentInChildren<UILogic>().currentActiveContainer != null)
+        if (UILogic.Instance.currentActiveContainer != null)
         {//personal -> chest
-            NetworkContainer ncbh = GetComponentInChildren<UILogic>().currentActiveContainer;
+            NetworkContainer ncbh = UILogic.Instance.currentActiveContainer;
 
             InventorySlot from = g.GetComponent<InventorySlot>();
             int indexFrom = getIndexFromName(from.name);
@@ -1476,26 +1467,20 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
 
     }
 
-    public override void SendLoadoutUpdate(RpcArgs args)//ce je host se tole senkrat prepece cez, i dont give a fuck honestly..
+    public override void SendLoadoutUpdate(RpcArgs args)
     {
-        if (args.Info.SendingPlayer.NetworkId != 0) return;
-
-
+        if (args.Info.SendingPlayer.NetworkId != 0 || networkObject.IsServer) return;
         this.head = Predmet.createNewPredmet(args.GetNext<string>());
-
-
         this.chest = Predmet.createNewPredmet(args.GetNext<string>());
         this.hands = Predmet.createNewPredmet(args.GetNext<string>());
         this.legs = Predmet.createNewPredmet(args.GetNext<string>());
-
         this.feet = Predmet.createNewPredmet(args.GetNext<string>());
-
         this.backpack = Predmet.createNewPredmet(args.GetNext<string>());
 
         if (onLoadoutChangedCallback != null)
             onLoadoutChangedCallback.Invoke();
-        if (onItemChangedCallback != null)//najbrz nepotrebno ker je serverj in ne owner ampak ne skodi. optimizacija ksnej..
-            onItemChangedCallback.Invoke();//najbrz nepotrebno ker se itak klice senkat v rpcju. optimizacija ksnej
+        if (onItemChangedCallback != null)
+            onItemChangedCallback.Invoke();
 
     }
 
@@ -2325,7 +2310,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         if (args.Info.SendingPlayer.NetworkId == 0)
         {
             List<PredmetRecepie> r = getCraftingListFromNetworkStringIds(args.GetNext<string>());
-            GetComponentInChildren<craftingPanelHandler>().updateCraftingQueueWithServerData(r, args.GetNext<int>());
+            UILogic.Instance.GetComponentInChildren<craftingPanelHandler>().updateCraftingQueueWithServerData(r, args.GetNext<int>());
         }
 
 
@@ -2349,24 +2334,24 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
     #region containers
     internal void onContainerOpen(NetworkContainer container, Predmet[] predmeti)
     {
-        if (GetComponentInChildren<UILogic>().allows_UI_opening)
+        if (UILogic.Instance.allows_UI_opening)
         {
-            if (GetComponentInChildren<UILogic>().currently_openened_container.Equals(container))
+            if (UILogic.Instance.currently_openened_container.Equals(container))
             {
-                GetComponentInChildren<UILogic>().setContainerPanelActiveForContainer(predmeti);
-                GetComponentInChildren<UILogic>().setCurrentActiveContainer(container);
+                UILogic.Instance.setContainerPanelActiveForContainer(predmeti);
+                UILogic.Instance.setCurrentActiveContainer(container);
             }
         }
     }
 
     internal void onContainerOpenWithUpkeep(NetworkContainer container, Predmet[] predmeti, int a,int b, int c, int d)
     {
-        if (GetComponentInChildren<UILogic>().allows_UI_opening)
+        if (UILogic.Instance.allows_UI_opening)
         {
-            if (GetComponentInChildren<UILogic>().currently_openened_container.Equals(container))
+            if (UILogic.Instance.currently_openened_container.Equals(container))
             {
-                GetComponentInChildren<UILogic>().setContainerPanelActiveForFlagContainer(predmeti, a,b,c,d);
-                GetComponentInChildren<UILogic>().setCurrentActiveContainer(container);
+                UILogic.Instance.setContainerPanelActiveForFlagContainer(predmeti, a,b,c,d);
+                UILogic.Instance.setCurrentActiveContainer(container);
             }
         }
     }
@@ -2375,7 +2360,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
 
     internal void handleBackpackToContainer(RectTransform invSlot)
     {
-        NetworkContainer ncbh = GetComponentInChildren<UILogic>().currentActiveContainer;
+        NetworkContainer ncbh = UILogic.Instance.currentActiveContainer;
 
         InventorySlot from = this.draggedItemParent.GetComponent<InventorySlot>();
         int indexFrom = getIndexFromName(from.name);
@@ -2386,7 +2371,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
 
     internal void handleContainerToBackpack(RectTransform invSlot)
     {
-        NetworkContainer ncbh = GetComponentInChildren<UILogic>().currentActiveContainer;
+        NetworkContainer ncbh = UILogic.Instance.currentActiveContainer;
 
         InventorySlot from = this.draggedItemParent.GetComponent<InventorySlot>();
         int indexFrom = getIndexFromName(from.name);
@@ -2397,7 +2382,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
 
     internal void handleContainerToPersonal(RectTransform invSlot)
     {
-        NetworkContainer ncbh = GetComponentInChildren<UILogic>().currentActiveContainer;
+        NetworkContainer ncbh = UILogic.Instance.currentActiveContainer;
 
         InventorySlot from = this.draggedItemParent.GetComponent<InventorySlot>();
         int indexFrom = getIndexFromName(from.name);
@@ -2408,7 +2393,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
 
     internal void handleBarToContainer(RectTransform invSlot)
     {
-        NetworkContainer ncbh = GetComponentInChildren<UILogic>().currentActiveContainer;
+        NetworkContainer ncbh = UILogic.Instance.currentActiveContainer;
 
         InventorySlot from = this.draggedItemParent.GetComponent<InventorySlot>();
         int indexFrom = getIndexFromName(from.name);
@@ -2419,7 +2404,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
 
     internal void handleContainerToBar(RectTransform invSlot)
     {
-        NetworkContainer ncbh = GetComponentInChildren<UILogic>().currentActiveContainer;
+        NetworkContainer ncbh = UILogic.Instance.currentActiveContainer;
 
         InventorySlot from = this.draggedItemParent.GetComponent<InventorySlot>();
         int indexFrom = getIndexFromName(from.name);
@@ -2430,7 +2415,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
 
     internal void handleLoadoutToContainer(RectTransform invSlot)
     {
-        NetworkContainer ncbh = GetComponentInChildren<UILogic>().currentActiveContainer;
+        NetworkContainer ncbh = UILogic.Instance.currentActiveContainer;
 
         InventorySlot from = this.draggedItemParent.GetComponent<InventorySlot>();
         int indexFrom = getIndexFromName(from.name);
@@ -2441,7 +2426,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
 
     internal void handleContainerToLoadout(RectTransform invSlot)
     {
-        NetworkContainer ncbh = GetComponentInChildren<UILogic>().currentActiveContainer;
+        NetworkContainer ncbh = UILogic.Instance.currentActiveContainer;
 
         InventorySlot from = this.draggedItemParent.GetComponent<InventorySlot>();
         int indexFrom = getIndexFromName(from.name);
@@ -2454,7 +2439,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
     {
         //rabmo dobit taprav container kterga mamo zdle izbranga. ko ga dobimo klicemo z containerja metodo za manipulacijo z itemi.
         //najlazje bo to dobit kr z UILOgic, ker smo nastavli trenutni container ob odprtju containerja.
-        NetworkContainer ncbh= GetComponentInChildren<UILogic>().currentActiveContainer;
+        NetworkContainer ncbh= UILogic.Instance.currentActiveContainer;
 
         InventorySlot from = this.draggedItemParent.GetComponent<InventorySlot>();
         int indexFrom = getIndexFromName(from.name);
@@ -2466,7 +2451,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
 
     internal void handleContainerToContainer(RectTransform invSlot)
     {
-        NetworkContainer ncbh = GetComponentInChildren<UILogic>().currentActiveContainer;
+        NetworkContainer ncbh = UILogic.Instance.currentActiveContainer;
 
         InventorySlot from = this.draggedItemParent.GetComponent<InventorySlot>();
         int indexFrom = getIndexFromName(from.name);
@@ -2478,7 +2463,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
 
     internal void localPlayerDropItemFromContainerRequest(int v)
     {
-        GetComponentInChildren<UILogic>().currentActiveContainer.localRequestDropItemContainer(v);
+        UILogic.Instance.currentActiveContainer.localRequestDropItemContainer(v);
     }
 
     #endregion

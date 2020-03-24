@@ -13,8 +13,6 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
     private NetworkPlayerInventory networkPlayerInventory;
 
     private NetWorker myNetWorker;
-
-    public Interactable_radial_menu menu;
     private bool interacting = false;
 
     public GameObject canvas;
@@ -186,30 +184,30 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
                                     if (interactable is Interactable_player)
                                     {
                                         if (!interactable.transform.root.Equals(transform))//ce nismo raycastal samo nase ( recimo ce smo gledal dol na lastno nogo/roko al pa kej
-                                            this.menu.show_player_interaction_menu(interactable.gameObject);
+                                            UILogic.Instance.interactable_radial_menu.show_player_interaction_menu(interactable.gameObject);
                                     }
                                     //-----------------------------------------------------ARMOR STAND-------------------------------
                                     if (interactable is Interactible_ArmorStand)
                                     {
-                                        this.menu.show_ArmorStand_interaction_menu(interactable.gameObject);
+                                        UILogic.Instance.interactable_radial_menu.show_ArmorStand_interaction_menu(interactable.gameObject);
                                     }
                                     if (interactable is Interactable_Backpack)
-                                        this.menu.show_backpack_interaction_menu(interactable.gameObject);
+                                        UILogic.Instance.interactable_radial_menu.show_backpack_interaction_menu(interactable.gameObject);
 
                                     if (interactable is Interactable_chest)
-                                        this.menu.show_chest_interaction_menu(interactable.gameObject);
+                                        UILogic.Instance.interactable_radial_menu.show_chest_interaction_menu(interactable.gameObject);
 
                                     if (interactable is Interactable_trap)
-                                        this.menu.show_trap_interaction_menu(interactable.gameObject);
+                                        UILogic.Instance.interactable_radial_menu.show_trap_interaction_menu(interactable.gameObject);
 
                                     if (interactable is Interactable_crafting_station)
-                                        this.menu.show_craftingStation_menu(interactable.gameObject);
+                                        UILogic.Instance.interactable_radial_menu.show_craftingStation_menu(interactable.gameObject);
 
                                     if (interactable is Interactable_guild_flag)
-                                        this.menu.show_flag_menu(interactable.gameObject, interactable.GetComponent<NetworkGuildFlag>().is_player_authorized(networkObject.Owner.NetworkId));
+                                        UILogic.Instance.interactable_radial_menu.show_flag_menu(interactable.gameObject, interactable.GetComponent<NetworkGuildFlag>().is_player_authorized(networkObject.Owner.NetworkId));
 
                                     if (interactable is interactable_trebuchet) {
-                                        this.menu.show_trebuchet_menu(interactable.gameObject, interactable.GetComponent<NetworkPlaceable>().is_player_owner(networkObject.MyPlayerId));
+                                        UILogic.Instance.interactable_radial_menu.show_trebuchet_menu(interactable.gameObject, interactable.GetComponent<NetworkPlaceable>().is_player_owner(networkObject.MyPlayerId));
                                     }
                                 }
                             }
@@ -239,7 +237,7 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
                     {
                         this.time_pressed_alert = 0;
                         Debug.Log("ALERT long");
-                        this.menu.show_alert_menu(hit.point);
+                        UILogic.Instance.interactable_radial_menu.show_alert_menu(hit.point);
                     }
                     //----------------- konc alertov
 
@@ -252,7 +250,7 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
         }
         if (Input.GetButtonUp("Interact") || Input.GetButtonUp("Alert"))
         {
-            this.menu.hide_radial_menu();
+            UILogic.Instance.hide_radial_menu();
         }
     }
 
@@ -263,7 +261,7 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
         if (this.current_placeable_for_durability_lookup != null)
         {
             this.current_placeable_for_durability_lookup = null;
-            gameObject.GetComponentInChildren<UILogic>().clear_placeable_durability_lookup();
+            UILogic.Instance.clear_placeable_durability_lookup();
         }
     }
 
@@ -274,7 +272,7 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
         }
 
         this.current_placeable_for_durability_lookup = p;
-        gameObject.GetComponentInChildren<UILogic>().setup_placeable_durability_lookup(p);
+        UILogic.Instance.setup_placeable_durability_lookup(p);
         p.local_player_predmet_update_request();
     }
 
@@ -588,7 +586,7 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
 
     internal void local_player_siege_weapon_rotate_request(GameObject t)
     {
-        GetComponentInChildren<UILogic>().show_trebuchet_rotation_panel(t.GetComponent<NetworkSiegeTrebuchet>());
+        UILogic.Instance.show_trebuchet_rotation_panel(t.GetComponent<NetworkSiegeTrebuchet>());
     }
 
     internal void local_player_siege_weapon_trajectory_change_request(GameObject t)

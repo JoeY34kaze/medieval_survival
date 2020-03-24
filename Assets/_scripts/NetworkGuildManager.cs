@@ -25,11 +25,9 @@ public class NetworkGuildManager : NetworkGuildManagerBehavior
 
     public List<uint[]> valid_invites;
 
-    private decicions_handler_ui decision_handler;
-    private panel_guild_handler pgh;
-    public NetworkPlayerStats localStats;
-
     //private UILogic uiLogic;
+
+    private Guild currentGuild;
 
     #endregion
 
@@ -59,7 +57,7 @@ public class NetworkGuildManager : NetworkGuildManagerBehavior
     protected override void NetworkStart()
     {
         base.NetworkStart();
-
+        UILogic.Instance.ngm = this;
         if (networkObject.IsServer) {
             //load guilds from database or something...
             //if null
@@ -68,25 +66,10 @@ public class NetworkGuildManager : NetworkGuildManagerBehavior
             this.valid_invites = new List<uint[]>();
         }
         localPlayer = FindByid(NetworkManager.Instance.Networker.Me.NetworkId);//?? i guess it should work. mrde bols da player pogleda pa poveze z druge strani..
-        this.decision_handler = this.localPlayer.GetComponentInChildren<decicions_handler_ui>();
-        this.localStats = this.localPlayer.GetComponent<NetworkPlayerStats>();
-        this.pgh = this.localStats.GetPGH();
-        this.name_guild = this.localStats.guild_name_input;
-        this.tag_guild = this.localStats.guild_tag_input;
-
-        if (this.localStats == null || this.decision_handler == null || this.localPlayer == null) StartCoroutine(LinkStatsDelayed(2));
+        localPlayerGuildInfoUpdateRequest();
+        
     }
 
-    private IEnumerator LinkStatsDelayed(float t) {
-        yield return new WaitForSeconds(t);
-        if (this.localStats == null) {
-            this.decision_handler = this.localPlayer.GetComponentInChildren<decicions_handler_ui>();
-            this.localStats = this.localPlayer.GetComponent<NetworkPlayerStats>();
-            this.pgh = this.localStats.GetPGH();
-            this.name_guild = this.localStats.guild_name_input;
-            this.tag_guild = this.localStats.guild_tag_input;
-        }
-    } 
 
 
     #endregion
@@ -106,12 +89,13 @@ public class NetworkGuildManager : NetworkGuildManagerBehavior
             uint faggot = args.GetNext<uint>();
 
 
-            Guild from = getGuildFromMember(requester);
+            Guild from = getGuildFromNetworkId(requester);
 
             if (requester == from.guildMaster) {
                 if (requester != faggot) {
                     from.removeMember(faggot);
-                    sendGuildModifiedResponse(CreateGuild(faggot, FindByid(faggot).GetComponent<NetworkPlayerStats>().playerName + "'s Guild", args.Info.SendingPlayer.NetworkId + "-ST", Color.gray, null));
+                    sendGuildModifiedResponse(CreateGuild(faggot, FindByid(faggot).GetComponent<NetworkPlayerStats>().playerName + "'s Guild", args.Info.SendingPlayer.NetworkId + "-ST", "ff0000", null));
+                    sendUserInfoResponseTo(faggot);
                 }
             }
         }
@@ -131,7 +115,7 @@ public class NetworkGuildManager : NetworkGuildManagerBehavior
     {
         if (networkObject.IsServer) {
             uint requester = args.Info.SendingPlayer.NetworkId;
-            Guild from = getGuildFromMember(requester);
+            Guild from = getGuildFromNetworkId(requester);
             if (from.members.Count <= 1)
             {
                 //nemora leavat ce je sam not, to je njegov starter guild al pa nekej
@@ -145,16 +129,12 @@ public class NetworkGuildManager : NetworkGuildManagerBehavior
                 //posljemo ostalim memberjim guilda updejt? - mislm da ni treba
 
                 //kreiramo nov guild zanjga. njegov starter guild in poslemo njemu updejt
-                sendGuildModifiedResponse(CreateGuild(args.Info.SendingPlayer.NetworkId, FindByid(args.Info.SendingPlayer.NetworkId).GetComponent<NetworkPlayerStats>().playerName + "'s Guild", args.Info.SendingPlayer.NetworkId+"-ST" , Color.gray, null));
-                
+                sendGuildModifiedResponse(CreateGuild(args.Info.SendingPlayer.NetworkId, FindByid(args.Info.SendingPlayer.NetworkId).GetComponent<NetworkPlayerStats>().playerName + "'s Guild", args.Info.SendingPlayer.NetworkId+"-ST" , "#ff0000", null));
+                sendUserInfoResponseTo(args.Info.SendingPlayer);
             }
         }
     }
 
-    internal void Init()
-    {
-        
-    }
 
     #endregion
 
@@ -163,8 +143,7 @@ public class NetworkGuildManager : NetworkGuildManagerBehavior
     public void OnButtonModifyClick()
     {
         Debug.Log("Modification CLICKED");
-        if (localPlayer == null) localPlayer = FindByid(NetworkManager.Instance.Networker.Me.NetworkId);
-        localPlayer.GetComponentInChildren<UILogic>().showGuildModificationPanel(true, this);
+        UILogic.Instance.showGuildModificationPanel(true, this);
 
     }
 
@@ -176,25 +155,27 @@ public class NetworkGuildManager : NetworkGuildManagerBehavior
         string tag="-1";
         Color color=Color.gray;
         byte[] image_byte = new byte[25];
-        ///image nekak dobit
-        ///
-        if (this.name_guild == null) this.name_guild = this.localStats.guild_name_input;
-        if (this.tag_guild == null) this.tag_guild = this.localStats.guild_tag_input;
-        if (this.name_guild != null)
-            if (this.name_guild.text != "")
-                name = this.name_guild.text;
-        if (this.tag_guild != null)
-            if (this.tag_guild.text != "")
-                tag = this.tag_guild.text;
-        //if (this.color_guild != null)
-        //  if (this.color_guild.text != "")
-        //    color = IfValidColorReturnColor(this.color_guild.text, color);
 
-        //nekej nrdit za image..
+        try
+        {
+            name = UILogic.Instance.GuildModificationName.text;
+        }
+        catch (Exception e) { }
+
+        try
+        {
+            tag = UILogic.Instance.GuildModificationTag.text;
+        }
+        catch (Exception e) { }
+        /*
+        try
+        {
+            name = UILogic.Instance.GuildModificationColor.text;
+        }
+        catch (Exception e) { }*/
 
 
-
-        localPlayer.GetComponentInChildren<UILogic>().showGuildModificationPanel(false, this);
+        UILogic.Instance.showGuildModificationPanel(false, this);
 
 
         networkObject.SendRpc(RPC_CREATE_OR_MODIFY_GUILD_REQUEST, Receivers.Server, name, tag, color, image_byte);
@@ -212,7 +193,7 @@ public class NetworkGuildManager : NetworkGuildManagerBehavior
 
             string name = args.GetNext<string>();
             string tag = args.GetNext<string>();
-            Color c = args.GetNext<Color>();
+            string c = args.GetNext<string>();
             byte[] image = args.GetNext<byte[]>();
 
 
@@ -231,7 +212,7 @@ public class NetworkGuildManager : NetworkGuildManagerBehavior
             else
             {
                 //create guild
-                g = CreateGuild(args.Info.SendingPlayer.NetworkId, FindByid(args.Info.SendingPlayer.NetworkId).GetComponent<NetworkPlayerStats>().name + "'s Guild", "", Color.gray, null);
+                g = CreateGuild(args.Info.SendingPlayer.NetworkId, FindByid(args.Info.SendingPlayer.NetworkId).GetComponent<NetworkPlayerStats>().name + "'s Guild", "", "#ff0000", null);
             }
 
             sendGuildModifiedResponse(g);
@@ -254,7 +235,7 @@ public class NetworkGuildManager : NetworkGuildManagerBehavior
                 {
                     NetworkPlayerStats ms = pl.GetComponent<NetworkPlayerStats>();
                     if (ms != null)
-                        ms.SendGuildUpdate(g.name, g.tag, g.color, g.image);
+                        ms.SetGuildUpdated(g.tag);
                     else
                     {
                         Debug.LogError("MS IS NULL. COULDNT UPDATE OR CREATE GUILD!");
@@ -285,7 +266,7 @@ public class NetworkGuildManager : NetworkGuildManagerBehavior
                     NetworkPlayerStats ms = pl.GetComponent<NetworkPlayerStats>();
                     if (ms != null)
                     {
-                        ms.SendGuildUpdate(g.name, g.tag, g.color, g.image);
+                        ms.SetGuildUpdated(g.tag);
                         sent = true;
                     }
                     else
@@ -325,14 +306,6 @@ public class NetworkGuildManager : NetworkGuildManagerBehavior
         return null;
     }
 
-
-
-    
-
-    public void SetPGH(panel_guild_handler pgh) {
-        this.pgh = pgh;
-    }
-
     private void AddToValidInvites(uint gm, uint pleb) {
         uint[] inv = new uint[2];
         inv[0] = gm;
@@ -358,10 +331,10 @@ public class NetworkGuildManager : NetworkGuildManagerBehavior
 
     internal void toggleMemberPanel()
     {
-        if (this.pgh == null) this.pgh = this.localStats.GetPGH();
-        bool next = !this.pgh.gameObject.activeSelf;
-        this.pgh.Clear();//pobrise prejsne memberje
-        this.pgh.gameObject.SetActive(!this.pgh.gameObject.activeSelf);
+
+        bool next = !UILogic.PanelGuildHander.gameObject.activeSelf;
+        UILogic.PanelGuildHander.Clear();//pobrise prejsne memberje
+        UILogic.PanelGuildHander.gameObject.SetActive(!UILogic.PanelGuildHander.gameObject.activeSelf);
         /*if (next)
         {
             Cursor.lockState = CursorLockMode.None;
@@ -378,20 +351,10 @@ public class NetworkGuildManager : NetworkGuildManagerBehavior
     {
         if (!v)
         {
-            if (this.pgh == null) this.pgh = this.localStats.GetPGH();
-            //bool next = !this.pgh.gameObject.activeSelf;
-            this.pgh.Clear();//pobrise prejsne memberje
-            //this.pgh.gameObject.SetActive(!this.pgh.gameObject.activeSelf);
-            //Cursor.lockState = CursorLockMode.Locked;
-            //Cursor.visible = false;
+            UILogic.PanelGuildHander.Clear();//pobrise prejsne memberje
         }
         else {
-            if (this.pgh == null) this.pgh = this.localStats.GetPGH();
-            //bool next = !this.pgh.gameObject.activeSelf;
-            this.pgh.Clear();//pobrise prejsne memberje
-            //this.pgh.gameObject.SetActive(!this.pgh.gameObject.activeSelf);
-            //Cursor.lockState = CursorLockMode.None;
-            //Cursor.visible = true;
+            UILogic.PanelGuildHander.Clear();//pobrise prejsne memberje
             localGetMembersRequest();
         }
     }
@@ -404,7 +367,7 @@ public class NetworkGuildManager : NetworkGuildManagerBehavior
     public override void GetGuildMembersRequest(RpcArgs args)
     {
         if (networkObject.IsServer) {
-            Guild g = getGuildFromMember(args.Info.SendingPlayer.NetworkId);
+            Guild g = getGuildFromNetworkId(args.Info.SendingPlayer.NetworkId);
             if(g!=null)
                 networkObject.SendRpc(args.Info.SendingPlayer, RPC_GUILD_MEMBERS_UPDATE,g.guildMaster, g.GetMembersToString(), g.name);
         }
@@ -414,7 +377,7 @@ public class NetworkGuildManager : NetworkGuildManagerBehavior
 
     #region GUILD_RELATED_METHODS
 
-    public Guild CreateGuild(uint gm, string name, string tag, Color c, byte[] image)
+    public Guild CreateGuild(uint gm, string name, string tag, string c, byte[] image)
     {
         Guild g = new Guild(gm, name, tag, c, image);
         if (this.guilds == null) this.guilds = new List<Guild>();
@@ -429,20 +392,6 @@ public class NetworkGuildManager : NetworkGuildManagerBehavior
                     if (g.isMember(p))
                         return g;
                 }
-        return null;
-    }
-
-    /// <summary>
-    /// vrne guild katerga je member
-    /// </summary>
-    /// <param name="player_id"></param>
-    /// <returns></returns>
-    private Guild getGuildFromMember(uint player_id)
-    {
-        foreach (Guild g in this.guilds)
-        {
-            if (g.isMember(player_id)) return g;
-        }
         return null;
     }
 
@@ -467,19 +416,19 @@ public class NetworkGuildManager : NetworkGuildManagerBehavior
         return r;
     }
 
-
+    [Serializable]
     public class Guild
     {
         public int id;
         public string name;
         public string tag;
-        public Color color;
+        public string color;
         public byte[] image;
         public uint guildMaster;
         public List<uint> members;
 
 
-        public Guild(uint gm, string v1, string v2, Color gray, byte[] p)
+        public Guild(uint gm, string v1, string v2, string c, byte[] p)
         {
             this.guildMaster = gm;
             this.members = new List<uint>();
@@ -487,7 +436,7 @@ public class NetworkGuildManager : NetworkGuildManagerBehavior
 
             this.name = v1;
             this.tag = v2;
-            this.color = gray;
+            this.color = c;
             this.image = p;
 
             //id??
@@ -502,13 +451,6 @@ public class NetworkGuildManager : NetworkGuildManagerBehavior
             return String.Join(",", Array.ConvertAll(this.members.ToArray(), element => element.ToString()));
         }
 
-        public void updateInfo(string name, string tag, Color c, byte[] image)
-        {
-            this.name = name;
-            this.tag = tag;
-            this.color = c;
-            this.image = image;
-        }
 
         public void addMember(uint i)
         {
@@ -550,8 +492,8 @@ public class NetworkGuildManager : NetworkGuildManagerBehavior
         if (networkObject.IsServer) {
             uint pleb = args.GetNext<uint>();
             uint gm = args.Info.SendingPlayer.NetworkId;
-            Guild g = getGuildFromMember(gm);
-            Guild g2 = getGuildFromMember(pleb);
+            Guild g = getGuildFromNetworkId(gm);
+            Guild g2 = getGuildFromNetworkId(pleb);
             if (g != null && (g2==null || g2.members.Count==1)) {//samo guild master lahko invita in samo ce player ni ze u guildu lahko invita
                 if (g.guildMaster == gm) {//lahko poslje invite naprej
                     AddToValidInvites(gm, pleb);
@@ -573,9 +515,9 @@ public class NetworkGuildManager : NetworkGuildManagerBehavior
             string guild_name = args.GetNext<string>();
 
             //narisi panelo enako kot za team invite
-            
 
-            this.decision_handler.draw_guild_invite_decision(FindByid(gm).GetComponent<NetworkPlayerStats>().playerName, guild_name, gm, this);
+
+            UILogic.DecisionsHandler.draw_guild_invite_decision(FindByid(gm).GetComponent<NetworkPlayerStats>().playerName, guild_name, gm, this);
 
         }
     }
@@ -603,11 +545,11 @@ public class NetworkGuildManager : NetworkGuildManagerBehavior
             bool status = args.GetNext<bool>();
             if (isGuildInvitationResponseValid(gm, from))
             {
-                Guild g = getGuildFromMember(gm);
+                Guild g = getGuildFromNetworkId(gm);
                 if (g != null)
                 {
                     //naenkrat treba zbrisat in dodat v tem zaporedju, sicer zbrise guild v katerga ga je ubistvu hotu dodat lol
-                    Guild g2 = getGuildFromMember(from);
+                    Guild g2 = getGuildFromNetworkId(from);
                     DestroyGuild(g2);
 
                     g.addMember(from);
@@ -644,16 +586,16 @@ public class NetworkGuildManager : NetworkGuildManagerBehavior
             uint gm = args.GetNext<uint>();
             string members_string = args.GetNext<string>();
             string gName = args.GetNext<string>();
-            this.pgh.GuildNameText.text = gName;
+            UILogic.PanelGuildHander.GuildNameText.text = gName;
 
             uint[] members = GetMembersFromRPCString(members_string);
 
-            pgh.initGm(gm, FindByid(gm).GetComponent<NetworkPlayerStats>().playerName, NetworkManager.Instance.Networker.Me.NetworkId == gm);
+            UILogic.PanelGuildHander.initGm(gm, FindByid(gm).GetComponent<NetworkPlayerStats>().playerName, NetworkManager.Instance.Networker.Me.NetworkId == gm);
             foreach (uint ui in members)
             {
                 if (ui != gm)
                 {
-                    pgh.init(ui, FindByid(ui).GetComponent<NetworkPlayerStats>().playerName, NetworkManager.Instance.Networker.Me.NetworkId == gm);
+                    UILogic.PanelGuildHander.init(ui, FindByid(ui).GetComponent<NetworkPlayerStats>().playerName, NetworkManager.Instance.Networker.Me.NetworkId == gm);
                 }
             }
         }
@@ -663,7 +605,7 @@ public class NetworkGuildManager : NetworkGuildManagerBehavior
     internal void RefreshPlayersNetworkId(uint previousNetworkId, uint v)
     {
         Guild g = getGuildFromNetworkId(previousNetworkId);
-        for(int i = 0; i < g.members.Count; i++) { 
+        for (int i = 0; i < g.members.Count; i++){ 
             if (g.members[i] == previousNetworkId) g.members[i] = v;
             break;
         }
@@ -671,6 +613,54 @@ public class NetworkGuildManager : NetworkGuildManagerBehavior
         if (g.guildMaster == previousNetworkId) g.guildMaster = v;
 
         sendGuildModifiedResponse(g);
+    }
+
+    public void localPlayerGuildInfoUpdateRequest() {
+        networkObject.SendRpc(RPC_USER_INFO_REQUEST, Receivers.Server);
+    }
+
+    public override void UserInfoRequest(RpcArgs args)
+    {
+        if (networkObject.IsServer) {
+            //vrnt mora podatke userju v ktermu guildu je pa take fore
+            Guild g = getGuildFromNetworkId(args.Info.SendingPlayer.NetworkId);
+            networkObject.SendRpc(args.Info.SendingPlayer, RPC_USER_INFO_RESPONSE, g.ObjectToByteArray());
+        }
+    }
+
+    internal void sendUserInfoResponseTo(NetworkingPlayer  p) {
+        if (networkObject.IsServer)
+        {
+            //vrnt mora podatke userju v ktermu guildu je pa take fore
+            Guild g = getGuildFromNetworkId(p.NetworkId);
+            networkObject.SendRpc(p, RPC_USER_INFO_RESPONSE, g.ObjectToByteArray());
+        }
+    }
+
+    internal void sendUserInfoResponseTo(uint p)
+    {
+        if (networkObject.IsServer)
+        {
+            lock (NetworkManager.Instance.Networker.Players)
+            {
+                NetworkManager.Instance.Networker.IteratePlayers((player) =>
+                {
+                    if (player.NetworkId == p) //passive target
+                    {
+                        //vrnt mora podatke userju v ktermu guildu je pa take fore
+                        Guild g = getGuildFromNetworkId(p);
+                        networkObject.SendRpc(player, RPC_USER_INFO_RESPONSE, g.ObjectToByteArray());
+                    }
+                });
+            }
+        }
+    }
+
+    public override void UserInfoResponse(RpcArgs args)
+    {
+        if (args.Info.SendingPlayer.IsHost) {
+            this.currentGuild = args.GetNext<byte[]>().ByteArrayToObject<Guild>();
+        }
     }
 
     #endregion

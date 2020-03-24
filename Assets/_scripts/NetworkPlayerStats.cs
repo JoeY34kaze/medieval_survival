@@ -20,8 +20,6 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
     public float health = 255;//for debug purposes, its not being called from any other script that i made, its public just so that i can see it easier in inspector
     public Image healthBar;
 
-    //private uint server_id = 5;
-    public NetWorker myNetWorker;
     public Text player_displayed_name;
     public Text inventory_guild_name;
 
@@ -52,19 +50,10 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
 
     public string tag_guild="no tag yet";
 
-    internal panel_guild_handler GetPGH()
-    {
-        return this.panelGuildMemberHandler;
-    }
-
     public Color color_guild=Color.red;
     public byte[] image_guild;
 
-    public GameObject guild_modification_panel;
 
-    public Text guild_name_input;
-    public Text guild_tag_input;
-    public Text guild_color_input;
 
     private Queue<NetworkingPlayer> acceptedAndNotUpdatedPlayers;
     private bool AcceptedPlayerHandlingPending = false;
@@ -77,29 +66,27 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
 
     private NetworkPlayerCombatHandler combatStateHandler;
 
-    private UILogic uiLogic;
-
     private void Start()
     {
-        this.uiLogic = GetComponent<UILogic>();
+        
         this.npi = GetComponent<NetworkPlayerInventory>();
         acceptedAndNotUpdatedPlayers = new Queue<NetworkingPlayer>();
         this.disconnectedAndNotSavedPlayers = new Queue<NetworkingPlayer>();
         combatStateHandler = GetComponent<NetworkPlayerCombatHandler>();
+
     }
 
     protected override void NetworkStart()
     {
         base.NetworkStart();
         // TODO:  Your initialization code that relies on network setup for this object goes here
-        myNetWorker = NetworkManager.Instance.Networker;//GameObject.Find("NetworkManager(Clone)").GetComponent<NetworkManager>().Networker;
         //networkObject.SendRpc(RPC_UPDATE_ALL_PLAYER_ID, Receivers.Server);
         //this.server_id = myNetWorker.Me.NetworkId; -- SAMO ZA DEBUGGING CE BO TREBA POGLEDAT V INSPEKTORJU ID AL PA KEJ
         //this.playerName = "Janez Kranjski";
         //updateDisplayName();
         if (networkObject.IsOwner)
         {
-
+            UILogic.set_local_player_gameObject(gameObject);
             healthBar = GameObject.Find("health_fg").GetComponent<Image>();
             transform.Find("canvas_player_overhead").gameObject.SetActive(false);
             FloatingTextController.Initialize();
@@ -113,7 +100,6 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
 
         StartCoroutine(RequestUpdateFromEveryoneDelayed(2));//pozene coroutine, ki vsem network objektom, kateri imajo karkoli da se rab rocno sinhronizirat na clientih, ki so se ravnokar povezal, poslje rpc s katerim signalizira, da nj mu poslejo nazaj podatke s katerimi bo nastavu trenutno stanje objekta.
         if (networkObject.IsServer && networkObject.IsOwner) {
-            NetworkGuildManager.Instance.Init();
             StartCoroutine(serverPlayerInitDelayer(1));
         }
 
@@ -140,13 +126,7 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
             // Debug.LogError("networkObject is null.");
             return;
         }
-        if (myNetWorker == null)
-        {
-            if (GameObject.Find("NetworkManager(Clone)") != null)
-            {
-                myNetWorker = GameObject.Find("NetworkManager(Clone)").GetComponent<NetworkManager>().Networker;
-            }
-        }
+
 
         if (networkObject.IsServer && Input.GetKeyDown(KeyCode.X))
         {
@@ -277,10 +257,10 @@ napadenmu playerju da si poupdejta health. ta player pol ko si je updejtov healt
             if (new_hp < 0) new_hp = 0;
             //healthBar.fillAmount = (float)this.health / (float)this.max_health;
 
-            lock (myNetWorker.Players)
+            lock (NetworkManager.Instance.Networker.Players)
             {
                 int count = 0;//v koliziji sta udelezena dva igralca, poiskat moramo oba. tukej je lahko problem ce klicemo to metodo pri koliziji z ne-igralcem, za agresorja bo slo vedno cez vse igralce.
-                myNetWorker.IteratePlayers((player) =>
+                NetworkManager.Instance.Networker.IteratePlayers((player) =>
                 {
                     if (player.NetworkId == passive_player_server_network_id) //passive target
                     {
@@ -307,6 +287,11 @@ napadenmu playerju da si poupdejta health. ta player pol ko si je updejtov healt
 
             }
         }
+    }
+
+    internal void SetGuildUpdated(string tag)
+    {
+       this.player_displayed_name.text ="["+tag + "] " + this.playerName;
     }
 
     public void take_environmental_damage_server_authority(Item item, string tag)
@@ -368,9 +353,9 @@ napadenmu playerju da si poupdejta health. ta player pol ko si je updejtov healt
             if (new_hp < 0) new_hp = 0;
             //healthBar.fillAmount = (float)this.health / (float)this.max_health;
 
-            lock (myNetWorker.Players)
+            lock (NetworkManager.Instance.Networker.Players)
             {
-                myNetWorker.IteratePlayers((player) =>
+                NetworkManager.Instance.Networker.IteratePlayers((player) =>
                 {
                     if (player.NetworkId == networkObject.Owner.NetworkId) //passive target
                     {
@@ -395,32 +380,6 @@ napadenmu playerju da si poupdejta health. ta player pol ko si je updejtov healt
         return networkObject.Owner.NetworkId;
     }
 
-    internal void SendGuildUpdate(NetworkGuildManager.Guild g)
-    {
-        if (networkObject.IsServer)
-        {
-            this.SendGuildUpdate(g.name, g.tag, g.color, g.image);
-        }
-    }
-
-    internal void SendGuildUpdate(string name, string tag, Color color, byte[] image)
-    {
-        if (networkObject.IsServer) {
-            if (image == null) image = new byte[25];
-            if (tag == null) tag = "asd";
-            networkObject.SendRpc(RPC_GUILD_UPDATE, Receivers.All, name, tag, color,image);
-        }
-    }
-
-    internal void SendGuildUpdateToPlayer(NetworkingPlayer p,string name, string tag, Color color, byte[] image)
-    {
-        if (networkObject.IsServer)
-        {
-            if (image == null) image = new byte[25];
-            if (tag == null) tag = "asd";
-            networkObject.SendRpc(p,RPC_GUILD_UPDATE, name, tag, color, image);
-        }
-    }
 
     private void handle_death_player(uint player_id)//samo na serverju
     {
@@ -476,9 +435,9 @@ napadenmu playerju da si poupdejta health. ta player pol ko si je updejtov healt
     public void set_player_health(float amount,uint id) {
         if (!networkObject.IsServer) return;
        // Debug.Log("server :set player health");
-        lock (myNetWorker.Players)
+        lock (NetworkManager.Instance.Networker.Players)
         {
-            myNetWorker.IteratePlayers((player) =>
+            NetworkManager.Instance.Networker.IteratePlayers((player) =>
             {
                 if (player.NetworkId == id) //passive target
                 {
@@ -657,10 +616,10 @@ napadenmu playerju da si poupdejta health. ta player pol ko si je updejtov healt
     }
 
     private void serverSide_sendNegativeTeamResponse(uint other) {
-        lock (myNetWorker.Players)
+        lock (NetworkManager.Instance.Networker.Players)
         {
 
-            myNetWorker.IteratePlayers((player) =>
+            NetworkManager.Instance.Networker.IteratePlayers((player) =>
             {
                 if (player.NetworkId == other) //passive target
                 {
@@ -725,10 +684,10 @@ napadenmu playerju da si poupdejta health. ta player pol ko si je updejtov healt
             if (!isMyTeamMember(other)) {
                 //request invite to team
 
-                lock (myNetWorker.Players)
+                lock (NetworkManager.Instance.Networker.Players)
                 {
-                    
-                    myNetWorker.IteratePlayers((player) =>
+
+                    NetworkManager.Instance.Networker.IteratePlayers((player) =>
                     {
                         if (player.NetworkId == other) //passive target
                         {
@@ -960,10 +919,10 @@ napadenmu playerju da si poupdejta health. ta player pol ko si je updejtov healt
 
     private void serverSide_send_team_update(uint[] new_team, uint[] players_to_update, bool deleting, uint requester) {
         int count = 0;
-        lock (myNetWorker.Players)
+        lock (NetworkManager.Instance.Networker.Players)
         {
 
-            myNetWorker.IteratePlayers((player) =>
+            NetworkManager.Instance.Networker.IteratePlayers((player) =>
             {
                 if (isTeamMemberForNetworkUpdate(players_to_update, player.NetworkId)) //team memberji. vsakemu memberju nastav kdo so njegovi team memberji, tud na serverjevi skripti
                 {
@@ -1183,9 +1142,9 @@ private void ServerSendOnAcceptedData() {
         NetworkGuildManager.Guild playersGuild = NetworkGuildManager.Instance.getGuildFromNetworkId(Get_server_id());
         //players_guild = NetworkGuildManager.findPlayersGuild(this.GetSteamworksID());
         if (playersGuild == null) {
-            playersGuild = GameObject.FindGameObjectWithTag("GuildManager").GetComponent<NetworkGuildManager>().CreateGuild(networkObject.Owner.NetworkId, networkObject.Owner.NetworkId + "'s clan", networkObject.Owner.NetworkId + "-S", Color.gray, new byte[25]);
+            playersGuild = NetworkGuildManager.Instance.CreateGuild(networkObject.Owner.NetworkId, networkObject.Owner.NetworkId + "'s clan", networkObject.Owner.NetworkId + "-S","#ff0000", new byte[25]);
             if (playersGuild != null) {
-                SendGuildUpdate(playersGuild.name, playersGuild.tag, playersGuild.color, playersGuild.image);
+                NetworkGuildManager.Instance.sendUserInfoResponseTo(Get_server_id());
             }
         }
     }
@@ -1261,7 +1220,7 @@ private void ServerSendOnAcceptedData() {
         if (!networkObject.IsServer) return;
 
         //kar se tice guilda nrdimo kr guild update.
-        SendGuildUpdateToPlayer(p,this.name_guild, this.tag_guild, this.color_guild, this.image_guild);
+        NetworkGuildManager.Instance.sendUserInfoResponseTo(p);
         //health
         networkObject.SendRpc(p, RPC_REFRESH_HEALTH, this.health);
         //ostalo

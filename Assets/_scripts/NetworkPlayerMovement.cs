@@ -94,7 +94,6 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
         networkPlayerInventory = GetComponent<NetworkPlayerInventory>();
         stats = GetComponent<NetworkPlayerStats>();
         animation_logic_script = GetComponent<NetworkPlayerAnimationLogic>();
-        this.uiLogic = GetComponentInChildren<UILogic>();
         this.controller = GetComponent<CharacterController>();
     }
 
@@ -118,7 +117,7 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
 
     private bool isCameraRotationAllowed()
     {
-        return !uiLogic.hasOpenWindow;
+        return !UILogic.Instance.hasOpenWindow;
     }
 
     protected virtual void Update()

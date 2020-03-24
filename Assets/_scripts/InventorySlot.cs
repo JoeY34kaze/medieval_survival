@@ -10,7 +10,7 @@ public abstract class InventorySlot : MonoBehaviour
     //public Image icon_background;          // Reference to the Icon image to display when empty
     protected Image durability_bar;
     protected Text text_quantity;
-    public int index;
+    public int index;//tole MORA bit nastiman v inspectorju ker se sibling index spreminja ko draggas iteme okol
 
     private void Start()
     {
@@ -19,7 +19,9 @@ public abstract class InventorySlot : MonoBehaviour
         this.text_quantity = transform.GetChild(2).GetComponent<Text>();
         //this.text_quantity.text = "x50";
         //icon_background = GetComponentInChildren<Image>();
+
         ClearSlot();
+       
     }
 
     private void setReferences() {
@@ -30,6 +32,12 @@ public abstract class InventorySlot : MonoBehaviour
 
     public void AddPredmet(Predmet p)
     {
+
+        if (this.index == 0)
+        {
+            Debug.Log("asda");
+        }
+
         if (this.durability_bar == null || this.text_quantity == null)
             setReferences();
         if (p == null) { ClearSlot(); return; };
@@ -77,6 +85,10 @@ public abstract class InventorySlot : MonoBehaviour
     {
         if (this.durability_bar == null || this.text_quantity == null)
             setReferences();
+
+        if (this.index == 0) {
+            Debug.Log("asda");
+        }
 
         predmet = null;
         //icon.sprite = icon_background.sprite;

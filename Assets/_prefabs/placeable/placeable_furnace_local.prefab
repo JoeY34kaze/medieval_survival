@@ -40,6 +40,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2335539397820572241}
   - component: {fileID: 8496917942115167487}
+  - component: {fileID: 8077158607203576189}
   m_Layer: 13
   m_Name: placeable_furnace_local
   m_TagString: Untagged
@@ -75,6 +76,19 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 0.7079067, y: 1.343725, z: 0.7079064}
   m_Center: {x: -0.30002713, y: -0.63831854, z: 0.20432279}
+--- !u!114 &8077158607203576189
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2335539397820284529}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5cfbc831614f4184ba5fe410ec87de29, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  collider_for_placement: {fileID: 0}
 --- !u!1 &2633769654019850409
 GameObject:
   m_ObjectHideFlags: 0
@@ -131,6 +145,7 @@ MeshRenderer:
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -142,6 +157,7 @@ MeshRenderer:
   m_ProbeAnchor: {fileID: 0}
   m_LightProbeVolumeOverride: {fileID: 0}
   m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
   m_PreserveUVs: 0
   m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0
@@ -166,3 +182,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5cfbc831614f4184ba5fe410ec87de29, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  collider_for_placement: {fileID: 0}

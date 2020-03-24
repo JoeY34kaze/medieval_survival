@@ -12,8 +12,7 @@ public class ItemDragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, I
 
     public void OnBeginDrag(PointerEventData eventData)
     {
-        //transform.root.GetComponentInChildren<CanvasGroup>().blocksRaycasts = false;
-        //if (transform.root.GetComponent<NetworkPlayerInventory>().draggedItemParent == null)
+        if (this.npi == null) link_local_player();
 
         npi.dragged_gameobjectSiblingIndex = transform.GetSiblingIndex();
         transform.SetAsFirstSibling();
@@ -68,12 +67,14 @@ public class ItemDragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, I
 
     public void OnDrag(PointerEventData eventData)
     {
+       
         transform.position = Input.mousePosition;
 
     }
 
     public void OnEndDrag(PointerEventData eventData)
     {
+        if(this.npi==null) link_local_player();
         Debug.Log("end drag -"+transform.parent.name);
         transform.SetSiblingIndex(npi.dragged_gameobjectSiblingIndex);
 
@@ -124,9 +125,11 @@ public class ItemDragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, I
         npi.draggedGameobjectParent_parent_parent_parentSiblingIndex = -1;
     }
 
-    public void Start()
-    {
-        this.npi = transform.root.GetComponent<NetworkPlayerInventory>();
-    }
 
+
+    internal void link_local_player()
+    {
+        if (UILogic.localPlayerGameObject != null)
+            this.npi = UILogic.localPlayerGameObject.GetComponent<NetworkPlayerInventory>();
+    }
 }

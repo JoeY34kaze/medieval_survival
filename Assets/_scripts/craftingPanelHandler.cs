@@ -33,7 +33,7 @@ public class craftingPanelHandler : MonoBehaviour
 
     public Text timer;
     //private List<PredmetRecepie> queueRecepieList;
-    private NetworkPlayerInventory npi;
+
 
 
 
@@ -128,12 +128,11 @@ public class craftingPanelHandler : MonoBehaviour
             }
         }
 
-        transform.root.GetComponent<NetworkPlayerInventory>().localSendCraftingQueueUpdateRequest();
+        UILogic.local_npi.localSendCraftingQueueUpdateRequest();
     }
     private void Start()
     {
         PlayerCraftingManager.Instance.queueRecepieList = new List<PredmetRecepie>();
-        if (this.npi == null) this.npi = transform.root.GetComponent<NetworkPlayerInventory>();
 
     }
 
@@ -247,7 +246,7 @@ public class craftingPanelHandler : MonoBehaviour
 
     private int GetMaxPossibleCraftsWithRegardsToCraftingQueue()
     {
-        int max_possible = transform.root.GetComponent<NetworkPlayerInventory>().getMaxNumberOfPossibleCraftsForRecipe(this.currentlySelectedRecipe);
+        int max_possible = UILogic.local_npi.getMaxNumberOfPossibleCraftsForRecipe(this.currentlySelectedRecipe);
 
         int[,] all_cost = getCostOfQuantity(this.currentlySelectedRecipe, max_possible);
         int[,] current_stuff_in_queue = GetCurrentAmountOfStuffInQueue();
@@ -344,7 +343,7 @@ public class craftingPanelHandler : MonoBehaviour
         this.craftOrder.text = "1";
         Item i = this.currentlySelectedItem;
         int skin = 0;
-        transform.root.GetComponent<NetworkPlayerInventory>().localStartCraftingRequest(i, current, skin);
+        UILogic.local_npi.localStartCraftingRequest(i, current, skin);
     }
 
 
@@ -384,7 +383,7 @@ public class craftingPanelHandler : MonoBehaviour
 
     private void localCancelCraftRequest(PredmetRecepie p, int index_sibling)
     {
-        transform.root.GetComponent<NetworkPlayerInventory>().localCancelCraftRequest(p, index_sibling);
+        UILogic.local_npi.localCancelCraftRequest(p, index_sibling);
     }
 
 

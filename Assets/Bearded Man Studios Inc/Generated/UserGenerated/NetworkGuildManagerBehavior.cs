@@ -4,8 +4,8 @@ using UnityEngine;
 
 namespace BeardedManStudios.Forge.Networking.Generated
 {
-	[GeneratedRPC("{\"types\":[[\"string\", \"string\", \"Color\", \"byte[]\"][\"uint\"][\"uint\", \"string\"][\"uint\", \"bool\"][\"uint\", \"string\", \"string\"][][][\"uint\"]]")]
-	[GeneratedRPCVariableNames("{\"types\":[[\"name\", \"tag\", \"GuildColor\", \"Optional_Image\"][\"candidate\"][\"gm\", \"guild_name\"][\"gm\", \"response_guild\"][\"gm\", \"members_string\", \"gName\"][][][\"player\"]]")]
+	[GeneratedRPC("{\"types\":[[\"string\", \"string\", \"Color\", \"byte[]\"][\"uint\"][\"uint\", \"string\"][\"uint\", \"bool\"][\"uint\", \"string\", \"string\"][][][\"uint\"][][\"byte[]\"]]")]
+	[GeneratedRPCVariableNames("{\"types\":[[\"name\", \"tag\", \"GuildColor\", \"Optional_Image\"][\"candidate\"][\"gm\", \"guild_name\"][\"gm\", \"response_guild\"][\"gm\", \"members_string\", \"gName\"][][][\"player\"][][\"guild\"]]")]
 	public abstract partial class NetworkGuildManagerBehavior : NetworkBehavior
 	{
 		public const byte RPC_CREATE_OR_MODIFY_GUILD_REQUEST = 0 + 5;
@@ -16,6 +16,8 @@ namespace BeardedManStudios.Forge.Networking.Generated
 		public const byte RPC_GET_GUILD_MEMBERS_REQUEST = 5 + 5;
 		public const byte RPC_LEAVE_GUILD_REQUEST = 6 + 5;
 		public const byte RPC_KICK_GUILD_REQUEST = 7 + 5;
+		public const byte RPC_USER_INFO_REQUEST = 8 + 5;
+		public const byte RPC_USER_INFO_RESPONSE = 9 + 5;
 		
 		public NetworkGuildManagerNetworkObject networkObject = null;
 
@@ -37,6 +39,8 @@ namespace BeardedManStudios.Forge.Networking.Generated
 			networkObject.RegisterRpc("GetGuildMembersRequest", GetGuildMembersRequest);
 			networkObject.RegisterRpc("LeaveGuildRequest", LeaveGuildRequest);
 			networkObject.RegisterRpc("KickGuildRequest", KickGuildRequest, typeof(uint));
+			networkObject.RegisterRpc("UserInfoRequest", UserInfoRequest);
+			networkObject.RegisterRpc("UserInfoResponse", UserInfoResponse, typeof(byte[]));
 
 			networkObject.onDestroy += DestroyGameObject;
 
@@ -157,6 +161,14 @@ namespace BeardedManStudios.Forge.Networking.Generated
 		/// Arguments:
 		/// </summary>
 		public abstract void KickGuildRequest(RpcArgs args);
+		/// <summary>
+		/// Arguments:
+		/// </summary>
+		public abstract void UserInfoRequest(RpcArgs args);
+		/// <summary>
+		/// Arguments:
+		/// </summary>
+		public abstract void UserInfoResponse(RpcArgs args);
 
 		// DO NOT TOUCH, THIS GETS GENERATED PLEASE EXTEND THIS CLASS IF YOU WISH TO HAVE CUSTOM CODE ADDITIONS
 	}

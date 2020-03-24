@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using BeardedManStudios.Forge.Networking.Generated;
+using BeardedManStudios.Forge.Networking;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -20,8 +21,8 @@ public class UILogic : MonoBehaviour
     public GameObject trebuchet_rotation_panel;
 
     public bool hasOpenWindow=false;
-    private NetworkGuildManager ngm;
-    private NetworkPlayerInventory npi;
+    public NetworkGuildManager ngm;
+    public static NetworkPlayerInventory local_npi;
 
     public GameObject container_panel_10_slots;
     public GameObject container_panel_20_slots;
@@ -34,6 +35,10 @@ public class UILogic : MonoBehaviour
     public Text stone_upkeep_label;
     public Text iron_upkeep_label;
     public Text gold_upkeep_label;
+
+    public Text GuildModificationName;
+    public Text GuildModificationTag;
+    public Text GuildModificationColor;
 
     public NetworkContainer currently_openened_container = null;
     public NetworkPlaceable placeable_for_durability_check = null;
@@ -52,10 +57,29 @@ public class UILogic : MonoBehaviour
 
     public bool allows_UI_opening = false;
 
+    public static UILogic Instance;
+    public static GameObject localPlayerGameObject;
+    public static panel_guild_handler PanelGuildHander;
+    public static decicions_handler_ui DecisionsHandler;
+    public Interactable_radial_menu interactable_radial_menu;
+
+
+    //----------------za linkat z npi
+    public InventorySlotPersonal[] personal_inventory_slots;
+    //-------------------------------LOADOUT SLOTS-----------------------------
+    public InventorySlotLoadout loadout_head;
+    public InventorySlotLoadout loadout_chest;
+    public InventorySlotLoadout loadout_hands;
+    public InventorySlotLoadout loadout_legs;
+    public InventorySlotLoadout loadout_feet;
+    public InventorySlotLoadout loadout_backpack;
+    public InventorySlotBar[] bar_slots;
+
     private void Start()
     {
-        this.ngm = GameObject.FindGameObjectWithTag("GuildManager").GetComponent<NetworkGuildManager>();
-        this.npi = GetComponentInParent<NetworkPlayerInventory>();
+        if (UILogic.Instance != null) Destroy(this); else UILogic.Instance = this;
+        UILogic.PanelGuildHander = this.GuildPanel.GetComponent<panel_guild_handler>();
+        UILogic.DecisionsHandler = GetComponentInChildren<decicions_handler_ui>();
     }
     // Update is called once per frame
     void Update()
@@ -94,6 +118,7 @@ public class UILogic : MonoBehaviour
                 this.GuildPanel.SetActive(true);
                 this.hasOpenWindow = true;
                 NetworkGuildManager.Instance.SetMemberPanel(true);
+                NetworkGuildManager.Instance.localPlayerGuildInfoUpdateRequest();
                 enableMouse();
             }  
         }
@@ -131,6 +156,40 @@ public class UILogic : MonoBehaviour
         }
     }
 
+    internal bool isRadialMenuOpen()
+    {
+        return this.interactable_radial_menu.transform.GetChild(0).gameObject.activeSelf;
+    }
+
+    internal static void set_local_player_gameObject(GameObject player)
+    {
+        UILogic.localPlayerGameObject = player;
+        UILogic.local_npi = player.GetComponent<NetworkPlayerInventory>();
+        UILogic.Instance.on_local_player_linked();
+    }
+
+    private void on_local_player_linked() {
+
+        //itemDrophandlers
+        foreach (ItemDropHandler d in GetComponentsInChildren<ItemDropHandler>()) d.link_local_player();
+        //itemDragHandlers
+        foreach (ItemDragHandler d in GetComponentsInChildren<ItemDragHandler>()) d.link_local_player();
+        //npi linkage wwith slots
+        
+
+
+            //----------------za linkat z npi
+        UILogic.local_npi.personal_inventory_slots = this.personal_inventory_slots;
+        UILogic.local_npi.loadout_head = this.loadout_head;
+        UILogic.local_npi.loadout_chest = this.loadout_chest;
+        UILogic.local_npi.loadout_hands = this.loadout_hands;
+        UILogic.local_npi.loadout_legs = this.loadout_legs;
+        UILogic.local_npi.loadout_feet = this.loadout_feet;
+        UILogic.local_npi.loadout_backpack = this.loadout_backpack;
+        UILogic.local_npi.bar_slots = this.bar_slots;
+        UILogic.local_npi.on_UI_linked();
+    }
+
     private void handleEscapePressed()
     {
         //ce je odprto ksno okno ga zapri, sicer prikaz main menu
@@ -147,7 +206,7 @@ public class UILogic : MonoBehaviour
             this.GuildPanel.SetActive(false);
             this.inventoryPanel.SetActive(false);
             this.hasOpenWindow = true;
-            GetComponentInParent<NetworkPlayerMovement>().lockMovement = false;
+            UILogic.localPlayerGameObject.GetComponent<NetworkPlayerMovement>().lockMovement = true;
         }
         else {
             ClearAll();
@@ -170,10 +229,12 @@ public class UILogic : MonoBehaviour
 
     }
 
-    public void on_rotation_slider_changed() {
+    public void on_rotation_slider_changed() {//nek bug je da se klice tole takoj na startu skripte pa nevem zakaj. mogoce se na sliderju ob startu nastavjo vrednosti ins e tole sprozi i guess.
         //get float
         float add_rotation = this.slider_trebuchet_rotation.value;
         //update transform rotation
+        if (this.active_trebuchet == null) return;
+        if (this.active_trebuchet.platform == null) return;
         this.active_trebuchet.platform.rotation = Quaternion.Euler(this.active_trebuchet.platform.rotation.eulerAngles.x,this.original_trebuchet_rotation.eulerAngles.y+add_rotation, this.active_trebuchet.platform.rotation.eulerAngles.z);
         //set value to input
         this.input_trebuchet_rotation.text = add_rotation + " degrees";
@@ -226,9 +287,9 @@ public class UILogic : MonoBehaviour
         NetworkGuildManager.Instance.SetMemberPanel(false);
 
         DisableMouse();
-        GetComponentInParent<NetworkPlayerAnimationLogic>().hookChestRotation = true;
-        GetComponentInParent<NetworkPlayerMovement>().lockMovement = false;
-        GetComponentInParent<player_camera_handler>().lockCamera = false;
+        UILogic.localPlayerGameObject.GetComponent<NetworkPlayerAnimationLogic>().hookChestRotation = true;
+        UILogic.localPlayerGameObject.GetComponent<NetworkPlayerMovement>().lockMovement = false;
+        UILogic.localPlayerGameObject.GetComponent<player_camera_handler>().lockCamera = false;
         this.input_trebuchet_rotation.text = "0 degrees";
     }
 
@@ -236,7 +297,7 @@ public class UILogic : MonoBehaviour
     private void showInventory()
     {
         this.inventoryPanel.SetActive(true);
-        npi.requestLocalUIUpdate();
+        local_npi.requestLocalUIUpdate();
         this.hasOpenWindow = true;
         enableMouse();
     }
@@ -313,6 +374,11 @@ public class UILogic : MonoBehaviour
         UpdateActiveChestPanel(predmeti);
         
 
+    }
+
+    internal void hide_radial_menu()
+    {
+        this.interactable_radial_menu.hide_radial_menu();
     }
 
     private void update_upkeep_values(int a, int b, int c, int d) {

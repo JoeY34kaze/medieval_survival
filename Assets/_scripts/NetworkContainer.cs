@@ -82,8 +82,8 @@ public class NetworkContainer : NetworkContainerBehavior
 
     internal  void local_open_container_request()
     {
-        FindByid(networkObject.Networker.Me.NetworkId).GetComponentInChildren<UILogic>().allows_UI_opening = true;
-        FindByid(networkObject.Networker.Me.NetworkId).GetComponentInChildren<UILogic>().currently_openened_container = this;
+        UILogic.Instance.allows_UI_opening = true;
+        UILogic.Instance.currently_openened_container = this;
         networkObject.SendRpc(RPC_OPEN_REQUEST, Receivers.Server);
     }
 
@@ -184,7 +184,7 @@ public class NetworkContainer : NetworkContainerBehavior
             }
             else
             {//fail - nismo authorized al pa kej tazga
-                FindByid(networkObject.Networker.Me.NetworkId).GetComponentInChildren<UILogic>().ClearAll();//da se miska zbrise
+                UILogic.Instance.ClearAll();//da se miska zbrise
             }
         }
     }
@@ -205,7 +205,7 @@ public class NetworkContainer : NetworkContainerBehavior
             }
             else
             {//fail - nismo authorized al pa kej tazga
-                FindByid(networkObject.Networker.Me.NetworkId).GetComponentInChildren<UILogic>().ClearAll();//da se miska zbrise
+                UILogic.Instance.ClearAll();//da se miska zbrise
             }
         }
     }

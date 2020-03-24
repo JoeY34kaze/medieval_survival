@@ -8,21 +8,21 @@ using UnityEngine.EventSystems;
 /// </summary>
 public class ItemDropHandler : MonoBehaviour, IDropHandler , IPointerClickHandler
 {
-    private NetworkPlayerInventory networkPlayerInventory;
+    private NetworkPlayerInventory npi;
 
-    private void Start()
-    {
-        networkPlayerInventory = transform.root.GetComponent<NetworkPlayerInventory>();
+    internal void link_local_player() {
+        if(UILogic.localPlayerGameObject!=null)
+            this.npi = UILogic.localPlayerGameObject.GetComponent<NetworkPlayerInventory>();
     }
-
     public void OnDrop(PointerEventData eventData)
     {
+        if (this.npi == null) link_local_player();
         RectTransform invSlot = transform as RectTransform;
         Debug.Log("dropped "+invSlot.name);
         if (GetComponent<InventorySlot>().GetPredmet() != null) {//ce smo potegnil backpack loh sam vrzemo na tla. nemors ga dat u inventorij k ni tak item
             if (GetComponent<InventorySlot>().GetPredmet().item.type == Item.Type.backpack)
             {
-                networkPlayerInventory.backpackSpot.GetComponentInChildren<NetworkBackpack>().local_player_backpack_unequip_request();
+                this.npi.backpackSpot.GetComponentInChildren<NetworkBackpack>().local_player_backpack_unequip_request();
                 return;
             }
         }
@@ -32,66 +32,66 @@ public class ItemDropHandler : MonoBehaviour, IDropHandler , IPointerClickHandle
             //Debug.Log(networkPlayerInventory.draggedItemParent.name+"'s child was dropped on " + invSlot.name+" ");
             InventorySlot to = invSlot.GetComponent<InventorySlot>();
             //koda se bo malo podvajala ker bi sicer biu prevelik clusterfuck od metode
-            InventorySlot from = networkPlayerInventory.draggedItemParent.GetComponent<InventorySlot>();
+            InventorySlot from = this.npi.draggedItemParent.GetComponent<InventorySlot>();
             if ((from is InventorySlotPersonal || from is InventorySlotLoadout) && ((to is InventorySlotLoadout) || (to is InventorySlotPersonal)))//vsa interakcija med loadoutom in personal inventorijem. una velika metoda v npi
-                networkPlayerInventory.handleInventorySlotOnDragDropEvent(invSlot, null, false);
+                this.npi.handleInventorySlotOnDragDropEvent(invSlot, null, false);
             else if (from is InventorySlotLoadout && to is InventorySlotBackpack)
-                networkPlayerInventory.handleLoadoutToBackpackDrag(invSlot);
+                this.npi.handleLoadoutToBackpackDrag(invSlot);
             else if (from is InventorySlotPersonal && to is InventorySlotBackpack)
-                networkPlayerInventory.handlePersonalToBackpackDrag(invSlot);
+                this.npi.handlePersonalToBackpackDrag(invSlot);
             else if (from is InventorySlotBackpack && to is InventorySlotPersonal)
-                networkPlayerInventory.handleBackpackToPersonalDrag(invSlot);
+                this.npi.handleBackpackToPersonalDrag(invSlot);
             else if (from is InventorySlotBackpack && to is InventorySlotBackpack)
-                networkPlayerInventory.handleBackpackToBackpack(invSlot);
+                this.npi.handleBackpackToBackpack(invSlot);
             else if (from is InventorySlotBackpack && to is InventorySlotBar)
-                networkPlayerInventory.handleBackpackToBar(invSlot);
+                this.npi.handleBackpackToBar(invSlot);
             else if (from is InventorySlotBar && to is InventorySlotBackpack)
-                networkPlayerInventory.handleBarToBackpack(invSlot);
+                this.npi.handleBarToBackpack(invSlot);
             else if (from is InventorySlotBackpack)
-                networkPlayerInventory.handleBackpackSlotOnDragDropEvent(invSlot, null);
+                this.npi.handleBackpackSlotOnDragDropEvent(invSlot, null);
             else if (from is InventorySlotPersonal && to is InventorySlotBar)
-                networkPlayerInventory.handlePersonalToBar(invSlot);
+                this.npi.handlePersonalToBar(invSlot);
             else if (from is InventorySlotBar && to is InventorySlotPersonal)
-                networkPlayerInventory.handleBarToPersonal(invSlot);
+                this.npi.handleBarToPersonal(invSlot);
             else if (from is InventorySlotBar && to is InventorySlotBar)
-                networkPlayerInventory.handleBarToBar(invSlot);
+                this.npi.handleBarToBar(invSlot);
             else if (from is InventorySlotPersonal && to is InventorySlotContainer)
-                networkPlayerInventory.handlePersonalToContainer(invSlot);
+                this.npi.handlePersonalToContainer(invSlot);
             else if (from is InventorySlotContainer && to is InventorySlotPersonal)
-                networkPlayerInventory.handleContainerToPersonal(invSlot);
+                this.npi.handleContainerToPersonal(invSlot);
             else if (from is InventorySlotBackpack && to is InventorySlotContainer)
-                networkPlayerInventory.handleBackpackToContainer(invSlot);
+                this.npi.handleBackpackToContainer(invSlot);
             else if (from is InventorySlotContainer && to is InventorySlotBackpack)
-                networkPlayerInventory.handleContainerToBackpack(invSlot);
+                this.npi.handleContainerToBackpack(invSlot);
             else if (from is InventorySlotBar && to is InventorySlotContainer)
-                networkPlayerInventory.handleBarToContainer(invSlot);
+                this.npi.handleBarToContainer(invSlot);
             else if (from is InventorySlotContainer && to is InventorySlotBar)
-                networkPlayerInventory.handleContainerToBar(invSlot);
+                this.npi.handleContainerToBar(invSlot);
             else if (from is InventorySlotLoadout && to is InventorySlotContainer)
-                networkPlayerInventory.handleLoadoutToContainer(invSlot);
+                this.npi.handleLoadoutToContainer(invSlot);
             else if (from is InventorySlotContainer && to is InventorySlotLoadout)
-                networkPlayerInventory.handleContainerToLoadout(invSlot);
+                this.npi.handleContainerToLoadout(invSlot);
             else if (from is InventorySlotContainer && to is InventorySlotContainer)
-                networkPlayerInventory.handleContainerToContainer(invSlot);
+                this.npi.handleContainerToContainer(invSlot);
 
 
         }
         else
         {//smo dropal nekam tko da mora past na tla. gremo prevert s kje smo potegnil
-            InventorySlot inventorySlot = networkPlayerInventory.draggedItemParent.GetComponent<InventorySlot>();
+            InventorySlot inventorySlot = this.npi.draggedItemParent.GetComponent<InventorySlot>();
             //Debug.Log("Called on " + gameObject.name);
-            if (inventorySlot is InventorySlotPersonal) networkPlayerInventory.DropItemFromPersonalInventory(getIndexFromName(invSlot.name));
+            if (inventorySlot is InventorySlotPersonal) this.npi.DropItemFromPersonalInventory(getIndexFromName(invSlot.name));
             else if (inventorySlot is InventorySlotLoadout)
             {
                 InventorySlotLoadout ldslt = (InventorySlotLoadout)inventorySlot;
-                networkPlayerInventory.DropItemFromLoadout(ldslt.type, ldslt.index);
+                this.npi.DropItemFromLoadout(ldslt.type, ldslt.index);
                 //transform.root.GetComponent<NetworkPlayerCombatHandler>().update_equipped_weapons(); - to se mora klicat ko server sporoci novo stanje
 
             }
             else if (inventorySlot is InventorySlotBackpack)
-                this.networkPlayerInventory.backpack_inventory.localPlayerdropItemFromBackpackRequest(this.networkPlayerInventory.getIndexFromName(networkPlayerInventory.draggedItemParent.name));
-            else if (inventorySlot is InventorySlotBar) this.networkPlayerInventory.localPlayerDropFromBarRequest(this.networkPlayerInventory.getIndexFromName(networkPlayerInventory.draggedItemParent.name));
-            else if (inventorySlot is InventorySlotContainer) this.networkPlayerInventory.localPlayerDropItemFromContainerRequest(this.networkPlayerInventory.getIndexFromName(networkPlayerInventory.draggedItemParent.name));
+                this.npi.backpack_inventory.localPlayerdropItemFromBackpackRequest(this.npi.getIndexFromName(this.npi.draggedItemParent.name));
+            else if (inventorySlot is InventorySlotBar) this.npi.localPlayerDropFromBarRequest(this.npi.getIndexFromName(this.npi.draggedItemParent.name));
+            else if (inventorySlot is InventorySlotContainer) this.npi.localPlayerDropItemFromContainerRequest(this.npi.getIndexFromName(this.npi.draggedItemParent.name));
         }
     }
 
@@ -107,21 +107,22 @@ public class ItemDropHandler : MonoBehaviour, IDropHandler , IPointerClickHandle
 
     public void OnPointerClick(PointerEventData eventData)
     {
+        if (this.npi == null) link_local_player();
         InventorySlot iss= GetComponent<InventorySlot>();
         if (eventData.button == PointerEventData.InputButton.Right && iss.GetPredmet() != null)
         {
             if (iss.GetPredmet().item.type == Item.Type.backpack)//ce je backpack ga dropa
-                networkPlayerInventory.backpackSpot.GetComponentInChildren<NetworkBackpack>().local_player_backpack_unequip_request();
+                this.npi.backpackSpot.GetComponentInChildren<NetworkBackpack>().local_player_backpack_unequip_request();
             else if (iss is InventorySlotPersonal)//ce je personal inventorij al pa loadout k je blo to spisan ze prej
-                networkPlayerInventory.OnRightClickPersonalInventory(gameObject);
+                this.npi.OnRightClickPersonalInventory(gameObject);
             else if (iss is InventorySlotBackpack)
-                networkPlayerInventory.OnRightClickBackpack(gameObject);
+                this.npi.OnRightClickBackpack(gameObject);
             else if (iss is InventorySlotBar)
-                networkPlayerInventory.OnRightClickBar(gameObject);
+                this.npi.OnRightClickBar(gameObject);
             else if (iss is InventorySlotLoadout)
-                networkPlayerInventory.OnRightClickLoadout(gameObject);
+                this.npi.OnRightClickLoadout(gameObject);
             else if (iss is InventorySlotContainer)
-                networkPlayerInventory.OnRightClickContainer(gameObject);
+                this.npi.OnRightClickContainer(gameObject);
 
         }
     }

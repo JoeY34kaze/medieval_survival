@@ -21,7 +21,7 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
     private NetworkPlayerStats stats;
 
     private NetworkPlayerInventory networkPlayerInventory;
-    public GameObject radial_menu;
+
     public GameObject[] combat_sound_effects;
 
     public Transform weapon_slot;
@@ -31,7 +31,7 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
     public Predmet currently_equipped_weapon;//melee in ranged
 
     private NetworkPlayerAnimationLogic animator;
-    private UILogic uiLogic;
+
 
     private void disable_all_shields()
     {
@@ -57,7 +57,7 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
         player_local_locks = GetComponent<player_local_locks>();
         stats = GetComponent<NetworkPlayerStats>();
         networkPlayerInventory = GetComponent<NetworkPlayerInventory>();
-        this.uiLogic = GetComponentInChildren<UILogic>();
+
         //this.radial_menu = transform.GetComponentInChildren<RMF_RadialMenu>().gameObject; -treba dat v start ker sicer crkne k ni se vse nrjen
         this.bar_handler = GetComponentInChildren<panel_bar_handler>();
         this.neutralStateHandler = GetComponent<NetworkPlayerNeutralStateHandler>();
@@ -102,9 +102,8 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
             return false; //Ce je downan da nemora vec napadat pa take fore. to je precej loše ker je na clientu. ksnej bo treba prenest to logiko na server ker tole zjebe ze cheatengine
         }
 
-        if (uiLogic.hasOpenWindow) return false; //odprt inventorij
-        if (stats.guild_modification_panel.activeSelf) return false;
-        if (this.radial_menu.activeSelf) return false;
+        if (UILogic.Instance.hasOpenWindow) return false; //odprt inventorij
+        if (UILogic.Instance.isRadialMenuOpen()) return false;
 
         return true;
     }

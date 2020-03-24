@@ -46,11 +46,12 @@ public class gathering_tool_collider_handler : MonoBehaviour
 
     private void set_swing_IK(Collider other)
     {
-        RaycastHit hit;
-        Vector3 dir = other.transform.position - transform.position;
-        if (Physics.Raycast(transform.position, dir, out hit))
-        {
-            anim.on_weapon_or_tool_collision(hit.point);
-        }
+        //RaycastHit hit;
+        //Vector3 dir = other.transform.position - transform.position;
+      //  if (Physics.Raycast(transform.position, dir, out hit))
+       // {
+            anim.on_weapon_or_tool_collision(transform.position);
+            
+       // }
     }
 }
