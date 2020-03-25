@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 7283402985956060173}
   - component: {fileID: 588495936027247469}
   - component: {fileID: 4630755613087367229}
-  m_Layer: 9
+  m_Layer: 15
   m_Name: Axe0
   m_TagString: weapon_player
   m_Icon: {fileID: 0}
@@ -84,7 +84,7 @@ GameObject:
   - component: {fileID: 8926213288833594356}
   - component: {fileID: 2238087557624015602}
   - component: {fileID: 7008352538241984463}
-  m_Layer: 9
+  m_Layer: 15
   m_Name: model0
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -127,6 +127,7 @@ MeshRenderer:
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -138,6 +139,7 @@ MeshRenderer:
   m_ProbeAnchor: {fileID: 0}
   m_LightProbeVolumeOverride: {fileID: 0}
   m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
   m_PreserveUVs: 0
   m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0

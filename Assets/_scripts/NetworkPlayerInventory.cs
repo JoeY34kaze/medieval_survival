@@ -54,7 +54,6 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
 
 
     public Transform backpackSpot; //tukaj se parenta backpack
-    public backpack_local_panel_handler backpackPanel;
     public panel_bar_handler barPanel;
     internal NetworkPlayerNeutralStateHandler neutralStateHandler;
     private NetworkPlayerStats stats;
@@ -678,6 +677,33 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
                 this.backpack_inventory.localPlayerRequestBackpackToLoadout(index_backpack);
             }
         }
+    }
+
+    internal int get_index_of_next_item_on_hotbar_ascending(int current_index)
+    {
+        if (current_index == -1) current_index = 0;
+        else
+        current_index = (current_index + 1) % predmeti_hotbar.Length;
+
+        for (int i = 0; i < this.predmeti_hotbar.Length; i++) {
+            if (predmeti_hotbar[(current_index + i) % predmeti_hotbar.Length] != null)
+                return (current_index + i) % predmeti_hotbar.Length;
+        }
+        return -1;
+    }
+
+    internal int get_index_of_next_item_on_hotbar_descending(int current_index)
+    {
+        if (current_index < 1) current_index = 9;
+        else
+            current_index = (current_index - 1) % predmeti_hotbar.Length;
+
+        for (int i = 0; i < this.predmeti_hotbar.Length; i++)
+        {
+            if (predmeti_hotbar[(current_index - i) % predmeti_hotbar.Length] != null)
+                return (current_index - i) % predmeti_hotbar.Length;
+        }
+        return -1;
     }
 
     internal void OnRightClickBar(GameObject g)//tole lahko potem pri ciscenju kode z malo preurejanja damo v uno tavelko metodo
@@ -2343,7 +2369,6 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
             }
         }
     }
-
     internal void onContainerOpenWithUpkeep(NetworkContainer container, Predmet[] predmeti, int a,int b, int c, int d)
     {
         if (UILogic.Instance.allows_UI_opening)

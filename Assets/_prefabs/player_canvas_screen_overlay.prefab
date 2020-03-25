@@ -16641,6 +16641,7 @@ MonoBehaviour:
   containerPanel: {fileID: 3913216996302822355}
   panel_durability: {fileID: 1216088287839641261}
   trebuchet_rotation_panel: {fileID: 1654874722657117057}
+  backpack_local_panel_handler: {fileID: 2280539279734057636}
   hasOpenWindow: 0
   ngm: {fileID: 0}
   container_panel_10_slots: {fileID: 5157159246022302494}

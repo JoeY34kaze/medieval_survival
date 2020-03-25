@@ -9,7 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5404533701025607219}
-  m_Layer: 9
+  m_Layer: 15
   m_Name: Group1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -44,7 +44,7 @@ GameObject:
   - component: {fileID: 4367424705475756983}
   - component: {fileID: 3228877955547608264}
   - component: {fileID: 8569555301042384949}
-  m_Layer: 9
+  m_Layer: 15
   m_Name: Mesh5
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -87,6 +87,7 @@ MeshRenderer:
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -98,6 +99,7 @@ MeshRenderer:
   m_ProbeAnchor: {fileID: 0}
   m_LightProbeVolumeOverride: {fileID: 0}
   m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
   m_PreserveUVs: 0
   m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0
@@ -119,7 +121,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4436558194337155541}
-  m_Layer: 9
+  m_Layer: 15
   m_Name: Group4
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -152,7 +154,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3757172808128744808}
-  m_Layer: 9
+  m_Layer: 15
   m_Name: Group3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -183,7 +185,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4834351257136663824}
-  m_Layer: 9
+  m_Layer: 15
   m_Name: Group6
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -216,7 +218,7 @@ GameObject:
   - component: {fileID: 8868518782947108416}
   - component: {fileID: 9006046641364313907}
   - component: {fileID: 2889698281563956515}
-  m_Layer: 9
+  m_Layer: 15
   m_Name: Mesh6
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -259,6 +261,7 @@ MeshRenderer:
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -270,6 +273,7 @@ MeshRenderer:
   m_ProbeAnchor: {fileID: 0}
   m_LightProbeVolumeOverride: {fileID: 0}
   m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
   m_PreserveUVs: 0
   m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0
@@ -291,7 +295,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7046649556538617128}
-  m_Layer: 9
+  m_Layer: 15
   m_Name: Group8
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -324,7 +328,7 @@ GameObject:
   - component: {fileID: 1872261903418637330}
   - component: {fileID: 5477625327295110275}
   - component: {fileID: 7189800904960659090}
-  m_Layer: 9
+  m_Layer: 15
   m_Name: Mesh1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -367,6 +371,7 @@ MeshRenderer:
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -379,6 +384,7 @@ MeshRenderer:
   m_ProbeAnchor: {fileID: 0}
   m_LightProbeVolumeOverride: {fileID: 0}
   m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
   m_PreserveUVs: 0
   m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0
@@ -400,7 +406,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2049686273728532148}
-  m_Layer: 9
+  m_Layer: 15
   m_Name: Group5
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -431,7 +437,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8795037239659715433}
-  m_Layer: 9
+  m_Layer: 15
   m_Name: Group9
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -462,7 +468,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1496505975482913419}
-  m_Layer: 9
+  m_Layer: 15
   m_Name: Group7
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -495,7 +501,7 @@ GameObject:
   - component: {fileID: 8323402806160435946}
   - component: {fileID: 5055713415081079172}
   - component: {fileID: 8550046424284577832}
-  m_Layer: 9
+  m_Layer: 15
   m_Name: Mesh2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -538,6 +544,7 @@ MeshRenderer:
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -549,6 +556,7 @@ MeshRenderer:
   m_ProbeAnchor: {fileID: 0}
   m_LightProbeVolumeOverride: {fileID: 0}
   m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
   m_PreserveUVs: 0
   m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0
@@ -572,7 +580,7 @@ GameObject:
   - component: {fileID: 588940221534070329}
   - component: {fileID: 5643477790063133837}
   - component: {fileID: 6501303640425013903}
-  m_Layer: 9
+  m_Layer: 15
   m_Name: tool_axe_0_hand
   m_TagString: tool
   m_Icon: {fileID: 0}
@@ -629,7 +637,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4187415763285193397}
-  m_Layer: 9
+  m_Layer: 15
   m_Name: Group2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -663,7 +671,7 @@ GameObject:
   - component: {fileID: 4556963308176174982}
   - component: {fileID: 5196198740046813930}
   - component: {fileID: 7031098929680617682}
-  m_Layer: 9
+  m_Layer: 15
   m_Name: Mesh3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -706,6 +714,7 @@ MeshRenderer:
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -717,6 +726,7 @@ MeshRenderer:
   m_ProbeAnchor: {fileID: 0}
   m_LightProbeVolumeOverride: {fileID: 0}
   m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
   m_PreserveUVs: 0
   m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0
@@ -740,7 +750,7 @@ GameObject:
   - component: {fileID: 717525073934523967}
   - component: {fileID: 7945059356212322114}
   - component: {fileID: 7382052790843967345}
-  m_Layer: 9
+  m_Layer: 15
   m_Name: Mesh4
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -783,6 +793,7 @@ MeshRenderer:
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -794,6 +805,7 @@ MeshRenderer:
   m_ProbeAnchor: {fileID: 0}
   m_LightProbeVolumeOverride: {fileID: 0}
   m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
   m_PreserveUVs: 0
   m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0

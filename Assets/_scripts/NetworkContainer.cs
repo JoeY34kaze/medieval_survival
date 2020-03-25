@@ -125,6 +125,11 @@ public class NetworkContainer : NetworkContainerBehavior
         }
     }
 
+    internal Predmet getPredmet()
+    {
+        return this.p;
+    }
+
     private void send_rpc_response_with_upkeep_cost(RpcArgs args)
     {
         if (gameObject.GetComponent<NetworkGuildFlag>() != null)
@@ -175,7 +180,7 @@ public class NetworkContainer : NetworkContainerBehavior
     /// <param name="args"></param>
     public override void openResponse(RpcArgs args)
     {
-        if (args.Info.SendingPlayer.NetworkId == 0)
+        if (args.Info.SendingPlayer.IsHost)
         {
             if (args.GetNext<int>() == 1)
             {

@@ -340,11 +340,11 @@ public class NetworkPlayerAnimationLogic : NetworkPlayerAnimationBehavior
 
     //--------------------   INVERSE KINEMATICS
 
-    public void on_weapon_or_tool_collision(Vector3 location) {
+    public void on_weapon_or_tool_collision() {
         //sprozi se z weapona ali toola ko zadane nek objekt.
 
         this.IK_swing_active = true;
-        this.IK_swing_target = location;
+        this.IK_swing_target = anim.GetIKPosition(AvatarIKGoal.RightHand);
 
     }
 

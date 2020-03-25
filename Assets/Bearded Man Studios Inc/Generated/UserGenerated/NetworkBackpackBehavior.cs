@@ -4,23 +4,22 @@ using UnityEngine;
 
 namespace BeardedManStudios.Forge.Networking.Generated
 {
-	[GeneratedRPC("{\"types\":[[\"byte\"][\"string\"][\"uint\"][\"int\", \"Vector3\", \"Vector3\"][\"int\", \"int\"][\"int\", \"int\"][\"string\", \"int\", \"int\"][][][\"string\"][\"int\"][\"int\", \"int\"][\"int\", \"int\"]]")]
-	[GeneratedRPCVariableNames("{\"types\":[[\"tip\"][\"data\"][\"newOwner\"][\"index\", \"pos\", \"dir\"][\"i\", \"j\"][\"backpack_index\", \"inventory_index\"][\"loadout_type\", \"loadout_index\", \"inventory_index\"][][][\"data\"][\"index\"][\"backpack_index\", \"bar_index\"][\"backInd\", \"BarInd\"]]")]
+	[GeneratedRPC("{\"types\":[[\"byte\"][\"uint\"][\"int\", \"Vector3\", \"Vector3\"][\"int\", \"int\"][\"int\", \"int\"][\"string\", \"int\", \"int\"][][][\"string\"][\"int\"][\"int\", \"int\"][\"int\", \"int\"]]")]
+	[GeneratedRPCVariableNames("{\"types\":[[\"tip\"][\"newOwner\"][\"index\", \"pos\", \"dir\"][\"i\", \"j\"][\"backpack_index\", \"inventory_index\"][\"loadout_type\", \"loadout_index\", \"inventory_index\"][][][\"data\"][\"index\"][\"backpack_index\", \"bar_index\"][\"backInd\", \"BarInd\"]]")]
 	public abstract partial class NetworkBackpackBehavior : NetworkBehavior
 	{
 		public const byte RPC_BACKPACK_INTERACTION_REQUEST = 0 + 5;
-		public const byte RPC_BACKPACK_ITEMS_OTHER_RESPONSE = 1 + 5;
-		public const byte RPC_OWNERSHIP_CHANGE_RESPONSE = 2 + 5;
-		public const byte RPC_BACKPACK_DROP_ITEM_REQUEST = 3 + 5;
-		public const byte RPC_BACKPACK_SWAP_ITEMS_REQUEST = 4 + 5;
-		public const byte RPC_INVENTORY_TO_BACKPACK_SWAP_REQUEST = 5 + 5;
-		public const byte RPC_LOADOUT_TO_BACKPACK_REQUEST = 6 + 5;
-		public const byte RPC_BACKPACK_UNEQUIP_REQUEST = 7 + 5;
-		public const byte RPC_BACKPACK_UNEQUIP_RESPONSE = 8 + 5;
-		public const byte RPC_BACKPACK_ITEMS_OWNER_RESPONSE = 9 + 5;
-		public const byte RPC_BACKPACK_TO_LOADOUT_REQUEST = 10 + 5;
-		public const byte RPC_BACKPACK_TO_BAR_REQUEST = 11 + 5;
-		public const byte RPC_BAR_TO_BACKPACK_REQUEST = 12 + 5;
+		public const byte RPC_OWNERSHIP_CHANGE_RESPONSE = 1 + 5;
+		public const byte RPC_BACKPACK_DROP_ITEM_REQUEST = 2 + 5;
+		public const byte RPC_BACKPACK_SWAP_ITEMS_REQUEST = 3 + 5;
+		public const byte RPC_INVENTORY_TO_BACKPACK_SWAP_REQUEST = 4 + 5;
+		public const byte RPC_LOADOUT_TO_BACKPACK_REQUEST = 5 + 5;
+		public const byte RPC_BACKPACK_UNEQUIP_REQUEST = 6 + 5;
+		public const byte RPC_BACKPACK_UNEQUIP_RESPONSE = 7 + 5;
+		public const byte RPC_BACKPACK_ITEMS_OWNER_RESPONSE = 8 + 5;
+		public const byte RPC_BACKPACK_TO_LOADOUT_REQUEST = 9 + 5;
+		public const byte RPC_BACKPACK_TO_BAR_REQUEST = 10 + 5;
+		public const byte RPC_BAR_TO_BACKPACK_REQUEST = 11 + 5;
 		
 		public NetworkBackpackNetworkObject networkObject = null;
 
@@ -35,7 +34,6 @@ namespace BeardedManStudios.Forge.Networking.Generated
 
 			base.SetupHelperRpcs(networkObject);
 			networkObject.RegisterRpc("BackpackInteractionRequest", BackpackInteractionRequest, typeof(byte));
-			networkObject.RegisterRpc("BackpackItemsOtherResponse", BackpackItemsOtherResponse, typeof(string));
 			networkObject.RegisterRpc("OwnershipChangeResponse", OwnershipChangeResponse, typeof(uint));
 			networkObject.RegisterRpc("BackpackDropItemRequest", BackpackDropItemRequest, typeof(int), typeof(Vector3), typeof(Vector3));
 			networkObject.RegisterRpc("BackpackSwapItemsRequest", BackpackSwapItemsRequest, typeof(int), typeof(int));
@@ -128,11 +126,6 @@ namespace BeardedManStudios.Forge.Networking.Generated
 		/// byte tip
 		/// </summary>
 		public abstract void BackpackInteractionRequest(RpcArgs args);
-		/// <summary>
-		/// Arguments:
-		/// string data
-		/// </summary>
-		public abstract void BackpackItemsOtherResponse(RpcArgs args);
 		/// <summary>
 		/// Arguments:
 		/// uint newOwner

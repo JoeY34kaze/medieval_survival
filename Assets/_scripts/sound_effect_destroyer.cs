@@ -9,7 +9,6 @@ public class sound_effect_destroyer : MonoBehaviour
     void Start()
     {
         this.sound_effect_length = GetComponent<AudioSource>().clip.length;
-        Debug.Log(transform.position);
         StartCoroutine("killer");
     }
 

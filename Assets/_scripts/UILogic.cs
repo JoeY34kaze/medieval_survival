@@ -19,6 +19,7 @@ public class UILogic : MonoBehaviour
     public GameObject containerPanel;
     public GameObject panel_durability;
     public GameObject trebuchet_rotation_panel;
+    public backpack_local_panel_handler backpack_local_panel_handler;
 
     public bool hasOpenWindow=false;
     public NetworkGuildManager ngm;
@@ -278,6 +279,7 @@ public class UILogic : MonoBehaviour
         this.hasOpenWindow = false;
         this.currentActiveContainer = null;
         this.panelsPredmetiContainer = null;
+        
 
         this.allows_UI_opening = false;
         this.currently_openened_container = null;

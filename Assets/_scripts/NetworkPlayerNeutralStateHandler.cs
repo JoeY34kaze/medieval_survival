@@ -295,23 +295,14 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
 
     private void set_rotation_parameters_from_mouse_info(float allowedAngleChunk)
     {
-     
-        
-
         if (allowedAngleChunk <1 &&  (!this.CurrentLocalPlaceable.GetComponent<LocalPlaceableHelper>().isSnapping))
         {
-
-
             this.CurrentLocalPlaceable.transform.Rotate(this.CurrentLocalPlaceable.transform.up, Input.mouseScrollDelta.y);
-
-
         }
         else{
-
             if(Input.mouseScrollDelta.y!=0)
                 this.CurrentLocalPlaceable.transform.Rotate(this.CurrentLocalPlaceable.transform.up, ((Input.mouseScrollDelta.y / Input.mouseScrollDelta.y) * allowedAngleChunk));
         }
-
     }
 
     private RaycastHit local_MoveCurrentPlaceableObjectToMouseRay()
@@ -326,9 +317,7 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
         RaycastHit hitInfo;
         if (Physics.Raycast(ray, out hitInfo, Mathf.Infinity, this.placement_layer_mask)) {
             //Debug.Log(hitInfo.collider.name);
-            
             //pivot objekta je v sredini njegovga colliderja. tko da ga izrise not v zemljo. to rabmo compensatat
-
             AttachmentPoint s = GetClosestValidSnapPointInRange(hitInfo, this.current_placeable_item.PlacementType);
             this.current_closest_attachment_point = s;
             if (s == null)//ce je null in je foundation ga loh postavlamo na tla po zelji
@@ -366,11 +355,8 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
     /// <returns></returns>
     private AttachmentPoint GetClosestValidSnapPointInRange(RaycastHit hit, Item.SnappableType current_snappable_type)
     {
-
-
         // if (current_snappable_type == Item.SnappableType.foundation)//we cant put switch because it would get messier than this crap
         //{
-
         //pogledat mormo ve ima objekt kterga trenutno gledamo snap point. prioriteta mora bit da se snapa na objekt kterga gledamo
         AttachmentPoint closestAttachmentPoint_on_gameObject = getClosestAttachmentPoint_on_gameobject(hit, current_snappable_type);
 
@@ -390,33 +376,6 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
                 if (Vector3.Distance(hit.point, closestAttachmentPoint.transform.position) < this.placeable_snapping_range)
                     return closestAttachmentPoint;
             return null;//ce je null al pa ce je predalec
-
-
-       // }
-
-        /*
-        else if (current_snappable_type == Item.SnappableType.wall || current_snappable_type == Item.SnappableType.door_frame || current_snappable_type == Item.SnappableType.windows_frame) {
-            //ti objekti se lahko nalimajo samo na foundation, floor, wall, door_frame ali window_frame.
-            AttachmentPoint closestAttachmentPoint = getClosestAttachmentPoint_NoChecks(point, current_snappable_type);
-            if (closestAttachmentPoint == null) return null;
-
-
-            switch (closest.snappableType) {//attachmentPoint na kterga se je prlimal
-                case Item.SnappableType.foundation: {
-                        
-
-                        if (Vector3.Distance(point, r.position) < this.placeable_snapping_range)
-                            return r;
-                        break;
-                    }
-                default:
-                    Debug.LogError("notImplemented yet");
-                    break;
-            }
-
-        }
-        */
-        //return r;
     }
 
     private AttachmentPoint getClosestAttachmentPoint_on_gameobject(RaycastHit hit, Item.SnappableType snappableType) {
@@ -483,12 +442,13 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
         }
         return false;
     }
-    
+
 
     /// <summary>
     /// 1,2,3,4,5,6,7,8,9,0 - tko kot so na tipkovnci!
     /// </summary>
-    private void checkInputBar() {
+    private void checkInputBar()
+    {
         if (Input.GetButtonDown("Bar1")) localBarSlotSelectionRequest(0);
         else if (Input.GetButtonDown("Bar2")) localBarSlotSelectionRequest(1);
         else if (Input.GetButtonDown("Bar3")) localBarSlotSelectionRequest(2);
@@ -499,12 +459,25 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
         else if (Input.GetButtonDown("Bar8")) localBarSlotSelectionRequest(7);
         else if (Input.GetButtonDown("Bar9")) localBarSlotSelectionRequest(8);
         else if (Input.GetButtonDown("Bar0")) localBarSlotSelectionRequest(9);
-        else if (Input.GetAxis("Mouse ScrollWheel") > 0f) {
-            //TODO: spisat kodo da manja weapon in ignorira slot ce je gor shield. nocmo da nam med fajtom zamenja shield
+        else if (Input.GetAxis("Mouse ScrollWheel") > 0f)
+        {
+
+
+            int current_index = this.selected_index;
+
+            int next = this.npi.get_index_of_next_item_on_hotbar_ascending(current_index);
+            if (next == this.selected_index_shield)
+                next = this.npi.get_index_of_next_item_on_hotbar_ascending(next);
+                localBarSlotSelectionRequest(next);
+            
         }
-        else if (Input.GetAxis("Mouse ScrollWheel") < 0f) {
-            //TODO
-            //spisat kodo da manja weapon in ignorira slot ce je gor shield. nocmo da nam med fajtom zamenja shield
+        else if (Input.GetAxis("Mouse ScrollWheel") < 0f)
+        {
+            int current_index = this.selected_index;
+            int next = this.npi.get_index_of_next_item_on_hotbar_descending(current_index);
+            if (next == this.selected_index_shield)
+                next = this.npi.get_index_of_next_item_on_hotbar_descending(next);
+            localBarSlotSelectionRequest(next);
         }
     }
 
@@ -1033,6 +1006,7 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
 
         //apply force on clients, sets predmet
         b.gameObject.GetComponent<NetworkPlaceable>().init(p, networkObject.Owner.NetworkId);
+
         return b.gameObject.GetComponent<NetworkPlaceable>();
     }
 

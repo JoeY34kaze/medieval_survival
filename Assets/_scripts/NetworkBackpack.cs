@@ -14,11 +14,13 @@ public class NetworkBackpack : NetworkBackpackBehavior
     private NetworkPlayerInventory npi = null;
     private Rigidbody r;
     private backpack_local_panel_handler panel_handler;
+    public Item item;
     void Start()
     {
         nci = GetComponent<NetworkContainer_items>();
         if (networkObject.IsServer) {
-            nci.init(Mapper.instance.getItemById(GetComponent<identifier_helper>().id).capacity);
+            nci.init(this.item.capacity);
+            GetComponent<NetworkContainer>().init(new Predmet(item, 1, item.Max_durability, "creator not found. devs should check this"));
         }
             
         r = GetComponent<Rigidbody>();
@@ -58,8 +60,8 @@ public class NetworkBackpack : NetworkBackpackBehavior
     }
 
     internal void local_player_look_request()
-    {
-        networkObject.SendRpc(RPC_BACKPACK_INTERACTION_REQUEST, Receivers.Server, (byte)1);
+    {//to gre u networkcontainer
+        GetComponent<NetworkContainer>().local_open_container_request();
     }
 
     public void local_player_backpack_unequip_request() {
@@ -77,14 +79,10 @@ public class NetworkBackpack : NetworkBackpackBehavior
     public override void BackpackInteractionRequest(RpcArgs args)
     {
         if (!networkObject.IsServer) return;
-       
-
         byte tip = args.GetNext<byte>();
         uint player_id = args.Info.SendingPlayer.NetworkId;
         if (tip == 0 && this.owner_id == -1)//equip request
         {
-
-
             //poglej ce ze ima equipan backpack
             GameObject player = FindByid(player_id);
             if (player.GetComponentInChildren<NetworkBackpack>() == null)
@@ -92,15 +90,10 @@ public class NetworkBackpack : NetworkBackpackBehavior
                 //lahko pobere
                 //networkObject.AssignOwnership(args.Info.SendingPlayer);
                 NetworkPlayerInventory n = player.GetComponent<NetworkPlayerInventory>();
-                n.SetPredmetLoadout(new Predmet(Mapper.instance.getItemById(GetComponent<identifier_helper>().id)));//to nrdi samo server..
+                n.SetPredmetLoadout(GetComponent<NetworkContainer>().getPredmet());//to nrdi samo server..
                 n.sendNetworkUpdate(false, true);
                 sendOwnershipResponse(args.Info.SendingPlayer);
             }
-        }
-        else if (tip == 1 && (networkObject.IsOwner) &&(this.owner_id==-1))//ce je -1 pomen da ni od nobenga in lezi na tleh. ce je 0 pomen da ima serverjev player na hrbtu
-        { //look request. ce je od serverja
-            //lahko pogleda i guess.
-            networkObject.SendRpc(args.Info.SendingPlayer, RPC_BACKPACK_ITEMS_OTHER_RESPONSE, nci.getItemsNetwork());
         }
         else if (tip == 1 && (networkObject.Owner.NetworkId == args.Info.SendingPlayer.NetworkId)) {//look request od ownerja. pomen da je odpru inventorij al ravnokar dubu ownership response in rab pohendlat panelo
             networkObject.SendRpc(networkObject.Owner, RPC_BACKPACK_ITEMS_OWNER_RESPONSE, nci.getItemsNetwork());
@@ -109,11 +102,6 @@ public class NetworkBackpack : NetworkBackpackBehavior
 
 
 
-    private void sendItemsResponse(NetworkingPlayer sendingPlayer)
-    {
-        if(networkObject.IsServer)
-            networkObject.SendRpc(sendingPlayer, RPC_BACKPACK_ITEMS_OTHER_RESPONSE, this.nci.getItemsNetwork());
-    }
 
     private void sendOwnershipResponse(NetworkingPlayer sendingPlayer)
     {
@@ -140,7 +128,7 @@ public class NetworkBackpack : NetworkBackpackBehavior
     }
     public override void BackpackItemsOwnerResponse(RpcArgs args)//tole dobi owner, ponavad ko odpre inventorij al pa kj tazga
     {
-        if (args.Info.SendingPlayer.NetworkId != 0) return;
+        if (!args.Info.SendingPlayer.IsHost) return;
 
         Predmet[] serverjevi_predmeti = nci.parseItemsNetworkFormat(args.GetNext<string>());
         nci.setAll(serverjevi_predmeti);
@@ -149,18 +137,7 @@ public class NetworkBackpack : NetworkBackpackBehavior
         this.panel_handler.updateUI();//tole je za tvoj inventorij ko imas equippan
     }
 
-    public override void BackpackItemsOtherResponse(RpcArgs args)//odpre backpack da ga lahko gleda kot nek chest in pobira iteme vn
-    {
-         if (args.Info.SendingPlayer.NetworkId != 0) return;
-
-        //odpret panel ce nima se odprtga
-
-        Predmet[] serverjevi_predmeti = nci.parseItemsNetworkFormat(args.GetNext<string>());
-        nci.setAll(serverjevi_predmeti);
-        //izrisat iteme k jih mamo tle u arrayu na panele.
-        //this.panel_handler.updateUI();//tole je za tvoj inventorij ko imas equippan
-
-    }
+   
 
     /// <summary>
     /// zamenja pozicije itemov znotraj inventorija
@@ -233,7 +210,7 @@ public class NetworkBackpack : NetworkBackpackBehavior
 
     public override void OwnershipChangeResponse(RpcArgs args)
     {
-        if (args.Info.SendingPlayer.NetworkId != 0) return;
+        if (!args.Info.SendingPlayer.IsHost) return;
 
         uint player_id = args.GetNext<uint>();
         this.owner_id = (int)player_id;
@@ -241,7 +218,7 @@ public class NetworkBackpack : NetworkBackpackBehavior
         //poisc playerja in se mu prlimej na hrbet
         this.npi = this.owning_player.GetComponent<NetworkPlayerInventory>();
         this.npi.backpack_inventory = this;
-        Item item =Mapper.instance.getItemById(GetComponent<identifier_helper>().id);
+       
         
         Transform transformForBackpack = this.npi.backpackSpot;
         //this.panel_handler = this.npi.backpackPanel;
@@ -253,7 +230,7 @@ public class NetworkBackpack : NetworkBackpackBehavior
         this.transform.SetParent(transformForBackpack);
         this.transform.localPosition = Vector3.zero;
         this.transform.localRotation = Quaternion.identity;
-        npi.requestUiUpdate();//najbrz overkill k itak posle redraw zmer k odpres inventorij ampak za zacetk je ok - da izrise backpack na svoj slot u loadoutu
+        
         
         //nastimat je treba tud panel za backpack slote.
 
@@ -261,10 +238,11 @@ public class NetworkBackpack : NetworkBackpackBehavior
 
         if (networkObject.IsOwner)
         {
-            this.panel_handler = this.npi.backpackPanel;
-            this.panel_handler.init(item.capacity, this.nci);//nastav samo slote
+            this.panel_handler = UILogic.Instance.backpack_local_panel_handler;
+            this.panel_handler.init(this.item.capacity, this.nci);//nastav samo slote
             networkObject.SendRpc(RPC_BACKPACK_INTERACTION_REQUEST, Receivers.Server, (byte)1);//posle request da mu updejta iteme
         }
+        npi.requestUiUpdate();//najbrz overkill k itak posle redraw zmer k odpres inventorij ampak za zacetk je ok - da izrise backpack na svoj slot u loadoutu
     }
 
     public override void BackpackUnequipRequest(RpcArgs args)

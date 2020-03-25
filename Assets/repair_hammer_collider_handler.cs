@@ -29,7 +29,7 @@ public class repair_hammer_collider_handler : MonoBehaviour
         //Vector3 dir = other.transform.position - transform.position;
         //  if (Physics.Raycast(transform.position, dir, out hit))
         // {
-        anim.on_weapon_or_tool_collision(transform.position);
+        anim.on_weapon_or_tool_collision();
 
         // }
     }

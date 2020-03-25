@@ -33,10 +33,7 @@ public abstract class InventorySlot : MonoBehaviour
     public void AddPredmet(Predmet p)
     {
 
-        if (this.index == 0)
-        {
-            Debug.Log("asda");
-        }
+
 
         if (this.durability_bar == null || this.text_quantity == null)
             setReferences();
@@ -86,9 +83,7 @@ public abstract class InventorySlot : MonoBehaviour
         if (this.durability_bar == null || this.text_quantity == null)
             setReferences();
 
-        if (this.index == 0) {
-            Debug.Log("asda");
-        }
+
 
         predmet = null;
         //icon.sprite = icon_background.sprite;

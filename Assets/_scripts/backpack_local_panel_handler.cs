@@ -23,8 +23,6 @@ public class backpack_local_panel_handler : MonoBehaviour
                 slots[i].ClearSlot();
             }
         }
-
-
     }
 
     internal void init(int size,NetworkContainer_items nci)//size dobi z item.size
