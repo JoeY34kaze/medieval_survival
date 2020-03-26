@@ -377,8 +377,11 @@ public class NetworkPlaceable : NetworkPlaceableBehavior
 
     private void OnDestroy()
     {
-        if (!this.gibs.gameObject.activeSelf) this.gibs.gameObject.SetActive(true);
-        this.gibs.enableGibs();
+        if (this.gibs != null)
+        {
+            if (!this.gibs.gameObject.activeSelf) this.gibs.gameObject.SetActive(true);
+            this.gibs.enableGibs();
+        }
         clear_potential_ui_durability_panel();
     }
 
