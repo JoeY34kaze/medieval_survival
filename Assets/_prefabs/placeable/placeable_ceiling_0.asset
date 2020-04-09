@@ -36,6 +36,7 @@ MonoBehaviour:
     type: 3}
   ignorePlacementNormal: 1
   PlacementType: 2
-  blocks_placements: 
+  blocks_placements: 02000000
   needs_upkeep: 1
   recepie: {fileID: 11400000, guid: d283713c020252549ae644fa265b493d, type: 2}
+  needsToBeAttached: 1

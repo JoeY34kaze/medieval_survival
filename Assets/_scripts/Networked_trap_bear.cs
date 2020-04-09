@@ -49,7 +49,7 @@ public class Networked_trap_bear : NetworkTrapBehavior
         if (this.armed) {//if trap is ready
             if (networkObject.IsServer) {
                 Debug.Log("Server-side collision detected with trigger object " + other.name);
-                if (other.transform.root.name.Equals("NetworkPlayer(Clone)") && !other.transform.name.Equals("NetworkPlayer(Clone)")) {//ce je contact z playerjem in ce ni playerjev movement collider. what about animals??
+                if (other.transform.root.name.Equals("NetworkPlayer(Clone)") && !other.transform.name.Equals("NetworkPlayer(Clone)")) {//ce je contact z playerjem in ne z njegovim movement colliderjem. what about animals??
                                                                                                                                        //handle taking damage on player
                     other.transform.root.gameObject.GetComponent<NetworkPlayerStats>().take_environmental_damage_server_authority(this.item, other.tag);
                     //handle animation here

@@ -35,9 +35,6 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
 
     public GameObject[] sound_effects_on_player;
 
-    public decicions_handler_ui decision_handler;
-    public local_team_panel_handler team_panel;
-
     private uint[] team; //array networkId-jev team memberjev. server vedno hrani to vrednost za vse playerje. drugi dobijo samo update od serverja
 
 
@@ -373,6 +370,21 @@ napadenmu playerju da si poupdejta health. ta player pol ko si je updejtov healt
         }
     }
 
+    internal void localDisconnectRequest()
+    {
+        if (networkObject.IsOwner && !NetworkManager.Instance.Networker.Me.IsHost)
+        {
+            NetworkManager.Instance.Networker.Disconnect(false);
+        }
+        else if (NetworkManager.Instance.Networker.Me.IsHost) {
+            Debug.LogWarning("Host tried disconnecting. Im not sure of what to do about this at this point to be honest.");
+        }
+        else
+        {
+            Debug.LogError("tried disconnecting from a networkplayer that isnt owned by me.");
+        }
+    }
+
     #endregion
 
     internal uint Get_server_id()
@@ -481,7 +493,7 @@ napadenmu playerju da si poupdejta health. ta player pol ko si je updejtov healt
     /// <param name="args"></param>
     public override void setHealth(RpcArgs args)
     {
-        if (args.Info.SendingPlayer.NetworkId!=0) 
+        if (!args.Info.SendingPlayer.IsHost) 
             return;
         
 
@@ -501,7 +513,8 @@ napadenmu playerju da si poupdejta health. ta player pol ko si je updejtov healt
         string tag = args.GetNext<string>();
         if (!tag.Equals("block_player") && !tag.Equals("revive")) GameObject.Instantiate(this.sound_effects_on_player[0], transform.position, transform.rotation);//tag ni od objekta al pa kej. je samo kot parameter da se ve, da smo pobral cloveka
         this.healthBar.fillAmount = this.health / (this.max_health);
-        FindByid(NetworkManager.Instance.Networker.Me.NetworkId).GetComponent<NetworkPlayerStats>().team_panel.refreshHp(Get_server_id(), this.healthBar.fillAmount);
+        UILogic.TeamPanel.refreshHp(networkObject.NetworkId, this.healthBar.fillAmount);
+        if(networkObject.IsOwner)Exploration_and_Battle.Instance.onHostileAction();
         
         //}
     }
@@ -516,6 +529,7 @@ napadenmu playerju da si poupdejta health. ta player pol ko si je updejtov healt
        // Debug.Log("I Did Damage! "+tag);
         FloatingTextController.CreateFloatingText(dmg+"", Camera.main.ScreenToWorldPoint(new Vector3(Screen.width / 2, Screen.height / 2, Camera.main.nearClipPlane)),tag);
         reticle_hit_controller.CreateReticleHit(tag); //cod2 reticle hit style like
+        Exploration_and_Battle.Instance.onHostileAction();
     }
 
     public override void respawnRequest(RpcArgs args)//poslje client serverju
@@ -767,7 +781,7 @@ napadenmu playerju da si poupdejta health. ta player pol ko si je updejtov healt
 
 
             ///izris eno panelo kjer te vprasa ce se hocs joinat. podatke dobimo iz other_gameobject
-            this.decision_handler.draw_team_invite_decision(other_gameobject);
+            UILogic.DecisionsHandler.draw_team_invite_decision(other_gameobject);
 
             //response posljemo kot RPC_TEAM_INVITE_OTHER_RESPONSE,otherplayerNetworkId,bool -> LocalTeamRequestResponse(uint id, bool resp) {
         }

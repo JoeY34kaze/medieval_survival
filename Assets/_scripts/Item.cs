@@ -33,4 +33,5 @@ public class Item : ScriptableObject
     public SnappableType[] blocks_placements;
     public bool needs_upkeep;
     public PredmetRecepie recepie;
+    public bool needsToBeAttached = false;
 }

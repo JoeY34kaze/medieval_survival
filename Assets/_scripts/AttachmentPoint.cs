@@ -36,11 +36,17 @@ public class AttachmentPoint : MonoBehaviour
         GetComponentInParent<NetworkPlaceable>().sendAttachmentUpdate(transform.GetSiblingIndex(), true);
     }
 
-    internal void detach()
+    /// <summary>
+    /// local_only is set to true ONLY when called from OnDestroyed method because we CANNOT send any rpc's anymore.
+    /// </summary>
+    /// <param name="ony_server"></param>
+    internal NetworkPlaceable detach(bool local_only)
     {
+        NetworkPlaceable for_return = this.attached_placeable.GetComponent<NetworkPlaceable>();
         this.attached_placeable = null;
         this.blocking = false;
-        GetComponentInParent<NetworkPlaceable>().sendAttachmentUpdate(transform.GetSiblingIndex(), false);
+        if(!local_only) GetComponentInParent<NetworkPlaceable>().sendAttachmentUpdate(transform.GetSiblingIndex(), false);
+        return for_return;
     }
 
     /// <summary>
@@ -65,8 +71,9 @@ public class AttachmentPoint : MonoBehaviour
         //poiskat vse valid attachemnt pointe in izbrat najblizjo
 
 
-        //tole je za iskat foundatione
-        if (i.PlacementType == Item.SnappableType.foundation)
+        //tole je za poiskat in blokirat attachment pointe, ki so se spawnale sedaj, ki smo nov objekt postavili, in so na lokaciji, kjer objekt ze obstaja. ce tega ni, pride do bugga
+        //kjer lahko postavljamo en objekt cez druzga do neskoncnosti. prvi if blokira glede na RAZDALJO med objektoma in TIPOM objekta.
+        if (i.PlacementType == Item.SnappableType.foundation || i.PlacementType == Item.SnappableType.wall || i.PlacementType == Item.SnappableType.ceiling || i.PlacementType == Item.SnappableType.door_frame || i.PlacementType == Item.SnappableType.windows_frame)
             foreach (AttachmentPoint p in gameObject.GetComponentsInChildren<AttachmentPoint>())
             {
                 if (p.isFree())
@@ -76,7 +83,7 @@ public class AttachmentPoint : MonoBehaviour
                             p.attach(this.transform.parent.gameObject);
                         }
             }
-        else if (i.PlacementType == Item.SnappableType.stairs_narrow || i.PlacementType == Item.SnappableType.stairs_wide) {
+        else if (i.PlacementType == Item.SnappableType.stairs_narrow || i.PlacementType == Item.SnappableType.stairs_wide ) {
             //na tem foundationu poiskat vse attackment pointe k so valid za stenge in jih disablat
             foreach (AttachmentPoint p in this.gameObject.transform.parent.GetComponentsInChildren<AttachmentPoint>()) {
                 if (p.acceptsAttachmentOfType(i.PlacementType))
@@ -100,5 +107,21 @@ public class AttachmentPoint : MonoBehaviour
             }
         }
         return false;
+    }
+
+    /// <summary>
+    /// parent placeable was destroyed. we need to handle behaviour of any attached objects.
+    /// </summary>
+    /// <param name="networkPlaceable"></param>
+    internal void OnPlaceableDestroyed(NetworkPlaceable destroyedPlaceable)
+    {
+        if (attached_placeable != null) {//ce je nekaj attachan gor (recimo foudnation -> wall)
+            if (attached_placeable.GetComponent<NetworkPlaceable>().p.item.needsToBeAttached) {//ce je attachan objekt nekaj kar nemore obstajat sam po seb ( foundation lahko | wall nemore )
+                if (!attached_placeable.GetComponent<NetworkPlaceable>().isAttachedToAlternativeAttachmentPoint(this)) { //pogleda na ta placeable (wall ki je zgubil attachment) če se lahko attacha nekam drugam na valid
+                    NetworkPlaceable previous = this.detach(true);
+                    previous.handle_object_destruction(); //ce je tukaj pomeni da se ni mogel attachat nikamor. treba ga je unicit in pohendlat unicenje naprej.
+                }
+            }
+        }
     }
 }

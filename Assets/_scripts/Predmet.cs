@@ -12,16 +12,33 @@ public class Predmet
     public int quantity=1;
     //public string creator;
     public float current_durabilty;
-    public string creator = "some schmuk";
+    public string creator = "creator not set";
     public int tier = 0;
+    private Predmet pp;
+
+    public Predmet(Predmet ppp)
+    {
+        if (ppp != null)
+        {
+            this.item = ppp.item;
+            this.quantity = ppp.quantity;
+            this.current_durabilty = ppp.current_durabilty;
+            this.creator = ppp.creator;
+        }
+    }
+    public Predmet() { 
+    
+    }
     public Predmet(Item i) {
         this.item = i;
         this.quantity = 1;
+        this.current_durabilty = i.Max_durability;
     }
 
     public Predmet(Item i, int quantity) {
         this.item = i;
         this.quantity = quantity;
+        this.current_durabilty = i.Max_durability;
     }
 
     public Predmet(Item i, int quantity, float durability) {
@@ -37,7 +54,6 @@ public class Predmet
         this.current_durabilty = durability;
         this.creator = creator;
     }
-
     /// <summary>
     /// vrne strik k ga fuknes u RPC, predstavlja toString tega predmeta da ga pol stlacs v predmet.SetParametersFromNetworkString v rpcju na drug strani in smo tko prekopiral objekt po networku
     /// </summary>
@@ -64,7 +80,7 @@ public class Predmet
 
     internal static Predmet createNewPredmet(string networkString)
     {
-        Predmet r = new Predmet(null);
+        Predmet r = new Predmet();
         r.setParametersFromNetworkString(networkString);
         if (r.item == null) return null;
         return r;

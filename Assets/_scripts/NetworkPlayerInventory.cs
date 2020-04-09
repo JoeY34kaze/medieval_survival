@@ -1562,13 +1562,13 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
 
     public void instantiate_server_weapons_for_testing()
     {
-        Predmet p = new Predmet(null);
-        for (int i = 0; i < 50; i++)
+        if (!networkObject.IsServer) return;
+        Predmet p = new Predmet();
+        int k = 0;
+        foreach (Item i in Mapper.instance.items)
         {
-            Item it = Mapper.instance.getItemById(i);
-            while (it == null) it = Mapper.instance.getItemById(++i);
-            p = new Predmet(it, 1, 1000);
-            instantiateDroppedPredmet(p, transform.position + Vector3.up * 2, transform.forward);
+            p = new Predmet(i, 1, 1000);
+            instantiateDroppedPredmet(p, transform.position + Vector3.up * 2,( transform.forward*k++)*0.1f);
         }
     }
 
@@ -1622,7 +1622,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
     public override void NetworkInstantiationServerRequest(RpcArgs args)
     {
         if (!networkObject.IsServer) { Debug.LogError("instanciacija na clientu ne na serverju!"); return; }
-        Predmet p = new Predmet(null);
+        Predmet p = new Predmet();
         p.setParametersFromNetworkString(args.GetNext<string>());
         Vector3 pos = args.GetNext<Vector3>();
         Vector3 dir = args.GetNext<Vector3>();

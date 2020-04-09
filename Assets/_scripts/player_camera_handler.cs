@@ -13,7 +13,7 @@ public class player_camera_handler : NetworkPlayerCameraHandlerBehavior
     public bool freeLook = false;
 
     public Transform _camera_framework;
-    public float mouse_sensitivity_multiplier = 1.0f;
+    public static float mouse_sensitivity_multiplier = 1.0f;
 
     public Camera player_cam;
     private NetworkPlayerInventory networkPlayerInventory;

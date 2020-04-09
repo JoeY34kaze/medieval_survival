@@ -15,7 +15,7 @@ public class NetworkPlaceable : NetworkPlaceableBehavior
     private uint player_who_placed_this;
 
     [SerializeField]
-    private float distanceForSnappingHandling = 0.05f;
+    internal static float distanceForSnappingHandling = 0.05f;
 
     public Predmet p;
     [SerializeField]
@@ -94,7 +94,7 @@ public class NetworkPlaceable : NetworkPlaceableBehavior
     }
 
     internal void on_upkeep_pay() {
-        Debug.Log("Paying upkeep for " + this.p.item.Display_name);
+        //Debug.Log("Paying upkeep for " + this.p.item.Display_name);
         if (this.upkeep_flag == null || !this.upkeep_flag.pay_upkeep_for(this))//ce ni flaga ali pa placevanje upkeepa faila
             take_damage((int)this.p.item.Max_durability / 24);
     }
@@ -102,7 +102,7 @@ public class NetworkPlaceable : NetworkPlaceableBehavior
     internal void take_weapon_damage(Predmet p) {
         if (p == null)
         {
-            Debug.LogWarning("weapon predmet is null!");
+            Debug.LogWarning("weapon predmet is null! taking default damage of 250");
             take_damage(250);
         }
         else
@@ -110,10 +110,12 @@ public class NetworkPlaceable : NetworkPlaceableBehavior
     }
 
     private void take_damage(int d) {
+        //Debug.Log("object " + p.ToString() + " from " + this.p.current_durabilty + " takes " + d + " dmg and is now at " +(this.p.current_durabilty-d));
         if (networkObject.IsServer)
         {
             this.p.current_durabilty -= d;
-            send_update_to_all_nearby();
+
+            send_predmet_update_to_all_valid_nearby_players();
             if (this.p.current_durabilty <= 0)
                 handle_object_destruction();
         }
@@ -124,7 +126,7 @@ public class NetworkPlaceable : NetworkPlaceableBehavior
     public override void NetworkPlaceableAttachmentRequest(RpcArgs args)
     {
         if (networkObject.IsServer) {
-            GameObject player = FindByid(args.Info.SendingPlayer.NetworkId);
+                GameObject player = FindByid(args.Info.SendingPlayer.NetworkId);
             NetworkPlayerNeutralStateHandler neutral_state_handler = FindByid(args.Info.SendingPlayer.NetworkId).GetComponent<NetworkPlayerNeutralStateHandler>();
 
 
@@ -148,14 +150,21 @@ public class NetworkPlaceable : NetworkPlaceableBehavior
                 
                 NetworkPlaceable created = neutral_state_handler.NetworkPlaceableInstantiationServer(p, ch.position, rot);
 
+
+
+                /*tole je blo pre
+
                 ch.GetComponent<AttachmentPoint>().attachTryReverse(created.gameObject);//proba nrdit obojestransko referenco ce se vse izide, sicer samo v eno smer
-
                 //samo dve povezavi nista dovolj, ko se sklene krog je treba to tud ugotovit, recimo 4 foundationi
-
                 created.refreshAttachmentPointOccupancy();
 
-                
-                
+                */
+
+                created.refreshAttachmentPointsInDomain();
+
+
+
+
 
                 player.GetComponent<NetworkPlayerInventory>().reduceCurrentActivePlaceable(neutral_state_handler.selected_index);//sicer vrne bool da nam pove ce smo pobral celotn stack, ampak nima veze ker rabmo poslat update za kvantiteto v vsakem primeru.
                                                                                                                 //nastavi selected index na -1 ce smo pobral vse - da gre lepo v rpc             
@@ -165,6 +174,37 @@ public class NetworkPlaceable : NetworkPlaceableBehavior
 
 
         }
+    }
+
+
+    /// <summary>
+    /// to pride v postev, ko se recimo podre foundation in rabimo pogledat ali se stena drzi druge stene mogoce in ne lebdi v zraku
+    /// </summary>
+    /// <param name="attachmentPoint"></param>
+    /// <returns></returns>
+    internal bool isAttachedToAlternativeAttachmentPoint(AttachmentPoint at)
+    {
+        AttachmentPoint[] all_AttachmentPoints = (AttachmentPoint[])GameObject.FindObjectsOfType<AttachmentPoint>();
+        if (all_AttachmentPoints == null) return false;
+        all_AttachmentPoints = removeTakenAttachmentPoints(all_AttachmentPoints);
+        if (all_AttachmentPoints == null) return false;
+        all_AttachmentPoints = removeNotValidSnappableTypeAttachmentPoints(all_AttachmentPoints, this.p.item.blocks_placements);
+
+        foreach (AttachmentPoint p in all_AttachmentPoints)
+        {
+            if (p.isFree() && !p.Equals(at))//tole neb smel bit ampak ce slucajno je se mora pohandlat
+                if (p.acceptsAttachmentOfType(this.snappableType))
+                {
+                    if (Vector3.Distance(p.gameObject.transform.position, this.transform.position) < NetworkPlaceable.distanceForSnappingHandling)
+                    {
+                        p.attachTryReverse(this.transform.gameObject);
+                        Debug.LogError("tole se neb smel izvest. attachment pointi ne smejo bit prazni ampak bi mogl zmer ze prej kazat na ta objekt! glej attachment point refresh ocupancy pri postavitvi objekta");
+                        return true;
+                    }
+                }
+                else if (p.attached_placeable.Equals(gameObject)) return true;
+        }
+        return false;
     }
 
 
@@ -195,7 +235,7 @@ public class NetworkPlaceable : NetworkPlaceableBehavior
                         }
                     }
 
-                    if (Vector3.Distance(p.gameObject.transform.position, this.transform.position) < this.distanceForSnappingHandling)
+                    if (Vector3.Distance(p.gameObject.transform.position, this.transform.position) < NetworkPlaceable.distanceForSnappingHandling)
                     {
                         p.attachTryReverse(this.transform.gameObject);
                     }
@@ -203,12 +243,81 @@ public class NetworkPlaceable : NetworkPlaceableBehavior
         }
     }
 
+    /// <summary>
+    /// klice se, ko se ustvari nov networkplaceable z snappable nacinom. pohandlat mora VSE reference, ki se ga ticejo.
+    /// </summary>
+    private void refreshAttachmentPointsInDomain()
+    {
+        //naredit mora 3 locene operacije.
+        //1 - poiskat vse attachment pointe, katere sam poblokira in nastavit referenco na njih, nase
+        //2 - za vse svoje child attachment pointe pogledat, ali so znotraj že postavljenih networkplaceable objektov in ustrezno nastavit reference
+        //3 - ce je objekt posebnega tipa ( door , narrow/wide stairs) treba pohandlat blokiranje tudi izven rangea
+
+        List<AttachmentPoint> attachedTo = new List<AttachmentPoint>();
+        //1 -----------------------------------------------------------------------------------------------------------------------------------------
+        AttachmentPoint[] all_AttachmentPoints = (AttachmentPoint[])GameObject.FindObjectsOfType<AttachmentPoint>();
+        if (all_AttachmentPoints == null) return;
+        all_AttachmentPoints = removeTakenAttachmentPoints(all_AttachmentPoints);
+        if (all_AttachmentPoints == null) return;
+        all_AttachmentPoints = removeNotValidSnappableTypeAttachmentPoints(all_AttachmentPoints, this.p.item.blocks_placements);
+
+        foreach (AttachmentPoint p in all_AttachmentPoints)
+        {
+            if (Vector3.Distance(p.gameObject.transform.position, this.transform.position) < NetworkPlaceable.distanceForSnappingHandling)
+                if (p.acceptsAttachmentOfType(this.snappableType))
+                {
+                    if (p.isFree())
+                    {
+                        p.attach(gameObject);
+                        attachedTo.Add(p);
+                    }
+                }
+        }
+
+
+        //2-----------------------------------------------------------------------------------------------------------------------------------------
+        NetworkPlaceable[] arr = new NetworkPlaceable[0];
+        foreach (AttachmentPoint p in GetComponentsInChildren<AttachmentPoint>()) {
+            arr = getAllNetworkplaceablesInRange(p.transform.position, NetworkPlaceable.distanceForSnappingHandling);
+            foreach (NetworkPlaceable np in arr)
+                p.attach(np.gameObject);//ustvari enosmerno referenco. posledicno je dvosmerna zaradi tocke 1. v tej metodi. mora bit dvosmerna!
+        }
+
+        //3-----------------------------------------------------------------------------------------------------------------------------------------
+
+        if (this.p.item.PlacementType == Item.SnappableType.door || this.p.item.PlacementType == Item.SnappableType.stairs_narrow || this.p.item.PlacementType == Item.SnappableType.stairs_wide)
+        { //ce je vrata, mora poblikirat vsa druga vrata na parent objektu.
+            foreach (AttachmentPoint att in attachedTo) { //za vsak networkplaceable na kterga smo attachan ( naceloma samo en ker je samo vrata in stenge)
+                NetworkPlaceable np = att.GetComponentInParent<NetworkPlaceable>();
+                np.blockChildAttachmentPointsOfTypeWith(this.p.item.PlacementType, gameObject);
+            }
+        }
+
+
+    }
+
+    internal void blockChildAttachmentPointsOfTypeWith(Item.SnappableType placeableType, GameObject g) {
+        foreach (AttachmentPoint a in GetComponentsInChildren<AttachmentPoint>()) {
+            if (a.acceptsAttachmentOfType(placeableType) && a.isFree())
+                a.attach(g);
+        } 
+    }
+
+
+    public static NetworkPlaceable[] getAllNetworkplaceablesInRange(Vector3 pos, float r) { 
+        List<NetworkPlaceable> rez = new List<NetworkPlaceable>();
+        foreach (NetworkPlaceable p in GameObject.FindObjectsOfType<NetworkPlaceable>())
+            if (Vector3.Distance(p.gameObject.transform.position, pos) < NetworkPlaceable.distanceForSnappingHandling)
+                rez.Add(p);
+        return rez.ToArray();
+    }
+
     private AttachmentPoint[] GetAttachmentPointsInRangeForSnapping(AttachmentPoint[] all_valid)
     {
         List<AttachmentPoint> l = new List<AttachmentPoint>();
         foreach (AttachmentPoint p in all_valid) {
             float dist = Vector3.Distance(p.transform.position, transform.position);
-            if ( dist< this.distanceForSnappingHandling)
+            if ( dist< NetworkPlaceable.distanceForSnappingHandling)
                 l.Add(p);
             Debug.Log(Vector3.Distance(p.transform.position, transform.position));
 
@@ -324,7 +433,7 @@ public class NetworkPlaceable : NetworkPlaceableBehavior
         return true;
     }
 
-    private void send_update_to_all_nearby() {
+    private void send_predmet_update_to_all_valid_nearby_players() {
         GameObject temp=null;
         lock (myNetWorker.Players)
         {
@@ -381,6 +490,10 @@ public class NetworkPlaceable : NetworkPlaceableBehavior
         {
             if (!this.gibs.gameObject.activeSelf) this.gibs.gameObject.SetActive(true);
             this.gibs.enableGibs();
+        }
+        foreach (AttachmentPoint a in GetComponentsInChildren<AttachmentPoint>()) {
+            if(a.attached_placeable!=null)
+                a.OnPlaceableDestroyed(this);
         }
         clear_potential_ui_durability_panel();
     }

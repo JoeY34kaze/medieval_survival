@@ -39,3 +39,4 @@ MonoBehaviour:
   blocks_placements: 030000000400000005000000
   needs_upkeep: 1
   recepie: {fileID: 11400000, guid: a20534c9fb7feae479a0d14f574f3e2a, type: 2}
+  needsToBeAttached: 1

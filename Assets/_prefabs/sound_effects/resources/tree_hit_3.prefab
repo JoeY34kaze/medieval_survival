@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 2312515853737920593}
   - component: {fileID: 9133978894292726709}
   - component: {fileID: 1394585502731536220}
+  - component: {fileID: -9128945344025975390}
   m_Layer: 0
   m_Name: tree_hit_3
   m_TagString: Untagged
@@ -143,5 +144,17 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 080adab74c1f28547a645ad564db8eea, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &-9128945344025975390
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2312515853737920592}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d78b26827478db24da9dfb06da510592, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 

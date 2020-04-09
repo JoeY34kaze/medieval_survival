@@ -64,7 +64,7 @@ public class MultiplayerMenu : MonoBehaviour
 		}
 
         //JOEY CODE - CE SE NC NE NRDI EN CAJT ZASTARTEJ SERVER
-        StartCoroutine(StartServerDelayed(10));
+        //StartCoroutine(StartServerDelayed(10));
 	}
 
     public IEnumerator StartServerDelayed(float t) {

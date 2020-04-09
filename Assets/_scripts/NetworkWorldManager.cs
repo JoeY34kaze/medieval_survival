@@ -8,8 +8,8 @@ using System;
 
 public class NetworkWorldManager : NetworkWorldManagerBehavior
 {
-    public int resourceRefreshTime;
-
+    public float resourceRefreshTime;
+    public float upkeep_interval;
     private IEnumerator upkeep_checker;
 
 
@@ -25,15 +25,19 @@ public class NetworkWorldManager : NetworkWorldManagerBehavior
 
     private IEnumerator Upkeep_checker_coroutine()
     {
+        int i = 0;
         while (true)
         {
-            foreach (NetworkPlaceable p in GameObject.FindObjectsOfType<NetworkPlaceable>())
+            NetworkPlaceable[] list = GameObject.FindObjectsOfType<NetworkPlaceable>();
+            //Debug.Log("------------UKEEP ITERATION " + (i++) + "------------------");
+            for (int k=0;k<list.Length;k++)
             {
-                if(p!=null)
-                    if (p.p.item.needs_upkeep)
-                        p.on_upkeep_pay();
+                if(list[k]!=null)
+                    if (list[k].p.item.needs_upkeep)
+                        list[k].on_upkeep_pay();
             }
-            yield return new WaitForSecondsRealtime(30);
+           // Debug.Log("------------------------------------------------------");
+            yield return new WaitForSecondsRealtime(upkeep_interval);
         }
     }
 
@@ -60,7 +64,7 @@ public class NetworkWorldManager : NetworkWorldManagerBehavior
         
     }
 
-    public IEnumerator serverResourceRefresh(int seconds)
+    public IEnumerator serverResourceRefresh(float seconds)
     {
         while (true) {
             yield return new WaitForSecondsRealtime(seconds);
@@ -76,7 +80,7 @@ public class NetworkWorldManager : NetworkWorldManagerBehavior
 
     public override void resourceRefresh(RpcArgs args)
     {
-        if (args.Info.SendingPlayer.NetworkId == 0) {
+        if (args.Info.SendingPlayer.IsHost) {
             foreach (Transform child in transform) {
                     child.GetComponent<NetworkResource>().onRefresh();
             }

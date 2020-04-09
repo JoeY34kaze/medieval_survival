@@ -62,7 +62,10 @@ public class UILogic : MonoBehaviour
     public static GameObject localPlayerGameObject;
     public static panel_guild_handler PanelGuildHander;
     public static decicions_handler_ui DecisionsHandler;
+    public static local_team_panel_handler TeamPanel;
     public Interactable_radial_menu interactable_radial_menu;
+
+    public MenuControllerInGame menuController;
 
 
     //----------------za linkat z npi
@@ -75,12 +78,21 @@ public class UILogic : MonoBehaviour
     public InventorySlotLoadout loadout_feet;
     public InventorySlotLoadout loadout_backpack;
     public InventorySlotBar[] bar_slots;
+    public GameObject menuBasicButtonsPanel;
+    public static bool drawDirectionArrowsEnabled = true;
+
+    public GameObject direction_arrow_up;
+    public GameObject direction_arrow_right;
+    public GameObject direction_arrow_down;
+    public GameObject direction_arrow_left;
 
     private void Start()
     {
         if (UILogic.Instance != null) Destroy(this); else UILogic.Instance = this;
         UILogic.PanelGuildHander = this.GuildPanel.GetComponent<panel_guild_handler>();
         UILogic.DecisionsHandler = GetComponentInChildren<decicions_handler_ui>();
+        UILogic.TeamPanel = GetComponentInChildren<local_team_panel_handler>();
+       
     }
     // Update is called once per frame
     void Update()
@@ -157,6 +169,20 @@ public class UILogic : MonoBehaviour
         }
     }
 
+    internal void OnWeaponDirectionChanged(int current_direction)
+    {
+        if (UILogic.drawDirectionArrowsEnabled) {
+            this.direction_arrow_up.SetActive(false);
+            this.direction_arrow_down.SetActive(false);
+            this.direction_arrow_left.SetActive(false);
+            this.direction_arrow_right.SetActive(false);
+            if (current_direction == 0) this.direction_arrow_up.SetActive(true);
+            if (current_direction == 1) this.direction_arrow_right.SetActive(true);
+            if (current_direction == 2) this.direction_arrow_down.SetActive(true);
+            if (current_direction == 3) this.direction_arrow_left.SetActive(true);
+        }
+    }
+
     internal bool isRadialMenuOpen()
     {
         return this.interactable_radial_menu.transform.GetChild(0).gameObject.activeSelf;
@@ -194,8 +220,11 @@ public class UILogic : MonoBehaviour
     private void handleEscapePressed()
     {
         //ce je odprto ksno okno ga zapri, sicer prikaz main menu
-        if (this.hasOpenWindow) ClearAll();
-        else { Application.Quit(); }//prikazat main menu
+        if (this.hasOpenWindow && (!menuController.transform.parent.gameObject.activeSelf || this.menuBasicButtonsPanel.activeSelf)) ClearAll();
+        else {
+            //prikazat main menu
+            set_main_menu_state(true);
+        }
     }
 
     internal void showGuildModificationPanel(bool b, NetworkGuildManager ngm)
@@ -214,7 +243,13 @@ public class UILogic : MonoBehaviour
         }
 
     }
-
+    private void set_main_menu_state(bool visible) {
+        if (visible) {
+            this.hasOpenWindow = true;
+            enableMouse();
+        }
+        this.menuController.transform.parent.gameObject.SetActive(visible);
+    }
 
     internal void show_trebuchet_rotation_panel(NetworkSiegeTrebuchet trebuchet) {
         this.active_trebuchet = trebuchet;
@@ -289,6 +324,7 @@ public class UILogic : MonoBehaviour
         NetworkGuildManager.Instance.SetMemberPanel(false);
 
         DisableMouse();
+        set_main_menu_state(false);
         UILogic.localPlayerGameObject.GetComponent<NetworkPlayerAnimationLogic>().hookChestRotation = true;
         UILogic.localPlayerGameObject.GetComponent<NetworkPlayerMovement>().lockMovement = false;
         UILogic.localPlayerGameObject.GetComponent<player_camera_handler>().lockCamera = false;

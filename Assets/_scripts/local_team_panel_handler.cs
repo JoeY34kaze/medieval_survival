@@ -16,30 +16,6 @@ public class local_team_panel_handler : MonoBehaviour
     /// </summary>
     /// 
 
-    /*
-        private void Start()
-        {
-            for (int i = 0; i < this.transform.childCount; i++)
-            {
-                Debug.Log(transform.GetChild(i).name);
-                if (transform.GetChild(i).GetComponent<team_leave_button_handler>() != null)
-                {//ce ni button
-                    Destroy(transform.GetChild(i).gameObject);
-
-                    //transform.GetChild(i).gameObject.SetActive(false);
-                    //transform.GetChild(i).transform.GetChild(0).gameObject.SetActive(false);
-                    //transform.GetChild(i).transform.GetChild(0).GetChild(0).gameObject.SetActive(false);
-                    //Destroy(transform.GetChild(i));
-                    DestroyImmediate(transform.GetChild(i).gameObject);
-                    Destroy(transform.GetChild(i).GetComponent<CanvasGroup>());
-                    Destroy(transform.GetChild(i).gameObject);
-                }
-
-
-            }
-        }
-        */
-
     public void refreshAll(uint[] my_boys) {//bols blo nrdit da e sam preshiftajo ko se spremeni ampak to bo ksnej se jebat
 
 

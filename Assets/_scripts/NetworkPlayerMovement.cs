@@ -18,6 +18,12 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
     public LayerMask groundMask;
 
     public float jump_velocity;
+    public static float mouse_sensitivity = 1.0f;
+
+    internal static void OnMouseSensitivityChanged()
+    {
+        NetworkPlayerMovement.mouse_sensitivity = Prefs.mouse_sensitivity;
+    }
 
     public string horizontalInput = "Horizontal";
     public string verticallInput = "Vertical";
@@ -140,7 +146,7 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
     {
         if (!isCameraRotationAllowed()) return;
         var X = Input.GetAxis(rotateCameraXInput);
-        Quaternion turnAngle = Quaternion.AngleAxis(Input.GetAxis("Mouse X") * GetComponent<player_camera_handler>().mouse_sensitivity_multiplier, Vector3.up);
+        Quaternion turnAngle = Quaternion.AngleAxis(Input.GetAxis("Mouse X") * mouse_sensitivity, Vector3.up);
         transform.eulerAngles = transform.eulerAngles + turnAngle.eulerAngles;
 
 

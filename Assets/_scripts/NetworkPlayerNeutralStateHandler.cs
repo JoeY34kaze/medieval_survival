@@ -198,6 +198,13 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
                 else
                     return true;
             else return false;
+        } else if (current_placeable_item.PlacementType == Item.SnappableType.wall || current_placeable_item.PlacementType == Item.SnappableType.door_frame || current_placeable_item.PlacementType == Item.SnappableType.windows_frame) {
+            if (is_in_range_for_placement(this.CurrentLocalPlaceable.transform.position))
+                if (this.CurrentLocalPlaceable.GetComponent<LocalPlaceableHelper>().isSnapping)
+                
+                    if (this.current_closest_attachment_point.isFree())//ces se ne snappa na ze zaseden spot
+                        return true;
+            return false;
         }
         else if (current_placeable_item.PlacementType == Item.SnappableType.siege_weapon) {
             if (is_in_range_for_placement(this.CurrentLocalPlaceable.transform.position))
@@ -997,8 +1004,11 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
     }
 
 
-    public NetworkPlaceable NetworkPlaceableInstantiationServer(Predmet p, Vector3 pos, Quaternion rot)
+    public NetworkPlaceable NetworkPlaceableInstantiationServer(Predmet pp, Vector3 pos, Quaternion rot)
     {
+        //pp SE MORA NRDIT NOV!!! SICER VSI NETWORK PLACEABLI / ITEMI SHARAJO ISTI PREDMET IN ISTI DURABILITY
+        Predmet p = new Predmet(pp);
+
         if (!networkObject.IsServer) { Debug.LogError("instanciacija na clientu ne na serverju!"); return null; }
         int net_id = getPlaceableNetworkIdFromItem(p.item);
         if (net_id == -1) return null;//item is not placeable object

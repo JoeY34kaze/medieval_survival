@@ -32,6 +32,9 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
 
     private NetworkPlayerAnimationLogic animator;
 
+    public byte weapon_direction = 0;
+
+
 
     private void disable_all_shields()
     {
@@ -62,6 +65,82 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
         this.bar_handler = GetComponentInChildren<panel_bar_handler>();
         this.neutralStateHandler = GetComponent<NetworkPlayerNeutralStateHandler>();
     }
+
+     private void Update()
+    {
+        if (networkObject == null) {
+            Debug.LogError("networkObject is null. - najbrz zato ker se se connecta gor.");
+            return; }
+
+        if (networkObject.IsOwner) checkAttackDirection();
+
+
+        if (!networkObject.IsOwner || !is_allowed_to_attack_local())
+        {
+            return;
+        }
+
+
+
+        if (Input.GetButtonDown("Fire2")) {
+
+            Debug.Log("fire2");
+        }
+
+        //input glede menjave orozja pa tega se izvaja v neutralStatehandlerju
+
+        if (this.combat_mode == 1)
+        {
+            if (hasWeaponSelected()) {
+                if (Input.GetButtonDown("Fire1") && !this.in_attack_animation)
+                {
+                    //fire  --------------------------//ce server nrdi tole tukaj potem faila rpc
+                    if (!networkObject.IsServer) {
+                        if (player_local_locks.fire1_available)
+                            setup_Fire1_lock();
+                        else
+                            return;
+                    }//--------------------------------ce server nrdi tole tukaj potem faila rpc
+                    
+                    networkObject.SendRpc(RPC_NETWORK_FIRE1, Receivers.Server);
+                }
+                else if (Input.GetButtonDown("Fire2") && !this.in_attack_animation && !this.blocking)
+                {
+                    //block
+                    networkObject.SendRpc(RPC_NETWORK_FIRE2, Receivers.Server);
+                }
+                else if (Input.GetButtonUp("Fire2")) {
+                    //nehov blokirat
+                    networkObject.SendRpc(RPC_NETWORK_FIRE2, Receivers.Server);
+                }//fejkanje
+                if (Input.GetButtonDown("Fire2") && this.in_attack_animation)
+                {
+                    networkObject.SendRpc(RPC_NETWORK_FEIGN, Receivers.Server);
+                }
+
+            }
+        }
+
+
+        
+    }
+
+
+    private void checkAttackDirection() {
+        float x = Input.GetAxis("Mouse X");
+        float y = Input.GetAxis("Mouse Y");
+        float xx = x * x;
+        float yy = y * y;
+        // Debug.Log(x + " " + y);
+
+        if (y > 0 && xx < yy) { if (this.weapon_direction != 0) { this.weapon_direction = 0; UILogic.Instance.OnWeaponDirectionChanged(0); } }
+        else if (y < 0 && xx < yy){ if (this.weapon_direction != 2) { this.weapon_direction = 2; UILogic.Instance.OnWeaponDirectionChanged(2); } }
+        else if (x > 0 && xx > yy){ if (this.weapon_direction != 1) { this.weapon_direction = 1; UILogic.Instance.OnWeaponDirectionChanged(1); } }
+        else if (x < 0 && xx > yy){ if (this.weapon_direction != 3) { this.weapon_direction = 3; UILogic.Instance.OnWeaponDirectionChanged(3); } }
+
+        Debug.Log(this.weapon_direction);
+    }
+
 
     internal Predmet GetCurrentlyActiveWeapon()
     {
@@ -108,58 +187,7 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
         return true;
     }
 
-    private void Update()
-    {
-        if (networkObject == null) {
-            Debug.LogError("networkObject is null. - najbrz zato ker se se connecta gor.");
-            return; }
-        if (!networkObject.IsOwner || !is_allowed_to_attack_local())
-        {
-            return;
-        }
-
-        if (Input.GetButtonDown("Fire2")) {
-            Debug.Log("sad");
-            Debug.Log("fire2");
-        }
-
-        //input glede menjave orozja pa tega se izvaja v neutralStatehandlerju
-
-        if (this.combat_mode == 1)
-        {
-            if (hasWeaponSelected()) {
-                if (Input.GetButtonDown("Fire1") && !this.in_attack_animation)
-                {
-                    //fire  --------------------------//ce server nrdi tole tukaj potem faila rpc
-                    if (!networkObject.IsServer) {
-                        if (player_local_locks.fire1_available)
-                            setup_Fire1_lock();
-                        else
-                            return;
-                    }//--------------------------------ce server nrdi tole tukaj potem faila rpc
-                    
-                    networkObject.SendRpc(RPC_NETWORK_FIRE1, Receivers.Server);
-                }
-                else if (Input.GetButtonDown("Fire2") && !this.in_attack_animation && !this.blocking)
-                {
-                    //block
-                    networkObject.SendRpc(RPC_NETWORK_FIRE2, Receivers.Server);
-                }
-                else if (Input.GetButtonUp("Fire2")) {
-                    //nehov blokirat
-                    networkObject.SendRpc(RPC_NETWORK_FIRE2, Receivers.Server);
-                }//fejkanje
-                if (Input.GetButtonDown("Fire2") && this.in_attack_animation)
-                {
-                    networkObject.SendRpc(RPC_NETWORK_FEIGN, Receivers.Server);
-                }
-
-            }
-        }
-
-
-        
-    }
+   
 
     /// <summary>
     /// klice animatiopn event ki je na koncu vsake attack animacije ter v animaciji, kjer pofejkas attack. v dodgu je tud ta animation event. kjerkoli pademo iz attack animacije uglavnem mora bit ta event
