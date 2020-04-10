@@ -5,6 +5,7 @@ public class Weapon_collider_handler : MonoBehaviour
     public Item item;
     private NetworkPlayerInventory inv;
     private NetworkPlayerAnimationLogic anim;
+    private NetworkPlayerCombatHandler combat_handler;
 
     private void Start()
     {
@@ -53,7 +54,6 @@ public class Weapon_collider_handler : MonoBehaviour
         //  if (Physics.Raycast(transform.position, dir, out hit))
         // {
         anim.on_weapon_or_tool_collision();
-
         // }
     }
 

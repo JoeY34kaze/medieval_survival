@@ -257,6 +257,11 @@ public class NetworkPlayerAnimationLogic : NetworkPlayerAnimationBehavior
         
     }
 
+    internal void reset_readying_attack()
+    {
+        anim.ResetTrigger("ready_atack");
+    }
+
     internal void setCrouched(bool b) {
         anim.SetBool("crouched", b);
     }
@@ -301,6 +306,9 @@ public class NetworkPlayerAnimationLogic : NetworkPlayerAnimationBehavior
         anim.SetLayerWeight(1, 1);//combat layer
     }
 
+    #region combat
+
+
     internal void setCombatState(byte new_mode)
     {
         if (new_mode == 1) setCombatClass(combat_handler.currently_equipped_weapon);//to bi moral bit ured ker se najprej porihta vse za item, nato pa pride se en rpc da vrze vseskup v combat mode. ce se zjebe zaporedje mamo lahko problem..
@@ -323,13 +331,20 @@ public class NetworkPlayerAnimationLogic : NetworkPlayerAnimationBehavior
     internal void setFeign()
     {
         anim.SetTrigger("feign");
+        anim.ResetTrigger("ready_attack");
+        anim.ResetTrigger("release_attack");
     }
 
-    internal void setFire1()
+    internal void setFire1(byte dir)
     {
         combat_handler.in_attack_animation = true;
-        anim.SetTrigger("attack_1");
+        combat_handler.is_readying_attack = true;
+        anim.SetFloat("attack_direction", (float)dir);
+        anim.SetTrigger("ready_attack");
+        anim.ResetTrigger("feign");
     }
+
+    #endregion
 
     internal void startToolAction(Item tool_to_use)
     {
@@ -364,5 +379,8 @@ public class NetworkPlayerAnimationLogic : NetworkPlayerAnimationBehavior
         }
     }
 
-
+    internal void setReleaseOfAttack()
+    {
+        anim.SetTrigger("release_attack");
+    }
 }

@@ -17,7 +17,7 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
     }
     private panel_bar_handler bar_handler;
     public bool in_attack_animation = false;
-    private player_local_locks player_local_locks;
+
     private NetworkPlayerStats stats;
 
     private NetworkPlayerInventory networkPlayerInventory;
@@ -33,8 +33,8 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
     private NetworkPlayerAnimationLogic animator;
 
     public byte weapon_direction = 0;
-
-
+    public bool is_holding_attack = false;
+    public bool is_readying_attack = false;
 
     private void disable_all_shields()
     {
@@ -57,7 +57,7 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
     private void Awake()
     {
         animator = GetComponent<NetworkPlayerAnimationLogic>();
-        player_local_locks = GetComponent<player_local_locks>();
+
         stats = GetComponent<NetworkPlayerStats>();
         networkPlayerInventory = GetComponent<NetworkPlayerInventory>();
 
@@ -88,39 +88,36 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
         }
 
         //input glede menjave orozja pa tega se izvaja v neutralStatehandlerju
-
         if (this.combat_mode == 1)
         {
-            if (hasWeaponSelected()) {
-                if (Input.GetButtonDown("Fire1") && !this.in_attack_animation)
+            if (hasWeaponSelected())
+            {
+                if (Input.GetButtonDown("Fire1") && !this.in_attack_animation && !this.is_holding_attack)
                 {
-                    //fire  --------------------------//ce server nrdi tole tukaj potem faila rpc
-                    if (!networkObject.IsServer) {
-                        if (player_local_locks.fire1_available)
-                            setup_Fire1_lock();
-                        else
-                            return;
-                    }//--------------------------------ce server nrdi tole tukaj potem faila rpc
-                    
-                    networkObject.SendRpc(RPC_NETWORK_FIRE1, Receivers.Server);
+                    networkObject.SendRpc(RPC_NETWORK_FIRE1, Receivers.Server, this.weapon_direction);
                 }
-                else if (Input.GetButtonDown("Fire2") && !this.in_attack_animation && !this.blocking)
+                else if (Input.GetButtonDown("Fire2") && !this.in_attack_animation && !this.blocking && !this.is_holding_attack)
                 {
                     //block
-                    networkObject.SendRpc(RPC_NETWORK_FIRE2, Receivers.Server);
+                    networkObject.SendRpc(RPC_NETWORK_FIRE2, Receivers.Server, this.weapon_direction);
                 }
-                else if (Input.GetButtonUp("Fire2")) {
-                    //nehov blokirat
-                    networkObject.SendRpc(RPC_NETWORK_FIRE2, Receivers.Server);
-                }//fejkanje
-                if (Input.GetButtonDown("Fire2") && this.in_attack_animation)
+                else if (Input.GetButtonUp("Fire2"))
                 {
-                    networkObject.SendRpc(RPC_NETWORK_FEIGN, Receivers.Server);
+                    //nehov blokirat
+                    networkObject.SendRpc(RPC_NETWORK_FIRE2, Receivers.Server, this.weapon_direction);//sj je toggle
+                }//fejkanje
+                if (Input.GetButtonDown("Fire2") && (this.is_holding_attack || this.is_readying_attack))
+                {
+                    networkObject.SendRpc(RPC_CANCEL_ATTACK, Receivers.Server);
+                }
+                if (Input.GetButtonUp("Fire1"))
+                {
+                    networkObject.SendRpc(RPC_NETWORK_FIRE1, Receivers.Server, (byte)255);
                 }
 
             }
-        }
 
+        }
 
         
     }
@@ -190,10 +187,16 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
    
 
     /// <summary>
-    /// klice animatiopn event ki je na koncu vsake attack animacije ter v animaciji, kjer pofejkas attack. v dodgu je tud ta animation event. kjerkoli pademo iz attack animacije uglavnem mora bit ta event
+    /// klice animatiopn event ki je na koncu vsake attack animacije
     /// </summary>
     public void handleEndOfAttackAnimation() {
+        if (this.in_attack_animation || this.is_holding_attack || this.is_readying_attack)
+        {
+            animator.setFeign();
+        }
         this.in_attack_animation = false;
+        this.is_readying_attack = false;
+        this.is_holding_attack = false;
         animator.reset_swing_IK();
     }
 
@@ -227,6 +230,12 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
 
     public void handle_player_downed() {
         Debug.Log("handling player downed");
+    }
+
+    public void OnAttackReady() {
+        this.is_readying_attack = false;
+        this.is_holding_attack = true;
+        animator.reset_readying_attack();
     }
 
     /// <summary>
@@ -283,20 +292,8 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
     }
 
 
-    IEnumerator StartFire1Lock(float timeout)
-    {
-        if (networkObject.IsServer)
-        {
-            player_local_locks.fire1_available = false;
-            yield return new WaitForSeconds(timeout);
-            player_local_locks.fire1_available = true;
-        }
-    }
 
-    private void setup_Fire1_lock()
-    {
-        StartCoroutine(StartFire1Lock(stats.fire1_cooldown));
-    }
+
 
 
 
@@ -332,6 +329,39 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
             }
         }
     }
+    ///klice se potem, ki ze zamenjamo item z hotbara.
+    public void ChangeCombatMode(Item i)
+    {
+        if (!networkObject.IsServer) return;
+        // Debug.Log("server : got change combat mode request");
+        int next = 0;
+        if (i != null)
+            if (i.type == Item.Type.weapon || i.type == Item.Type.ranged)
+                next = 1;
+
+        networkObject.SendRpc(RPC_CHANGE_COMBAT_MODE_RESPONSE, Receivers.All, next);
+
+    }
+
+    private void setCombatStateLocally(byte new_mode)
+    {
+        this.combat_mode = (byte)new_mode;
+        // Debug.Log("got change combat mode response : "+this.combat_mode + " "+new_mode);
+
+
+        if (new_mode == 0)
+        {
+            animator.setCombatState((byte)new_mode);
+            place_shield_on_back();
+            neutralStateHandler.NeutralStateSetup();
+        }
+        else
+        {
+            neutralStateHandler.CombatStateSetup();
+            update_equipped_weapons();
+            animator.setCombatState((byte)new_mode);
+        }
+    }
 
 
     //--------------------------RPC's
@@ -339,9 +369,19 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
     public override void NetworkFire1(RpcArgs args)
     {
         if (networkObject.IsServer && args.Info.SendingPlayer.NetworkId == networkObject.Owner.NetworkId) {
-            if (hasWeaponSelected() && !this.in_attack_animation && player_local_locks.fire1_available) {
-                setup_Fire1_lock();
-                networkObject.SendRpc(RPC_NETWORK_FIRE1_RESPONSE, Receivers.All);
+            if (hasWeaponSelected()) {
+
+                byte direction = args.GetNext<byte>();
+                if (direction == 255)
+                {
+                    networkObject.SendRpc(RPC_NETWORK_FIRE1_RESPONSE, Receivers.All, (byte)255);
+                }
+                else { 
+                    if(!this.is_readying_attack && !is_holding_attack)//tle manjka attack antihack check
+                        networkObject.SendRpc(RPC_NETWORK_FIRE1_RESPONSE, Receivers.All, direction);
+                }
+
+                
             }
         }
 
@@ -363,7 +403,7 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
         }
     }
 
-    public override void NetworkFeign(RpcArgs args)
+    public override void cancelAttack(RpcArgs args)
     {
         if (networkObject.IsServer && args.Info.SendingPlayer.NetworkId == networkObject.Owner.NetworkId)
         {
@@ -374,19 +414,7 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
         }
     }
 
-    ///klice se potem, ki ze zamenjamo item z hotbara.
-    public void ChangeCombatMode(Item i)
-    {
-        if (!networkObject.IsServer) return;
-        // Debug.Log("server : got change combat mode request");
-        int next = 0;
-        if (i != null)
-            if (i.type == Item.Type.weapon || i.type == Item.Type.ranged)
-                next = 1;
-
-        networkObject.SendRpc(RPC_CHANGE_COMBAT_MODE_RESPONSE, Receivers.All, next);
-        
-    }
+   
 
     /// <summary>
     /// prejmejo vsi od serverja. setter
@@ -401,25 +429,7 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
         setCombatStateLocally((byte)new_mode);
     }
 
-    private void setCombatStateLocally(byte new_mode) {
-        this.combat_mode = (byte)new_mode;
-        // Debug.Log("got change combat mode response : "+this.combat_mode + " "+new_mode);
-
-
-        if (new_mode == 0)
-        {
-            animator.setCombatState((byte)new_mode);
-            place_shield_on_back();
-            neutralStateHandler.NeutralStateSetup();
-        }
-        else
-        {
-            neutralStateHandler.CombatStateSetup();
-            update_equipped_weapons();
-            animator.setCombatState((byte)new_mode);
-        }
-    }
- 
+   
     public override void SendAll(RpcArgs args)
     {
         if (args.Info.SendingPlayer.NetworkId == 0) {
@@ -438,22 +448,32 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
 
             //int id_wep = (this.currently_equipped_weapon.item == null) ? -1 : this.currently_equipped_weapon.item.id;
 
-            networkObject.SendRpc(p, RPC_SEND_ALL, (int)this.combat_mode, this.blocking, (this.currently_equipped_weapon == null) ? "-1" : this.currently_equipped_weapon.toNetworkString(), (this.currently_equipped_shield == null) ? "-1" : this.currently_equipped_shield.toNetworkString());
+            networkObject.SendRpc(p, RPC_SEND_ALL, (int)this.combat_mode, this.blocking, (this.currently_equipped_weapon == null) ? "-1" : this.currently_equipped_weapon.toNetworkString(), (this.currently_equipped_shield == null) ? "-1" : this.currently_equipped_shield.toNetworkString(), this.weapon_direction);
         }
     }
 
     public override void NetworkFire1Response(RpcArgs args)
     {
-        if (args.Info.SendingPlayer.NetworkId == 0)
+        if (args.Info.SendingPlayer.IsHost)
         {
             if(networkObject.IsServer)
             {//do server stuff
              //coolliderji se aktivirajo na animation eventu (activate_weapon_collider_server())
+
             }
-            //vsi - animacije
-            animator.setFire1();//animator in inAttackAnimation
-            //sound i guess. to dodajam po dolgem cajtu in mogoce ni pravilno
-            play_main_attack_sound_effect();
+            byte direction = args.GetNext<byte>();
+            if (direction >= 0 && direction < 4)
+            {
+                //vsi - animacije
+                animator.setFire1(direction);//animator in inAttackAnimation
+                this.is_readying_attack = true;
+            }
+            else if (direction == 255)
+            {
+                play_main_attack_sound_effect();
+                animator.setReleaseOfAttack();
+            }
+
         }
 
     }
@@ -462,7 +482,11 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
     {
         if (args.Info.SendingPlayer.NetworkId == 0)
         {//do server stuff - collider? - its always on so..
-            animator.setCombatBlocking(args.GetNext<bool>());
+            bool blocking = args.GetNext<bool>();
+            byte direction = args.GetNext<byte>();
+
+
+          
         }
     }
 
@@ -472,10 +496,7 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
     /// <param name="args"></param>
     public override void NetworkFeignResponse(RpcArgs args)
     {
-        if(args.Info.SendingPlayer.NetworkId==0)
-            if (this.in_attack_animation) {
-                this.in_attack_animation = false;
-                animator.setFeign();
-            }
+        if (args.Info.SendingPlayer.IsHost)
+            handleEndOfAttackAnimation();
     }
 }
