@@ -323,9 +323,21 @@ public class NetworkPlayerAnimationLogic : NetworkPlayerAnimationBehavior
             anim.SetInteger("weapon_animation_class", p.item.weapon_animation_class);
     }
 
-    internal void setCombatBlocking(bool v)
+    internal void setCombatBlocking(bool v, byte dir)
     {
-        anim.SetBool("combat_blocking",v);
+        if (v)
+        {
+            anim.SetBool("combat_blocking", true);
+            anim.SetFloat("attack_direction", (float)dir);
+            anim.ResetTrigger("ready_attack");
+            anim.ResetTrigger("release_attack");
+        }
+        else{
+            anim.SetBool("combat_blocking", false);
+            setFeign();
+        }
+        
+
     }
 
     internal void setFeign()
@@ -333,6 +345,7 @@ public class NetworkPlayerAnimationLogic : NetworkPlayerAnimationBehavior
         anim.SetTrigger("feign");
         anim.ResetTrigger("ready_attack");
         anim.ResetTrigger("release_attack");
+        
     }
 
     internal void setFire1(byte dir)

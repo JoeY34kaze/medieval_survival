@@ -33,7 +33,6 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
     private NetworkPlayerAnimationLogic animator;
 
     public byte weapon_direction = 0;
-    public bool is_holding_attack = false;
     public bool is_readying_attack = false;
 
     private void disable_all_shields()
@@ -92,11 +91,11 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
         {
             if (hasWeaponSelected())
             {
-                if (Input.GetButtonDown("Fire1") && !this.in_attack_animation && !this.is_holding_attack)
+                if (Input.GetButtonDown("Fire1") && !this.in_attack_animation)
                 {
                     networkObject.SendRpc(RPC_NETWORK_FIRE1, Receivers.Server, this.weapon_direction);
                 }
-                else if (Input.GetButtonDown("Fire2") && !this.in_attack_animation && !this.blocking && !this.is_holding_attack)
+                else if (Input.GetButtonDown("Fire2") && !this.blocking)
                 {
                     //block
                     networkObject.SendRpc(RPC_NETWORK_FIRE2, Receivers.Server, this.weapon_direction);
@@ -105,10 +104,6 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
                 {
                     //nehov blokirat
                     networkObject.SendRpc(RPC_NETWORK_FIRE2, Receivers.Server, this.weapon_direction);//sj je toggle
-                }//fejkanje
-                if (Input.GetButtonDown("Fire2") && (this.is_holding_attack || this.is_readying_attack))
-                {
-                    networkObject.SendRpc(RPC_CANCEL_ATTACK, Receivers.Server);
                 }
                 if (Input.GetButtonUp("Fire1"))
                 {
@@ -135,7 +130,6 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
         else if (x > 0 && xx > yy){ if (this.weapon_direction != 1) { this.weapon_direction = 1; UILogic.Instance.OnWeaponDirectionChanged(1); } }
         else if (x < 0 && xx > yy){ if (this.weapon_direction != 3) { this.weapon_direction = 3; UILogic.Instance.OnWeaponDirectionChanged(3); } }
 
-        Debug.Log(this.weapon_direction);
     }
 
 
@@ -190,13 +184,13 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
     /// klice animatiopn event ki je na koncu vsake attack animacije
     /// </summary>
     public void handleEndOfAttackAnimation() {
-        if (this.in_attack_animation || this.is_holding_attack || this.is_readying_attack)
+        if (this.in_attack_animation  || this.is_readying_attack)
         {
             animator.setFeign();
         }
         this.in_attack_animation = false;
         this.is_readying_attack = false;
-        this.is_holding_attack = false;
+  
         animator.reset_swing_IK();
     }
 
@@ -234,7 +228,6 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
 
     public void OnAttackReady() {
         this.is_readying_attack = false;
-        this.is_holding_attack = true;
         animator.reset_readying_attack();
     }
 
@@ -377,7 +370,7 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
                     networkObject.SendRpc(RPC_NETWORK_FIRE1_RESPONSE, Receivers.All, (byte)255);
                 }
                 else { 
-                    if(!this.is_readying_attack && !is_holding_attack)//tle manjka attack antihack check
+                    if(!this.is_readying_attack)//tle manjka attack antihack check
                         networkObject.SendRpc(RPC_NETWORK_FIRE1_RESPONSE, Receivers.All, direction);
                 }
 
@@ -395,10 +388,10 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
     {
         if (networkObject.IsServer && args.Info.SendingPlayer.NetworkId == networkObject.Owner.NetworkId)
         {
-            if (this.blocking) {//stops blocking
-                networkObject.SendRpc(RPC_NETWORK_FIRE2_RESPONSE, Receivers.All, true);
-            } else if (!this.in_attack_animation && !this.blocking) {//starts blocking
-                networkObject.SendRpc(RPC_NETWORK_FIRE2_RESPONSE, Receivers.All, true);
+            if (!this.blocking) {//stops blocking
+                networkObject.SendRpc(RPC_NETWORK_FIRE2_RESPONSE, Receivers.All, true, args.GetNext<byte>());
+            } else {//starts blocking or cancels the current attack
+                networkObject.SendRpc(RPC_NETWORK_FIRE2_RESPONSE, Receivers.All, false, args.GetNext<byte>());
             }
         }
     }
@@ -485,8 +478,12 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
             bool blocking = args.GetNext<bool>();
             byte direction = args.GetNext<byte>();
 
+            animator.setCombatBlocking(blocking, direction);
+            this.blocking = blocking;
+            //pohandlat prehod iz combat animacij u blocking
+            this.in_attack_animation = false;
+            this.is_readying_attack = false;
 
-          
         }
     }
 
