@@ -2467,6 +2467,8 @@ MonoBehaviour:
   image_guild: 
   serverSide_guildManager: {fileID: 0}
   panelGuildMemberHandler: {fileID: 0}
+  metal_block_sound_effects: []
+  wooden_block_sound_effects: []
 --- !u!114 &8177753189296896474
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2486,6 +2488,8 @@ MonoBehaviour:
   - {fileID: 5834470938225872258, guid: 75fae846ed60a9344b8226a84c76a726, type: 3}
   weapon_slot: {fileID: 2048528667891861577}
   shield_slot: {fileID: 2169459720401964971}
+  weapon_direction: 0
+  is_readying_attack: 0
 --- !u!114 &4281506579215346488
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2517,7 +2521,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 54db190968c439947b9606c61537c085, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  fire1_available: 1
 --- !u!114 &5542566147419541656
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2631,10 +2634,10 @@ MonoBehaviour:
   umaData: {fileID: 0}
   umaRecipe: {fileID: 0}
   umaAdditionalRecipes:
-  - {fileID: 11400000, guid: 920d59ac577b2d9449aa36a4d9e86f10, type: 2}
+  - {fileID: 11400000, guid: f36ba6c553c66f747bc69741fa115880, type: 2}
   - {fileID: 11400000, guid: 84b952592715cb94da0e3e81d267e72f, type: 2}
   - {fileID: 11400000, guid: d0a23b6199dd01d4f9774992f538b2f5, type: 2}
-  - {fileID: 11400000, guid: f36ba6c553c66f747bc69741fa115880, type: 2}
+  - {fileID: 11400000, guid: 920d59ac577b2d9449aa36a4d9e86f10, type: 2}
   umaGenerator: {fileID: 0}
   animationController: {fileID: 9100000, guid: e8578e83444fdcc4ea97d7e00a69e0a4, type: 2}
   CharacterCreated:
@@ -2665,7 +2668,11 @@ MonoBehaviour:
   rebuildSkeleton: 0
   preloadWardrobeRecipes:
     loadDefaultRecipes: 1
-    recipes: []
+    recipes:
+    - _recipeName: FemaleHair1
+      _compatibleRaces:
+      - HumanFemaleDCS
+      - HumanFemale
   raceAnimationControllers:
     defaultAnimationController: {fileID: 0}
     animators: []
@@ -11060,6 +11067,10 @@ PrefabInstance:
       propertyPath: m_Layer
       value: 15
       objectReference: {fileID: 0}
+    - target: {fileID: 1398047969005088, guid: 35b61329bf244b44c8a0a3832b5fbbbf, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4967289912243710, guid: 35b61329bf244b44c8a0a3832b5fbbbf, type: 3}
       propertyPath: m_LocalPosition.x
       value: -0
@@ -11460,6 +11471,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 4499943188486747254, guid: 45c706ebb1646004693540d897cd11e8,
+        type: 3}
+      propertyPath: m_Enabled
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 45c706ebb1646004693540d897cd11e8, type: 3}

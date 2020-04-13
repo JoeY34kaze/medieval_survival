@@ -661,27 +661,27 @@ public class NetworkArmorStand : NetworkArmorStandBehavior
 
         if (this.head != null)
         {
-            avatar.SetSlot("Helmet", this.head.item.uma_item_recipe_name);
+            update_gear_on_armor_stand(this.head.item);
         }
 
         if (this.chest != null)
         {
-            avatar.SetSlot("Chest", this.chest.item.uma_item_recipe_name);
+            update_gear_on_armor_stand(this.chest.item);
         }
 
         if (this.hands != null)
         {
-            avatar.SetSlot("Hands", this.hands.item.uma_item_recipe_name);
+            update_gear_on_armor_stand(this.hands.item);
         }
 
         if (this.legs != null)
         {
-            avatar.SetSlot("Legs", this.legs.item.uma_item_recipe_name);
+            update_gear_on_armor_stand(this.legs.item);
         }
 
         if (this.feet != null)
         {
-            avatar.SetSlot("Feet", this.feet.item.uma_item_recipe_name);
+            update_gear_on_armor_stand(this.feet.item);
         }
 
         avatar.BuildCharacter();
@@ -698,6 +698,17 @@ public class NetworkArmorStand : NetworkArmorStandBehavior
 
 
     }
+
+    private void update_gear_on_armor_stand(Item item)
+    {
+        if (item == null) return;
+
+
+        throw new NotImplementedException();
+    }
+
+
+
     //private void Update()
     //{
     //    redraw_armor_stand();

@@ -29,6 +29,8 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
 
     public float block_damage_reduction = 0.025f;  //to bomo pobral z itema
 
+
+
     internal float fire1_cooldown = 0.6f;
 
     private NetworkPlayerInventory npi;
@@ -62,6 +64,10 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
     private NetworkPlayerStats executionTarget;
 
     private NetworkPlayerCombatHandler combatStateHandler;
+
+    public GameObject[] metal_block_sound_effects;
+    public GameObject[] wooden_block_sound_effects;
+
 
     private void Start()
     {
@@ -162,6 +168,14 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
         }
     }
 
+    private void play_random_sound_effect(GameObject[] sound_fx)
+    {
+        if (sound_fx.Length > 0) {
+            int k = (int)UnityEngine.Random.Range(0, sound_fx.Length);
+            GameObject.Instantiate(sound_fx[k], transform.position, transform.rotation,transform);
+        }
+    }
+
     public void OnSubmitModifiedGuildDataClick() {
         GameObject.FindGameObjectWithTag("GuildManager").GetComponent<NetworkGuildManager>().OnModifyGuildConfirmClick();
     }
@@ -180,6 +194,37 @@ napadenmu playerju da si poupdejta health. ta player pol ko si je updejtov healt
     }
 
     #region TAKING DAMAGE
+
+    internal bool is_valid_server_block(NetworkPlayerStats attacker)
+    {
+        if (!networkObject.IsServer) return false;
+        bool blocked = false;
+        //this je defender
+        Animator anim = GetComponent<Animator>();
+        bool is_blocking_with_shield = anim.GetBool("shield_equipped");
+        if (is_blocking_with_shield)
+        {
+            blocked = true;
+
+        }
+        else
+        {
+            float other_direction = attacker.gameObject.GetComponent<Animator>().GetFloat("attack_direction");
+            float this_direction = anim.GetFloat("attack_direction");
+            blocked = this_direction == other_direction;
+        }
+
+        if (blocked)
+        {
+            //ubistvu samo posljemo na ta netowrkobject in vsi nrdijo sound effect tle
+            networkObject.SendRpc(RPC_ON_BLOCKED, Receivers.AllProximity);
+        }
+        return blocked;
+    }
+
+
+
+
 
     public void take_weapon_damage_server_authority(Item weapon,string tag_passive ,uint passive_player_server_network_id, uint agressor_server_network_id)
     {
@@ -471,10 +516,6 @@ napadenmu playerju da si poupdejta health. ta player pol ko si je updejtov healt
         GetComponent<NetworkPlayerAnimationLogic>().handle_downed_start();
         if(GetComponent<NetworkPlayerInventory>().backpackSpot.GetComponentInChildren<NetworkBackpack>())
             GetComponent<NetworkPlayerInventory>().backpackSpot.GetComponentInChildren<NetworkBackpack>().local_server_BackpackUnequip();
-
-        GetComponent<Rigidbody>().useGravity = true;
-        this.original_capsule_collider_height=GetComponent<CapsuleCollider>().height;
-        GetComponent<CapsuleCollider>().height = 0;
     }
 
     public void handle_player_pickup() {
@@ -545,9 +586,6 @@ napadenmu playerju da si poupdejta health. ta player pol ko si je updejtov healt
         this.dead = false;
 
         local_setDrawingPlayer(true);
-
-        GetComponent<Rigidbody>().useGravity = false;
-        GetComponent<CapsuleCollider>().height = this.original_capsule_collider_height;
 
         if (networkObject.IsServer)//server nastima vsem health
             set_player_health(max_health/2, Get_server_id());
@@ -1334,5 +1372,21 @@ private void ServerSendOnAcceptedData() {
     private IEnumerator ExecutionDelayed(float t) {
         yield return new WaitForSeconds(t);
         handle_death_player(Get_server_id());
+    }
+
+    public override void OnBlocked(RpcArgs args)
+    {
+        if (args.Info.SendingPlayer.IsHost) {
+
+            if (GetComponent<Animator>().GetBool("shield_equipped"))    
+            {
+                //blocked with shield. i guess neki wooden sound effects
+                play_random_sound_effect(this.metal_block_sound_effects);
+            }
+            else {
+                //
+                play_random_sound_effect(this.wooden_block_sound_effects);
+            }
+        }
     }
 }

@@ -4,8 +4,8 @@ using UnityEngine;
 
 namespace BeardedManStudios.Forge.Networking.Generated
 {
-	[GeneratedRPC("{\"types\":[[\"float\", \"string\"][\"float\", \"string\"][][\"Vector3\"][][\"string\"][\"uint\"][\"uint\"][\"uint\", \"bool\"][][\"uint\"][][\"string\", \"string\", \"Color\", \"byte[]\"][\"Vector3\", \"Quaternion\", \"string\", \"bool\", \"float\", \"string\", \"string\", \"string\", \"string\", \"string\", \"string\"][][\"string\", \"bool\", \"bool\"][\"float\"][\"uint\", \"float\"]]")]
-	[GeneratedRPCVariableNames("{\"types\":[[\"health\", \"tag\"][\"damage\", \"tag\"][][\"pos\"][][\"teamData\"][\"server_id\"][\"sendingPlayer\"][\"other\", \"resp\"][][\"other\"][][\"name_g\", \"tag_g\", \"color_g\", \"image_g\"][\"pos\", \"rot\", \"name_p\", \"dead\", \"hp\", \"head\", \"chest\", \"hands\", \"legs\", \"feet\", \"backpack\"][][\"player_name\", \"downed\", \"dead\"][\"hp\"][\"agresor\", \"cas_animacije\"]]")]
+	[GeneratedRPC("{\"types\":[[\"float\", \"string\"][\"float\", \"string\"][][\"Vector3\"][][\"string\"][\"uint\"][\"uint\"][\"uint\", \"bool\"][][\"uint\"][][\"string\", \"string\", \"Color\", \"byte[]\"][\"Vector3\", \"Quaternion\", \"string\", \"bool\", \"float\", \"string\", \"string\", \"string\", \"string\", \"string\", \"string\"][][\"string\", \"bool\", \"bool\"][\"float\"][\"uint\", \"float\"][]]")]
+	[GeneratedRPCVariableNames("{\"types\":[[\"health\", \"tag\"][\"damage\", \"tag\"][][\"pos\"][][\"teamData\"][\"server_id\"][\"sendingPlayer\"][\"other\", \"resp\"][][\"other\"][][\"name_g\", \"tag_g\", \"color_g\", \"image_g\"][\"pos\", \"rot\", \"name_p\", \"dead\", \"hp\", \"head\", \"chest\", \"hands\", \"legs\", \"feet\", \"backpack\"][][\"player_name\", \"downed\", \"dead\"][\"hp\"][\"agresor\", \"cas_animacije\"][]]")]
 	public abstract partial class NetworkPlayerStatsBehavior : NetworkBehavior
 	{
 		public const byte RPC_SET_HEALTH = 0 + 5;
@@ -26,6 +26,7 @@ namespace BeardedManStudios.Forge.Networking.Generated
 		public const byte RPC_SEND_ALL = 15 + 5;
 		public const byte RPC_REFRESH_HEALTH = 16 + 5;
 		public const byte RPC_EXECUTION_REQUEST = 17 + 5;
+		public const byte RPC_ON_BLOCKED = 18 + 5;
 		
 		public NetworkPlayerStatsNetworkObject networkObject = null;
 
@@ -57,6 +58,7 @@ namespace BeardedManStudios.Forge.Networking.Generated
 			networkObject.RegisterRpc("SendAll", SendAll, typeof(string), typeof(bool), typeof(bool));
 			networkObject.RegisterRpc("RefreshHealth", RefreshHealth, typeof(float));
 			networkObject.RegisterRpc("ExecutionRequest", ExecutionRequest, typeof(uint), typeof(float));
+			networkObject.RegisterRpc("OnBlocked", OnBlocked);
 
 			networkObject.onDestroy += DestroyGameObject;
 
@@ -209,6 +211,10 @@ namespace BeardedManStudios.Forge.Networking.Generated
 		/// Arguments:
 		/// </summary>
 		public abstract void ExecutionRequest(RpcArgs args);
+		/// <summary>
+		/// Arguments:
+		/// </summary>
+		public abstract void OnBlocked(RpcArgs args);
 
 		// DO NOT TOUCH, THIS GETS GENERATED PLEASE EXTEND THIS CLASS IF YOU WISH TO HAVE CUSTOM CODE ADDITIONS
 	}

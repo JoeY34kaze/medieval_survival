@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UMA;
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "newPredmetRecepie", menuName = "Medieval Survival/PredmetRecepie")]
+[CreateAssetMenu(fileName = "newPredmetRecepie", menuName = "Medieval Survival/new PredmetRecepie")]
 public class PredmetRecepie : ScriptableObject
 {
     public Item Product;

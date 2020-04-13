@@ -79,7 +79,6 @@ public class UILogic : MonoBehaviour
     public InventorySlotLoadout loadout_backpack;
     public InventorySlotBar[] bar_slots;
     public GameObject menuBasicButtonsPanel;
-    public static bool drawDirectionArrowsEnabled = true;
 
     public GameObject direction_arrow_up;
     public GameObject direction_arrow_right;
@@ -171,16 +170,19 @@ public class UILogic : MonoBehaviour
 
     internal void OnWeaponDirectionChanged(int current_direction)
     {
-        if (UILogic.drawDirectionArrowsEnabled) {
-            this.direction_arrow_up.SetActive(false);
-            this.direction_arrow_down.SetActive(false);
-            this.direction_arrow_left.SetActive(false);
-            this.direction_arrow_right.SetActive(false);
+
+        this.direction_arrow_up.SetActive(false);
+        this.direction_arrow_down.SetActive(false);
+        this.direction_arrow_left.SetActive(false);
+        this.direction_arrow_right.SetActive(false);
+        if (Prefs.showDirectionalArrow)
+        {
             if (current_direction == 0) this.direction_arrow_up.SetActive(true);
             if (current_direction == 1) this.direction_arrow_right.SetActive(true);
             if (current_direction == 2) this.direction_arrow_down.SetActive(true);
             if (current_direction == 3) this.direction_arrow_left.SetActive(true);
         }
+        
     }
 
     internal bool isRadialMenuOpen()

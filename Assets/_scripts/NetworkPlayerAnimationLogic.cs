@@ -336,8 +336,13 @@ public class NetworkPlayerAnimationLogic : NetworkPlayerAnimationBehavior
             anim.SetBool("combat_blocking", false);
             setFeign();
         }
-        
+    }
 
+    public void onShieldChanged(Predmet s) { 
+        if(s!=null)
+            anim.SetBool("shield_equipped", true);
+        else
+            anim.SetBool("shield_equipped", false);
     }
 
     internal void setFeign()

@@ -65,6 +65,8 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
     internal int draggedGameobjectParent_parentSiblingIndex;
     internal int draggedGameobjectParent_parent_parentSiblingIndex;
     internal int draggedGameobjectParent_parent_parent_parentSiblingIndex;
+    private readonly int bar_slots_Length = 10;
+    private readonly int personal_inventory_space=20;
 
     private void Start()
     {
@@ -89,6 +91,11 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         if (networkObject.IsOwner)
         {
             onItemChangedCallback += UpdateUI;    // Subscribe to the onItemChanged callback
+        }
+
+        if (networkObject.IsServer) {
+            this.predmeti_hotbar = new Predmet[this.bar_slots_Length];
+            this.predmeti_personal = new Predmet[personal_inventory_space];
         }
 
         onLoadoutChangedCallback += refresh_UMA_equipped_gear;//vsi rabjo vidt loadout
@@ -269,30 +276,41 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
 
         if (this.head != null)
         {
-            avatar.SetSlot("Helmet", this.head.item.uma_item_recipe_name);
+            update_gear_on_player(this.head.item);
         }
 
         if (this.chest != null)
         {
-            avatar.SetSlot("Chest", this.chest.item.uma_item_recipe_name);
+            update_gear_on_player(this.chest.item);
         }
 
         if (this.hands != null)
         {
-            avatar.SetSlot("Hands", this.hands.item.uma_item_recipe_name);
+            update_gear_on_player(this.hands.item);
         }
 
         if (this.legs != null)
         {
-            avatar.SetSlot("Legs", this.legs.item.uma_item_recipe_name);
+            update_gear_on_player(this.legs.item);
         }
 
         if (this.feet != null)
         {
-            avatar.SetSlot("Feet", this.feet.item.uma_item_recipe_name);
+            update_gear_on_player(this.feet.item);
         }
 
         avatar.BuildCharacter();
+    }
+
+    private void update_gear_on_player(Item item)
+    {
+        if (item == null) return;
+        if (item.UMARecipes.Length == 0) return;
+
+        foreach (UMATextRecipe t in item.UMARecipes) {
+            Debug.Log("this goes on slot: " + t.wardrobeSlot);
+            avatar.SetSlot(t.wardrobeSlot, t.DisplayValue);//display value MORA BIT ENAK imanu datoteke/recepta sicer ne dela!!!!  tko da je treba popravt zmer k dodas nov armor!
+        }
     }
 
     /// <summary>
@@ -1006,7 +1024,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
 
         if (networkObject == null)
         {
-            Debug.LogError("networkObject is null.");
+            Debug.LogWarning("networkObject is null.");
             return;
         }
         if (!networkObject.IsOwner) return;

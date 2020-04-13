@@ -40,7 +40,7 @@ public class player_camera_handler : NetworkPlayerCameraHandlerBehavior
     {
         if (networkObject == null)
         {
-            Debug.LogError("networkObject is null.");
+            Debug.LogWarning("networkObject is null.");
             return;
         }
         if (!networkObject.IsOwner) return;

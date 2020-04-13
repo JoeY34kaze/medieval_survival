@@ -55,6 +55,8 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
 
     private void Update()
     {
+        if (networkObject == null) return;
+
         if (networkObject.IsOwner) {
             if (bar_handler.gameObject.activeSelf) {
 
@@ -699,9 +701,9 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
         }
 
         if (shield != null)
-            combat_handler.currently_equipped_shield = shield;
-        else 
-            combat_handler.currently_equipped_shield = null;
+            combat_handler.SetShield(shield);
+        else
+            combat_handler.SetShield(null);
         combat_handler.update_equipped_weapons();//weapon in shield
     }
 

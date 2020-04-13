@@ -139,6 +139,10 @@ namespace BeardedManStudios.Forge.Networking.Generated
 						availableCallback = true;
 						obj = new TestNetworkObject(networker, id, frame);
 						break;
+					case NetworkItemSpawnerNetworkObject.IDENTITY:
+						availableCallback = true;
+						obj = new NetworkItemSpawnerNetworkObject(networker, id, frame);
+						break;
 				}
 
 				if (!availableCallback)

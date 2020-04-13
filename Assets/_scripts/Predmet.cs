@@ -12,7 +12,7 @@ public class Predmet
     public int quantity=1;
     //public string creator;
     public float current_durabilty;
-    public string creator = "creator not set";
+    public string creator = "Server";
     public int tier = 0;
     private Predmet pp;
 
