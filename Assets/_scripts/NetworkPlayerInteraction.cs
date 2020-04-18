@@ -116,7 +116,7 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
                             if (interactable is Interactable_parenting_fix) { interactable = ((Interactable_parenting_fix)(interactable)).parent_interactable; }//tole je zato da se pohendla ce colliderja nimamo na prvem objektu ampak je nizje u hierarhiji. recimo za vrata
 
 
-                            if ((interactable is Interactable_chest || interactable is ItemPickup || interactable is Interactable_door || interactable is Interactable_trap || interactable is Interactable_crafting_station || interactable is Interactable_guild_flag) && interactable != this.recent_interactable)
+                            if ((interactable is Interactable_chest || interactable is ItemPickup || interactable is Interactable_door || interactable is Interactable_trap || interactable is Interactable_crafting_station || interactable is Interactable_guild_flag || interactable is interactable_trebuchet || interactable is InteractablePlayerBed ) && interactable != this.recent_interactable)
                             {
                                 interactable.setMaterialGlow();
                                 if (this.recent_interactable != null)
@@ -168,6 +168,12 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
                                     local_player_siege_weapon_advance_fire_state_request(interactable.gameObject);
                                 }
 
+                                if (interactable is InteractablePlayerBed)
+                                    local_player_playerBed_rename_panel_open_request(interactable.gameObject);
+
+                                if (interactable is Interactable_trebuchet_shot)
+                                    local_player_trebuchet_shot_pickup_request(interactable.gameObject);
+
                             }
                             else if (Input.GetButton("Interact") && this.time_pressed_interaction > 0 && time_passed_interaction(150f) && !(Input.GetButton("Alert") || this.time_pressed_alert > 0))
                             {
@@ -207,7 +213,15 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
                                         UILogic.Instance.interactable_radial_menu.show_flag_menu(interactable.gameObject, interactable.GetComponent<NetworkGuildFlag>().is_player_authorized(networkObject.Owner.NetworkId));
 
                                     if (interactable is interactable_trebuchet) {
-                                        UILogic.Instance.interactable_radial_menu.show_trebuchet_menu(interactable.gameObject, interactable.GetComponent<NetworkPlaceable>().is_player_owner(networkObject.MyPlayerId));
+                                        UILogic.Instance.interactable_radial_menu.show_trebuchet_menu(interactable.gameObject, interactable.GetComponent<NetworkPlaceable>().is_player_owner(networkObject.Owner.NetworkId));
+                                    }
+                                    if (interactable is InteractablePlayerBed) {
+                                        //posebnost! ce ni owner ima samo 1 interakcijo tko da jo kr nrdimo magar!
+                                        bool is_owner = interactable.gameObject.GetComponent<NetworkPlayerBed>().is_owner(networkObject.Owner.NetworkId);
+                                        if (is_owner)
+                                            UILogic.Instance.interactable_radial_menu.showPlayerBedMenu(interactable.gameObject, is_owner);
+                                        else
+                                            local_player_playerBed_rename_panel_open_request(interactable.gameObject);
                                     }
                                 }
                             }
@@ -254,7 +268,13 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
         }
     }
 
-
+    private void local_player_trebuchet_shot_pickup_request(GameObject shot)
+    {
+        if (networkObject.IsServer) {
+            GetComponent<NetworkPlayerInventory>().handleItemPickup(shot.GetComponent<Networked_siege_projectile>().p);
+            shot.GetComponent<Networked_siege_projectile>().OnPlayerPickup();
+        }
+    }
 
     private void clear_placeable_for_durability_lookup()
     {
@@ -601,11 +621,31 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
 
     internal void local_player_siege_weapon_pickup_request(GameObject t)
     {
-        throw new NotImplementedException();
+        t.GetComponent<NetworkSiegeTrebuchet>().local_player_siege_weapon_pickup_request();
     }
 
     internal void local_player_siege_weapon_advance_fire_state_request(GameObject t)
     {
         t.GetComponent<NetworkSiegeTrebuchet>().local_player_siege_weapon_advance_fire_state_request();
     }
+
+    #region Player Bed
+
+    internal void local_player_playerBed_rename_panel_open_request(GameObject bed)
+    {
+        UILogic.Instance.local_open_playerBed_rename_panel(bed.GetComponent<NetworkPlayerBed>());
+    }
+
+    internal void local_player_playerBed_gift_request(GameObject bed)
+    {
+        UILogic.Instance.local_open_playerBed_gift_panel(bed.GetComponent<NetworkPlayerBed>());
+    }
+
+    internal void local_player_playerBed_pickup_request(GameObject bed)
+    {
+        bed.GetComponent<NetworkPlayerBed>().localPlayer_pickup_request();
+    }
+
+
+    #endregion
 }

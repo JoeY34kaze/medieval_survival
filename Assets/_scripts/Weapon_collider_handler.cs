@@ -15,29 +15,46 @@ public class Weapon_collider_handler : MonoBehaviour
     {
         if (other.transform.root.name.Equals("NetworkPlayer(Clone)") && !other.transform.root.gameObject.Equals(transform.root.gameObject) && !other.transform.name.Equals("NetworkPlayer(Clone)")) {//ce je player && ce ni moj player && ce ni playerjev movement collider(kter je samo za movement)
 
+            if (transform.root.GetComponent<NetworkPlayerStats>().am_i_local_client())
+            {
+                set_offensive_colliders(false);
+                set_swing_IK(other);
+                return;
+            }
 
-            if (gameObject.CompareTag("block_player"))
+            if (other.gameObject.CompareTag("block_player"))
             {
                 //zadel smo enemy shield ali sword, ko blocka
-                if (other.transform.root.gameObject.GetComponent<NetworkPlayerStats>().is_valid_server_block(transform.root.GetComponent<NetworkPlayerStats>())) {
+                if (other.transform.root.gameObject.GetComponent<NetworkPlayerStats>().is_valid_server_block(transform.root.GetComponent<NetworkPlayerStats>()))
+                {
                     set_offensive_colliders(false);
+                    set_swing_IK(other);
                 }
+                else
+                    return;
 
             }
             else
             {
                // Debug.Log("Hit another player in the " + other.name + " | " + other.tag);
 
-                other.transform.root.gameObject.GetComponent<NetworkPlayerStats>().take_weapon_damage_server_authority(this.item,other.tag, other.transform.root.gameObject.GetComponent<NetworkPlayerStats>().Get_server_id(), transform.root.gameObject.GetComponent<NetworkPlayerStats>().Get_server_id());
+                other.transform.root.gameObject.GetComponent<NetworkPlayerStats>().take_weapon_damage_server_authority(this.item,other.tag, transform.root.gameObject.GetComponent<NetworkPlayerStats>().Get_server_id());
                 set_offensive_colliders(false);
+                set_swing_IK(other);
             }
-
-            set_swing_IK(other);
         }
 
         if (other.transform.tag.Equals("resource"))//ce smo zadel nek resource
         {
             print("Collision detected with a resource object " + other.name);
+
+            if (transform.root.GetComponent<NetworkPlayerStats>().am_i_local_client())
+            {
+                set_offensive_colliders(false);
+                set_swing_IK(other);
+                return;
+            }
+
 
             //other.transform.root.gameObject.GetComponent<NetworkPlayerStats>().take_weapon_damage_server_authority(this.item, other.tag, gameObject.tag, other.transform.root.gameObject.GetComponent<NetworkPlayerStats>().Get_server_id(), transform.root.gameObject.GetComponent<NetworkPlayerStats>().Get_server_id());
             if (this.inv == null) { this.inv = transform.root.GetComponent<NetworkPlayerInventory>(); }

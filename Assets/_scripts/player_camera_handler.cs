@@ -17,7 +17,9 @@ public class player_camera_handler : NetworkPlayerCameraHandlerBehavior
 
     public Camera player_cam;
     private NetworkPlayerInventory networkPlayerInventory;
-    public bool lockCamera = false;
+
+    private bool network_handled = false;
+
     private void Awake()
     {
         this.networkPlayerInventory = GetComponent<NetworkPlayerInventory>();
@@ -29,10 +31,12 @@ public class player_camera_handler : NetworkPlayerCameraHandlerBehavior
 
     
         if (!networkObject.IsOwner) return;
+
         player_cam = Camera.main;
         player_cam.transform.parent = this._camera_framework;
         player_cam.transform.localPosition = Vector3.zero;
         player_cam.transform.localRotation = Quaternion.Euler(camera_rotation_offset);
+        network_handled = true;
 
     }
 
@@ -43,11 +47,15 @@ public class player_camera_handler : NetworkPlayerCameraHandlerBehavior
             Debug.LogWarning("networkObject is null.");
             return;
         }
+        if (networkObject.IsOwner && !network_handled) {
+            // Debug.LogWarning("lateupdate is called before NetworkStart(). waiting..");
+            return;
+        }
         if (!networkObject.IsOwner) return;
-        if (lockCamera) return;
+        if (UILogic.hasControlOfInput) return;
         if (UILogic.Instance.hasOpenWindow) return;
 
-
+        if (player_cam == null) return;
             player_cam.transform.localPosition = camera_starting_offset;
         player_cam.transform.localRotation = Quaternion.Euler(camera_rotation_offset);
 

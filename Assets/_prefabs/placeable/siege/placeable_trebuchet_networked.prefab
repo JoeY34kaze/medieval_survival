@@ -71,6 +71,7 @@ GameObject:
   - component: {fileID: 4786787043554352}
   - component: {fileID: 33449785080154500}
   - component: {fileID: 23379678409125254}
+  - component: {fileID: 2329253665631068586}
   m_Layer: 0
   m_Name: trebuchet_stair_poly
   m_TagString: Untagged
@@ -139,6 +140,19 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+--- !u!114 &2329253665631068586
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1055983086206382}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 02973966e7e4fc341a82a21f1fca0401, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  parent_interactable: {fileID: 693566429}
 --- !u!1 &1086007752340250
 GameObject:
   m_ObjectHideFlags: 0
@@ -149,6 +163,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4291605584335726}
   - component: {fileID: 137280854649624024}
+  - component: {fileID: 1523232808082398630}
   m_Layer: 0
   m_Name: trebuchet_rope_ring
   m_TagString: Untagged
@@ -240,6 +255,19 @@ SkinnedMeshRenderer:
     m_Center: {x: -0.09165037, y: 0.1311364, z: -0.0000011934899}
     m_Extent: {x: 0.0014358833, y: 0.002050832, z: 0.0021222315}
   m_DirtyAABB: 0
+--- !u!114 &1523232808082398630
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1086007752340250}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 02973966e7e4fc341a82a21f1fca0401, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  parent_interactable: {fileID: 693566429}
 --- !u!1 &1125213262857638
 GameObject:
   m_ObjectHideFlags: 0
@@ -279,6 +307,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4245522051905314}
+  - component: {fileID: 2657253765506688900}
   m_Layer: 0
   m_Name: trebuchet_rig
   m_TagString: Untagged
@@ -302,6 +331,19 @@ Transform:
   m_Father: {fileID: 7399809338916094252}
   m_RootOrder: 8
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2657253765506688900
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1130447119621906}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 02973966e7e4fc341a82a21f1fca0401, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  parent_interactable: {fileID: 693566429}
 --- !u!1 &1130630315745392
 GameObject:
   m_ObjectHideFlags: 0
@@ -344,6 +386,7 @@ GameObject:
   - component: {fileID: 4800991194463950}
   - component: {fileID: 137186869051642506}
   - component: {fileID: 5574775217150969242}
+  - component: {fileID: 5116764463126712693}
   m_Layer: 0
   m_Name: trebuchet_arms
   m_TagString: Untagged
@@ -449,6 +492,19 @@ MeshCollider:
   m_Convex: 1
   m_CookingOptions: 30
   m_Mesh: {fileID: 4300008, guid: 27cba75a263584ba9a4bc06c3fc682f6, type: 3}
+--- !u!114 &5116764463126712693
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1142567782100520}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 02973966e7e4fc341a82a21f1fca0401, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  parent_interactable: {fileID: 693566429}
 --- !u!1 &1151347031826790
 GameObject:
   m_ObjectHideFlags: 0
@@ -459,6 +515,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4725112985535970}
   - component: {fileID: 137523776610790910}
+  - component: {fileID: 7686273617262584810}
   m_Layer: 0
   m_Name: trebuchet_back_lev
   m_TagString: Untagged
@@ -550,6 +607,19 @@ SkinnedMeshRenderer:
     m_Center: {x: -0.07215883, y: 0.013647223, z: 0.0090454975}
     m_Extent: {x: 0.0005076304, y: 0.0069138072, z: 0.0004827883}
   m_DirtyAABB: 0
+--- !u!114 &7686273617262584810
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1151347031826790}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 02973966e7e4fc341a82a21f1fca0401, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  parent_interactable: {fileID: 693566429}
 --- !u!1 &1153193858117452
 GameObject:
   m_ObjectHideFlags: 0
@@ -560,6 +630,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4398111263506842}
   - component: {fileID: 137782815020589430}
+  - component: {fileID: 1830151207704502969}
   m_Layer: 0
   m_Name: trebuchet_rotor
   m_TagString: Untagged
@@ -651,6 +722,19 @@ SkinnedMeshRenderer:
     m_Center: {x: -0.08376212, y: 0.002867035, z: 0.0000061392784}
     m_Extent: {x: 0.0044754595, y: 0.004475461, z: 0.017120477}
   m_DirtyAABB: 0
+--- !u!114 &1830151207704502969
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1153193858117452}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 02973966e7e4fc341a82a21f1fca0401, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  parent_interactable: {fileID: 693566429}
 --- !u!1 &1157770282083532
 GameObject:
   m_ObjectHideFlags: 0
@@ -661,6 +745,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4592883362777150}
   - component: {fileID: 137839879836615568}
+  - component: {fileID: 6618604864699910232}
   m_Layer: 0
   m_Name: trebuchet_front_lev
   m_TagString: Untagged
@@ -752,6 +837,19 @@ SkinnedMeshRenderer:
     m_Center: {x: -0.08376694, y: 0.013952095, z: 0.009045497}
     m_Extent: {x: 0.0005076304, y: 0.0072322492, z: 0.0004827883}
   m_DirtyAABB: 0
+--- !u!114 &6618604864699910232
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1157770282083532}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 02973966e7e4fc341a82a21f1fca0401, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  parent_interactable: {fileID: 693566429}
 --- !u!1 &1179475939003914
 GameObject:
   m_ObjectHideFlags: 0
@@ -793,6 +891,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4365098357204898}
   - component: {fileID: 137142737214413016}
+  - component: {fileID: 6367307456885618110}
   m_Layer: 0
   m_Name: trebuchet_pulley_top
   m_TagString: Untagged
@@ -884,6 +983,19 @@ SkinnedMeshRenderer:
     m_Center: {x: -0.057699382, y: 0.09539982, z: 0.000010811258}
     m_Extent: {x: 0.0023058765, y: 0.0031429753, z: 0.0027260694}
   m_DirtyAABB: 0
+--- !u!114 &6367307456885618110
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1199226598439232}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 02973966e7e4fc341a82a21f1fca0401, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  parent_interactable: {fileID: 693566429}
 --- !u!1 &1220945328425134
 GameObject:
   m_ObjectHideFlags: 0
@@ -925,6 +1037,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4485491574088762}
   - component: {fileID: 137679717476215742}
+  - component: {fileID: 7212476591698567790}
   m_Layer: 0
   m_Name: trebuchet_bag_stop
   m_TagString: Untagged
@@ -1016,6 +1129,19 @@ SkinnedMeshRenderer:
     m_Center: {x: -0.101468384, y: 0.002189682, z: -0.000008486211}
     m_Extent: {x: 0.0029508173, y: 0.00049334933, z: 0.014254755}
   m_DirtyAABB: 0
+--- !u!114 &7212476591698567790
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1289971794996848}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 02973966e7e4fc341a82a21f1fca0401, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  parent_interactable: {fileID: 693566429}
 --- !u!1 &1293910816782822
 GameObject:
   m_ObjectHideFlags: 0
@@ -1056,6 +1182,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4848842936959744}
+  - component: {fileID: 2501744725768674175}
   m_Layer: 0
   m_Name: structure
   m_TagString: Untagged
@@ -1083,6 +1210,19 @@ Transform:
   m_Father: {fileID: 4245522051905314}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2501744725768674175
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1297468515329050}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 02973966e7e4fc341a82a21f1fca0401, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  parent_interactable: {fileID: 693566429}
 --- !u!1 &1328076517858684
 GameObject:
   m_ObjectHideFlags: 0
@@ -1093,6 +1233,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4009902546447446}
   - component: {fileID: 137606789515848230}
+  - component: {fileID: 5198718960745150225}
   m_Layer: 0
   m_Name: trebuchet_rotor_back
   m_TagString: Untagged
@@ -1184,6 +1325,19 @@ SkinnedMeshRenderer:
     m_Center: {x: -0.072143495, y: 0.002867035, z: 0.000006135553}
     m_Extent: {x: 0.004235968, y: 0.0042359713, z: 0.017120477}
   m_DirtyAABB: 0
+--- !u!114 &5198718960745150225
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1328076517858684}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 02973966e7e4fc341a82a21f1fca0401, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  parent_interactable: {fileID: 693566429}
 --- !u!1 &1350316044773086
 GameObject:
   m_ObjectHideFlags: 0
@@ -1194,6 +1348,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4065296123448962}
   - component: {fileID: 137744530694853884}
+  - component: {fileID: 5655020165166495822}
   m_Layer: 0
   m_Name: trebuchet_rope_sec
   m_TagString: Untagged
@@ -1285,6 +1440,19 @@ SkinnedMeshRenderer:
     m_Center: {x: -0.09764689, y: -0.00008074718, z: 0}
     m_Extent: {x: 0.014981881, y: 0.0011974771, z: 0.026421929}
   m_DirtyAABB: 0
+--- !u!114 &5655020165166495822
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1350316044773086}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 02973966e7e4fc341a82a21f1fca0401, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  parent_interactable: {fileID: 693566429}
 --- !u!1 &1360361226525634
 GameObject:
   m_ObjectHideFlags: 0
@@ -1295,6 +1463,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4927487697747130}
   - component: {fileID: 137525871958213706}
+  - component: {fileID: 7437840887899261562}
   m_Layer: 0
   m_Name: trebuchet_pulley_down
   m_TagString: Untagged
@@ -1386,6 +1555,19 @@ SkinnedMeshRenderer:
     m_Center: {x: -0.058820758, y: 0.090424344, z: 0.00018528197}
     m_Extent: {x: 0.0045460053, y: 0.00513757, z: 0.0033524688}
   m_DirtyAABB: 0
+--- !u!114 &7437840887899261562
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1360361226525634}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 02973966e7e4fc341a82a21f1fca0401, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  parent_interactable: {fileID: 693566429}
 --- !u!1 &1376772412275596
 GameObject:
   m_ObjectHideFlags: 0
@@ -1459,6 +1641,7 @@ GameObject:
   - component: {fileID: 4070815571970804}
   - component: {fileID: 137748045799600580}
   - component: {fileID: 5587104047832578502}
+  - component: {fileID: 643883117612499276}
   m_Layer: 0
   m_Name: trebuchet_bag_base
   m_TagString: Untagged
@@ -1564,6 +1747,19 @@ MeshCollider:
   m_Convex: 1
   m_CookingOptions: 30
   m_Mesh: {fileID: 4300006, guid: 27cba75a263584ba9a4bc06c3fc682f6, type: 3}
+--- !u!114 &643883117612499276
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1496369717277176}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 02973966e7e4fc341a82a21f1fca0401, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  parent_interactable: {fileID: 693566429}
 --- !u!1 &1503462777678394
 GameObject:
   m_ObjectHideFlags: 0
@@ -1634,6 +1830,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4608976282096714}
   - component: {fileID: 137526937851858280}
+  - component: {fileID: 7431048702863644611}
   m_Layer: 0
   m_Name: trebuchet_rope_track
   m_TagString: Untagged
@@ -1725,6 +1922,19 @@ SkinnedMeshRenderer:
     m_Center: {x: -0.06445964, y: 0.04572326, z: -0.0018801643}
     m_Extent: {x: 0.02394651, y: 0.049856544, z: 0.010169691}
   m_DirtyAABB: 0
+--- !u!114 &7431048702863644611
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1551479070120538}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 02973966e7e4fc341a82a21f1fca0401, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  parent_interactable: {fileID: 693566429}
 --- !u!1 &1570885918377078
 GameObject:
   m_ObjectHideFlags: 0
@@ -1766,6 +1976,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4384389816555584}
   - component: {fileID: 137204582821475620}
+  - component: {fileID: 7550102246384906535}
   m_Layer: 0
   m_Name: trebuchet_top_rope
   m_TagString: Untagged
@@ -1857,6 +2068,19 @@ SkinnedMeshRenderer:
     m_Center: {x: -0.05364836, y: 0.110038936, z: 0.000000013038516}
     m_Extent: {x: 0.029251404, y: 0.019322421, z: 0.0051904684}
   m_DirtyAABB: 0
+--- !u!114 &7550102246384906535
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1576166817510140}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 02973966e7e4fc341a82a21f1fca0401, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  parent_interactable: {fileID: 693566429}
 --- !u!1 &1582838358172202
 GameObject:
   m_ObjectHideFlags: 0
@@ -1868,6 +2092,7 @@ GameObject:
   - component: {fileID: 4227113679533602}
   - component: {fileID: 137276194995077066}
   - component: {fileID: 3763565014348302952}
+  - component: {fileID: 8838741415559791047}
   m_Layer: 0
   m_Name: trebuchet_sand_charge
   m_TagString: Untagged
@@ -1973,6 +2198,19 @@ MeshCollider:
   m_Convex: 1
   m_CookingOptions: 30
   m_Mesh: {fileID: 4300010, guid: 27cba75a263584ba9a4bc06c3fc682f6, type: 3}
+--- !u!114 &8838741415559791047
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1582838358172202}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 02973966e7e4fc341a82a21f1fca0401, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  parent_interactable: {fileID: 693566429}
 --- !u!1 &1605188680497696
 GameObject:
   m_ObjectHideFlags: 0
@@ -1983,6 +2221,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4082334174257162}
   - component: {fileID: 137747228285203198}
+  - component: {fileID: 9103398228973978555}
   m_Layer: 0
   m_Name: trebuchet_stop
   m_TagString: Untagged
@@ -2074,6 +2313,19 @@ SkinnedMeshRenderer:
     m_Center: {x: -0.06264103, y: 0.0028126072, z: -0.000008486211}
     m_Extent: {x: 0.00048882514, y: 0.001318234, z: 0.017867908}
   m_DirtyAABB: 0
+--- !u!114 &9103398228973978555
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1605188680497696}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 02973966e7e4fc341a82a21f1fca0401, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  parent_interactable: {fileID: 693566429}
 --- !u!1 &1616697468978594
 GameObject:
   m_ObjectHideFlags: 0
@@ -2084,7 +2336,6 @@ GameObject:
   m_Component:
   - component: {fileID: 4016436908294856}
   - component: {fileID: 95060085611003452}
-  - component: {fileID: 2266142753150728321}
   - component: {fileID: 693566426}
   - component: {fileID: 693566427}
   - component: {fileID: 693566428}
@@ -2131,19 +2382,6 @@ Animator:
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorControllerStateOnDisable: 0
---- !u!65 &2266142753150728321
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1616697468978594}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Size: {x: 21.95462, y: 0.24208832, z: 2.4334106}
-  m_Center: {x: -4.8698883, y: -0.0649147, z: -0.041656494}
 --- !u!114 &693566426
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2157,7 +2395,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   player_who_placed_this: 0
-  distanceForSnappingHandling: 0.05
   snappableType: 0
   attachmentPoints: []
   upkeep_flag: {fileID: 0}
@@ -2197,6 +2434,29 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 84443d258e0bb5f4680f0482e12431c4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  currentPlaceableRenderers:
+  - {fileID: 137186869051642506}
+  - {fileID: 137523776610790910}
+  - {fileID: 137503966391678116}
+  - {fileID: 137748045799600580}
+  - {fileID: 137679717476215742}
+  - {fileID: 137839879836615568}
+  - {fileID: 137525871958213706}
+  - {fileID: 137142737214413016}
+  - {fileID: 137646751543046094}
+  - {fileID: 137800919117993978}
+  - {fileID: 137744530694853884}
+  - {fileID: 137526937851858280}
+  - {fileID: 137782815020589430}
+  - {fileID: 137606789515848230}
+  - {fileID: 137832332223034172}
+  - {fileID: 137276194995077066}
+  - {fileID: 23674825295810052}
+  - {fileID: 23379678409125254}
+  - {fileID: 137747228285203198}
+  - {fileID: 137924690286222350}
+  - {fileID: 137279885900752208}
+  - {fileID: 137204582821475620}
 --- !u!114 &3169370672132096531
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2226,6 +2486,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4867463113795114}
   - component: {fileID: 137800919117993978}
+  - component: {fileID: 4056253038000681483}
   m_Layer: 0
   m_Name: trebuchet_ring_metal
   m_TagString: Untagged
@@ -2317,6 +2578,19 @@ SkinnedMeshRenderer:
     m_Center: {x: -0.079283826, y: 0.0005210771, z: 0}
     m_Extent: {x: 0.015604444, y: 0.0022228044, z: 0.016647665}
   m_DirtyAABB: 0
+--- !u!114 &4056253038000681483
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1620543233724854}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 02973966e7e4fc341a82a21f1fca0401, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  parent_interactable: {fileID: 693566429}
 --- !u!1 &1649211954991260
 GameObject:
   m_ObjectHideFlags: 0
@@ -2359,6 +2633,7 @@ GameObject:
   - component: {fileID: 4688735945710708}
   - component: {fileID: 137646751543046094}
   - component: {fileID: 668714794752915932}
+  - component: {fileID: 2905540296313767447}
   m_Layer: 0
   m_Name: trebuchet_rigid
   m_TagString: Untagged
@@ -2464,6 +2739,19 @@ MeshCollider:
   m_Convex: 1
   m_CookingOptions: 30
   m_Mesh: {fileID: 4300012, guid: 27cba75a263584ba9a4bc06c3fc682f6, type: 3}
+--- !u!114 &2905540296313767447
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1656250905362804}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 02973966e7e4fc341a82a21f1fca0401, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  parent_interactable: {fileID: 693566429}
 --- !u!1 &1658661521540780
 GameObject:
   m_ObjectHideFlags: 0
@@ -2628,6 +2916,7 @@ GameObject:
   - component: {fileID: 4899415193751574}
   - component: {fileID: 137924690286222350}
   - component: {fileID: 4184899394151217868}
+  - component: {fileID: 3413402388456556819}
   m_Layer: 0
   m_Name: trebuchet_structure
   m_TagString: Untagged
@@ -2733,6 +3022,19 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: 4300014, guid: 27cba75a263584ba9a4bc06c3fc682f6, type: 3}
+--- !u!114 &3413402388456556819
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1737882892864678}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 02973966e7e4fc341a82a21f1fca0401, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  parent_interactable: {fileID: 693566429}
 --- !u!1 &1755595900052984
 GameObject:
   m_ObjectHideFlags: 0
@@ -2964,6 +3266,7 @@ GameObject:
   - component: {fileID: 4145336547841486}
   - component: {fileID: 137832332223034172}
   - component: {fileID: 3753699573006973740}
+  - component: {fileID: 7423223646569795488}
   m_Layer: 0
   m_Name: trebuchet_rotors_axes
   m_TagString: Untagged
@@ -3069,6 +3372,19 @@ MeshCollider:
   m_Convex: 1
   m_CookingOptions: 30
   m_Mesh: {fileID: 4300016, guid: 27cba75a263584ba9a4bc06c3fc682f6, type: 3}
+--- !u!114 &7423223646569795488
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1827742218353120}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 02973966e7e4fc341a82a21f1fca0401, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  parent_interactable: {fileID: 693566429}
 --- !u!1 &1850970048270704
 GameObject:
   m_ObjectHideFlags: 0
@@ -3141,6 +3457,7 @@ GameObject:
   - component: {fileID: 4638011322446486}
   - component: {fileID: 33237901997788658}
   - component: {fileID: 23674825295810052}
+  - component: {fileID: 2056496471321069339}
   m_Layer: 0
   m_Name: trebuchet_stair
   m_TagString: Untagged
@@ -3209,6 +3526,19 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+--- !u!114 &2056496471321069339
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1880797595555534}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 02973966e7e4fc341a82a21f1fca0401, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  parent_interactable: {fileID: 693566429}
 --- !u!1 &1888169879436724
 GameObject:
   m_ObjectHideFlags: 0
@@ -3219,6 +3549,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4720590815128764}
   - component: {fileID: 137503966391678116}
+  - component: {fileID: 5693602796138271807}
   m_Layer: 0
   m_Name: trebuchet_bag.001
   m_TagString: Untagged
@@ -3311,6 +3642,19 @@ SkinnedMeshRenderer:
     m_Center: {x: -0.09208263, y: 0.100737944, z: 0.00038922112}
     m_Extent: {x: 0.013694957, y: 0.031263035, z: 0.010072207}
   m_DirtyAABB: 0
+--- !u!114 &5693602796138271807
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1888169879436724}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 02973966e7e4fc341a82a21f1fca0401, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  parent_interactable: {fileID: 693566429}
 --- !u!1 &1894306412212346
 GameObject:
   m_ObjectHideFlags: 0
@@ -3321,6 +3665,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4163912324419884}
   - component: {fileID: 137279885900752208}
+  - component: {fileID: 8631808288435692926}
   m_Layer: 0
   m_Name: trebuchet_structure sec
   m_TagString: Untagged
@@ -3412,6 +3757,19 @@ SkinnedMeshRenderer:
     m_Center: {x: -0.08292645, y: 0.00007543748, z: -0.000008486211}
     m_Extent: {x: 0.034886554, y: 0.001612812, z: 0.038865734}
   m_DirtyAABB: 0
+--- !u!114 &8631808288435692926
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1894306412212346}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 02973966e7e4fc341a82a21f1fca0401, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  parent_interactable: {fileID: 693566429}
 --- !u!1 &1954543058326730
 GameObject:
   m_ObjectHideFlags: 0
@@ -3454,6 +3812,7 @@ GameObject:
   - component: {fileID: 4170336560830400}
   - component: {fileID: 33893523185523708}
   - component: {fileID: 23906101148768052}
+  - component: {fileID: 7300586465046862812}
   m_Layer: 0
   m_Name: trebuchet_bag
   m_TagString: Untagged
@@ -3522,6 +3881,19 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+--- !u!114 &7300586465046862812
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1967576384950724}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 02973966e7e4fc341a82a21f1fca0401, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  parent_interactable: {fileID: 693566429}
 --- !u!1 &1980982528821458
 GameObject:
   m_ObjectHideFlags: 0
@@ -3592,6 +3964,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7399809338916094252}
+  - component: {fileID: 7214141856827038143}
   m_Layer: 0
   m_Name: trebuchet_object
   m_TagString: Untagged
@@ -3637,6 +4010,19 @@ Transform:
   m_Father: {fileID: 5148351208568275369}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &7214141856827038143
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 811510192763983577}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 02973966e7e4fc341a82a21f1fca0401, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  parent_interactable: {fileID: 693566429}
 --- !u!1 &1252364197899787783
 GameObject:
   m_ObjectHideFlags: 0
@@ -3696,7 +4082,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 289ee40bc1b3fc54aa062d7e4a1b080c, type: 2}
+  - {fileID: 2100000, guid: 66320ed4852bc724484d52f28f22941a, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -3853,7 +4239,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 138144e6809b7a84b9e3e60ee870c987, type: 2}
+  - {fileID: 2100000, guid: dc4f5cb8f4162b64b8ae6e668f8bd17d, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -3948,7 +4334,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 138144e6809b7a84b9e3e60ee870c987, type: 2}
+  - {fileID: 2100000, guid: b171df2116ec5554a8fa613a98146954, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0

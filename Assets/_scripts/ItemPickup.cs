@@ -16,6 +16,11 @@ public class ItemPickup : Interactable {
     public Material[] original_materials;
     private MeshRenderer[] renderers;
     private bool initialized = false;
+
+
+
+
+
     private void Start()
     {
         if (this.renderers == null) this.renderers = GetComponentsInChildren<MeshRenderer>();
@@ -31,19 +36,29 @@ public class ItemPickup : Interactable {
         this.initialized = true;
     }
 
-    IEnumerator changeOwner()//hacky, but we save 1 rpc call because of it
-    {
-        yield return new WaitForSeconds(1);
-        if (networkObject == null) { Debug.LogError("networkObject is null."); }
-        if (networkObject.IsServer) networkObject.TakeOwnership();
-    }
+
 
     protected override void NetworkStart()
     {
         base.NetworkStart();
         // TODO:  Your initialization code that relies on network setup for this object goes here
-        StartCoroutine(changeOwner());
+        if (networkObject.IsServer)
+        {
+            networkObject.TakeOwnership();
+            StartCoroutine(despawner(get_time_for_despawn()));
+        }
 
+    }
+
+    private float get_time_for_despawn()
+    {
+        //kasnej bojo itemi se nekak postackal skup? predvidevam kot pr conan exiles? mogoce pa ne, mogoce bo tko kot rust...
+        return 600 + 600 * this.p.tier;
+    }
+
+    IEnumerator despawner(float time) {
+        yield return new WaitForSecondsRealtime(time);
+        networkObject.Destroy();
     }
 
     internal override void Interact()//sprozi na playerju
@@ -204,4 +219,7 @@ public class ItemPickup : Interactable {
         for (int i = 0; i < this.renderers.Length; i++)
             this.renderers[i].material = this.original_materials[i];
     }
+
+
+
 }

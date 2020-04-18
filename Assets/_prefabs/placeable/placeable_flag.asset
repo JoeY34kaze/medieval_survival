@@ -25,11 +25,11 @@ MonoBehaviour:
   prefab_pickup: {fileID: 4344458020859959958, guid: 4d857fb3f3804e540b9c4ac4ce5da7b1,
     type: 3}
   weapon_animation_class: 0
-  uma_item_recipe_name: 
+  UMARecipes: []
   stone_gather_rate: 0
   wood_gather_rate: 0
   flesh_gather_rate: 0
-  description: Guild flag, used for claiming territory.
+  description: Guild flag, used for claiming territory and playing base upkeep.
   placeable_Local_object: {fileID: 4116918404208757098, guid: dc930c56585e1ac47b45e61d97295c24,
     type: 3}
   networked_physical_instantiated_object: {fileID: 4116918404208757098, guid: 29c693bfbe24f3741aad183f4c608531,
@@ -39,3 +39,5 @@ MonoBehaviour:
   blocks_placements: 
   needs_upkeep: 1
   recepie: {fileID: 11400000, guid: 87fae42f526336247a6d8bd0796392c2, type: 2}
+  needsToBeAttached: 0
+  respawn_time: 0

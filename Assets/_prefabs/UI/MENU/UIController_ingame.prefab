@@ -3897,6 +3897,7 @@ MonoBehaviour:
   defaultVolumeMusic: 1
   defaultVolumeEffects: 1
   defaultSen: 2
+  defaultShowDirectionalArrow: 1
   menuSoundEffect: {fileID: 0}
   mainMenuMusic: {fileID: 0}
   level: Level1_Demo
@@ -3922,6 +3923,7 @@ MonoBehaviour:
   volumeSliderMusic: {fileID: 0}
   volumeTextEffects: {fileID: 0}
   volumeSliderEffects: {fileID: 0}
+  directionalArrowToggle: {fileID: 0}
 --- !u!114 &7513035468422700229
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3939,6 +3941,7 @@ MonoBehaviour:
   defaultVolumeMusic: 1
   defaultVolumeEffects: 1
   defaultSen: 2
+  defaultShowDirectionalArrow: 1
   menuSoundEffect: {fileID: 0}
   mainMenuMusic: {fileID: 0}
   menuNumber: 0
@@ -3963,6 +3966,7 @@ MonoBehaviour:
   volumeSliderMusic: {fileID: 0}
   volumeTextEffects: {fileID: 0}
   volumeSliderEffects: {fileID: 0}
+  directionalArrowToggle: {fileID: 0}
 --- !u!1 &1439258321415800
 GameObject:
   m_ObjectHideFlags: 0

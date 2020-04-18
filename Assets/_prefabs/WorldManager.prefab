@@ -43,4 +43,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4e9d65bbe0a249c4db9f4ee1bc9c1171, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  resourceRefreshTime: 10
+  resourceRefreshTime: 120
+  upkeep_interval: 6000

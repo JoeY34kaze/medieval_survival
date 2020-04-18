@@ -17,6 +17,7 @@ public class NetworkPlaceable : NetworkPlaceableBehavior
     [SerializeField]
     internal static float distanceForSnappingHandling = 0.05f;
 
+
     public Predmet p;
     [SerializeField]
     public Item.SnappableType snappableType;
@@ -39,6 +40,7 @@ public class NetworkPlaceable : NetworkPlaceableBehavior
         this.gibs = GetComponentInChildren<gibs_handler>(true);
          
     }
+
 
 
     protected override void NetworkStart()
@@ -66,6 +68,11 @@ public class NetworkPlaceable : NetworkPlaceableBehavior
             myNetWorker = GameObject.Find("NetworkManager(Clone)").GetComponent<NetworkManager>().Networker;
             attach_land_claim_object();
         }
+    }
+
+    internal uint get_player_who_placed_this()
+    {
+        return this.player_who_placed_this;
     }
 
     private void attach_land_claim_object() {

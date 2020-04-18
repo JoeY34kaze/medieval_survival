@@ -368,7 +368,6 @@ public class Interactable_radial_menu : MonoBehaviour
     }
 
 
-
     internal void show_trebuchet_menu(GameObject target, bool owner)
     {
         if (owner)
@@ -460,6 +459,52 @@ public class Interactable_radial_menu : MonoBehaviour
             menu.reDraw();
         }
     }
+
+    internal void showPlayerBedMenu(GameObject target, bool owner)
+    {
+        if (owner)
+        {
+            show_menu(target);
+            this.number_of_elements = 3;
+            menu.angleOffset = (360f / this.number_of_elements);
+            center_label.text = target.GetComponent<NetworkPlaceable>().p.item.Display_name;
+
+            GameObject btn_0_r = Resources.Load<GameObject>("radial_menu_elements/interaction_player_steal");//pickup
+            GameObject btn_1_r = Resources.Load<GameObject>("radial_menu_elements/interaction_player_gift");
+            GameObject btn_2_r = Resources.Load<GameObject>("radial_menu_elements/interaction_player_rename");
+
+
+
+            GameObject btn_0 = GameObject.Instantiate(btn_0_r);
+            GameObject btn_1 = GameObject.Instantiate(btn_1_r);
+            GameObject btn_2 = GameObject.Instantiate(btn_2_r);
+
+            menu.elements.Clear();
+            setup_button(btn_0, menu.angleOffset * 0);
+            setup_button(btn_1, menu.angleOffset * 1);
+            setup_button(btn_2, menu.angleOffset * 2);
+
+
+            Button button = btn_0.transform.GetComponentInChildren<Button>();
+            button.onClick.RemoveAllListeners();
+            button.onClick.AddListener(delegate { player_interaction_playerBed_pickup_request(target); });
+
+            button = btn_1.transform.GetComponentInChildren<Button>();
+            button.onClick.RemoveAllListeners();
+            button.onClick.AddListener(delegate { player_interaction_playerBed_gift_request(target); });
+
+            button = btn_2.transform.GetComponentInChildren<Button>();
+            button.onClick.RemoveAllListeners();
+            button.onClick.AddListener(delegate { player_interaction_playerBed_rename_request(target); });
+
+            menu.reDraw();
+        }
+        else
+        {
+            Debug.LogError("this should not be possible because NetworkPlayerInteraction.cs prevents non-owner from opening the menu!");
+        }
+    }
+
 
 
     internal void show_craftingStation_menu(GameObject target)
@@ -908,4 +953,34 @@ public class Interactable_radial_menu : MonoBehaviour
         interaction.local_player_siege_weapon_pickup_request(this.target);
     }
 
+
+    private void player_interaction_playerBed_rename_request(GameObject t)
+    {
+        menu.elements.Clear();
+        foreach (Transform child in elements)
+        {
+            GameObject.Destroy(child.gameObject);
+        }
+        center_label.text = "";
+        this.radialMenu.SetActive(false);
+        interaction.local_player_playerBed_rename_panel_open_request(t);
+    }
+
+    private void player_interaction_playerBed_gift_request(GameObject t)
+    {
+        menu.elements.Clear();
+        foreach (Transform child in elements)
+        {
+            GameObject.Destroy(child.gameObject);
+        }
+        center_label.text = "";
+        this.radialMenu.SetActive(false);
+        interaction.local_player_playerBed_gift_request(t);
+    }
+
+    private void player_interaction_playerBed_pickup_request(GameObject t)
+    {
+        hide_radial_menu();
+        interaction.local_player_playerBed_pickup_request(t);
+    }
 }

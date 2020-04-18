@@ -4,16 +4,20 @@ using UnityEngine;
 
 namespace BeardedManStudios.Forge.Networking.Generated
 {
-	[GeneratedRPC("{\"types\":[[\"byte\"][\"byte\"][\"int\"][\"int\", \"bool\", \"string\", \"string\", \"byte\", \"bool\"][\"byte\"][\"bool\", \"byte\"]]")]
-	[GeneratedRPCVariableNames("{\"types\":[[\"direction\"][\"direction\"][\"mode\"][\"remote_combat_mode\", \"remote_blocking\", \"equipped_weapon\", \"equipped_shield\", \"remote_direction\", \"readying_attack\"][\"direction\"][\"blocking\", \"direction\"]]")]
+	[GeneratedRPC("{\"types\":[[\"int\"][\"int\", \"bool\", \"string\", \"string\", \"byte\", \"bool\", \"bool\", \"bool\"][\"byte\"][\"bool\", \"byte\"][][\"bool\"][\"byte\"][\"byte\"][][]]")]
+	[GeneratedRPCVariableNames("{\"types\":[[\"mode\"][\"remote_combat_mode\", \"remote_blocking\", \"equipped_weapon\", \"equipped_shield\", \"remote_direction\", \"readying_attack\", \"ready_attack\", \"executing_attack\"][\"direction\"][\"readying\", \"direction\"][][\"executing_attack\"][\"dir\"][\"dir\"][][]]")]
 	public abstract partial class NetworkPlayerCombatBehavior : NetworkBehavior
 	{
-		public const byte RPC_NETWORK_FIRE2 = 0 + 5;
-		public const byte RPC_NETWORK_FIRE1 = 1 + 5;
-		public const byte RPC_CHANGE_COMBAT_MODE_RESPONSE = 2 + 5;
-		public const byte RPC_SEND_ALL = 3 + 5;
-		public const byte RPC_NETWORK_FIRE1_RESPONSE = 4 + 5;
-		public const byte RPC_NETWORK_FIRE2_RESPONSE = 5 + 5;
+		public const byte RPC_CHANGE_COMBAT_MODE_RESPONSE = 0 + 5;
+		public const byte RPC_SEND_ALL = 1 + 5;
+		public const byte RPC_START_ATTACK_REQUEST = 2 + 5;
+		public const byte RPC_START_ATTACK_RESPONSE = 3 + 5;
+		public const byte RPC_EXECUTE_ATTACK_REQUEST = 4 + 5;
+		public const byte RPC_EXECUTE_ATTACK_RESPONSE = 5 + 5;
+		public const byte RPC_START_BLOCK_REQUEST = 6 + 5;
+		public const byte RPC_START_BLOCK_RESPONSE = 7 + 5;
+		public const byte RPC_STOP_BLOCK_REQ = 8 + 5;
+		public const byte RPC_STOP_BLOCK_RESP = 9 + 5;
 		
 		public NetworkPlayerCombatNetworkObject networkObject = null;
 
@@ -27,12 +31,16 @@ namespace BeardedManStudios.Forge.Networking.Generated
 			networkObject.AttachedBehavior = this;
 
 			base.SetupHelperRpcs(networkObject);
-			networkObject.RegisterRpc("NetworkFire2", NetworkFire2, typeof(byte));
-			networkObject.RegisterRpc("NetworkFire1", NetworkFire1, typeof(byte));
 			networkObject.RegisterRpc("ChangeCombatModeResponse", ChangeCombatModeResponse, typeof(int));
-			networkObject.RegisterRpc("SendAll", SendAll, typeof(int), typeof(bool), typeof(string), typeof(string), typeof(byte), typeof(bool));
-			networkObject.RegisterRpc("NetworkFire1Response", NetworkFire1Response, typeof(byte));
-			networkObject.RegisterRpc("NetworkFire2Response", NetworkFire2Response, typeof(bool), typeof(byte));
+			networkObject.RegisterRpc("SendAll", SendAll, typeof(int), typeof(bool), typeof(string), typeof(string), typeof(byte), typeof(bool), typeof(bool), typeof(bool));
+			networkObject.RegisterRpc("start_attack_request", start_attack_request, typeof(byte));
+			networkObject.RegisterRpc("start_attack_response", start_attack_response, typeof(bool), typeof(byte));
+			networkObject.RegisterRpc("execute_attack_request", execute_attack_request);
+			networkObject.RegisterRpc("execute_attack_response", execute_attack_response, typeof(bool));
+			networkObject.RegisterRpc("start_block_request", start_block_request, typeof(byte));
+			networkObject.RegisterRpc("start_block_response", start_block_response, typeof(byte));
+			networkObject.RegisterRpc("stop_block_req", stop_block_req);
+			networkObject.RegisterRpc("stop_block_resp", stop_block_resp);
 
 			networkObject.onDestroy += DestroyGameObject;
 
@@ -111,16 +119,6 @@ namespace BeardedManStudios.Forge.Networking.Generated
 
 		/// <summary>
 		/// Arguments:
-		/// byte direction
-		/// </summary>
-		public abstract void NetworkFire2(RpcArgs args);
-		/// <summary>
-		/// Arguments:
-		/// byte direction
-		/// </summary>
-		public abstract void NetworkFire1(RpcArgs args);
-		/// <summary>
-		/// Arguments:
 		/// int mode
 		/// </summary>
 		public abstract void ChangeCombatModeResponse(RpcArgs args);
@@ -132,19 +130,45 @@ namespace BeardedManStudios.Forge.Networking.Generated
 		/// string equipped_shield
 		/// byte remote_direction
 		/// bool readying_attack
+		/// bool ready_attack
+		/// bool executing_attack
 		/// </summary>
 		public abstract void SendAll(RpcArgs args);
 		/// <summary>
 		/// Arguments:
 		/// byte direction
 		/// </summary>
-		public abstract void NetworkFire1Response(RpcArgs args);
+		public abstract void start_attack_request(RpcArgs args);
 		/// <summary>
 		/// Arguments:
-		/// bool blocking
+		/// bool readying
 		/// byte direction
 		/// </summary>
-		public abstract void NetworkFire2Response(RpcArgs args);
+		public abstract void start_attack_response(RpcArgs args);
+		/// <summary>
+		/// Arguments:
+		/// </summary>
+		public abstract void execute_attack_request(RpcArgs args);
+		/// <summary>
+		/// Arguments:
+		/// </summary>
+		public abstract void execute_attack_response(RpcArgs args);
+		/// <summary>
+		/// Arguments:
+		/// </summary>
+		public abstract void start_block_request(RpcArgs args);
+		/// <summary>
+		/// Arguments:
+		/// </summary>
+		public abstract void start_block_response(RpcArgs args);
+		/// <summary>
+		/// Arguments:
+		/// </summary>
+		public abstract void stop_block_req(RpcArgs args);
+		/// <summary>
+		/// Arguments:
+		/// </summary>
+		public abstract void stop_block_resp(RpcArgs args);
 
 		// DO NOT TOUCH, THIS GETS GENERATED PLEASE EXTEND THIS CLASS IF YOU WISH TO HAVE CUSTOM CODE ADDITIONS
 	}

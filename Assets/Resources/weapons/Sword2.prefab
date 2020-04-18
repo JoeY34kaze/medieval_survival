@@ -14,13 +14,13 @@ GameObject:
   - component: {fileID: 1400558324009327095}
   - component: {fileID: 2047511483840256646}
   - component: {fileID: 5124851250700498642}
-  m_Layer: 9
+  m_Layer: 15
   m_Name: Sword2
   m_TagString: weapon_player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &5567297768877738451
 Transform:
   m_ObjectHideFlags: 0
@@ -135,7 +135,6 @@ GameObject:
   m_Component:
   - component: {fileID: 7908997589533193229}
   - component: {fileID: 3056211865840180186}
-  - component: {fileID: 4730936043991865042}
   m_Layer: 9
   m_Name: block_collider
   m_TagString: block_player
@@ -171,15 +170,3 @@ CapsuleCollider:
   m_Height: 1.75
   m_Direction: 0
   m_Center: {x: 0.34741825, y: -0.0028483483, z: -0.0029364964}
---- !u!114 &4730936043991865042
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7585796095291150892}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c56c3dcb11dcab546999624c6abf1142, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 

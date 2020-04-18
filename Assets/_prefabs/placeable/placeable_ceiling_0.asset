@@ -25,11 +25,11 @@ MonoBehaviour:
   prefab_pickup: {fileID: 4344458020859959958, guid: 4d857fb3f3804e540b9c4ac4ce5da7b1,
     type: 3}
   weapon_animation_class: 0
-  uma_item_recipe_name: 
+  UMARecipes: []
   stone_gather_rate: 0
   wood_gather_rate: 0
   flesh_gather_rate: 0
-  description: no description yet.
+  description: Ceiling used for building. Can be placed on walls or pillars.
   placeable_Local_object: {fileID: 8933572121124272504, guid: 168e0a6899e801347854d547a116220f,
     type: 3}
   networked_physical_instantiated_object: {fileID: 4103599921800810234, guid: ebaa22677fc84994db20d23af88110d8,
@@ -40,3 +40,4 @@ MonoBehaviour:
   needs_upkeep: 1
   recepie: {fileID: 11400000, guid: d283713c020252549ae644fa265b493d, type: 2}
   needsToBeAttached: 1
+  respawn_time: 0

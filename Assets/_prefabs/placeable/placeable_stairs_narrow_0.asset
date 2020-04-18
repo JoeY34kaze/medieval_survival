@@ -25,11 +25,11 @@ MonoBehaviour:
   prefab_pickup: {fileID: 4344458020859959958, guid: 4d857fb3f3804e540b9c4ac4ce5da7b1,
     type: 3}
   weapon_animation_class: 0
-  uma_item_recipe_name: 
+  UMARecipes: []
   stone_gather_rate: 0
   wood_gather_rate: 0
   flesh_gather_rate: 0
-  description: no description yet.
+  description: blabla
   placeable_Local_object: {fileID: 4421934177080679166, guid: ff8d28c268eb84349b418bb38caf7b63,
     type: 3}
   networked_physical_instantiated_object: {fileID: 4421934177080679166, guid: 956a4a17fa7cc6c4da28ab8cb6a5e7e0,
@@ -40,3 +40,4 @@ MonoBehaviour:
   needs_upkeep: 1
   recepie: {fileID: 11400000, guid: 098ea8ea30e34424ebfd409b606928f5, type: 2}
   needsToBeAttached: 1
+  respawn_time: 0

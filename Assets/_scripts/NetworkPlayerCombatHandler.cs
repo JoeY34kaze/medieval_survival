@@ -16,7 +16,7 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
         set { this.combat_mode = value; }
     }
     private panel_bar_handler bar_handler;
-    public bool in_attack_animation = false;
+
 
     private NetworkPlayerStats stats;
 
@@ -34,6 +34,10 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
 
     public byte weapon_direction = 0;
     public bool is_readying_attack = false;
+    public bool ready_attack = false;
+    public bool executing_attack = false;
+
+    public bool locally_buffered_execute_attack_request =false;
 
     private void disable_all_shields()
     {
@@ -71,14 +75,14 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
             Debug.LogWarning("networkObject is null. - najbrz zato ker se se connecta gor.");
             return; }
 
-        if (networkObject.IsOwner) checkAttackDirection();
+ 
 
 
         if (!networkObject.IsOwner || !is_allowed_to_attack_local())
         {
             return;
         }
-
+        checkAttackDirection();
 
 
         if (Input.GetButtonDown("Fire2")) {
@@ -91,29 +95,43 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
         {
             if (hasWeaponSelected())
             {
-                if (Input.GetButtonDown("Fire1") && !this.in_attack_animation)
+                if (Input.GetButtonDown("Fire1") && !this.executing_attack && !this.is_readying_attack && !this.ready_attack &&!this.blocking)
                 {
-                    networkObject.SendRpc(RPC_NETWORK_FIRE1, Receivers.Server, this.weapon_direction);
+                    locally_buffered_execute_attack_request = false;
+                    
+                    networkObject.SendRpc(RPC_START_ATTACK_REQUEST, Receivers.Server, this.weapon_direction);
                 }
-                else if (Input.GetButtonDown("Fire2") && !this.blocking)
+                else if (Input.GetButtonDown("Fire2"))
                 {
                     //block
-                    networkObject.SendRpc(RPC_NETWORK_FIRE2, Receivers.Server, this.weapon_direction);
+                    networkObject.SendRpc(RPC_START_BLOCK_REQUEST, Receivers.Server, this.weapon_direction);
                 }
                 else if (Input.GetButtonUp("Fire2"))
                 {
                     //nehov blokirat
-                    networkObject.SendRpc(RPC_NETWORK_FIRE2, Receivers.Server, this.weapon_direction);//sj je toggle
+                    networkObject.SendRpc(RPC_STOP_BLOCK_REQ, Receivers.Server);
                 }
                 if (Input.GetButtonUp("Fire1"))
                 {
-                    networkObject.SendRpc(RPC_NETWORK_FIRE1, Receivers.Server, (byte)255);
+                    if (ready_attack)
+                        networkObject.SendRpc(RPC_EXECUTE_ATTACK_REQUEST, Receivers.Server);
+                    else
+                        this.locally_buffered_execute_attack_request = true;
                 }
-
             }
-
+            else if (this.currently_equipped_shield != null) {
+                if (Input.GetButtonDown("Fire2"))
+                {
+                    //block
+                    networkObject.SendRpc(RPC_START_BLOCK_REQUEST, Receivers.Server, this.weapon_direction);
+                }
+                else if (Input.GetButtonUp("Fire2"))
+                {
+                    //nehov blokirat
+                    networkObject.SendRpc(RPC_STOP_BLOCK_REQ, Receivers.Server );
+                }
+            }
         }
-
         
     }
 
@@ -184,12 +202,13 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
     /// klice animatiopn event ki je na koncu vsake attack animacije
     /// </summary>
     public void handleEndOfAttackAnimation() {
-        if (this.in_attack_animation  || this.is_readying_attack)
+        if (this.is_readying_attack  || this.ready_attack || this.executing_attack)
         {
             animator.setFeign();
         }
-        this.in_attack_animation = false;
+        this.ready_attack = false;
         this.is_readying_attack = false;
+        this.executing_attack = false;
   
         animator.reset_swing_IK();
     }
@@ -237,7 +256,6 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
     /// </summary>
     public void update_equipped_weapons()
     {
- 
             foreach (Transform c in weapon_slot)
             {
                 if (this.currently_equipped_weapon != null)
@@ -254,7 +272,6 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
                 else {
                     c.gameObject.SetActive(false);
                     //treba tud pohendlat animacijo da vrze iz combat state-a. lahko klicemo kr combatstatesetter - ker se to nastavi na vsah playerjih, tud na serverju.
-                    setCombatStateLocally(0);
                 }
             }
         
@@ -308,16 +325,22 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
 
     /// <summary>
     /// Na serverju se aktivira collider na weaponu s ktermu napadamo. to metodo naj bi klical animation event.
+    /// 
+    /// ALSO!!!! te metode ne slice samo server ampak tud lokalni player!!! zarad IK
     /// </summary>
     public void activate_weapon_collider_server(int b)
     {
-        if (!networkObject.IsServer) return;
-        bool active = false;
-        if (b > 0) active = true;
+        if (networkObject.IsServer || networkObject.IsOwner)
+        {
+            bool active = false;
+            if (b > 0) active = true;
 
-        foreach (Transform child in weapon_slot) {
-            if (child.GetComponent<Weapon_collider_handler>().item.id == this.currently_equipped_weapon.item.id) {
-                child.GetComponent<Weapon_collider_handler>().set_offensive_colliders(active);
+            foreach (Transform child in weapon_slot)
+            {
+                if (child.GetComponent<Weapon_collider_handler>().item.id == this.currently_equipped_weapon.item.id)
+                {
+                    child.GetComponent<Weapon_collider_handler>().set_offensive_colliders(active);
+                }
             }
         }
     }
@@ -325,6 +348,7 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
     public void set_weapon_blocking_collider_server(bool b)
     {
         if (!networkObject.IsServer) return;
+        if (this.currently_equipped_weapon == null) return;
         Debug.Log("Activating blocking colliders  " + b);
 
         foreach (Transform child in weapon_slot)
@@ -337,13 +361,15 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
     ///klice se potem, ki ze zamenjamo item z hotbara.
     public void ChangeCombatMode(Item i)
     {
+
         if (!networkObject.IsServer) return;
         // Debug.Log("server : got change combat mode request");
         int next = 0;
         if (i != null)
-            if (i.type == Item.Type.weapon || i.type == Item.Type.ranged)
+        {
+            if (i.type == Item.Type.weapon || i.type == Item.Type.ranged || i.type == Item.Type.shield)
                 next = 1;
-
+        }
         networkObject.SendRpc(RPC_CHANGE_COMBAT_MODE_RESPONSE, Receivers.All, next);
 
     }
@@ -375,53 +401,7 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
 
     //--------------------------RPC's
 
-    public override void NetworkFire1(RpcArgs args)
-    {
-        if (networkObject.IsServer && args.Info.SendingPlayer.NetworkId == networkObject.Owner.NetworkId) {
-            if (hasWeaponSelected()) {
-
-                byte direction = args.GetNext<byte>();
-                if (direction == 255)
-                {
-                    networkObject.SendRpc(RPC_NETWORK_FIRE1_RESPONSE, Receivers.All, (byte)255);
-                }
-                else { 
-                    if(!this.is_readying_attack)//tle manjka attack antihack check
-                        networkObject.SendRpc(RPC_NETWORK_FIRE1_RESPONSE, Receivers.All, direction);
-                }
-
-                
-            }
-        }
-
-    }
-
-
-    public override void NetworkFire1Response(RpcArgs args)
-    {
-        if (args.Info.SendingPlayer.IsHost)
-        {
-            if (networkObject.IsServer)
-            {//do server stuff
-             //coolliderji se aktivirajo na animation eventu (activate_weapon_collider_server())
-
-            }
-            byte direction = args.GetNext<byte>();
-            if (direction >= 0 && direction < 4)
-            {
-                //vsi - animacije
-                animator.setFire1(direction);//animator in inAttackAnimation
-                this.is_readying_attack = true;
-            }
-            else if (direction == 255)
-            {
-                play_main_attack_sound_effect();
-                animator.setReleaseOfAttack();
-            }
-
-        }
-
-    }
+   
 
 
     /// <summary>
@@ -458,46 +438,115 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
 
             //int id_wep = (this.currently_equipped_weapon.item == null) ? -1 : this.currently_equipped_weapon.item.id;
 
-            networkObject.SendRpc(p, RPC_SEND_ALL, (int)this.combat_mode, this.blocking, (this.currently_equipped_weapon == null) ? "-1" : this.currently_equipped_weapon.toNetworkString(), (this.currently_equipped_shield == null) ? "-1" : this.currently_equipped_shield.toNetworkString(), this.weapon_direction, this.is_readying_attack);
+            networkObject.SendRpc(p, RPC_SEND_ALL, (int)this.combat_mode, this.blocking, (this.currently_equipped_weapon == null) ? "-1" : this.currently_equipped_weapon.toNetworkString(), (this.currently_equipped_shield == null) ? "-1" : this.currently_equipped_shield.toNetworkString(), this.weapon_direction, this.is_readying_attack, this.ready_attack,this.executing_attack);
         }
     }
 
 
+    public override void start_attack_request(RpcArgs args)
+    {
+        if (networkObject.IsServer && args.Info.SendingPlayer.NetworkId == networkObject.Owner.NetworkId) {
+            byte dir = args.GetNext<byte>();
+            if (dir > 3) dir = 3;
+            if (!this.executing_attack && !ready_attack && !is_readying_attack && !blocking) { //ce je v zacetnem stanju
+                if (this.currently_equipped_weapon != null) {
+                    networkObject.SendRpc(RPC_START_ATTACK_RESPONSE, Receivers.All, true, dir);
+                }
+            }
+        }
+    }
+
+    public override void start_attack_response(RpcArgs args)
+    {
+        if (args.Info.SendingPlayer.IsHost) {
+            this.ready_attack = false;
+            this.executing_attack = false;
+            this.locally_buffered_execute_attack_request = false;
+            this.is_readying_attack = args.GetNext<bool>();
+            if(this.is_readying_attack)
+                animator.handle_readying_of_attack(args.GetNext<byte>());
+        }
+    }
+
     /// <summary>
-    /// to je ubistvu toggle. menja med blokiranjem
+    /// animation event ki mora bit naliman na animaciji
     /// </summary>
-    /// <param name="args"></param>
-    public override void NetworkFire2(RpcArgs args)
+    public void on_attack_ready() {
+        if (networkObject.IsOwner || networkObject.IsServer) {
+            this.is_readying_attack = false;
+            this.ready_attack = true;
+
+            if (networkObject.IsOwner && this.locally_buffered_execute_attack_request)
+                networkObject.SendRpc(RPC_EXECUTE_ATTACK_REQUEST, Receivers.Server);
+        }
+    }
+
+    public override void execute_attack_request(RpcArgs args)
+    {
+        if (networkObject.IsServer && args.Info.SendingPlayer.NetworkId == networkObject.Owner.NetworkId) {
+            if (this.ready_attack) { //vedno true razen ce so e paketi zgubil?? ali pa ce hacka
+                networkObject.SendRpc(RPC_EXECUTE_ATTACK_RESPONSE, Receivers.All, true);
+            }
+        }
+    }
+
+    public override void execute_attack_response(RpcArgs args)
+    {
+        if (args.Info.SendingPlayer.IsHost) {
+            this.ready_attack = false;
+            this.executing_attack = true;
+            animator.handle_execution_of_attack();
+        }
+    }
+
+
+    public override void start_block_request(RpcArgs args)
     {
         if (networkObject.IsServer && args.Info.SendingPlayer.NetworkId == networkObject.Owner.NetworkId)
         {
             if (!this.blocking)
             {//starts blocking
-                set_weapon_blocking_collider_server(true);
-                networkObject.SendRpc(RPC_NETWORK_FIRE2_RESPONSE, Receivers.All, true, args.GetNext<byte>());
+                if (currently_equipped_shield == null)
+                {
+                    set_weapon_blocking_collider_server(true);
+                }
+                networkObject.SendRpc(RPC_START_BLOCK_RESPONSE, Receivers.All, args.GetNext<byte>());
 
             }
-            else
-            {//stops blocking
-                set_weapon_blocking_collider_server(false);
-                networkObject.SendRpc(RPC_NETWORK_FIRE2_RESPONSE, Receivers.All, false, args.GetNext<byte>());
-            }
+
         }
     }
 
-    public override void NetworkFire2Response(RpcArgs args)
+    public override void start_block_response(RpcArgs args)
     {
-        if (args.Info.SendingPlayer.NetworkId == 0)
-        {//do server stuff - collider? - its always on so..
-            bool blocking = args.GetNext<bool>();
-            byte direction = args.GetNext<byte>();
+        if (args.Info.SendingPlayer.IsHost) {
+            byte dir = args.GetNext<byte>();
+            this.blocking = true;
 
-            animator.setCombatBlocking(blocking, direction);
-            this.blocking = blocking;
-            //pohandlat prehod iz combat animacij u blocking
-            this.in_attack_animation = false;
+            //reestiramo vsi kar ima veze z attackom ker je ali prešel z attackanja na block ali pa z blokiranja v nevtralsnot.
+            this.locally_buffered_execute_attack_request = false;
             this.is_readying_attack = false;
+            this.ready_attack = false;
+            this.executing_attack = false;
 
+            animator.setCombatBlocking(blocking, dir);
         }
     }
+
+    public override void stop_block_req(RpcArgs args)
+    {
+        if (networkObject.IsServer && args.Info.SendingPlayer.NetworkId == networkObject.Owner.NetworkId) {
+            networkObject.SendRpc(RPC_STOP_BLOCK_RESP, Receivers.All);
+        }
+    }
+
+    public override void stop_block_resp(RpcArgs args)
+    {
+        if (args.Info.SendingPlayer.IsHost) {
+            this.blocking = false;
+            animator.setCombatBlocking(false, 0);
+        }
+    }
+
+
 }

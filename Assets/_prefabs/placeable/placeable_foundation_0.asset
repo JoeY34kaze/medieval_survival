@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Display_name: Wooden Foundation
   type: 11
-  icon: {fileID: 21300000, guid: 2cdf1865ccf6a1642a6d45885328b3a1, type: 3}
+  icon: {fileID: 21300000, guid: 07ff64f2da6951b4a8cc19aeea95796a, type: 3}
   damage: 0
   hasDurability: 1
   Max_durability: 1000
@@ -25,11 +25,11 @@ MonoBehaviour:
   prefab_pickup: {fileID: 4344458020859959958, guid: 4d857fb3f3804e540b9c4ac4ce5da7b1,
     type: 3}
   weapon_animation_class: 0
-  uma_item_recipe_name: 
+  UMARecipes: []
   stone_gather_rate: 0
   wood_gather_rate: 0
   flesh_gather_rate: 0
-  description: no description yet.
+  description: Wooden foundation. Basic building block of your base.
   placeable_Local_object: {fileID: 1805417395977712654, guid: 27ee443cc14477249b304184b090bdba,
     type: 3}
   networked_physical_instantiated_object: {fileID: 1805417395977712654, guid: 9b6fabd4b2753604eaf462dd7510042a,
@@ -39,3 +39,5 @@ MonoBehaviour:
   blocks_placements: 0100000002000000
   needs_upkeep: 1
   recepie: {fileID: 11400000, guid: f994972ef8b5b184a9505d86473d614c, type: 2}
+  needsToBeAttached: 0
+  respawn_time: 0

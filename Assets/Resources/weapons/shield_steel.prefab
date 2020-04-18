@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 2701159987629232917}
   - component: {fileID: 7081142338222088361}
   - component: {fileID: 3430589318907065106}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: twoo001
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -54,6 +54,7 @@ MeshRenderer:
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -65,6 +66,7 @@ MeshRenderer:
   m_ProbeAnchor: {fileID: 0}
   m_LightProbeVolumeOverride: {fileID: 0}
   m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
   m_PreserveUVs: 0
   m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0
@@ -88,7 +90,7 @@ GameObject:
   - component: {fileID: 2346908198808610537}
   - component: {fileID: 3511794941764754106}
   - component: {fileID: 323148806033930088}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: shield
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -102,13 +104,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5723831762209532722}
-  m_LocalRotation: {x: 0.00000008146034, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -0.19920802, y: 0.20415103, z: -0.027565422}
+  m_LocalRotation: {x: 0, y: 0.16504757, z: 0.9862857, w: 0}
+  m_LocalPosition: {x: -0.19920802, y: 0.26, z: -0.02}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 4300587994069874272}
   m_RootOrder: 1
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: -19, y: 0, z: 180}
 --- !u!33 &3511794941764754106
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -131,6 +133,7 @@ MeshRenderer:
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -142,6 +145,7 @@ MeshRenderer:
   m_ProbeAnchor: {fileID: 0}
   m_LightProbeVolumeOverride: {fileID: 0}
   m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
   m_PreserveUVs: 0
   m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0
@@ -165,7 +169,7 @@ GameObject:
   - component: {fileID: 3143938904954381549}
   - component: {fileID: 4467796128054364712}
   - component: {fileID: 1338625638307393311}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: twoo
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -208,6 +212,7 @@ MeshRenderer:
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -219,6 +224,7 @@ MeshRenderer:
   m_ProbeAnchor: {fileID: 0}
   m_LightProbeVolumeOverride: {fileID: 0}
   m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
   m_PreserveUVs: 0
   m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0
@@ -241,13 +247,14 @@ GameObject:
   m_Component:
   - component: {fileID: 4300587994069874272}
   - component: {fileID: 6273895676875426086}
-  m_Layer: 0
+  - component: {fileID: 9106054431348976857}
+  m_Layer: 9
   m_Name: shield_steel
-  m_TagString: Untagged
+  m_TagString: block_player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &4300587994069874272
 Transform:
   m_ObjectHideFlags: 0
@@ -257,7 +264,7 @@ Transform:
   m_GameObject: {fileID: 6081796324413394575}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -0.19395065, y: 1.175, z: 3.9085064}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 1.1, y: 1.1, z: 1.1}
   m_Children:
   - {fileID: 2814821790906652725}
   - {fileID: 2346908198808610537}
@@ -279,6 +286,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   id: 20
+--- !u!65 &9106054431348976857
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6081796324413394575}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 1
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 0.63669354, y: 0.73866487, z: 0.260617}
+  m_Center: {x: -0.18164566, y: 0.36030585, z: 0.39791012}
 --- !u!1 &6688384973641931793
 GameObject:
   m_ObjectHideFlags: 0
@@ -290,7 +310,7 @@ GameObject:
   - component: {fileID: 2814821790906652725}
   - component: {fileID: 779947221184586946}
   - component: {fileID: 2592914235202638136}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Object002
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -333,6 +353,7 @@ MeshRenderer:
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -344,6 +365,7 @@ MeshRenderer:
   m_ProbeAnchor: {fileID: 0}
   m_LightProbeVolumeOverride: {fileID: 0}
   m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
   m_PreserveUVs: 0
   m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0

@@ -211,4 +211,25 @@ public class NetworkSiegeTrebuchet : NetworkedSiegeWeaponBehavior
     {
         this.container.local_open_container_request();
     }
+
+    internal void local_player_siege_weapon_pickup_request()
+    {
+        if (GetComponent<NetworkPlaceable>().get_player_who_placed_this() == networkObject.MyPlayerId) {
+            networkObject.SendRpc(RPC_PICKUP_REQUEST, Receivers.Server);
+        }
+    }
+
+    public override void pickup_request(RpcArgs args)
+    {
+        NetworkPlaceable pl = GetComponent<NetworkPlaceable>();
+        if (pl.get_player_who_placed_this() == args.Info.SendingPlayer.NetworkId)
+        {
+            if (this.container.isEmpty())
+            {
+                Debug.Log("Picking up trebuchet..");
+                FindByid(args.Info.SendingPlayer.NetworkId).GetComponent<NetworkPlayerInventory>().handleItemPickup(pl.p);
+                networkObject.Destroy();
+            }
+        }
+    }
 }

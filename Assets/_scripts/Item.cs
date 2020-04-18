@@ -34,4 +34,5 @@ public class Item : ScriptableObject
     public bool needs_upkeep;
     public PredmetRecepie recepie;
     public bool needsToBeAttached = false;
+    public int respawn_time;
 }

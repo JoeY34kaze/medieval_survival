@@ -10,11 +10,13 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
 {
     private NetworkPlayerCombatHandler combat_handler;
     private NetworkPlayerAnimationLogic anim_logic;
+    private NetworkPlayerStats stats;
     private panel_bar_handler bar_handler;
     private NetworkPlayerInventory npi;
     private Material valid_material;
     private Material invalid_material;
     public Transform toolContainerOnHand;
+
 
     internal int selected_index = -1;
     internal int selected_index_shield = -1;
@@ -41,11 +43,14 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
 
 
     private AttachmentPoint current_closest_attachment_point;
+    private float rotation_effset_for_normal_rotation;
+    private float rotational_speed_modifier = 4f;
 
     private void Start()
     {
         this.combat_handler = GetComponent<NetworkPlayerCombatHandler>();
         this.anim_logic = GetComponent<NetworkPlayerAnimationLogic>();
+        this.stats = GetComponent<NetworkPlayerStats>();
         this.bar_handler = UILogic.Instance.gameObject.GetComponentInChildren<panel_bar_handler>();
         this.npi = GetComponent<NetworkPlayerInventory>();
         this.valid_material = (Material)Resources.Load("Glow_green", typeof(Material));
@@ -57,7 +62,7 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
     {
         if (networkObject == null) return;
 
-        if (networkObject.IsOwner) {
+        if (networkObject.IsOwner && !this.stats.dead && !UILogic.hasControlOfInput) {
             if (bar_handler.gameObject.activeSelf) {
 
                 checkInputBar();
@@ -106,12 +111,15 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
     {
         RaycastHit h= local_MoveCurrentPlaceableObjectToMouseRay();//tle applya ze rotacijo od snappable objekta
 
-        set_rotation_parameters_from_mouse_info(GetAllowedAngleRotationFromCurrentPlaceable());
+        
+            set_rotation_parameters_from_mouse_info(GetAllowedAngleRotationFromCurrentPlaceable(), !this.current_placeable_item.ignorePlacementNormal);
+        
+            
 
         if (currentTransformOfPlaceableIsValid(h))
         {
             this.previously_valid_position = this.CurrentLocalPlaceable.transform.position;
-            this.previously_valid_rotation = this.CurrentLocalPlaceable.transform.rotation;
+             this.previously_valid_rotation = this.CurrentLocalPlaceable.transform.rotation;
 
             set_material(this.valid_material);
             this.placeable_currently_valid = true;
@@ -302,15 +310,32 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
         else return parent.is_placement_possible_for(this.current_placeable_item);
     }
 
-    private void set_rotation_parameters_from_mouse_info(float allowedAngleChunk)
+    private void set_rotation_parameters_from_mouse_info(float allowedAngleChunk, bool use_normal)
     {
-        if (allowedAngleChunk <1 &&  (!this.CurrentLocalPlaceable.GetComponent<LocalPlaceableHelper>().isSnapping))
+        Debug.Log(this.CurrentLocalPlaceable.transform.rotation);
+        if (use_normal)//tale if mora bit ker se rotacija obasa drugano ce uporablamo normalo ali ne ( uporaba normale je recimo na chest_0 in trap kjer se prilagaja terenu, medtem ko foundation se ne. je transform.up zmer == 0,1,0
         {
-            this.CurrentLocalPlaceable.transform.Rotate(this.CurrentLocalPlaceable.transform.up, Input.mouseScrollDelta.y);
+            if (allowedAngleChunk < 1 && (!this.CurrentLocalPlaceable.GetComponent<LocalPlaceableHelper>().isSnapping))
+            {
+                this.rotation_effset_for_normal_rotation += Input.mouseScrollDelta.y * this.rotational_speed_modifier;
+                this.CurrentLocalPlaceable.transform.Rotate(Vector3.up, this.rotation_effset_for_normal_rotation);
+            }
+            else
+            {
+                if (Input.mouseScrollDelta.y != 0)
+                    this.CurrentLocalPlaceable.transform.Rotate(this.CurrentLocalPlaceable.transform.up, ((Input.mouseScrollDelta.y / Input.mouseScrollDelta.y) * allowedAngleChunk));
+            }
         }
-        else{
-            if(Input.mouseScrollDelta.y!=0)
-                this.CurrentLocalPlaceable.transform.Rotate(this.CurrentLocalPlaceable.transform.up, ((Input.mouseScrollDelta.y / Input.mouseScrollDelta.y) * allowedAngleChunk));
+        else {
+            if (allowedAngleChunk < 1 && (!this.CurrentLocalPlaceable.GetComponent<LocalPlaceableHelper>().isSnapping))
+            {
+                this.CurrentLocalPlaceable.transform.Rotate(Vector3.up,Input.mouseScrollDelta.y * this.rotational_speed_modifier);
+            }
+            else
+            {
+                if (Input.mouseScrollDelta.y != 0)
+                    this.CurrentLocalPlaceable.transform.Rotate(this.CurrentLocalPlaceable.transform.up, ((Input.mouseScrollDelta.y / Input.mouseScrollDelta.y) * allowedAngleChunk));
+            }
         }
     }
 
@@ -338,7 +363,6 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
                     if (!this.current_placeable_item.ignorePlacementNormal)
                     {
                         this.CurrentLocalPlaceable.transform.rotation = Quaternion.FromToRotation(Vector3.up, hitInfo.normal);//ce hocmo da je zmer alignan z terenom - chesti pa take stvari
-                        //this.CurrentLocalPlaceable.transform.Rotate(Vector3.up, this.current_placeable_rotation_offset);
                         offsetOfColliderHeight = Vector3.up * this.currentPlaceableCollider.size.y / 2;
 
                         offsetOfColliderHeight = hitInfo.normal*(this.currentPlaceableCollider.size.y / 2 - this.currentPlaceableCollider.center.y);
@@ -468,6 +492,7 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
         else if (Input.GetButtonDown("Bar8")) localBarSlotSelectionRequest(7);
         else if (Input.GetButtonDown("Bar9")) localBarSlotSelectionRequest(8);
         else if (Input.GetButtonDown("Bar0")) localBarSlotSelectionRequest(9);
+        else if (Input.GetButton("Rotate")) return;//ce rotiramo objekt nesmemo skenslat rotacijo z menjavo objekta..
         else if (Input.GetAxis("Mouse ScrollWheel") > 0f)
         {
 
@@ -477,8 +502,8 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
             int next = this.npi.get_index_of_next_item_on_hotbar_ascending(current_index);
             if (next == this.selected_index_shield)
                 next = this.npi.get_index_of_next_item_on_hotbar_ascending(next);
-                localBarSlotSelectionRequest(next);
-            
+            localBarSlotSelectionRequest(next);
+
         }
         else if (Input.GetAxis("Mouse ScrollWheel") < 0f)
         {
@@ -641,6 +666,11 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
                         if(p.item.id == this.current_placeable_item.id)
                             return;
 
+            //pohandlat rabmo sound effecte za izbiranje itema..
+            if (p != null)
+                if (p.item != null)
+                    if (p.item.type == Item.Type.weapon)
+                        stats.play_random_sound_effect(stats.sfx_draw_sword);
 
             if (networkObject.IsOwner)
             {
@@ -652,8 +682,12 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
             }
 
             //ZA COMBAT MODE - precej neefektivno ker pri menjavi itema na baru se klice dvakrat rpc...........
-            if(combat_handler.currently_equipped_weapon!=null)
+            if (combat_handler.currently_equipped_weapon != null)
                 combat_handler.ChangeCombatMode(combat_handler.currently_equipped_weapon.item);
+            else if (combat_handler.currently_equipped_shield != null)
+                combat_handler.ChangeCombatMode(combat_handler.currently_equipped_shield.item);
+            else//nimamo nc equipan
+                combat_handler.ChangeCombatMode(null);
             
         }
     }
@@ -729,13 +763,15 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
     private void setPlaceableState(Predmet i)
     {
         this.inPlaceableMode = true;
-        this.CurrentLocalPlaceable = Instantiate(i.item.placeable_Local_object);
         this.current_placeable_item = i.item;
         this.activePlaceable = i;
-        this.currentPlaceableCollider = this.CurrentLocalPlaceable.GetComponent<LocalPlaceableHelper>().getColliderForPlacement();
-        this.currentPlaceableRenderers = this.CurrentLocalPlaceable.GetComponentsInChildren<MeshRenderer>();
-        //SetToolSelected(null);
-        //combat_handler.currently_equipped_weapon=null;
+
+        if (networkObject.IsOwner)
+        {
+            this.CurrentLocalPlaceable = Instantiate(i.item.placeable_Local_object);
+            this.currentPlaceableCollider = this.CurrentLocalPlaceable.GetComponent<LocalPlaceableHelper>().getColliderForPlacement();
+            this.currentPlaceableRenderers = this.CurrentLocalPlaceable.GetComponentsInChildren<MeshRenderer>();
+        }
     }
 
     private void SetToolSelected(Predmet i) {

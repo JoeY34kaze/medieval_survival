@@ -25,11 +25,12 @@ MonoBehaviour:
   prefab_pickup: {fileID: 4344458020859959958, guid: 4d857fb3f3804e540b9c4ac4ce5da7b1,
     type: 3}
   weapon_animation_class: 0
-  uma_item_recipe_name: 
+  UMARecipes: []
   stone_gather_rate: 0
   wood_gather_rate: 0
   flesh_gather_rate: 0
-  description: no description yet.
+  description: Wooden foundation stairs used to create stairs to help you enter your
+    base more easily.
   placeable_Local_object: {fileID: 4859765243381674479, guid: 7082fcc515a998d4fb4f4c4eb9a86ffc,
     type: 3}
   networked_physical_instantiated_object: {fileID: 3972517851848812556, guid: af4573d26c7b34443a69cf2f960cb761,
@@ -39,3 +40,5 @@ MonoBehaviour:
   blocks_placements: 0100000002000000
   needs_upkeep: 1
   recepie: {fileID: 11400000, guid: ec6c0d647de33bd488f9a25875f0f37d, type: 2}
+  needsToBeAttached: 0
+  respawn_time: 0

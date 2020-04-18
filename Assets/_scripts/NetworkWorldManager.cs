@@ -15,12 +15,13 @@ public class NetworkWorldManager : NetworkWorldManagerBehavior
 
     private void Update()
     {
-        if (networkObject.IsServer)//bi dau u start ampak je izjemno pomembna metoda in bi blo treba chekirat skos če dela l pa ne. bolš bi blo da se na vsake par minut chekira ampak update je ured pomoje ker je check cist dzabe
-            if (this.upkeep_checker == null)
-            {
-                this.upkeep_checker = Upkeep_checker_coroutine();
-                StartCoroutine(this.upkeep_checker);
-            }
+        if(networkObject!=null)
+            if (networkObject.IsServer)//bi dau u start ampak je izjemno pomembna metoda in bi blo treba chekirat skos če dela l pa ne. bolš bi blo da se na vsake par minut chekira ampak update je ured pomoje ker je check cist dzabe
+                if (this.upkeep_checker == null)
+                {
+                    this.upkeep_checker = Upkeep_checker_coroutine();
+                    StartCoroutine(this.upkeep_checker);
+                }
     }
 
     private IEnumerator Upkeep_checker_coroutine()

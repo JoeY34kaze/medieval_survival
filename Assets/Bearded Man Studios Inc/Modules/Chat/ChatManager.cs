@@ -40,7 +40,7 @@ public class ChatManager : ChatManagerBehavior
 		if (string.IsNullOrEmpty(message))
 			return;
 
-        string name = transform.root.GetComponent<NetworkPlayerStats>().playerName;//networkObject.Networker.Me.Name;
+        string name = UILogic.localPlayerGameObject.GetComponent<NetworkPlayerStats>().playerName;//networkObject.Networker.Me.Name;
 
 		if (string.IsNullOrEmpty(name))
 			name = NetWorker.InstanceGuid.ToString().Substring(0, 5);
@@ -63,8 +63,7 @@ public class ChatManager : ChatManagerBehavior
     {
         text_panel.parent.GetComponent<Image>().color = new Color(255, 255, 255, 0.05f);
         messageInput.GetComponent<Image>().color = new Color(255, 255, 255, 0.05f);
-        GetComponentInParent<NetworkPlayerMovement>().lockMovement = false;
-        GetComponentInParent<player_camera_handler>().lockCamera = false;
+        UILogic.hasControlOfInput = false;
         GetComponentInParent<UILogic>().DisableMouse();
     }
 

@@ -75,6 +75,10 @@ namespace BeardedManStudios.Forge.Networking.Generated
 						availableCallback = true;
 						obj = new NetworkGuildManagerNetworkObject(networker, id, frame);
 						break;
+					case NetworkItemSpawnerNetworkObject.IDENTITY:
+						availableCallback = true;
+						obj = new NetworkItemSpawnerNetworkObject(networker, id, frame);
+						break;
 					case NetworkLandClaimObjectNetworkObject.IDENTITY:
 						availableCallback = true;
 						obj = new NetworkLandClaimObjectNetworkObject(networker, id, frame);
@@ -86,6 +90,10 @@ namespace BeardedManStudios.Forge.Networking.Generated
 					case NetworkPlayerAnimationNetworkObject.IDENTITY:
 						availableCallback = true;
 						obj = new NetworkPlayerAnimationNetworkObject(networker, id, frame);
+						break;
+					case NetworkPlayerBedNetworkObject.IDENTITY:
+						availableCallback = true;
+						obj = new NetworkPlayerBedNetworkObject(networker, id, frame);
 						break;
 					case NetworkPlayerCameraHandlerNetworkObject.IDENTITY:
 						availableCallback = true;
@@ -138,10 +146,6 @@ namespace BeardedManStudios.Forge.Networking.Generated
 					case TestNetworkObject.IDENTITY:
 						availableCallback = true;
 						obj = new TestNetworkObject(networker, id, frame);
-						break;
-					case NetworkItemSpawnerNetworkObject.IDENTITY:
-						availableCallback = true;
-						obj = new NetworkItemSpawnerNetworkObject(networker, id, frame);
 						break;
 				}
 

@@ -25,11 +25,12 @@ MonoBehaviour:
   prefab_pickup: {fileID: 4344458020859959958, guid: 4d857fb3f3804e540b9c4ac4ce5da7b1,
     type: 3}
   weapon_animation_class: 0
-  uma_item_recipe_name: 
+  UMARecipes: []
   stone_gather_rate: 0
   wood_gather_rate: 0
   flesh_gather_rate: 0
-  description: no description yet.
+  description: Wooden door frame. Can be placed on foundation or next to an existing
+    wall. Used for installing doors.
   placeable_Local_object: {fileID: 4568946295635604716, guid: 9207ee5e35228244baa3a1a1e787f569,
     type: 3}
   networked_physical_instantiated_object: {fileID: 1469634279016249563, guid: cddb02731c87feb43b0c426d9beae4fe,
@@ -40,3 +41,4 @@ MonoBehaviour:
   needs_upkeep: 1
   recepie: {fileID: 11400000, guid: a20534c9fb7feae479a0d14f574f3e2a, type: 2}
   needsToBeAttached: 1
+  respawn_time: 0

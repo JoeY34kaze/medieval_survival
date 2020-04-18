@@ -5,6 +5,7 @@ using BeardedManStudios.Forge.Networking.Generated;
 using BeardedManStudios.Forge.Networking;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 /// <summary>
 /// skripta skrbi za celotno logiko kar se tice ui-a. izjema je radial menu, canvas za healthbar, team panel pa take fore. cez ima guild, inventorij, pa take stvari k jih player lahko sam odpira
@@ -20,6 +21,11 @@ public class UILogic : MonoBehaviour
     public GameObject panel_durability;
     public GameObject trebuchet_rotation_panel;
     public backpack_local_panel_handler backpack_local_panel_handler;
+    public GameObject deathScreen;
+    public GameObject deathScreenBeds;
+    public GameObject playerBedRenamePanel;
+    public GameObject disconnect_screen;
+    public Text latencyText;
 
     public bool hasOpenWindow=false;
     public NetworkGuildManager ngm;
@@ -47,6 +53,7 @@ public class UILogic : MonoBehaviour
     private GameObject active_container_panel;
     public GameObject[] panelsPredmetiContainer;
     internal NetworkContainer currentActiveContainer;//tole se posreduje npi-ju med premikanjem predmetov. z npi v tole in obratno
+    private NetworkPlayerBed bed_currently_being_modified;
 
     private NetworkSiegeTrebuchet active_trebuchet = null;
     public GameObject Button_trebuchet_rotation;
@@ -84,6 +91,8 @@ public class UILogic : MonoBehaviour
     public GameObject direction_arrow_right;
     public GameObject direction_arrow_down;
     public GameObject direction_arrow_left;
+    internal static bool hasControlOfInput;
+    internal double currentPing;
 
     private void Start()
     {
@@ -102,6 +111,14 @@ public class UILogic : MonoBehaviour
         }
 
         if (Input.GetKeyDown(KeyCode.Return)) {
+
+            if (this.playerBedRenamePanel.activeSelf) {
+                OnPlayerBedRenameButtonClicked();
+                return;
+            }
+
+
+
             //djmo fokusirat not da loh pisemo ke
             if (chatActive)
             {
@@ -113,8 +130,7 @@ public class UILogic : MonoBehaviour
                 chatActive = true;
                 chatInput.GetComponent<InputField>().Select();
                 GetComponentInChildren<ChatManager>().onInputFieldSelected();
-                GetComponentInParent<NetworkPlayerMovement>().lockMovement = true;
-                GetComponentInParent<player_camera_handler>().lockCamera = true;
+                UILogic.hasControlOfInput = true;
             }
             
         }
@@ -168,6 +184,13 @@ public class UILogic : MonoBehaviour
         }
     }
 
+
+    public  void setLatencyText(double s) {
+        this.latencyText.text = "Latency: " + s + " ms";
+        if (s > 255) s = 255;
+        float f = (float)s;
+        this.latencyText.color = new Color(f, 255 - f, 0, 255);
+    }
     internal void OnWeaponDirectionChanged(int current_direction)
     {
 
@@ -234,11 +257,11 @@ public class UILogic : MonoBehaviour
         this.guildModificationPanel.SetActive(b);
         if (b)//??
         {
+            UILogic.hasControlOfInput = true;
             if (this.GuildPanel.activeSelf) ngm.SetMemberPanel(false);
             this.GuildPanel.SetActive(false);
             this.inventoryPanel.SetActive(false);
             this.hasOpenWindow = true;
-            UILogic.localPlayerGameObject.GetComponent<NetworkPlayerMovement>().lockMovement = true;
         }
         else {
             ClearAll();
@@ -254,6 +277,7 @@ public class UILogic : MonoBehaviour
     }
 
     internal void show_trebuchet_rotation_panel(NetworkSiegeTrebuchet trebuchet) {
+        UILogic.hasControlOfInput = true;
         this.active_trebuchet = trebuchet;
         this.original_trebuchet_rotation = trebuchet.get_rotation_of_platform(); ;
         this.trebuchet_rotation_panel.SetActive(true);
@@ -312,14 +336,17 @@ public class UILogic : MonoBehaviour
         this.GuildPanel.SetActive(false);
         this.crafting_panel.SetActive(false);
         this.crafting_panel.SetActive(false);
+        this.playerBedRenamePanel.SetActive(false);
         clearContainerPanel();
         this.hasOpenWindow = false;
         this.currentActiveContainer = null;
         this.panelsPredmetiContainer = null;
-        
+        this.disconnect_screen.SetActive(false);
+        UILogic.hasControlOfInput = false;
 
         this.allows_UI_opening = false;
         this.currently_openened_container = null;
+        this.bed_currently_being_modified = null;
 
         clear_placeable_durability_lookup();
 
@@ -328,8 +355,6 @@ public class UILogic : MonoBehaviour
         DisableMouse();
         set_main_menu_state(false);
         UILogic.localPlayerGameObject.GetComponent<NetworkPlayerAnimationLogic>().hookChestRotation = true;
-        UILogic.localPlayerGameObject.GetComponent<NetworkPlayerMovement>().lockMovement = false;
-        UILogic.localPlayerGameObject.GetComponent<player_camera_handler>().lockCamera = false;
         this.input_trebuchet_rotation.text = "0 degrees";
     }
 
@@ -366,6 +391,7 @@ public class UILogic : MonoBehaviour
             if (predmeti.Length == 10)
             {
                 this.active_container_panel = this.container_panel_10_slots;
+                this.active_container_panel.transform.GetChild(10).gameObject.SetActive(false);//upkeep panel
             }
             else if (predmeti.Length == 20)
             {
@@ -381,10 +407,14 @@ public class UILogic : MonoBehaviour
             }
             this.active_container_panel.SetActive(true);
 
-            for (int i = 0; i < this.active_container_panel.transform.childCount; i++)
+            for (int i = 0; i < this.active_container_panel.transform.childCount; i++)//bols kot to da se zanasamo da bo upkeep panel biu zadnji. mogoce se dodajo not se druge bedarije tekom razvoja
             {
-                this.panelsPredmetiContainer[i] = this.active_container_panel.transform.GetChild(i).gameObject;
+                if (this.active_container_panel.transform.GetChild(i).gameObject.GetComponent<InventorySlotContainer>() != null)
+                    this.panelsPredmetiContainer[i] = this.active_container_panel.transform.GetChild(i).gameObject;
             }
+            //upkeep panel
+                
+            
         }
 
         UpdateActiveChestPanel(predmeti);
@@ -401,7 +431,8 @@ public class UILogic : MonoBehaviour
             this.panelsPredmetiContainer = new GameObject[predmeti.Length];
             
             this.active_container_panel = this.container_panel_10_slots_with_upkeep;
-            
+            this.active_container_panel.transform.GetChild(10).gameObject.SetActive(true);//upkeep panel
+
             this.active_container_panel.SetActive(true);
 
             for (int i = 0; i < this.active_container_panel.transform.childCount; i++)//hacky
@@ -490,5 +521,60 @@ public class UILogic : MonoBehaviour
         if (this.placeable_for_durability_check == p) {
             clear_placeable_durability_lookup();
         }
+    }
+
+    internal void showDeathScreen()
+    {
+        enableMouse();
+        this.deathScreen.SetActive(true);
+    }
+
+    internal void closeDeathScreen() {
+        DisableMouse();
+        this.deathScreen.SetActive(false);
+        this.deathScreenBeds.SetActive(false);
+    }
+
+    public void OnRespawnWithoutBedButtonClicked() {
+        localPlayerGameObject.GetComponent<NetworkPlayerStats>().local_respawn_without_bed_request();
+    }
+
+    internal void local_open_playerBed_rename_panel(NetworkPlayerBed networkPlayerBed)
+    {
+        enableMouse();
+        UILogic.hasControlOfInput = true;
+        this.hasOpenWindow = true;
+        this.bed_currently_being_modified = networkPlayerBed;
+        this.playerBedRenamePanel.SetActive(true);
+        this.playerBedRenamePanel.GetComponentInChildren<InputField>().text = networkPlayerBed.name;
+    }
+
+    public void OnPlayerBedRenameButtonClicked() {
+        
+        if (this.bed_currently_being_modified != null) {
+            string new_name = this.playerBedRenamePanel.GetComponentInChildren<InputField>().text;
+            if(new_name.Length>0)
+                this.bed_currently_being_modified.local_player_playerBed_rename_request(new_name);
+        }
+        ClearAll();
+    }
+
+    internal void local_open_playerBed_gift_panel(NetworkPlayerBed networkPlayerBed)
+    {
+        //throw new NotImplementedException();
+        Debug.LogError("NOT IMPLEMENTED YET. NEED STEAM!");
+    }
+
+    internal void show_disconnect_info()
+    {
+        //pokaze info da je biu disconnectan. ima en gumb -> quit server  / reconnect mogoce tud?
+        this.disconnect_screen.SetActive(true);
+    }
+
+    /// <summary>
+    /// ta gumb se pokaze samo ko playerja disconnecta z serverja. mora ga vrzt nazaj v main menu.
+    /// </summary>
+    public void onDisconnectedWindow_exit_button_quit() {
+        SceneManager.LoadScene(0);
     }
 }

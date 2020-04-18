@@ -15,26 +15,9 @@ public class Networked_trap_bear : NetworkTrapBehavior
     #region Activation
     protected InteractableLocalLock local_lock;
 
-    private bool armed = true;
 
     [SerializeField]
-    public bool Armed
-    {
-        get
-        {
-            return armed;
-        }
-        set
-        {
-            armed = value;
-            OnArmedChanged();
-        }
-    }
-
-    void OnArmedChanged()
-    {
-        anim.SetBool("triggered", !armed);
-    }
+    public bool Armed;
 
     private Animator anim;
 
@@ -46,7 +29,7 @@ public class Networked_trap_bear : NetworkTrapBehavior
 
     void OnTriggerEnter(Collider other)
     {
-        if (this.armed) {//if trap is ready
+        if (this.Armed) {//if trap is ready
             if (networkObject.IsServer) {
                 Debug.Log("Server-side collision detected with trigger object " + other.name);
                 if (other.transform.root.name.Equals("NetworkPlayer(Clone)") && !other.transform.name.Equals("NetworkPlayer(Clone)")) {//ce je contact z playerjem in ne z njegovim movement colliderjem. what about animals??
@@ -72,7 +55,7 @@ public class Networked_trap_bear : NetworkTrapBehavior
 
     public override void setAnimationState(RpcArgs args)
     {
-        if (args.Info.SendingPlayer.NetworkId != 0) return;
+        if (!args.Info.SendingPlayer.IsHost) return;
 
         int new_state = args.GetNext<int>();
         if (new_state == 0)
@@ -83,6 +66,7 @@ public class Networked_trap_bear : NetworkTrapBehavior
             //arm
             Armed = true;
         }
+        anim.SetBool("triggered", !Armed);//je lih obratno
     }
 
     #region Startup
@@ -90,9 +74,6 @@ public class Networked_trap_bear : NetworkTrapBehavior
     protected override void NetworkStart()
     {
         base.NetworkStart();
-        if(!networkObject.IsServer)
-            networkObject.SendRpc(RPC_NETWORK_REFRESH_REQUEST, Receivers.Server);
-
     }
 
     /// <summary>
@@ -109,8 +90,9 @@ public class Networked_trap_bear : NetworkTrapBehavior
 
     public override void Refresh(RpcArgs args)
     {
-        if (args.Info.SendingPlayer.NetworkId != 0) return; //ni poslov player ampak nas edn hacka
+        if (!args.Info.SendingPlayer.IsHost) return; //ni poslov player ampak nas edn hacka
         this.Armed = args.GetNext<int>()==1;
+        anim.SetBool("triggered", !Armed);//je lih obratno
     }
 
     #endregion
@@ -140,7 +122,7 @@ public class Networked_trap_bear : NetworkTrapBehavior
     public override void Reload(RpcArgs args)
     {
         if (networkObject.IsServer) {
-                if (this.Armed == false) this.Armed = true;           
+            networkObject.SendRpc(RPC_SET_ANIMATION_STATE, Receivers.All,1);
         }
     }
 

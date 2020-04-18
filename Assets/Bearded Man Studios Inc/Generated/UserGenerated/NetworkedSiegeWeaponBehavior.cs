@@ -4,8 +4,8 @@ using UnityEngine;
 
 namespace BeardedManStudios.Forge.Networking.Generated
 {
-	[GeneratedRPC("{\"types\":[[][\"int\"][][\"float\"][\"Quaternion\"]]")]
-	[GeneratedRPCVariableNames("{\"types\":[[][\"fire_state\"][][\"y_rot\"][\"rot\"]]")]
+	[GeneratedRPC("{\"types\":[[][\"int\"][][\"float\"][\"Quaternion\"][]]")]
+	[GeneratedRPCVariableNames("{\"types\":[[][\"fire_state\"][][\"y_rot\"][\"rot\"][]]")]
 	public abstract partial class NetworkedSiegeWeaponBehavior : NetworkBehavior
 	{
 		public const byte RPC_ADVANCE_STATE_REQUEST = 0 + 5;
@@ -13,6 +13,7 @@ namespace BeardedManStudios.Forge.Networking.Generated
 		public const byte RPC_WEAPON_CHANGE_TRAJECTORY_REQUEST = 2 + 5;
 		public const byte RPC_SIEGE_WEAPON_ROTATE_HORIZONTALLY = 3 + 5;
 		public const byte RPC_SIEGE_WEAPON_ROTATION_UPDATE = 4 + 5;
+		public const byte RPC_PICKUP_REQUEST = 5 + 5;
 		
 		public NetworkedSiegeWeaponNetworkObject networkObject = null;
 
@@ -31,6 +32,7 @@ namespace BeardedManStudios.Forge.Networking.Generated
 			networkObject.RegisterRpc("weapon_change_trajectory_request", weapon_change_trajectory_request);
 			networkObject.RegisterRpc("siege_weapon_rotate_horizontally", siege_weapon_rotate_horizontally, typeof(float));
 			networkObject.RegisterRpc("siege_weapon_rotation_update", siege_weapon_rotation_update, typeof(Quaternion));
+			networkObject.RegisterRpc("pickup_request", pickup_request);
 
 			networkObject.onDestroy += DestroyGameObject;
 
@@ -127,6 +129,10 @@ namespace BeardedManStudios.Forge.Networking.Generated
 		/// Arguments:
 		/// </summary>
 		public abstract void siege_weapon_rotation_update(RpcArgs args);
+		/// <summary>
+		/// Arguments:
+		/// </summary>
+		public abstract void pickup_request(RpcArgs args);
 
 		// DO NOT TOUCH, THIS GETS GENERATED PLEASE EXTEND THIS CLASS IF YOU WISH TO HAVE CUSTOM CODE ADDITIONS
 	}

@@ -11,6 +11,8 @@ GameObject:
   - component: {fileID: 441888}
   - component: {fileID: 3346394}
   - component: {fileID: 2372870}
+  - component: {fileID: 6400916}
+  - component: {fileID: 9548600}
   m_Layer: 0
   m_Name: Furniture_5
   m_TagString: Untagged
@@ -25,13 +27,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 141112}
-  m_LocalRotation: {x: -0.70710546, y: -0.0013815447, z: -0.0013815447, w: 0.70710546}
-  m_LocalPosition: {x: 1.124e-12, y: 8e-15, z: 0.039}
-  m_LocalScale: {x: 3.32408, y: 4.3088, z: 4.506}
+  m_LocalRotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071068}
+  m_LocalPosition: {x: 16.690613, y: -0.98152417, z: 1.2915039}
+  m_LocalScale: {x: 7, y: 7, z: 7}
   m_Children: []
   m_Father: {fileID: 448506}
   m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: -90.00001, y: 0, z: -0.224}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!33 &3346394
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -54,6 +56,7 @@ MeshRenderer:
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -66,10 +69,11 @@ MeshRenderer:
   m_ProbeAnchor: {fileID: 0}
   m_LightProbeVolumeOverride: {fileID: 0}
   m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
   m_PreserveUVs: 0
   m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0
-  m_StitchLightmapSeams: 0
+  m_StitchLightmapSeams: 1
   m_SelectedEditorRenderState: 3
   m_MinimumChartSize: 4
   m_AutoUVMaxDistance: 0.5
@@ -78,6 +82,39 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+--- !u!64 &6400916
+MeshCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 141112}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Convex: 0
+  m_CookingOptions: 30
+  m_Mesh: {fileID: 4300000, guid: 930f78a4825463f41b7707a16f1cd137, type: 3}
+--- !u!95 &9548600
+Animator:
+  serializedVersion: 3
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 141112}
+  m_Enabled: 1
+  m_Avatar: {fileID: 9000000, guid: 930f78a4825463f41b7707a16f1cd137, type: 3}
+  m_Controller: {fileID: 0}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorControllerStateOnDisable: 0
 --- !u!1 &144314
 GameObject:
   m_ObjectHideFlags: 0
@@ -88,7 +125,6 @@ GameObject:
   m_Component:
   - component: {fileID: 448506}
   - component: {fileID: 20500870}
-  - component: {fileID: 3709360356359620067}
   m_Layer: 0
   m_Name: Chest 4 Prefab
   m_TagString: Untagged
@@ -104,7 +140,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 144314}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 201.16156, y: 1.2150366, z: 267.94708}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 441888}
@@ -119,8 +155,8 @@ LODGroup:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 144314}
   serializedVersion: 2
-  m_LocalReferencePoint: {x: 0, y: -0.0000000037252903, z: 0}
-  m_Size: 0.20371437
+  m_LocalReferencePoint: {x: 16.690613, y: -0.98152417, z: 1.2915039}
+  m_Size: 1.4260025
   m_FadeMode: 0
   m_AnimateCrossFading: 0
   m_LastLODIsBillboard: 0
@@ -129,17 +165,4 @@ LODGroup:
     fadeTransitionWidth: 0
     renderers:
     - renderer: {fileID: 2372870}
-  m_Enabled: 0
---- !u!65 &3709360356359620067
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 144314}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
   m_Enabled: 1
-  serializedVersion: 2
-  m_Size: {x: 0.6, y: 0.3, z: 0.4}
-  m_Center: {x: 0, y: 0, z: 0}

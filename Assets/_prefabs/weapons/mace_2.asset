@@ -1,0 +1,41 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5ba0d0d991d7fd84490deca31f6fb3d9, type: 3}
+  m_Name: mace_2
+  m_EditorClassIdentifier: 
+  Display_name: Steel Mace
+  type: 6
+  icon: {fileID: 21300000, guid: 0cf2f0e76dc7cb2408af7e2c1ea3f6a2, type: 3}
+  damage: 60
+  hasDurability: 1
+  Max_durability: 1000
+  stackSize: 1
+  capacity: 0
+  damage_reduction: 0
+  id: 36
+  prefab_pickup: {fileID: 1153930742003218, guid: 90d13dc56ec852040ad44a9ecad328cf,
+    type: 3}
+  weapon_animation_class: 2
+  UMARecipes: []
+  stone_gather_rate: 5
+  wood_gather_rate: 1
+  flesh_gather_rate: 1
+  description: High tier weapon. Deals 60 damage per hit.
+  placeable_Local_object: {fileID: 0}
+  networked_physical_instantiated_object: {fileID: 0}
+  ignorePlacementNormal: 0
+  PlacementType: 0
+  blocks_placements: 
+  needs_upkeep: 0
+  recepie: {fileID: 0}
+  needsToBeAttached: 0
+  respawn_time: 0

@@ -7030,6 +7030,7 @@ MonoBehaviour:
   defaultVolumeMusic: 1
   defaultVolumeEffects: 1
   defaultSen: 2
+  defaultShowDirectionalArrow: 1
   menuSoundEffect: {fileID: 82731731648620477}
   mainMenuMusic: {fileID: 629922156}
   level: MultiplayerMenu
@@ -7056,6 +7057,8 @@ MonoBehaviour:
   volumeTextEffects: {fileID: 1328638875}
   volumeSliderEffects: {fileID: 1972442758}
   directionalArrowToggle: {fileID: 789012010}
+  fullscreen: 0
+  defaultfullscreen: 1
 --- !u!114 &114759344440918653
 MonoBehaviour:
   m_ObjectHideFlags: 0

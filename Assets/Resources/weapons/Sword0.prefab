@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 4499943188486747254}
   - component: {fileID: 9114768778141697070}
   - component: {fileID: 6432118075398953504}
-  m_Layer: 9
+  m_Layer: 15
   m_Name: Sword0
   m_TagString: weapon_player
   m_Icon: {fileID: 0}
@@ -31,7 +31,8 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 0.2, y: 0.2, z: 0.2}
-  m_Children: []
+  m_Children:
+  - {fileID: 1649979644975305784}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -61,7 +62,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 0}
+  - {fileID: 2100000, guid: 290c47e7ccc4a664c9e39237c7d9d155, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -91,7 +92,7 @@ CapsuleCollider:
   m_GameObject: {fileID: 1190600162460664}
   m_Material: {fileID: 0}
   m_IsTrigger: 1
-  m_Enabled: 0
+  m_Enabled: 1
   m_Radius: 0.37694788
   m_Height: 4.6919713
   m_Direction: 2
@@ -122,3 +123,48 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   id: 37
+--- !u!1 &2333292063109623756
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1649979644975305784}
+  - component: {fileID: 7893454949691813958}
+  m_Layer: 9
+  m_Name: block_collider
+  m_TagString: block_player
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1649979644975305784
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2333292063109623756}
+  m_LocalRotation: {x: -0.00000008940688, y: -0.707107, z: 0.000000029802294, w: 0.70710665}
+  m_LocalPosition: {x: 0, y: 0, z: -0.3350006}
+  m_LocalScale: {x: 5, y: 5, z: 5}
+  m_Children: []
+  m_Father: {fileID: 4432210258381414}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!136 &7893454949691813958
+CapsuleCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2333292063109623756}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 1
+  m_Enabled: 0
+  m_Radius: 0.3
+  m_Height: 1.75
+  m_Direction: 0
+  m_Center: {x: 0.34741825, y: -0.0028483483, z: -0.0029364964}

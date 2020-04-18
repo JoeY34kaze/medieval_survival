@@ -38,7 +38,7 @@ public class gathering_tool_collider_handler : MonoBehaviour
             {
                 // Debug.Log("Hit another player in the " + other.name + " | " + other.tag);
 
-                other.transform.root.gameObject.GetComponent<NetworkPlayerStats>().take_weapon_damage_server_authority(this.item, other.tag, other.transform.root.gameObject.GetComponent<NetworkPlayerStats>().Get_server_id(), transform.root.gameObject.GetComponent<NetworkPlayerStats>().Get_server_id());
+                other.transform.root.gameObject.GetComponent<NetworkPlayerStats>().take_weapon_damage_server_authority(this.item, other.tag, transform.root.gameObject.GetComponent<NetworkPlayerStats>().Get_server_id());
                 GetComponent<Collider>().enabled = false;
             }
         }

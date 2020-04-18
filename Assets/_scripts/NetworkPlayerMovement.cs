@@ -33,8 +33,6 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
     [Header("--- Locomotion Setup ---")]
     private bool isDodging;
     private Vector3 dodgeVector;
-    [Tooltip("lock the player movement")]
-    public bool lockMovement;
     [Header("--- Movement Speed ---")]
     [Tooltip("Add extra speed for the locomotion movement, keep this value at 0 if you want to use only root motion speed.")]
     public float walk_speed = 2.5f;
@@ -107,7 +105,7 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
     {
         if (networkObject.IsOwner)
         {
-            InputHandle();                      // update input methods
+            if(!UILogic.hasControlOfInput)InputHandle();                      // update input methods
                                               
         }
     }
@@ -116,8 +114,8 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
     {
         if (networkObject.IsOwner)
         {
-            AirControl();
-            Rotate_character_horizontally();
+            if (!UILogic.hasControlOfInput) Rotate_character_horizontally();
+            
         }
     }
 
@@ -130,8 +128,10 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
     {
         if (networkObject.IsOwner)
         {
-            UpdateMotor();                   // call ThirdPersonMotor methods               
-            UpdateAnimator();                // call ThirdPersonAnimator methods	
+            if(!stats.dead && !UILogic.hasControlOfInput ){ 
+                UpdateMotor();                   // call ThirdPersonMotor methods               
+                UpdateAnimator();                // call ThirdPersonAnimator methods	
+            }
             networkObject.position = transform.position;
             networkObject.rotation = transform.rotation;
         }
@@ -154,7 +154,7 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
 
     protected virtual void InputHandle()
     {
-        if (!lockMovement && !stats.downed)//ce je downed je treba clearat movement sicer se se vedno vozi naprej
+        if (!stats.downed && !stats.dead)//ce je downed je treba clearat movement sicer se se vedno vozi naprej
         {
             SetAxisInput();
             SetSprintInput();
@@ -174,9 +174,7 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
        // na tem mestu so VSE spremenjivke nastavljene za smer / hitrost / stanje playerja
        
         CheckGround();
-        
-        ControlJumpBehaviour();
-        ControlMovement();
+        if(!stats.downed)ControlMovement();
         ControlGravity();
     }
 
@@ -226,7 +224,7 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
     }
     private void SetDodgeInput()
     {
-        if (Input.GetButtonDown("Dodge") && isGrounded && !isDodging && !lockMovement)
+        if (Input.GetButtonDown("Dodge") && isGrounded && !isDodging)
         {
             handle_dodge_start();
         }
@@ -261,19 +259,6 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
 
     #endregion
 
-    #region Jump Methods
-
-    protected void ControlJumpBehaviour()
-    {
-
-    }
-
-    public void AirControl()
-    {
-
-    }
-
-    #endregion
 
     #region Locomotion 
 

@@ -434,6 +434,7 @@ public class MenuControllerInGame : MonoBehaviour
     public void DisconnectButtonClicked() {
         Debug.Log("Disconnect Button Clicked. we will set disconnection method in NetworkPlayerStats because this script is not network aware.");
         UILogic.localPlayerGameObject.GetComponent<NetworkPlayerStats>().localDisconnectRequest();
+        Application.Quit();
     }
     #endregion
 }

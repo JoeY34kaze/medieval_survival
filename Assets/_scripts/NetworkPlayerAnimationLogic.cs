@@ -48,7 +48,7 @@ public class NetworkPlayerAnimationLogic : NetworkPlayerAnimationBehavior
     private float[] getVerticalAndHorizontalRounded() {
         float[] result = new float[2];
 
-        if (movement.lockMovement) {
+        if (UILogic.hasControlOfInput) {
             result[0] = 0;
             result[1] = 0;
             return result;
@@ -323,18 +323,18 @@ public class NetworkPlayerAnimationLogic : NetworkPlayerAnimationBehavior
             anim.SetInteger("weapon_animation_class", p.item.weapon_animation_class);
     }
 
-    internal void setCombatBlocking(bool v, byte dir)
+    internal void setCombatBlocking(bool blocking, byte dir)
     {
-        if (v)
+
+        setFeign();//najprej vrzemo v nevtralno stanje nato handlamo pripravo za block/kenslanje blocka
+
+        if (blocking)
         {
             anim.SetBool("combat_blocking", true);
             anim.SetFloat("attack_direction", (float)dir);
-            anim.ResetTrigger("ready_attack");
-            anim.ResetTrigger("release_attack");
         }
         else{
             anim.SetBool("combat_blocking", false);
-            setFeign();
         }
     }
 
@@ -353,14 +353,6 @@ public class NetworkPlayerAnimationLogic : NetworkPlayerAnimationBehavior
         
     }
 
-    internal void setFire1(byte dir)
-    {
-        combat_handler.in_attack_animation = true;
-        combat_handler.is_readying_attack = true;
-        anim.SetFloat("attack_direction", (float)dir);
-        anim.SetTrigger("ready_attack");
-        anim.ResetTrigger("feign");
-    }
 
     #endregion
 
@@ -375,6 +367,10 @@ public class NetworkPlayerAnimationLogic : NetworkPlayerAnimationBehavior
 
     public void on_weapon_or_tool_collision() {
         //sprozi se z weapona ali toola ko zadane nek objekt.
+        //sprozi se tudi na lokalnemu playerju ko zadane drugega playerja. v isti metodi kjer se izrise povratna informacija o damageu
+
+        Debug.Log("on client we are setting IK target: " + anim.GetIKPosition(AvatarIKGoal.RightHand));
+
 
         this.IK_swing_active = true;
         this.IK_swing_target = anim.GetIKPosition(AvatarIKGoal.RightHand);
@@ -397,8 +393,20 @@ public class NetworkPlayerAnimationLogic : NetworkPlayerAnimationBehavior
         }
     }
 
-    internal void setReleaseOfAttack()
+
+
+    internal void handle_readying_of_attack(byte dir)
     {
+        anim.SetFloat("attack_direction", (float)dir);
+        anim.SetTrigger("ready_attack");
+        anim.ResetTrigger("feign");
+        anim.ResetTrigger("release_attack");
+    }
+
+    internal void handle_execution_of_attack()
+    {
+        anim.ResetTrigger("ready_attack");
+        anim.ResetTrigger("feign");
         anim.SetTrigger("release_attack");
     }
 }

@@ -25,11 +25,11 @@ MonoBehaviour:
   prefab_pickup: {fileID: 4344458020859959958, guid: 4d857fb3f3804e540b9c4ac4ce5da7b1,
     type: 3}
   weapon_animation_class: 0
-  uma_item_recipe_name: 
+  UMARecipes: []
   stone_gather_rate: 0
   wood_gather_rate: 0
   flesh_gather_rate: 0
-  description: no description yet.
+  description: Wooden chest for storing items.
   placeable_Local_object: {fileID: 132834, guid: bbf727fd541b7b84097fc3ad3f8e0a5c,
     type: 3}
   networked_physical_instantiated_object: {fileID: 132834, guid: c005470ae31f1f146bdda4536f3e9be5,
@@ -39,3 +39,5 @@ MonoBehaviour:
   blocks_placements: 
   needs_upkeep: 0
   recepie: {fileID: 0}
+  needsToBeAttached: 0
+  respawn_time: 0

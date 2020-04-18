@@ -1,0 +1,41 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5ba0d0d991d7fd84490deca31f6fb3d9, type: 3}
+  m_Name: mace_0
+  m_EditorClassIdentifier: 
+  Display_name: Shabby Mace
+  type: 6
+  icon: {fileID: 21300000, guid: 4447d27b2f4e4e142a6bcbe44bdca625, type: 3}
+  damage: 25
+  hasDurability: 1
+  Max_durability: 1000
+  stackSize: 1
+  capacity: 0
+  damage_reduction: 0
+  id: 34
+  prefab_pickup: {fileID: 1206042230447930, guid: 2cc73f9fe09ae6642bf2ef85f51e2fc5,
+    type: 3}
+  weapon_animation_class: 2
+  UMARecipes: []
+  stone_gather_rate: 3
+  wood_gather_rate: 1
+  flesh_gather_rate: 1
+  description: Low tier weapon. Deals 25 damage per hit.
+  placeable_Local_object: {fileID: 0}
+  networked_physical_instantiated_object: {fileID: 0}
+  ignorePlacementNormal: 0
+  PlacementType: 0
+  blocks_placements: 
+  needs_upkeep: 0
+  recepie: {fileID: 0}
+  needsToBeAttached: 0
+  respawn_time: 0

@@ -31,19 +31,16 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
 
 
 
+    public float death_timer = 10f;
+
     internal float fire1_cooldown = 0.6f;
 
     private NetworkPlayerInventory npi;
 
-    public GameObject[] sound_effects_on_player;
-
     private uint[] team; //array networkId-jev team memberjev. server vedno hrani to vrednost za vse playerje. drugi dobijo samo update od serverja
-
 
     private List<uint> already_processed_inviters;
     private bool team_invite_pending = false;
-
-    public Transform soul;
 
     public string name_guild="no guild yet";
 
@@ -65,10 +62,27 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
 
     private NetworkPlayerCombatHandler combatStateHandler;
 
-    public GameObject[] metal_block_sound_effects;
-    public GameObject[] wooden_block_sound_effects;
+    public GameObject[] sfx_block_with_weapon;
+    public GameObject[] sfx_block_with_shield;
+    public GameObject[] sfx_player_hit_with_sword;
+    public GameObject[] sfx_player_death_by_weapon;
+    public GameObject[] sfx_draw_sword;
 
 
+    private float usual_character_controller_height;
+    private Vector3 usual_character_controller_center;
+
+    private IEnumerator death_timer_coroutine;
+
+
+    private float ping_timer_helper=0f;
+    private bool ping_subscribed = false;
+
+    [Range(0,5000)]
+    [SerializeField] public int simulated_ms_delay;
+    [Range(0, 1)]
+    [SerializeField] public float simulated_packet_loss;
+    [SerializeField] public bool update_network_throttling;
     private void Start()
     {
         
@@ -94,13 +108,28 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
             transform.Find("canvas_player_overhead").gameObject.SetActive(false);
             FloatingTextController.Initialize();
             reticle_hit_controller.Initialize();
-            if (networkObject.IsServer) {
+
+            // NetworkManager.Instance.Networker.onPingPong += PingEvent;
+
+            NetworkManager.Instance.Networker.onPingPong += (ping, sender) =>
+            {
+                MainThreadManager.Run(() =>
+                {
+                    //Debug.Log($"Sender:{sender} Ping: {ping}");
+                    UILogic.Instance.setLatencyText(ping);
+                });
+            };
+
+
+            if (networkObject.IsServer)
+            {
                 NetworkManager.Instance.Networker.playerAccepted += PlayerAccepted;
                 NetworkManager.Instance.Networker.playerDisconnected += OnPlayerDisconnected;
             }
+            else {
+                NetworkManager.Instance.Networker.disconnected += OnLocalClientDisconnected;
+            }
         }
-       
-
         StartCoroutine(RequestUpdateFromEveryoneDelayed(2));//pozene coroutine, ki vsem network objektom, kateri imajo karkoli da se rab rocno sinhronizirat na clientih, ki so se ravnokar povezal, poslje rpc s katerim signalizira, da nj mu poslejo nazaj podatke s katerimi bo nastavu trenutno stanje objekta.
         if (networkObject.IsServer && networkObject.IsOwner) {
             StartCoroutine(serverPlayerInitDelayer(1));
@@ -108,7 +137,10 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
 
     }
 
-
+    internal void handle_collision_with_siege_projectile()
+    {
+        handle_death_player();
+    }
 
     public IEnumerator serverPlayerInitDelayer(float t) {
         yield return new WaitForSeconds(t);
@@ -118,6 +150,12 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
 
     public void Update()
     {
+        if (this.update_network_throttling)
+        {
+            this.update_network_throttling = false;
+            NetworkManager.Instance.Networker.LatencySimulation = this.simulated_ms_delay;
+            NetworkManager.Instance.Networker.PacketLossSimulation = this.simulated_packet_loss;
+        }
 
         if (test) {
             test = false;
@@ -131,16 +169,23 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
         }
 
 
+        #region sending ping
+        if (networkObject.IsOwner){
+            this.ping_timer_helper += Time.deltaTime;
+            if (this.ping_timer_helper > 1f)
+            {
+                this.ping_timer_helper = 0;
+                NetworkManager.Instance.Networker.Ping();
+                //Debug.Log("sent ping");
+            }
+        }
+        #endregion
+
         if (networkObject.IsServer && Input.GetKeyDown(KeyCode.X))
         {
             // Debug.Log("Spawning uma");
             spawn_UMA_body(transform.position, get_UMA_to_string(), 0);
 
-        }
-
-        if (Input.GetButtonDown("Interact") && this.dead && networkObject.IsOwner)
-        {
-            networkObject.SendRpc(RPC_RESPAWN_REQUEST, Receivers.Server);
         }
 
         if (Input.GetButtonDown("Interact") && networkObject.IsOwner)
@@ -168,7 +213,7 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
         }
     }
 
-    private void play_random_sound_effect(GameObject[] sound_fx)
+    internal void play_random_sound_effect(GameObject[] sound_fx)
     {
         if (sound_fx.Length > 0) {
             int k = (int)UnityEngine.Random.Range(0, sound_fx.Length);
@@ -179,8 +224,6 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
     public void OnSubmitModifiedGuildDataClick() {
         GameObject.FindGameObjectWithTag("GuildManager").GetComponent<NetworkGuildManager>().OnModifyGuildConfirmClick();
     }
-
-
 
 
     /*
@@ -226,7 +269,14 @@ napadenmu playerju da si poupdejta health. ta player pol ko si je updejtov healt
 
 
 
-    public void take_weapon_damage_server_authority(Item weapon,string tag_passive ,uint passive_player_server_network_id, uint agressor_server_network_id)
+    /// <summary>
+    /// this je passive player
+    /// </summary>
+    /// <param name="weapon"></param>
+    /// <param name="tag_passive"></param>
+    /// <param name="passive_player_server_network_id"></param>
+    /// <param name="agressor_server_network_id"></param>
+    public void take_weapon_damage_server_authority(Item weapon,string tag_passive, uint agressor_server_network_id)
     {
         
         //tag je za tag colliderja. coll_0 = headshot, coll_1 = body/torso, coll2=arms/legs
@@ -304,7 +354,7 @@ napadenmu playerju da si poupdejta health. ta player pol ko si je updejtov healt
                 int count = 0;//v koliziji sta udelezena dva igralca, poiskat moramo oba. tukej je lahko problem ce klicemo to metodo pri koliziji z ne-igralcem, za agresorja bo slo vedno cez vse igralce.
                 NetworkManager.Instance.Networker.IteratePlayers((player) =>
                 {
-                    if (player.NetworkId == passive_player_server_network_id) //passive target
+                    if (player.NetworkId == networkObject.Owner.NetworkId) //passive target
                     {
                         //Debug.Log("Victim found! "+ passive_player_server_network_id);
                         networkObject.SendRpc(RPC_SET_HEALTH,Receivers.All, new_hp, tag_passive);
@@ -312,7 +362,9 @@ napadenmu playerju da si poupdejta health. ta player pol ko si je updejtov healt
 
                         if (prev_hp == 0 && final_damage_taken > 0) {
                             //death
-                            handle_death_player(passive_player_server_network_id);
+                            //poseben sound effect za tak tip smrti?
+                            play_random_sound_effect(this.sfx_player_death_by_weapon);
+                            handle_death_player();
                         }
                     }
 
@@ -406,7 +458,7 @@ napadenmu playerju da si poupdejta health. ta player pol ko si je updejtov healt
                         if (prev_hp == 0 && final_damage_taken > 0)
                         {
                             //death
-                            handle_death_player(networkObject.Owner.NetworkId);
+                            handle_death_player();
                         }
                     }
                 });
@@ -437,8 +489,13 @@ napadenmu playerju da si poupdejta health. ta player pol ko si je updejtov healt
         return networkObject.Owner.NetworkId;
     }
 
+    internal bool am_i_local_client()
+    {
+        return networkObject.IsOwner && !networkObject.IsServer;
+    }
 
-    private void handle_death_player(uint player_id)//samo na serverju
+
+    private void handle_death_player()//samo na serverju
     {
         if (!networkObject.IsServer) return;
 
@@ -446,21 +503,24 @@ napadenmu playerju da si poupdejta health. ta player pol ko si je updejtov healt
         if(GetComponent<NetworkPlayerInventory>().backpackSpot.GetComponentInChildren<NetworkBackpack>()!=null)
             GetComponent<NetworkPlayerInventory>().backpackSpot.GetComponentInChildren<NetworkBackpack>().local_server_BackpackUnequip();
 
-        spawn_UMA_body(transform.position, get_UMA_to_string(), player_id);//poslje rpc da nrdi uma body in disabla renderer za playerja v enem
+        spawn_UMA_body(transform.position, get_UMA_to_string(), networkObject.Owner.NetworkId);//poslje rpc da nrdi uma body in disabla renderer za playerja v enem
                                                                            // server mora vsem sporocit da nj nehajo renderat playerja k je lihkar umru ker ga je vizualno zamenjov ragdoll
         networkObject.SendRpc(RPC_ON_PLAYER_DEATH, Receivers.All);
     }
 
-    private void handle_respawn_player() {
-        if (!networkObject.IsServer) return;
-        if(check_for_validity_of_respawn_request())
-            networkObject.SendRpc(RPC_RESPAWN_SIGNAL, Receivers.All, transform.position);
-
+    internal bool server_side_respawn_request(RpcArgs args, Vector3 bed_position)
+    {
+        if (!networkObject.IsServer) return false;
+        if (networkObject.Owner.NetworkId != args.Info.SendingPlayer.NetworkId) return false;
+        if (check_for_validity_of_respawn_request())//delno se preveri ze v NetworkPlayerBed
+            networkObject.SendRpc(RPC_RESPAWN_SIGNAL, Receivers.All, bed_position+Vector3.up);
+        else return false;
+        return true;
     }
 
     private bool check_for_validity_of_respawn_request()
     {
-        //tle bo kao za prevert ce se player sme respawnat al je slucajn kej pohackov da se prej respawna, recimo da pohacka timer al pa kej.
+        //tle bo kao za prevert ce se player sme respawnat al je slucajn kej pohackov. timer nj bi se chekirov v NetworkPlayerBed.cs
         if (!this.dead)
             return false;
 
@@ -516,13 +576,42 @@ napadenmu playerju da si poupdejta health. ta player pol ko si je updejtov healt
         GetComponent<NetworkPlayerAnimationLogic>().handle_downed_start();
         if(GetComponent<NetworkPlayerInventory>().backpackSpot.GetComponentInChildren<NetworkBackpack>())
             GetComponent<NetworkPlayerInventory>().backpackSpot.GetComponentInChildren<NetworkBackpack>().local_server_BackpackUnequip();
+
+        //da ne lebdi v zraku rabmo popravt collider
+        CharacterController cc = GetComponent<CharacterController>();
+        this.usual_character_controller_height = cc.height;
+        this.usual_character_controller_center = cc.center;
+        cc.height = 0;
+        cc.center = new Vector3(this.usual_character_controller_center.x, this.usual_character_controller_center.y * 1.2f, this.usual_character_controller_center.z);
+
+        if (networkObject.IsServer)
+        {
+            if (this.death_timer_coroutine != null) Debug.LogError("Death Coroutine is busy!! this shouldnt be happening");
+            this.death_timer_coroutine = downed_timer(this.death_timer);
+            StartCoroutine(this.death_timer_coroutine);
+        }
+    }
+
+    private IEnumerator downed_timer(float t) {
+        yield return new WaitForSecondsRealtime(t);
+        if (downed)
+        {
+            Debug.Log("Player"+networkObject.Owner.NetworkId+" has been on the ground for " + t + " seconds. He will die now.");
+            handle_death_player();
+        }
     }
 
     public void handle_player_pickup() {
         this.downed = false;
         GetComponent<NetworkPlayerAnimationLogic>().handle_player_revived();// z tlele k smo smo dobil lahko samo pobiranje igralca. execution bomo klical z drugje in takrat damo na false
-        GetComponent<Rigidbody>().useGravity = false;
-        GetComponent<CapsuleCollider>().height = this.original_capsule_collider_height;
+        CharacterController cc = GetComponent<CharacterController>();
+        cc.height = this.usual_character_controller_height;
+        cc.center = this.usual_character_controller_center;
+        if (networkObject.IsServer && this.death_timer_coroutine != null)
+        {
+            StopCoroutine(this.death_timer_coroutine);
+            this.death_timer_coroutine = null;
+        }
     }
 
 
@@ -552,7 +641,8 @@ napadenmu playerju da si poupdejta health. ta player pol ko si je updejtov healt
 
 
         string tag = args.GetNext<string>();
-        if (!tag.Equals("block_player") && !tag.Equals("revive")) GameObject.Instantiate(this.sound_effects_on_player[0], transform.position, transform.rotation);//tag ni od objekta al pa kej. je samo kot parameter da se ve, da smo pobral cloveka
+        if (!tag.Equals("block_player") && !tag.Equals("revive"))
+            play_random_sound_effect(this.sfx_player_hit_with_sword);
         this.healthBar.fillAmount = this.health / (this.max_health);
         UILogic.TeamPanel.refreshHp(networkObject.NetworkId, this.healthBar.fillAmount);
         if(networkObject.IsOwner)Exploration_and_Battle.Instance.onHostileAction();
@@ -563,7 +653,6 @@ napadenmu playerju da si poupdejta health. ta player pol ko si je updejtov healt
     public override void ReceiveNotificationForDamageDealt(RpcArgs args)//tole funkcijo dobi owner agresor objekta in izrise na ekran da je naredu damage, rpc poslje server v metodi take_damage_server_authority
     {
 
-       // if (!networkObject.IsOwner) Debug.Log("I dont know why this prints out. The server is the owner of one of the objects. what the hell?");
 
         float dmg = args.GetNext<float>();
         string tag = args.GetNext<string>();
@@ -571,24 +660,38 @@ napadenmu playerju da si poupdejta health. ta player pol ko si je updejtov healt
         FloatingTextController.CreateFloatingText(dmg+"", Camera.main.ScreenToWorldPoint(new Vector3(Screen.width / 2, Screen.height / 2, Camera.main.nearClipPlane)),tag);
         reticle_hit_controller.CreateReticleHit(tag); //cod2 reticle hit style like
         Exploration_and_Battle.Instance.onHostileAction();
+
+        GetComponent<NetworkPlayerAnimationLogic>().on_weapon_or_tool_collision();//tole ne dela in nevem zakaj ne...
     }
 
-    public override void respawnRequest(RpcArgs args)//poslje client serverju
-    {
-        if (!networkObject.IsServer) return;
-        handle_respawn_player();
-    }
 
     public override void respawnSignal(RpcArgs args)//poslje server vsem, tud sebi
     {
+        if (!args.Info.SendingPlayer.IsHost) {
+            Debug.LogError("Player, that is not host tried sending respawn signal!!");
+            return;
+        }
         //nastav spremenljivke povsod
+
+        if (this.usual_character_controller_height == 0) {
+            //nastav na neke base vrednosti..
+            this.usual_character_controller_height = 1.7f;//vzeto iz prefaba
+            this.usual_character_controller_center = new Vector3(0.0038f, 0.84f, -0.065f);//vzeto iz prefaba
+        }
+
+        CharacterController cc = GetComponent<CharacterController>();
+        cc.height = this.usual_character_controller_height;
+        cc.center = this.usual_character_controller_center;
+
         this.downed = false;
         this.dead = false;
 
+        transform.position = args.GetNext<Vector3>();
         local_setDrawingPlayer(true);
+        if(networkObject.IsOwner)UILogic.Instance.closeDeathScreen();
 
         if (networkObject.IsServer)//server nastima vsem health
-            set_player_health(max_health/2, Get_server_id());
+            set_player_health(max_health, Get_server_id());
 
     }
 
@@ -598,7 +701,7 @@ napadenmu playerju da si poupdejta health. ta player pol ko si je updejtov healt
     /// <param name="args"></param>
     public override void OnPlayerDeath(RpcArgs args)//vsi dobijo
     {
-        if (args.Info.SendingPlayer.NetworkId == 0)
+        if (args.Info.SendingPlayer.IsHost)
         {
             local_setDrawingPlayer(false);//v drugi metodi zato ker se klice se z vsaj ene druge metode
 
@@ -610,14 +713,18 @@ napadenmu playerju da si poupdejta health. ta player pol ko si je updejtov healt
             Debug.Log("player died! - downed: " + this.downed + " dead: " + this.dead);
             GetComponent<NetworkPlayerCombatHandler>().handle_player_death();//disabla shield pa weapon
             GetComponent<NetworkPlayerAnimationLogic>().handle_player_death();
+            if(networkObject.IsOwner)UILogic.Instance.showDeathScreen();
+
+            if (networkObject.IsServer && this.death_timer_coroutine!=null)
+            {
+                StopCoroutine(this.death_timer_coroutine);
+                this.death_timer_coroutine = null;
+            }
         }
     }
 
     private void local_setDrawingPlayer(bool b) {
         transform.Find("UMARenderer").gameObject.SetActive(b);
-        //izris prica al karkoli bo ze letel po zraku do tvojga otroka da ga possessa(!b)
-        this.soul.gameObject.SetActive(!b);
-        GetComponent<Collider>().enabled = b;
     }
 
     /// <summary>
@@ -1104,8 +1211,12 @@ napadenmu playerju da si poupdejta health. ta player pol ko si je updejtov healt
                 //shrani v PlayerManagerja
                 PlayerManager.Instance.SavePlayerState(s.GetPlayerState());
 
-                //ubije ta networkObjekt
-                s.kill();
+
+
+                    pre_disconnect_cleanup();
+
+                    //ubije ta networkObjekt
+                    s.kill();
 
             }
                 else
@@ -1122,16 +1233,27 @@ napadenmu playerju da si poupdejta health. ta player pol ko si je updejtov healt
         yield return null;
     }
 
+    private void pre_disconnect_cleanup()
+    {
+        if (networkObject.IsServer && this.death_timer_coroutine != null)//just in case
+        {
+            StopCoroutine(this.death_timer_coroutine);
+            this.death_timer_coroutine = null;
+        }
 
-            
+
+    }
 
 
 
-/// <summary>
-/// metoda poisce podatke o tem playerju, ki se je ravnokar sconnectal na server. updejta objekt z temi podatki na serverju, server poskrbi za sinhronizacijo po omrezju
-/// </summary>
-/// <param name="name"></param>
-private void ServerSendOnAcceptedData() {
+
+
+
+    /// <summary>
+    /// metoda poisce podatke o tem playerju, ki se je ravnokar sconnectal na server. updejta objekt z temi podatki na serverju, server poskrbi za sinhronizacijo po omrezju
+    /// </summary>
+    /// <param name="name"></param>
+    private void ServerSendOnAcceptedData() {
         PlayerManager.PlayerState saved_playerState = PlayerManager.Instance.PopPlayerState(Get_server_id());//hacky. PlayerManager bo treba dat na singleton..
 
 
@@ -1315,6 +1437,14 @@ private void ServerSendOnAcceptedData() {
             Debug.Log("SERVER : player was Disconnected : " + player.NetworkId + "adding to queue for disconnection handling");
         }
     }
+
+
+    private void OnLocalClientDisconnected(NetWorker sender)
+    {
+        Debug.LogError("LOCAL CLIENT HAS BEEN DISCONENCTED!!");
+
+        MainThreadManager.Run(() => { UILogic.Instance.show_disconnect_info(); }) ;
+    }
     public void kill() {
         if (networkObject.IsServer) {
             networkObject.Destroy();
@@ -1371,7 +1501,7 @@ private void ServerSendOnAcceptedData() {
     }
     private IEnumerator ExecutionDelayed(float t) {
         yield return new WaitForSeconds(t);
-        handle_death_player(Get_server_id());
+        handle_death_player();
     }
 
     public override void OnBlocked(RpcArgs args)
@@ -1381,12 +1511,24 @@ private void ServerSendOnAcceptedData() {
             if (GetComponent<Animator>().GetBool("shield_equipped"))    
             {
                 //blocked with shield. i guess neki wooden sound effects
-                play_random_sound_effect(this.metal_block_sound_effects);
+                play_random_sound_effect(this.sfx_block_with_weapon);
             }
             else {
                 //
-                play_random_sound_effect(this.wooden_block_sound_effects);
+                play_random_sound_effect(this.sfx_block_with_shield);
             }
         }
     }
+
+    public void local_respawn_without_bed_request() {
+        if (networkObject.IsOwner)
+            networkObject.SendRpc(RPC_RESPAWN_WITHOUT_BED_REQUEST, Receivers.Server);
+
+    }
+    public override void RespawnWithoutBedRequest(RpcArgs args)
+    {
+        if (args.Info.SendingPlayer.NetworkId == networkObject.Owner.NetworkId && networkObject.IsServer)
+            networkObject.SendRpc(RPC_RESPAWN_SIGNAL, Receivers.All, new Vector3(315, 38, 564));
+    }
+
 }
