@@ -12,7 +12,6 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
     public float radius = 4f; // ce je distance od camere manjsi kot to lahko interactamo
     private NetworkPlayerInventory networkPlayerInventory;
 
-    private NetWorker myNetWorker;
     private bool interacting = false;
 
     public GameObject canvas;
@@ -39,7 +38,7 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
     {
         base.NetworkStart();
         // TODO:  Your initialization code that relies on network setup for this object goes here
-        myNetWorker = GameObject.Find("NetworkManager(Clone)").GetComponent<NetworkManager>().Networker;
+
         if (!networkObject.IsOwner)
             Destroy(canvas);
     }
@@ -482,10 +481,10 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
             {
                 byte b = args.GetNext<byte>();
                 Vector3 p = args.GetNext<Vector3>();
-                lock (myNetWorker.Players)
+                lock (NetworkManager.Instance.Networker.Players)
                 {
 
-                    myNetWorker.IteratePlayers((player) =>
+                    NetworkManager.Instance.Networker.IteratePlayers((player) =>
                     {
                         if (contains(team, player.NetworkId)) //passive target
                         {

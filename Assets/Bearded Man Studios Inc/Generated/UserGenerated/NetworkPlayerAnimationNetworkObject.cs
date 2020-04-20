@@ -15,6 +15,7 @@ namespace BeardedManStudios.Forge.Networking.Generated
 		#pragma warning disable 0067
 		public event FieldChangedEvent fieldAltered;
 		#pragma warning restore 0067
+		[ForgeGeneratedField]
 		private Quaternion _chestRotation;
 		public event FieldEvent<Quaternion> chestRotationChanged;
 		public InterpolateQuaternion chestRotationInterpolation = new InterpolateQuaternion() { LerpT = 0f, Enabled = false };

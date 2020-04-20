@@ -15,6 +15,7 @@ namespace BeardedManStudios.Forge.Networking.Generated
 		#pragma warning disable 0067
 		public event FieldChangedEvent fieldAltered;
 		#pragma warning restore 0067
+		[ForgeGeneratedField]
 		private Vector3 _position;
 		public event FieldEvent<Vector3> positionChanged;
 		public InterpolateVector3 positionInterpolation = new InterpolateVector3() { LerpT = 0.25f, Enabled = true };
@@ -45,6 +46,7 @@ namespace BeardedManStudios.Forge.Networking.Generated
 			if (positionChanged != null) positionChanged(_position, timestep);
 			if (fieldAltered != null) fieldAltered("position", _position, timestep);
 		}
+		[ForgeGeneratedField]
 		private Quaternion _rotation;
 		public event FieldEvent<Quaternion> rotationChanged;
 		public InterpolateQuaternion rotationInterpolation = new InterpolateQuaternion() { LerpT = 0.15f, Enabled = true };

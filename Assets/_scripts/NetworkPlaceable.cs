@@ -28,17 +28,16 @@ public class NetworkPlaceable : NetworkPlaceableBehavior
     [SerializeField]
     internal NetworkGuildFlag upkeep_flag;
 
-    private NetWorker myNetWorker;
-
     private gibs_handler gibs;
 
     public static float repair_rate=0.1f;
     public static readonly float max_distance_for_durability_check = 5f;
 
+    private bool sent_update_on_start = false;
+
     private void Start()
     {
         this.gibs = GetComponentInChildren<gibs_handler>(true);
-         
     }
 
 
@@ -49,7 +48,17 @@ public class NetworkPlaceable : NetworkPlaceableBehavior
         if (networkObject.IsServer)
         {
             networkObject.TakeOwnership();//server prevzame ownership
+            if (this.p != null)
+            {
+                networkObject.SendRpc(RPC_SERVER_UPDATE_PREDMET, Receivers.Others, this.p.toNetworkString());
+                sent_update_on_start = true;
+            }
         }
+        else {
+            networkObject.SendRpc(RPC_CLIENT_REQUEST_PREDMET_UPDATE, Receivers.Server);
+        }
+        
+
     }
 
     public void init(Predmet p, uint player_who_placed_this)
@@ -65,8 +74,15 @@ public class NetworkPlaceable : NetworkPlaceableBehavior
 
         if (networkObject.IsServer)
         {
-            myNetWorker = GameObject.Find("NetworkManager(Clone)").GetComponent<NetworkManager>().Networker;
             attach_land_claim_object();
+        }
+    }
+
+    private void Update()
+    {
+        if (!sent_update_on_start && networkObject.IsServer && this.p != null) {
+            networkObject.SendRpc(RPC_SERVER_UPDATE_PREDMET, Receivers.Others, this.p.toNetworkString());
+            sent_update_on_start = true;
         }
     }
 
@@ -396,10 +412,19 @@ public class NetworkPlaceable : NetworkPlaceableBehavior
 
     internal bool is_placement_possible_for(Item current_placeable_item)
     {
-        //gremo cez vse attachment pointe in ce najdemo en point ki je ze zaseden med blockerjim vrzemo false sicer true.
+        //gremo cez vse attachment pointe NA KATERE SE LAHKO PRILEPI in ce najdemo en point ki je ze zaseden med blockerjim vrzemo false sicer true.
+        List<AttachmentPoint> possible = new List<AttachmentPoint>();
         for (int i = 0; i < this.attachmentPoints.Length; i++) {
-            if (attachment_point_can_be_blocked_by(this.attachmentPoints[i], current_placeable_item.blocks_placements) ) {
-                if (this.attachmentPoints[i].attached_placeable != null) return false;
+            if (this.attachmentPoints[i].acceptsAttachmentOfType(current_placeable_item.PlacementType))
+                possible.Add(this.attachmentPoints[i]);
+        }
+
+
+        for (int i = 0; i < possible.Count; i++) {
+            if (attachment_point_can_be_blocked_by(possible[i], current_placeable_item.blocks_placements) ) {
+                if (possible[i].attached_placeable != null)
+                    if (possible[i].has_attached_placeable_that_block_placement_of(current_placeable_item.PlacementType))
+                        return false;
             }
         }
         return true;
@@ -442,9 +467,9 @@ public class NetworkPlaceable : NetworkPlaceableBehavior
 
     private void send_predmet_update_to_all_valid_nearby_players() {
         GameObject temp=null;
-        lock (myNetWorker.Players)
+        lock (NetworkManager.Instance.Networker.Players)
         {
-            myNetWorker.IteratePlayers((player) =>
+            NetworkManager.Instance.Networker.IteratePlayers((player) =>
             {
                 temp = FindByid(player.NetworkId);
                 if (Vector3.Distance(temp.transform.position, transform.position)<=NetworkPlaceable.max_distance_for_durability_check && temp.GetComponent<NetworkPlayerNeutralStateHandler>().is_repair_hammer_active()) //passive target
@@ -471,14 +496,7 @@ public class NetworkPlaceable : NetworkPlaceableBehavior
         }
     }
 
-    public override void ServerUpdatePredmet(RpcArgs args)
-    {
-        if (args.Info.SendingPlayer.IsHost) {
-            string pred = args.GetNext<String>();
-            this.p.setParametersFromNetworkString(pred);
-            UILogic.Instance.try_drawing_durability_for_placeable(this);
-        }
-    }
+
 
     private void clear_potential_ui_durability_panel() {
         UILogic.Instance.clear_durability_panel_for_placeable(this);
@@ -515,5 +533,21 @@ public class NetworkPlaceable : NetworkPlaceableBehavior
         {
             networkObject.Destroy();
         }
+    }
+    public override void ServerUpdatePredmet(RpcArgs args)
+    {
+        if (args.Info.SendingPlayer.IsHost)
+        {
+            string pred = args.GetNext<String>();
+            if (this.p == null) this.p = new Predmet();
+            this.p.setParametersFromNetworkString(pred);
+            UILogic.Instance.try_drawing_durability_for_placeable(this);
+        }
+    }
+
+    public override void clientRequestPredmetUpdate(RpcArgs args)
+    {
+        if (networkObject.IsServer)
+            networkObject.SendRpc(args.Info.SendingPlayer, RPC_SERVER_UPDATE_PREDMET, this.p.toNetworkString());
     }
 }

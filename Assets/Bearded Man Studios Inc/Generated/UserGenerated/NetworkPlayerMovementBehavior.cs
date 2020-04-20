@@ -4,11 +4,12 @@ using UnityEngine;
 
 namespace BeardedManStudios.Forge.Networking.Generated
 {
-	[GeneratedRPC("{\"types\":[[\"int\"]]")]
-	[GeneratedRPCVariableNames("{\"types\":[[\"smer\"]]")]
+	[GeneratedRPC("{\"types\":[[\"int\"][\"float\", \"Vector3\", \"Quaternion\"]]")]
+	[GeneratedRPCVariableNames("{\"types\":[[\"smer\"][\"falling_speed\", \"position\", \"rotation\"]]")]
 	public abstract partial class NetworkPlayerMovementBehavior : NetworkBehavior
 	{
 		public const byte RPC_SET_DODGE = 0 + 5;
+		public const byte RPC_SERVER_UPDATE_FROM_SAVED_DATA = 1 + 5;
 		
 		public NetworkPlayerMovementNetworkObject networkObject = null;
 
@@ -23,6 +24,7 @@ namespace BeardedManStudios.Forge.Networking.Generated
 
 			base.SetupHelperRpcs(networkObject);
 			networkObject.RegisterRpc("setDodge", setDodge, typeof(int));
+			networkObject.RegisterRpc("ServerUpdateFromSavedData", ServerUpdateFromSavedData, typeof(float), typeof(Vector3), typeof(Quaternion));
 
 			networkObject.onDestroy += DestroyGameObject;
 
@@ -104,6 +106,13 @@ namespace BeardedManStudios.Forge.Networking.Generated
 		/// int smer
 		/// </summary>
 		public abstract void setDodge(RpcArgs args);
+		/// <summary>
+		/// Arguments:
+		/// float falling_speed
+		/// Vector3 position
+		/// Quaternion rotation
+		/// </summary>
+		public abstract void ServerUpdateFromSavedData(RpcArgs args);
 
 		// DO NOT TOUCH, THIS GETS GENERATED PLEASE EXTEND THIS CLASS IF YOU WISH TO HAVE CUSTOM CODE ADDITIONS
 	}

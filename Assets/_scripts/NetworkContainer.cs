@@ -10,7 +10,15 @@ using UnityEngine;
 /// </summary>
 public class NetworkContainer : NetworkContainerBehavior
 {
-    protected NetworkContainer_items nci;
+    private NetworkContainer_items nci_unaccessable;
+    protected NetworkContainer_items nci {
+            get {
+                if (this.nci_unaccessable == null)
+                    this.nci_unaccessable = GetComponent<NetworkContainer_items>();
+                return this.nci_unaccessable;
+            }
+            set { this.nci_unaccessable = value; } 
+    }
     protected Predmet p;
 
 
@@ -100,7 +108,9 @@ public class NetworkContainer : NetworkContainerBehavior
             //prevert se ce je owner, ali ma privilegij za pobiranje pa take fore odvisn od guilda. sam zaenkrat guildi se nimajo influenca
             //------------------------
             requester_gameObject.GetComponent<NetworkPlayerInventory>().handleItemPickup(p);
-            Destroy(this.gameObject);
+            networkObject.ClearRpcBuffer();
+
+            GetComponent<NetworkPlaceable>().handle_object_destruction();
 
         }
     }

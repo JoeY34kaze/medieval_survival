@@ -233,7 +233,7 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
                 else return false;
         }
 
-        Debug.LogError("we are trying to place a placeable for which we have not setup validity checks");
+        Debug.LogWarning("we are trying to place a placeable for which we have not setup validity checks");
         return false;
     }
 
@@ -312,7 +312,7 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
 
     private void set_rotation_parameters_from_mouse_info(float allowedAngleChunk, bool use_normal)
     {
-        Debug.Log(this.CurrentLocalPlaceable.transform.rotation);
+        //Debug.Log(this.CurrentLocalPlaceable.transform.rotation);
         if (use_normal)//tale if mora bit ker se rotacija obasa drugano ce uporablamo normalo ali ne ( uporaba normale je recimo na chest_0 in trap kjer se prilagaja terenu, medtem ko foundation se ne. je transform.up zmer == 0,1,0
         {
             if (allowedAngleChunk < 1 && (!this.CurrentLocalPlaceable.GetComponent<LocalPlaceableHelper>().isSnapping))

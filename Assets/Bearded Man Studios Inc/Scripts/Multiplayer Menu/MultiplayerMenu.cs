@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
-using System.Collections;
 
 public class MultiplayerMenu : MonoBehaviour
 {
@@ -62,17 +61,7 @@ public class MultiplayerMenu : MonoBehaviour
 			NetWorker.localServerLocated += LocalServerLocated;
 			NetWorker.RefreshLocalUdpListings(ushort.Parse(portNumber.text));
 		}
-
-        //JOEY CODE - CE SE NC NE NRDI EN CAJT ZASTARTEJ SERVER
-        //StartCoroutine(StartServerDelayed(10));
 	}
-
-    public IEnumerator StartServerDelayed(float t) {
-        yield return new WaitForSeconds(t);
-        Host();
-    }
-
-
 
 	private void LocalServerLocated(NetWorker.BroadcastEndpoints endpoint, NetWorker sender)
 	{

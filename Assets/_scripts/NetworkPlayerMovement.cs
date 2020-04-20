@@ -4,7 +4,8 @@ using BeardedManStudios.Forge.Networking.Generated;
 using BeardedManStudios.Forge.Networking;
 using System;
 using System.Collections;
-
+using BeardedManStudios.Forge.Networking.Unity;
+using static PlayerManager;
 
 /// <summary>
 /// INVECTOR FREE ASSET
@@ -18,12 +19,8 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
     public LayerMask groundMask;
 
     public float jump_velocity;
-    public static float mouse_sensitivity = 1.0f;
 
-    internal static void OnMouseSensitivityChanged()
-    {
-        NetworkPlayerMovement.mouse_sensitivity = Prefs.mouse_sensitivity;
-    }
+
 
     public string horizontalInput = "Horizontal";
     public string verticallInput = "Vertical";
@@ -46,13 +43,8 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
     [SerializeField]
     protected float gravity = -10f;
     
-
-    private NetworkPlayerAnimationLogic animation_handler_script;
-    private NetworkPlayerCombatHandler combat_handler_script;
-    private NetworkPlayerInventory networkPlayerInventory;
     private NetworkPlayerStats stats;
-
-    private Vector3 jump_vector_start;
+    public Transform camera_frame;
     #endregion
 
 
@@ -86,19 +78,43 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
     private int dodge_direction;
     private NetworkPlayerAnimationLogic animation_logic_script;
 
-    private UILogic uiLogic;
+    public float horizontal_angle_offset_multiplier=2f;
+
     #endregion
 
     private CharacterController controller;
+
     protected virtual void Start()
     {
         // access components
         animator = GetComponent<Animator>();
-        combat_handler_script = GetComponent<NetworkPlayerCombatHandler>();
-        networkPlayerInventory = GetComponent<NetworkPlayerInventory>();
         stats = GetComponent<NetworkPlayerStats>();
-        animation_logic_script = GetComponent<NetworkPlayerAnimationLogic>();
         this.controller = GetComponent<CharacterController>();
+
+    }
+
+    protected override void NetworkStart()
+    {
+        base.NetworkStart();
+
+        /*
+                NetworkManager.Instance.Networker.playerAccepted += PlayerAccepted;
+                NetworkManager.Instance.Networker.playerDisconnected += OnPlayerDisconnected;
+         */
+
+
+
+
+        if (networkObject.IsServer)
+        {
+            //------------------------- SERVER UPDATES EVERYONE OF THIS PLAYERS SCRIPT DATA WHEN PLAYER CONNECTS IF SERVER HAS SAVED DATA -----------------------------------------
+            uint steamId = 666;// hack ker nimamo se steamWorks
+            PlayerState ps = PlayerManager.get_playerStateForPlayer(steamId);
+            if (ps != null)
+                networkObject.SendRpc(RPC_SERVER_UPDATE_FROM_SAVED_DATA,Receivers.All, ps.current_gravity_velocity, ps.position, ps.rotation);
+        
+        }
+
     }
 
     protected virtual void LateUpdate()
@@ -106,7 +122,7 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
         if (networkObject.IsOwner)
         {
             if(!UILogic.hasControlOfInput)InputHandle();                      // update input methods
-                                              
+                    
         }
     }
 
@@ -115,7 +131,6 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
         if (networkObject.IsOwner)
         {
             if (!UILogic.hasControlOfInput) Rotate_character_horizontally();
-            
         }
     }
 
@@ -146,7 +161,9 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
     {
         if (!isCameraRotationAllowed()) return;
         var X = Input.GetAxis(rotateCameraXInput);
-        Quaternion turnAngle = Quaternion.AngleAxis(Input.GetAxis("Mouse X") * mouse_sensitivity, Vector3.up);
+        float rotation = Input.GetAxis("Mouse X") * Prefs.mouse_sensitivity;
+        rotation *=  (1+(camera_frame.transform.localRotation.x * 1 / 0.7f) * horizontal_angle_offset_multiplier);
+        Quaternion turnAngle = Quaternion.AngleAxis(rotation, Vector3.up);
         transform.eulerAngles = transform.eulerAngles + turnAngle.eulerAngles;
 
 
@@ -320,6 +337,25 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
         isDodging = false;
         GetComponent<NetworkPlayerAnimationLogic>().handle_dodge_end();
     }
+
+    #endregion
+
+    #region synchronization
+
+
+    /// <summary>
+    /// received by everyone. updates object to data from rpc
+    /// </summary>
+    /// <param name="args"></param>
+    public override void ServerUpdateFromSavedData(RpcArgs args)
+    {
+        if (args.Info.SendingPlayer.IsHost) {
+            this.current_gravity_velocity.y = args.GetNext<float>();//na vseh razen ownerju se zavrze
+            this.transform.position = args.GetNext<Vector3>();
+            this.transform.rotation = args.GetNext<Quaternion>();
+        }
+    }
+
 
     #endregion
 }

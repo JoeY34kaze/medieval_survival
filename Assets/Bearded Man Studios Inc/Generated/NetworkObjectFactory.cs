@@ -127,10 +127,6 @@ namespace BeardedManStudios.Forge.Networking.Generated
 						availableCallback = true;
 						obj = new NetworkResourceNetworkObject(networker, id, frame);
 						break;
-					case NetworkStartupSynchronizerNetworkObject.IDENTITY:
-						availableCallback = true;
-						obj = new NetworkStartupSynchronizerNetworkObject(networker, id, frame);
-						break;
 					case NetworkTrapNetworkObject.IDENTITY:
 						availableCallback = true;
 						obj = new NetworkTrapNetworkObject(networker, id, frame);

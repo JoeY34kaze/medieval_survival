@@ -56,11 +56,13 @@ public class deathScreenFadeToBlack : MonoBehaviour
     {
         GameObject btn2 = GameObject.Instantiate(this.no_bed_btn);
         btn2.transform.SetParent(UILogic.Instance.deathScreenBeds.transform);
+        btn2.transform.localScale = Vector3.one;
 
         foreach (NetworkPlayerBed b in GameObject.FindObjectsOfType<NetworkPlayerBed>()) {
             if (b.transform.GetComponent<NetworkPlaceable>().is_player_owner(UILogic.localPlayerGameObject.GetComponent<NetworkPlayerStats>().Get_server_id())) {
                 GameObject btn = GameObject.Instantiate(this.bed_btn);
                 btn.transform.SetParent(UILogic.Instance.deathScreenBeds.transform);
+                btn.transform.localScale = Vector3.one;
                 btn.GetComponent<bed_btn_handler>().bed_pointer = b;//TO MORA IMET. CE CRKNE TUKAJ JE PROV KER TO MORA ZMER DELAT IN JE TREBA POPRAVT
                 btn.GetComponentInChildren<Text>().text = b.name;//to bi mogl delat ker ima button samo 1 childa in to je napis na buttonu
             }

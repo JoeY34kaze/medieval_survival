@@ -1,4 +1,5 @@
-﻿using System;
+﻿using BeardedManStudios.Forge.Networking;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -33,69 +34,181 @@ public class PlayerManager : MonoBehaviour
     /// <summary>
     /// hrani stanja playerjev. ko se dc-ja se zapise stanje, ko se reconnecta se mu poslje stanje da povoz lokalne stvari
     /// </summary>
-    private List<PlayerState> _playerStates;
-    // Start is called before the first frame update
-    void Start()
-    {
-        this._playerStates = new List<PlayerState>();
+    /// 
+
+    private static List<PlayerState> _plstts;
+    private static List<PlayerState> playerStates {
+        get { 
+            if (_plstts == null)
+                _plstts = new List<PlayerState>();
+            return _plstts;
+                    }
     }
 
-    public void SavePlayerState(PlayerState ps)
+
+    /*  -----------------------------------------------------------------------------------------------------------------------------------------------
+        |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||   INITIALIZATION OVER |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+        ----------------------------------------------------------------------------------------------------------------------------------------------- */
+
+    #region SAVING SCRIPTS
+    internal static bool Save(NetworkPlayerMovement s) {
+        try
+        {
+            uint net_id = s.networkObject.Owner.NetworkId;
+            uint steamId = 666;
+            PlayerState ps = PlayerManager.get_playerStateForPlayer(steamId);
+            if (ps == null)
+            {
+                ps = PlayerManager.CreateNewPlayerState(net_id, steamId);
+            }
+
+            ps.current_gravity_velocity = s.current_gravity_velocity;
+            ps.position = s.transform.position;
+            ps.rotation = s.transform.rotation;
+            
+            return true;
+        }
+        catch (Exception e) {
+            Debug.LogError("Exception when saving player" + s.GetType().Name + " " + e.Message);
+            return false;
+        }
+
+    }
+
+
+    internal static bool Save(NetworkPlayerInteraction s)
     {
-        Debug.Log("Saving player state for player : " + ps.previousNetworkId);
-        this._playerStates.Add(ps);
+        try
+        {
+            Debug.LogWarning("Not implemented yet.");
+            return true;
+        }
+        catch (Exception e) {
+            Debug.LogError("Exception when saving player"+s.GetType().Name+  " "+ e.Message);
+            return false;
+        }
+    }
+
+    internal static bool Save(NetworkPlayerAnimationLogic s)
+    {
+        try
+        {
+            Debug.LogWarning("Not implemented yet.");
+            return true;
+        }
+        catch (Exception e)
+        {
+            Debug.LogError("Exception when saving player" + s.GetType().Name + " " + e.Message);
+            return false;
+        }
+    }
+
+    internal static bool Save(NetworkPlayerCombatHandler s )
+    {
+        try
+        {
+            Debug.LogWarning("Not implemented yet.");
+            return true;
+        }
+        catch (Exception e)
+        {
+            Debug.LogError("Exception when saving player" + s.GetType().Name + " " + e.Message);
+            return false;
+        }
+    }
+
+    internal static bool Save(NetworkPlayerInventory s)
+    {
+        try
+        {
+            Debug.LogWarning("Not implemented yet.");
+            return true;
+        }
+        catch (Exception e)
+        {
+            Debug.LogError("Exception when saving player" + s.GetType().Name + " " + e.Message);
+            return false;
+        }
+    }
+
+    internal static bool Save(NetworkPlayerNeutralStateHandler s)
+    {
+        try
+        {
+            Debug.LogWarning("Not implemented yet.");
+            return true;
+        }
+        catch (Exception e)
+        {
+            Debug.LogError("Exception when saving player" + s.GetType().Name + " " + e.Message);
+            return false;
+        }
+    }
+
+    internal static bool Save(NetworkPlayerStats s)
+    {
+        try
+        {
+            Debug.LogWarning("Not implemented yet.");
+            return true;
+        }
+        catch (Exception e)
+        {
+            Debug.LogError("Exception when saving player" + s.GetType().Name + " " + e.Message);
+            return false;
+        }
+    }
+
+    #endregion
+
+
+    private static PlayerState CreateNewPlayerState(uint netId, uint steamId)
+    {
+        PlayerState p = new PlayerState(netId, steamId);
+        PlayerManager.playerStates.Add(p);
+        return p;
     }
 
     /// <summary>
-    /// vrne podatke o playerju k so zapisan not. networkId je sam za testirat, ksnej se zamenja z steamId playerja ko bo vgrajen steamworksAPI
+    /// get PlayreState based on steamId. returns null if none.
     /// </summary>
-    /// <param name="networkId"></param>
+    /// <param name="steamId"></param>
     /// <returns></returns>
-    public PlayerState PopPlayerState(uint networkId) {
-        if(_playerStates!=null)
-        if (_playerStates.Count > 0) {
-            PlayerState r = _playerStates[0];
-            _playerStates.Remove(r);
-            Debug.Log("Popping the first player state - updating with data from player : " + r.previousNetworkId);
-            return r;
-        }
+    public static PlayerState get_playerStateForPlayer(uint steamId) {
+        //na 
+        //TODO -> sorted list pa nekak pametno dostopat do njega ??
+
+        foreach(PlayerState ps in PlayerManager.playerStates)
+            if (ps.steamId == steamId)
+                return ps;
         return null;
     }
 
+
     /// <summary>
-    /// Podatkovni tip, ki hrani vse podatke, ki jih mora player prejet takrat, ko se sconnecta na server. ta podatkovni tip se tudi zakodira rocno v forge network RPC in poslje novo prihajajocemu playerju
+    /// Podatkovni tip, ki hrani vse podatke, ki se updejtajo playerju, ki se sconnecta na server
     /// </summary>
     public class PlayerState {
         //general
         public uint previousNetworkId;
+        public uint steamId;
 
-        public Vector3 position;
-        public Quaternion rotation;
-        //stats
-        public string playerName;
-        public bool dead;
-        public float health;
+        //-----------------------NETWORKPLAYERMOVEMENT.cs -----------------
+        public Vector3 current_gravity_velocity { get; internal set; }
+        public Vector3 position { get; internal set; }
+        public Quaternion rotation { get; internal set; }
 
-        //inventory ----------------------- poslal se bo samo id (int) nevem kaj nrdit z durability pa takim foram se..
-        public Predmet[] items;
-        public Predmet[] bar_items;
-        public Predmet head;
-        public Predmet chest;
-        public Predmet hands;
-        public Predmet legs;
-        public Predmet feet;
-
-
-        public Predmet backpack;
-        //umaData
-
-        //guild ??
-        public NetworkGuildManager.Guild guild;
-        //team
-        //public uint[] team;
-        //??
-        public PlayerState(uint previousNetworkId) {
+        //-------------------------------------------------------------------
+        public PlayerState(uint previousNetworkId, uint steamId) {
             this.previousNetworkId = previousNetworkId;
+            this.steamId = steamId;
+        }
+
+
+
+        public bool saveToDisk() {
+            Debug.LogError("Not implemented yet..");
+            return false;
         }
 
 

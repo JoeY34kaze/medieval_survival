@@ -26,6 +26,8 @@ public class UILogic : MonoBehaviour
     public GameObject playerBedRenamePanel;
     public GameObject disconnect_screen;
     public Text latencyText;
+    public Text bandwidth_in_text;
+    public Text bandwidth_out_text;
 
     public bool hasOpenWindow=false;
     public NetworkGuildManager ngm;
@@ -92,7 +94,8 @@ public class UILogic : MonoBehaviour
     public GameObject direction_arrow_down;
     public GameObject direction_arrow_left;
     internal static bool hasControlOfInput;
-    internal double currentPing;
+    private ulong last_band_in;
+    private ulong last_band_out;
 
     private void Start()
     {
@@ -129,66 +132,89 @@ public class UILogic : MonoBehaviour
             {
                 chatActive = true;
                 chatInput.GetComponent<InputField>().Select();
-                GetComponentInChildren<ChatManager>().onInputFieldSelected();
+                //GetComponentInChildren<ChatManager>().onInputFieldSelected();
                 UILogic.hasControlOfInput = true;
             }
             
         }
 
-        if (Input.GetButtonDown("Guild") && !chatInput.GetComponent<InputField>().isFocused)
+        if (!UILogic.hasControlOfInput)
         {
-            bool was_active = this.GuildPanel.activeSelf;
-            ClearAll();
-            if (was_active)
+            if (Input.GetButtonDown("Guild") && !chatInput.GetComponent<InputField>().isFocused)
             {
+                bool was_active = this.GuildPanel.activeSelf;
+                ClearAll();
+                if (was_active)
+                {
+                }
+                else
+                {
+                    this.GuildPanel.SetActive(true);
+                    this.hasOpenWindow = true;
+                    NetworkGuildManager.Instance.SetMemberPanel(true);
+                    NetworkGuildManager.Instance.localPlayerGuildInfoUpdateRequest();
+                    enableMouse();
+                }
             }
-            else {
-                this.GuildPanel.SetActive(true);
-                this.hasOpenWindow = true;
-                NetworkGuildManager.Instance.SetMemberPanel(true);
-                NetworkGuildManager.Instance.localPlayerGuildInfoUpdateRequest();
-                enableMouse();
-            }  
-        }
 
-        if (Input.GetButtonDown("Inventory") && !chatInput.GetComponent<InputField>().isFocused)
-        {
-            bool was_active = this.inventoryPanel.activeSelf;
-            ClearAll();
-            if (was_active)
+            if (Input.GetButtonDown("Inventory") && !chatInput.GetComponent<InputField>().isFocused)
             {
-            }
-            else {
-                showInventory();
+                bool was_active = this.inventoryPanel.activeSelf;
+                ClearAll();
+                if (was_active)
+                {
+                }
+                else
+                {
+                    showInventory();
+
+
+                }
+                //guild modificationPanel se odpre z button eventa na guild managerju...
 
 
             }
-            //guild modificationPanel se odpre z button eventa na guild managerju...
-            
-            
-        }
-        if (Input.GetButtonDown("Crafting") && !chatInput.GetComponent<InputField>().isFocused)
-        {
-            bool was_active = this.crafting_panel.activeSelf;
-            ClearAll();
-            if (was_active)
+            if (Input.GetButtonDown("Crafting") && !chatInput.GetComponent<InputField>().isFocused)
             {
-                //nc
-            }
-            else
-            {
-                this.crafting_panel.SetActive(true);
-                this.hasOpenWindow = true;
-                enableMouse();
+                bool was_active = this.crafting_panel.activeSelf;
+                ClearAll();
+                if (was_active)
+                {
+                    //nc
+                }
+                else
+                {
+                    this.crafting_panel.SetActive(true);
+                    this.hasOpenWindow = true;
+                    enableMouse();
+                }
             }
         }
     }
 
+    internal void setTimeStamp(ulong timestep)
+    {
+        
+    }
+
+    internal void setBandwidthIn(ulong bandwidthIn)
+    {
+        
+        this.bandwidth_in_text.text = "IN: " + (bandwidthIn-last_band_in);
+        this.last_band_in = bandwidthIn;
+    }
+
+    internal void setBandwidthOut(ulong bandwidthOut)
+    {
+        this.bandwidth_out_text.text = "OUT: " + (bandwidthOut - last_band_out);
+        last_band_out = bandwidthOut;
+    }
 
     public  void setLatencyText(double s) {
-        this.latencyText.text = "Latency: " + s + " ms";
+        
         if (s > 255) s = 255;
-        float f = (float)s;
+        int f = (int)s;
+        this.latencyText.text = "Latency: " + f + " ms";
         this.latencyText.color = new Color(f, 255 - f, 0, 255);
     }
     internal void OnWeaponDirectionChanged(int current_direction)
@@ -328,6 +354,9 @@ public class UILogic : MonoBehaviour
     }
 
     public void ClearAll() {
+
+        if (this.disconnect_screen.activeSelf) return;//disconnect screen je final screen.
+
         this.active_trebuchet = null;
         this.trebuchet_rotation_panel.SetActive(false);
         this.inventoryPanel.SetActive(false);
@@ -341,7 +370,7 @@ public class UILogic : MonoBehaviour
         this.hasOpenWindow = false;
         this.currentActiveContainer = null;
         this.panelsPredmetiContainer = null;
-        this.disconnect_screen.SetActive(false);
+        
         UILogic.hasControlOfInput = false;
 
         this.allows_UI_opening = false;
@@ -569,6 +598,8 @@ public class UILogic : MonoBehaviour
     {
         //pokaze info da je biu disconnectan. ima en gumb -> quit server  / reconnect mogoce tud?
         this.disconnect_screen.SetActive(true);
+        this.enableMouse();
+        UILogic.hasControlOfInput = true;
     }
 
     /// <summary>

@@ -51,11 +51,8 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
 
 
 
-    private Queue<NetworkingPlayer> acceptedAndNotUpdatedPlayers;
-    private bool AcceptedPlayerHandlingPending = false;
     public GameObject serverSide_guildManager;
     public panel_guild_handler panelGuildMemberHandler;
-    private Queue<NetworkingPlayer> disconnectedAndNotSavedPlayers;
     private float original_capsule_collider_height;
 
     private NetworkPlayerStats executionTarget;
@@ -76,19 +73,20 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
 
 
     private float ping_timer_helper=0f;
-    private bool ping_subscribed = false;
+
 
     [Range(0,5000)]
     [SerializeField] public int simulated_ms_delay;
     [Range(0, 1)]
     [SerializeField] public float simulated_packet_loss;
     [SerializeField] public bool update_network_throttling;
+    private ulong prev_band_out;
+    private ulong prev_band_in;
+
     private void Start()
     {
         
         this.npi = GetComponent<NetworkPlayerInventory>();
-        acceptedAndNotUpdatedPlayers = new Queue<NetworkingPlayer>();
-        this.disconnectedAndNotSavedPlayers = new Queue<NetworkingPlayer>();
         combatStateHandler = GetComponent<NetworkPlayerCombatHandler>();
 
     }
@@ -98,7 +96,7 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
         base.NetworkStart();
         // TODO:  Your initialization code that relies on network setup for this object goes here
         //networkObject.SendRpc(RPC_UPDATE_ALL_PLAYER_ID, Receivers.Server);
-        //this.server_id = myNetWorker.Me.NetworkId; -- SAMO ZA DEBUGGING CE BO TREBA POGLEDAT V INSPEKTORJU ID AL PA KEJ
+        //this.server_id = NetworkManager.Instance.Networker.Me.NetworkId; -- SAMO ZA DEBUGGING CE BO TREBA POGLEDAT V INSPEKTORJU ID AL PA KEJ
         //this.playerName = "Janez Kranjski";
         //updateDisplayName();
         if (networkObject.IsOwner)
@@ -115,25 +113,98 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
             {
                 MainThreadManager.Run(() =>
                 {
-                    //Debug.Log($"Sender:{sender} Ping: {ping}");
+                    //Debug.Log("sender: "+sender+" ping: "+ (int)ping +"  timestamp:"+ NetworkManager.Instance.Networker.Time.Timestep + "  bandwidth out: " + NetworkManager.Instance.Networker.BandwidthOut + " | bandwidth IN: " + NetworkManager.Instance.Networker.BandwidthIn +" || bandwidth/s- OUT: "+( NetworkManager.Instance.Networker.BandwidthOut-this.prev_band_out)+" | IN: "+ (NetworkManager.Instance.Networker.BandwidthIn-this.prev_band_in));
+                    this.prev_band_in = NetworkManager.Instance.Networker.BandwidthIn;
+                    this.prev_band_out = NetworkManager.Instance.Networker.BandwidthOut;
+
                     UILogic.Instance.setLatencyText(ping);
                 });
             };
 
+        }
+        
 
-            if (networkObject.IsServer)
+
+        //----------------------------SERVER SAVES SCRIPT DATA WHEN PLAYER DISCONNECTS ----------------------------------------------------------------------------------------
+        if (networkObject.IsServer && !networkObject.IsOwner)
+        {
+            NetworkManager.Instance.Networker.playerDisconnected += (networkingPlayer_that_has_disconnected, disconnecting_networker) =>
             {
-                NetworkManager.Instance.Networker.playerAccepted += PlayerAccepted;
-                NetworkManager.Instance.Networker.playerDisconnected += OnPlayerDisconnected;
-            }
-            else {
-                NetworkManager.Instance.Networker.disconnected += OnLocalClientDisconnected;
-            }
+                if(!networkingPlayer_that_has_disconnected.IsHost)
+                    MainThreadManager.Run(() =>
+                    {
+                        save_player_on_disconnect(networkingPlayer_that_has_disconnected, disconnecting_networker);
+                    });
+            };
         }
-        StartCoroutine(RequestUpdateFromEveryoneDelayed(2));//pozene coroutine, ki vsem network objektom, kateri imajo karkoli da se rab rocno sinhronizirat na clientih, ki so se ravnokar povezal, poslje rpc s katerim signalizira, da nj mu poslejo nazaj podatke s katerimi bo nastavu trenutno stanje objekta.
-        if (networkObject.IsServer && networkObject.IsOwner) {
-            StartCoroutine(serverPlayerInitDelayer(1));
+
+        if (!networkObject.IsServer) { 
+        //server se itak nemore disconnectat sam od sebe
+            NetworkManager.Instance.Networker.disconnected += OnLocalClientDisconnected;
         }
+        
+
+
+    }
+
+    private void save_player_on_disconnect(NetworkingPlayer disconnecting_networkingPlayer, NetWorker disconnecting_networker) {
+        //------------------------------NetworkPlayerMovement.cs ------------------------------------------------------------------------------------------------
+        Debug.Log("Player Disconnected! Saving NetworkPlayerMovement.cs for player  netId: " + disconnecting_networkingPlayer.NetworkId);
+        if (PlayerManager.Save(GetComponent<NetworkPlayerMovement>()))
+        {
+            Debug.Log("Successfully saved player movement.");
+        }
+        //------------------------------NetworkPlayerInteraction.cs ------------------------------------------------------------------------------------------------
+        Debug.Log("Saving NetworkPlayerInteraction.cs for player with  netId: " + disconnecting_networkingPlayer.NetworkId);
+        if (PlayerManager.Save(GetComponent<NetworkPlayerInteraction>()))
+        {
+            Debug.Log("Successfully saved player Interaction.");
+        }
+        //------------------------------NetworkPlayerInventory.cs ------------------------------------------------------------------------------------------------
+        Debug.Log("Saving NetworkPlayerInventory.cs for player with  netId: " + disconnecting_networkingPlayer.NetworkId);
+        if (PlayerManager.Save(GetComponent<NetworkPlayerInventory>()))
+        {
+            Debug.Log("Successfully saved player NetworkPlayerInventory.");
+        }
+        //------------------------------NetworkPlayerAnimationLogic.cs ------------------------------------------------------------------------------------------------
+        Debug.Log("Saving NetworkPlayerAnimationLogic.cs for player with  netId: " + disconnecting_networkingPlayer.NetworkId);
+        if (PlayerManager.Save(GetComponent<NetworkPlayerAnimationLogic>()))
+        {
+            Debug.Log("Successfully saved player NetworkPlayerAnimationLogic.");
+        }
+        //------------------------------NetworkPlayerNeutralStateHandler.cs ------------------------------------------------------------------------------------------------
+        Debug.Log("Saving NetworkPlayerNeutralStateHandler.cs for player with  netId: " + disconnecting_networkingPlayer.NetworkId);
+        if (PlayerManager.Save(GetComponent<NetworkPlayerNeutralStateHandler>()))
+        {
+            Debug.Log("Successfully saved player NetworkPlayerNeutralStateHandler.");
+        }
+        //------------------------------NetworkPlayerCombat.cs ------------------------------------------------------------------------------------------------
+        Debug.Log("Saving NetworkPlayerCombatHandler.cs for player with  netId: " + disconnecting_networkingPlayer.NetworkId);
+        if (PlayerManager.Save(GetComponent<NetworkPlayerCombatHandler>()))
+        {
+            Debug.Log("Successfully saved player NetworkPlayerCombatHandler.");
+        }
+        //------------------------------NetworkPlayerStats.cs ------------------------------------------------------------------------------------------------
+        Debug.Log("Saving NetworkPlayerStats.cs for player with  netId: " + disconnecting_networkingPlayer.NetworkId);
+        if (PlayerManager.Save(this))
+        {
+            Debug.Log("Successfully saved player NetworkPlayerStats.");
+        }
+        pre_disconnect_cleanup();
+
+        //tle i guess unicmo playerja...
+
+        networkObject.Destroy();
+    }
+
+    private void pre_disconnect_cleanup()
+    {
+        if (networkObject.IsServer && this.death_timer_coroutine != null)//just in case
+        {
+            StopCoroutine(this.death_timer_coroutine);
+            this.death_timer_coroutine = null;
+        }
+
 
     }
 
@@ -142,11 +213,7 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
         handle_death_player();
     }
 
-    public IEnumerator serverPlayerInitDelayer(float t) {
-        yield return new WaitForSeconds(t);
 
-        ServerSendOnAcceptedData();
-    }
 
     public void Update()
     {
@@ -176,7 +243,10 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
             {
                 this.ping_timer_helper = 0;
                 NetworkManager.Instance.Networker.Ping();
-                //Debug.Log("sent ping");
+                UILogic.Instance.setBandwidthOut(NetworkManager.Instance.Networker.BandwidthOut);
+                UILogic.Instance.setBandwidthIn(NetworkManager.Instance.Networker.BandwidthIn);
+                UILogic.Instance.setTimeStamp(NetworkManager.Instance.Networker.Time.Timestep);
+                
             }
         }
         #endregion
@@ -198,19 +268,7 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
               this.health = 0;
               handle_0_hp();
           }*/
-        if (networkObject.IsServer)
-        {
-            if (this.acceptedAndNotUpdatedPlayers.Count > 0 && !AcceptedPlayerHandlingPending)
-            {//updejtej playerja k je na vrhu vrste
-                this.AcceptedPlayerHandlingPending = true;
-                StartCoroutine(HandleAcceptedPlayersData(3f));
-
-            }
-
-            if (this.disconnectedAndNotSavedPlayers.Count > 0) {
-                    StartCoroutine(HandleDisconnectedPlayerSaveCoroutine());
-            }
-        }
+       
     }
 
     internal void play_random_sound_effect(GameObject[] sound_fx)
@@ -1130,198 +1188,12 @@ napadenmu playerju da si poupdejta health. ta player pol ko si je updejtov healt
 
 
 
-    /// <summary>
-    /// Fired when the player has been officially accepted by the server and now is the time you are able to start sending your messages to this player.
-    /// </summary>
-    /// <param name="player"></param>
-    /// <param name="sender"></param>
-    private void PlayerAccepted(NetworkingPlayer player, NetWorker sender)//nevem tocn kaj nam networker pomaga tbh..
-    {
-        if (networkObject.IsServer)
-        {
-            Debug.Log("SERVER : player was accepted to server : " + player.NetworkId + " - updating players data.");
-
-            //kaj ce bi mel logiko connectanja in disconnectanja nrjeno tko da ko se prvic sconnecta se ne nrdi skor nc, ko se dc-ja se njegov objekt samo disabla ampak ne zbrise.
-            //ko se player reconnecta - se na podlagi njegovga steam id-ja poisce ce ze obstaja njegov objekt v spilu.
-            //ce obstaja se njegov trenutni objekt ubije in preveze vso logiko (ownership, camero) na ta najdeni objekt.
-
-            //ownerju povej da naj prevzame ta objekt. drugim verjetno ni treba nic povedat ker se bojo animacije avtomatsko pohendlale zarad akcij ownerja. tko nekak k conan exiles.
-
-            //UnityMainThreadDispatcher.Instance().Enqueue(PushToMainThreadPlayerAcceptedData(player,"JEBAC"));
-            this.acceptedAndNotUpdatedPlayers.Enqueue(player);
-        }
-    }
-
-    /// <summary>
-    /// sprozi se, ko se player sconnecta na server. Ker je unity mal prizadet dela to tko da gre pogledat ce kter player caka v vrsti za updejt, vzame enga in klice metodo na njegovem objektu da nj poskrbi za dejanski updejt
-    /// </summary>
-    /// <param name="time_delay"></param>
-    /// <returns></returns>
-    public IEnumerator HandleAcceptedPlayersData(float time_delay)
-    {
-        if (networkObject.IsServer)
-        {
-            yield return new WaitForSeconds(time_delay);
-            Debug.Log("This is executed from the main thread");
-
-            NetworkingPlayer p = this.acceptedAndNotUpdatedPlayers.Dequeue();
-            GameObject obj = FindByid(p.NetworkId);
-            if (obj != null)
-            {
-                NetworkPlayerStats stats = obj.GetComponent<NetworkPlayerStats>();
-                if (stats != null)
-                {
-                    stats.ServerSendOnAcceptedData();//this is wherer the amgic happens
-
-                }
-                else
-                {
-                    this.acceptedAndNotUpdatedPlayers.Enqueue(p);//ker je failal pohendlat ga mormo pohendlat ksnej enkat.
-                }
-            }
-            else
-            {
-                this.acceptedAndNotUpdatedPlayers.Enqueue(p);//ker je failal pohendlat ga mormo pohendlat ksnej enkat.
-            }
-            AcceptedPlayerHandlingPending = false;
-        }
-        yield return null;
-    }
-
-    
-    public IEnumerator HandleDisconnectedPlayerSaveCoroutine()
-    {
-        if (networkObject.IsServer)
-        {
-            
-            Debug.Log("This is executed from the main thread?");
-
-            NetworkingPlayer p = this.disconnectedAndNotSavedPlayers.Dequeue();
-            GameObject obj = FindByid(p.NetworkId);
-            if (obj != null)
-            {
-
-                Debug.Log("SERVER : player was Disconnected : " + p.NetworkId);
-                NetworkPlayerStats s = obj.GetComponent<NetworkPlayerStats>();
-
-                
-
-                if (s != null)
-                {
-                //shrani v PlayerManagerja
-                PlayerManager.Instance.SavePlayerState(s.GetPlayerState());
-
-
-
-                    pre_disconnect_cleanup();
-
-                    //ubije ta networkObjekt
-                    s.kill();
-
-            }
-                else
-                {
-                    this.acceptedAndNotUpdatedPlayers.Enqueue(p);//ker je failal pohendlat ga mormo pohendlat ksnej enkat.
-                }
-            }
-            else
-            {
-                this.acceptedAndNotUpdatedPlayers.Enqueue(p);//ker je failal pohendlat ga mormo pohendlat ksnej enkat.
-            }
-            AcceptedPlayerHandlingPending = false;
-        }
-        yield return null;
-    }
-
-    private void pre_disconnect_cleanup()
-    {
-        if (networkObject.IsServer && this.death_timer_coroutine != null)//just in case
-        {
-            StopCoroutine(this.death_timer_coroutine);
-            this.death_timer_coroutine = null;
-        }
-
-
-    }
 
 
 
 
 
 
-    /// <summary>
-    /// metoda poisce podatke o tem playerju, ki se je ravnokar sconnectal na server. updejta objekt z temi podatki na serverju, server poskrbi za sinhronizacijo po omrezju
-    /// </summary>
-    /// <param name="name"></param>
-    private void ServerSendOnAcceptedData() {
-        PlayerManager.PlayerState saved_playerState = PlayerManager.Instance.PopPlayerState(Get_server_id());//hacky. PlayerManager bo treba dat na singleton..
-
-
-        //serverju bo treba poslat drug data. vsi nesmejo dobit podatkov o inventoriju recimo. samo server ga mora.. bomo podatke k jih rab samo server met zapisal direkt pa je
-        if (saved_playerState != null)
-        {
-
-            string head = "-1"; if (saved_playerState.head != null) head = saved_playerState.head.toNetworkString();
-            string chest = "-1"; if (saved_playerState.chest != null) chest = saved_playerState.chest.toNetworkString();
-            string hands = "-1"; if (saved_playerState.hands != null) hands = saved_playerState.hands.toNetworkString();
-            string legs = "-1"; if (saved_playerState.legs != null) legs = saved_playerState.legs.toNetworkString();
-            string feet = "-1"; if (saved_playerState.feet != null) feet = saved_playerState.feet.toNetworkString();
-
-            //int ranged = -1; if (saved_playerState.ranged != null) ranged = saved_playerState.ranged.id;
-            //int item_selected = -1; if (saved_playerState.item_selected != null) item_selected = saved_playerState.item_selected.id;
-            //int weapon1 = -1; if (saved_playerState.weapon_1 != null) weapon1 = saved_playerState.weapon_1.id;
-            //int shielkd_selected = -1; if (saved_playerState.shield_selected != null) shielkd_selected = saved_playerState.shield_selected.id;
-            int backpack = -1; if (saved_playerState.backpack != null) backpack = saved_playerState.backpack.item.id;
-
-            networkObject.SendRpc(RPC_RECEIVE_PERSONAL_DATA_ON_CONNECTION, Receivers.All,
-                saved_playerState.position,
-                saved_playerState.rotation,
-                saved_playerState.playerName,
-                saved_playerState.dead,
-                saved_playerState.health,
-                head,
-                chest,
-                hands,
-                legs,
-                feet,
-                backpack
-                );//nevem kaj nrdit z backpackom tbh... ko se dcja bo treba najbrz shrant stanje pa updejtat na reconnectu al ga kr dropam zravn pa rečem adijo, nj se pohendla kokr če..
-
-            this.npi.predmeti_personal = saved_playerState.items;
-            this.npi.predmeti_hotbar = saved_playerState.bar_items;
-            NetworkGuildManager.Instance.RefreshPlayersNetworkId(saved_playerState.previousNetworkId,Get_server_id());
-
-
-        }
-        else {//NOV PLAYER - nerab dobit nbenga updejta
-            /*
-            networkObject.SendRpc(RPC_RECEIVE_PERSONAL_DATA_ON_CONNECTION, Receivers.All,
-                new Vector3(302, 43, 557),
-                transform.rotation,
-                "New Player",
-                false,
-                255f,
-                -1,
-                -1,
-                -1,
-                -1,
-                -1,
-                -1
-                );
-                */
-        }
-        //ce ne dobimo nobenga guilda z updejta bomo ustvarli novga.
-
-
-        NetworkGuildManager.Guild playersGuild = NetworkGuildManager.Instance.getGuildFromNetworkId(Get_server_id());
-        //players_guild = NetworkGuildManager.findPlayersGuild(this.GetSteamworksID());
-        if (playersGuild == null) {
-            playersGuild = NetworkGuildManager.Instance.CreateGuild(networkObject.Owner.NetworkId, networkObject.Owner.NetworkId + "'s clan", networkObject.Owner.NetworkId + "-S","#ff0000", new byte[25]);
-            if (playersGuild != null) {
-                NetworkGuildManager.Instance.sendUserInfoResponseTo(Get_server_id());
-            }
-        }
-    }
 
     /// <summary>
     /// sprozi se na vsah clientih za ta objekt. poslje server vsem podatke o tem objektu. ta objekt se je ravnokar REconnectal na server in to je bilo njegovo prejsnje stanje.
@@ -1356,35 +1228,9 @@ napadenmu playerju da si poupdejta health. ta player pol ko si je updejtov healt
         }
     }
 
-    /// <summary>
-    /// klice owner. zatezi serverju da nj mu poslje podatke za vsak objekt
-    /// </summary>
-    /// <param name="time_delay"></param>
-    /// <returns></returns>
-    public IEnumerator RequestUpdateFromEveryoneDelayed(float time_delay) {
-        yield return new WaitForSeconds(time_delay);
 
-        //vsem network objektim poslji zahtevo da poslejo podatke
-        if (networkObject.IsOwner)
-            SendGetALL();
-    }
 
-    internal void SendGetALL() {
-        networkObject.SendRpc(RPC_GET_ALL, Receivers.Server);
-    }
-    /// <summary>
-    /// dobi server. klice VSE skripte V SCENI synchronizerja da pohendlajo sinhronizacijo novga playerja
-    /// </summary>
-    /// <param name="args"></param>
-    public override void GetAll(RpcArgs args)
-    {
-        if (networkObject.IsServer)
-        {
-            foreach (NetworkStartupSynchronizer synchronizer in UnityEngine.Object.FindObjectsOfType<NetworkStartupSynchronizer>()){
-                synchronizer.SendDataToStartingClient(args.Info.SendingPlayer);
-            }
-        }
-    }
+
 
     /// <summary>
     /// sprozi se, ko se player sconnecta na server. poskrbi, da se playerju prinesejo pravilni podatki o njegovem characterju. moral bi poskrbet tud da drugi vidjo njegovga characterja updejtano normalno
@@ -1423,21 +1269,6 @@ napadenmu playerju da si poupdejta health. ta player pol ko si je updejtov healt
     }
 
 
-    /// <summary>
-    /// Fired when the player has been officially accepted by the server and now is the time you are able to start sending your messages to this player.
-    /// </summary>
-    /// <param name="player"></param>
-    /// <param name="sender"></param>
-    private void OnPlayerDisconnected(NetworkingPlayer player, NetWorker sender)//nevem tocn kaj nam networker pomaga tbh..
-    {
-        if (networkObject.IsServer)
-        {
-            Debug.Log("SERVER : player was Disconnected : " + player.NetworkId+"adding to queue for disconnection handling");
-            this.disconnectedAndNotSavedPlayers.Enqueue(player);
-            Debug.Log("SERVER : player was Disconnected : " + player.NetworkId + "adding to queue for disconnection handling");
-        }
-    }
-
 
     private void OnLocalClientDisconnected(NetWorker sender)
     {
@@ -1451,35 +1282,6 @@ napadenmu playerju da si poupdejta health. ta player pol ko si je updejtov healt
         }
     }
 
-    /// <summary>
-    /// nrdi objekt playerstate k se shrani v playermanagerja in se poslje ob reconnectu za updejt njegovega stanja
-    /// </summary>
-    /// <returns></returns>
-    public PlayerManager.PlayerState GetPlayerState() {
-        PlayerManager.PlayerState ps = new PlayerManager.PlayerState(Get_server_id());
-
-        //nafilamo podatke
-        Debug.Log("GetPlayerState()- creating data.");
-        ps.position = transform.position;
-        ps.rotation = transform.rotation;
-        ps.playerName = playerName;
-        ps.dead = dead;
-        ps.health = health;
-
-
-        ps.items = npi.predmeti_personal;
-        ps.head=npi.getHeadItem();
-        ps.chest = npi.getChestItem();
-        ps.hands = npi.getHandsItem();
-        ps.legs = npi.getLegsItem();
-        ps.feet = npi.getFeetItem();
-        //ps.item_selected = null;//spawna se brez weapona v roki.
-        //ps.shield_selected = null;
-        ps.backpack = npi.getBackpackItem();
-
-        ps.guild = NetworkGuildManager.Instance.getGuildFromNetworkId(Get_server_id());
-        return ps;
-    }
 
     internal void localPlayerExecutionRequest(uint server_id_agresorja)
     {

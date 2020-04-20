@@ -101,13 +101,13 @@ public class NetCam : NetworkCameraBehavior
 			transform.Rotate(-Input.GetAxis("Mouse Y") * 2, Input.GetAxis("Mouse X") * 2, 0);
 			transform.eulerAngles = new Vector3(transform.eulerAngles.x, transform.eulerAngles.y, 0);
 
-			//Cursor.lockState = CursorLockMode.Locked | CursorLockMode.Confined;
-			//Cursor.visible = false;
+			Cursor.lockState = CursorLockMode.Locked | CursorLockMode.Confined;
+			Cursor.visible = false;
 		}
 		else if (Input.GetMouseButtonUp(1))
 		{
-			//Cursor.lockState = CursorLockMode.None;
-			//Cursor.visible = true;
+			Cursor.lockState = CursorLockMode.None;
+			Cursor.visible = true;
 		}
 
 		// The network object should always house the latest position of this camera

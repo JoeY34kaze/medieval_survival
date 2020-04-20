@@ -15,7 +15,6 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
         get { return this.combat_mode; }
         set { this.combat_mode = value; }
     }
-    private panel_bar_handler bar_handler;
 
 
     private NetworkPlayerStats stats;
@@ -65,7 +64,6 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
         networkPlayerInventory = GetComponent<NetworkPlayerInventory>();
 
         //this.radial_menu = transform.GetComponentInChildren<RMF_RadialMenu>().gameObject; -treba dat v start ker sicer crkne k ni se vse nrjen
-        this.bar_handler = GetComponentInChildren<panel_bar_handler>();
         this.neutralStateHandler = GetComponent<NetworkPlayerNeutralStateHandler>();
     }
 

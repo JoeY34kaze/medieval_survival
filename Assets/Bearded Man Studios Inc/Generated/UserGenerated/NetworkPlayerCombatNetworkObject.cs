@@ -15,6 +15,7 @@ namespace BeardedManStudios.Forge.Networking.Generated
 		#pragma warning disable 0067
 		public event FieldChangedEvent fieldAltered;
 		#pragma warning restore 0067
+		[ForgeGeneratedField]
 		private byte _combatmode;
 		public event FieldEvent<byte> combatmodeChanged;
 		public Interpolated<byte> combatmodeInterpolation = new Interpolated<byte>() { LerpT = 0f, Enabled = false };

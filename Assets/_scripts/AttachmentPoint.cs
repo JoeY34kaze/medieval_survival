@@ -63,10 +63,10 @@ public class AttachmentPoint : MonoBehaviour
         else { this.attached_placeable = null; this.blocking = false; }
     }
 
-    internal void attachTryReverse(GameObject gameObject)
+    internal void attachTryReverse(GameObject trenutnoPostavljamo)
     {
-        Item i = gameObject.GetComponent<NetworkPlaceable>().p.item;
-        attach(gameObject);
+        Item i = trenutnoPostavljamo.GetComponent<NetworkPlaceable>().p.item;
+        attach(trenutnoPostavljamo);
 
         //poiskat vse valid attachemnt pointe in izbrat najblizjo
 
@@ -74,7 +74,7 @@ public class AttachmentPoint : MonoBehaviour
         //tole je za poiskat in blokirat attachment pointe, ki so se spawnale sedaj, ki smo nov objekt postavili, in so na lokaciji, kjer objekt ze obstaja. ce tega ni, pride do bugga
         //kjer lahko postavljamo en objekt cez druzga do neskoncnosti. prvi if blokira glede na RAZDALJO med objektoma in TIPOM objekta.
         if (i.PlacementType == Item.SnappableType.foundation || i.PlacementType == Item.SnappableType.wall || i.PlacementType == Item.SnappableType.ceiling || i.PlacementType == Item.SnappableType.door_frame || i.PlacementType == Item.SnappableType.windows_frame)
-            foreach (AttachmentPoint p in gameObject.GetComponentsInChildren<AttachmentPoint>())
+            foreach (AttachmentPoint p in trenutnoPostavljamo.GetComponentsInChildren<AttachmentPoint>())
             {
                 if (p.isFree())
                     if (p.acceptsAttachmentOfType(GetComponentInParent<NetworkPlaceable>().snappableType))
@@ -123,5 +123,14 @@ public class AttachmentPoint : MonoBehaviour
                 }
             }
         }
+    }
+
+    internal bool has_attached_placeable_that_block_placement_of(Item.SnappableType placementType)
+    {
+        if (this.attached_placeable != null)
+            foreach (Item.SnappableType s in this.attached_placeable.GetComponent<NetworkPlaceable>().p.item.blocks_placements)
+                if (s == placementType)
+                    return true;
+        return false;
     }
 }

@@ -9,7 +9,7 @@ public class Prefs : MonoBehaviour
     public static float mouse_sensitivity {
         get{ return m_sen; }
         set { m_sen = value;
-            On_mouseSensitivityChanged();
+
         }
     }
     private static float m_sen = 1.0f;
@@ -20,8 +20,5 @@ public class Prefs : MonoBehaviour
     public static float volumeMaster;
     public static bool showDirectionalArrow;
 
-    public static void On_mouseSensitivityChanged() {
-        NetworkPlayerMovement.OnMouseSensitivityChanged();
-        player_camera_handler.mouse_sensitivity_multiplier = Prefs.mouse_sensitivity;
-    }
+
 }
