@@ -7,9 +7,12 @@ using System;
 
 public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
 {
-    public byte combat_mode = 0; //0 = no combat, 1= combat  
-    public bool blocking = false;
-    public bool Blocking { set { this.blocking = value; } }
+    private byte combat_mode = 0; //0 = no combat, 1= combat  
+    private bool blocking = false;
+    public bool Blocking { 
+        get { return this.blocking; } 
+        set { this.blocking = value; } 
+    }
     public byte Combat_mode
     {
         get { return this.combat_mode; }
@@ -153,7 +156,7 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
     {
         if (this.currently_equipped_weapon != null)
         {
-            if (this.currently_equipped_weapon.item.type == Item.Type.weapon) return this.currently_equipped_weapon;
+            if (this.currently_equipped_weapon.getItem().type == Item.Type.weapon) return this.currently_equipped_weapon;
 
         }
         return null;
@@ -168,7 +171,7 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
     internal Predmet GetCurrentlyActiveRanged()
     {
         if (this.currently_equipped_weapon != null)
-            if (this.currently_equipped_weapon.item.type == Item.Type.ranged) return this.currently_equipped_weapon;
+            if (this.currently_equipped_weapon.getItem().type == Item.Type.ranged) return this.currently_equipped_weapon;
         return null;
     }
 
@@ -258,7 +261,7 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
             {
                 if (this.currently_equipped_weapon != null)
                 {
-                    if (c.GetComponent<Weapon_collider_handler>().item.id == this.currently_equipped_weapon.item.id)
+                    if (c.GetComponent<Weapon_collider_handler>().item.id == this.currently_equipped_weapon.getItem().id)
                     {
                         c.gameObject.SetActive(true);
                     }
@@ -277,7 +280,7 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
             {
                 if (this.currently_equipped_shield != null)
                 {
-                    if (c.GetComponent<identifier_helper>().id == this.currently_equipped_shield.item.id)
+                    if (c.GetComponent<identifier_helper>().id == this.currently_equipped_shield.getItem().id)
                     {
                         c.gameObject.SetActive(true);
                     }
@@ -335,7 +338,7 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
 
             foreach (Transform child in weapon_slot)
             {
-                if (child.GetComponent<Weapon_collider_handler>().item.id == this.currently_equipped_weapon.item.id)
+                if (child.GetComponent<Weapon_collider_handler>().item.id == this.currently_equipped_weapon.getItem().id)
                 {
                     child.GetComponent<Weapon_collider_handler>().set_offensive_colliders(active);
                 }
@@ -351,7 +354,7 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
 
         foreach (Transform child in weapon_slot)
         {
-            if (child.GetComponent<Weapon_collider_handler>().item.id == this.currently_equipped_weapon.item.id)
+            if (child.GetComponent<Weapon_collider_handler>().item.id == this.currently_equipped_weapon.getItem().id)
                 child.GetComponent<Weapon_collider_handler>().set_defensive_colliders(b);
             
         }
@@ -370,6 +373,11 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
         }
         networkObject.SendRpc(RPC_CHANGE_COMBAT_MODE_RESPONSE, Receivers.All, next);
 
+    }
+
+    internal void OnRemotePlayerDataSet()
+    {
+        ChangeCombatMode(currently_equipped_weapon.getItem());
     }
 
     private void setCombatStateLocally(byte new_mode)
@@ -421,8 +429,8 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
         if (args.Info.SendingPlayer.NetworkId == 0) {
             this.combat_mode = (byte)args.GetNext<int>();
             this.blocking = args.GetNext<bool>();
-            this.currently_equipped_weapon = Predmet.createNewPredmet(args.GetNext<string>());
-            this.currently_equipped_shield = Predmet.createNewPredmet(args.GetNext<string>());
+            this.currently_equipped_weapon = args.GetNext<byte[]>().ByteArrayToObject<Predmet>();
+            this.currently_equipped_shield = args.GetNext<byte[]>().ByteArrayToObject<Predmet>();
             update_equipped_weapons();
             this.weapon_direction = args.GetNext<byte>();
             this.is_readying_attack = args.GetNext<bool>();
@@ -436,7 +444,7 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
 
             //int id_wep = (this.currently_equipped_weapon.item == null) ? -1 : this.currently_equipped_weapon.item.id;
 
-            networkObject.SendRpc(p, RPC_SEND_ALL, (int)this.combat_mode, this.blocking, (this.currently_equipped_weapon == null) ? "-1" : this.currently_equipped_weapon.toNetworkString(), (this.currently_equipped_shield == null) ? "-1" : this.currently_equipped_shield.toNetworkString(), this.weapon_direction, this.is_readying_attack, this.ready_attack,this.executing_attack);
+            networkObject.SendRpc(p, RPC_SEND_ALL, (int)this.combat_mode, this.blocking, this.currently_equipped_weapon.ObjectToByteArray(),  this.currently_equipped_shield.ObjectToByteArray(), this.weapon_direction, this.is_readying_attack, this.ready_attack,this.executing_attack);
         }
     }
 

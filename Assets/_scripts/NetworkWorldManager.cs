@@ -34,7 +34,7 @@ public class NetworkWorldManager : NetworkWorldManagerBehavior
             for (int k=0;k<list.Length;k++)
             {
                 if(list[k]!=null)
-                    if (list[k].p.item.needs_upkeep)
+                    if (list[k].p.getItem().needs_upkeep)
                         list[k].on_upkeep_pay();
             }
            // Debug.Log("------------------------------------------------------");

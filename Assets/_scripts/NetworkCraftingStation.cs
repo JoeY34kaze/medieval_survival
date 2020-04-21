@@ -232,7 +232,7 @@ public class NetworkCraftingStation : NetworkCraftingStationBehavior
         int q = 0;
         foreach (Predmet p in pool)
             if (p != null)
-                if (p.item.Equals(item))
+                if (p.getItem().Equals(item))
                     q += p.quantity;
         return q;
     }

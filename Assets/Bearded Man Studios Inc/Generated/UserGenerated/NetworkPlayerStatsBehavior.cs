@@ -4,8 +4,8 @@ using UnityEngine;
 
 namespace BeardedManStudios.Forge.Networking.Generated
 {
-	[GeneratedRPC("{\"types\":[[\"float\", \"string\"][\"float\", \"string\"][\"Vector3\"][][\"string\"][\"uint\"][\"uint\"][\"uint\", \"bool\"][][\"uint\"][][\"string\", \"string\", \"Color\", \"byte[]\"][\"Vector3\", \"Quaternion\", \"string\", \"bool\", \"float\", \"string\", \"string\", \"string\", \"string\", \"string\", \"string\"][\"string\", \"bool\", \"bool\"][\"float\"][\"uint\", \"float\"][][]]")]
-	[GeneratedRPCVariableNames("{\"types\":[[\"health\", \"tag\"][\"damage\", \"tag\"][\"pos\"][][\"teamData\"][\"server_id\"][\"sendingPlayer\"][\"other\", \"resp\"][][\"other\"][][\"name_g\", \"tag_g\", \"color_g\", \"image_g\"][\"pos\", \"rot\", \"name_p\", \"dead\", \"hp\", \"head\", \"chest\", \"hands\", \"legs\", \"feet\", \"backpack\"][\"player_name\", \"downed\", \"dead\"][\"hp\"][\"agresor\", \"cas_animacije\"][][]]")]
+	[GeneratedRPC("{\"types\":[[\"float\", \"string\"][\"float\", \"string\"][\"Vector3\"][][\"string\"][\"uint\"][\"uint\"][\"uint\", \"bool\"][][\"uint\"][][\"string\", \"string\", \"Color\", \"byte[]\"][\"float\"][\"uint\", \"float\"][][][\"byte[]\"]]")]
+	[GeneratedRPCVariableNames("{\"types\":[[\"health\", \"tag\"][\"damage\", \"tag\"][\"pos\"][][\"teamData\"][\"server_id\"][\"sendingPlayer\"][\"other\", \"resp\"][][\"other\"][][\"name_g\", \"tag_g\", \"color_g\", \"image_g\"][\"hp\"][\"agresor\", \"cas_animacije\"][][][\"PlayerSynchronizationContainerObject\"]]")]
 	public abstract partial class NetworkPlayerStatsBehavior : NetworkBehavior
 	{
 		public const byte RPC_SET_HEALTH = 0 + 5;
@@ -20,12 +20,11 @@ namespace BeardedManStudios.Forge.Networking.Generated
 		public const byte RPC_TEAM_INVITE_ALREADY_IN_PARTY_NOTIFICATION = 9 + 5;
 		public const byte RPC_TEAM_LEAVE_REQUEST = 10 + 5;
 		public const byte RPC_GUILD_UPDATE = 11 + 5;
-		public const byte RPC_RECEIVE_PERSONAL_DATA_ON_CONNECTION = 12 + 5;
-		public const byte RPC_SEND_ALL = 13 + 5;
-		public const byte RPC_REFRESH_HEALTH = 14 + 5;
-		public const byte RPC_EXECUTION_REQUEST = 15 + 5;
-		public const byte RPC_ON_BLOCKED = 16 + 5;
-		public const byte RPC_RESPAWN_WITHOUT_BED_REQUEST = 17 + 5;
+		public const byte RPC_REFRESH_HEALTH = 12 + 5;
+		public const byte RPC_EXECUTION_REQUEST = 13 + 5;
+		public const byte RPC_ON_BLOCKED = 14 + 5;
+		public const byte RPC_RESPAWN_WITHOUT_BED_REQUEST = 15 + 5;
+		public const byte RPC_SERVER_SEND_ALL_THIS_TO_NEW_PLAYER = 16 + 5;
 		
 		public NetworkPlayerStatsNetworkObject networkObject = null;
 
@@ -51,12 +50,11 @@ namespace BeardedManStudios.Forge.Networking.Generated
 			networkObject.RegisterRpc("teamInviteAlreadyInPartyNotification", teamInviteAlreadyInPartyNotification, typeof(uint));
 			networkObject.RegisterRpc("teamLeaveRequest", teamLeaveRequest);
 			networkObject.RegisterRpc("GuildUpdate", GuildUpdate, typeof(string), typeof(string), typeof(Color), typeof(byte[]));
-			networkObject.RegisterRpc("ReceivePersonalDataOnConnection", ReceivePersonalDataOnConnection, typeof(Vector3), typeof(Quaternion), typeof(string), typeof(bool), typeof(float), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string));
-			networkObject.RegisterRpc("SendAll", SendAll, typeof(string), typeof(bool), typeof(bool));
 			networkObject.RegisterRpc("RefreshHealth", RefreshHealth, typeof(float));
 			networkObject.RegisterRpc("ExecutionRequest", ExecutionRequest, typeof(uint), typeof(float));
 			networkObject.RegisterRpc("OnBlocked", OnBlocked);
 			networkObject.RegisterRpc("RespawnWithoutBedRequest", RespawnWithoutBedRequest);
+			networkObject.RegisterRpc("ServerSendAllThisToNewPlayer", ServerSendAllThisToNewPlayer, typeof(byte[]));
 
 			networkObject.onDestroy += DestroyGameObject;
 
@@ -189,14 +187,6 @@ namespace BeardedManStudios.Forge.Networking.Generated
 		/// <summary>
 		/// Arguments:
 		/// </summary>
-		public abstract void ReceivePersonalDataOnConnection(RpcArgs args);
-		/// <summary>
-		/// Arguments:
-		/// </summary>
-		public abstract void SendAll(RpcArgs args);
-		/// <summary>
-		/// Arguments:
-		/// </summary>
 		public abstract void RefreshHealth(RpcArgs args);
 		/// <summary>
 		/// Arguments:
@@ -210,6 +200,10 @@ namespace BeardedManStudios.Forge.Networking.Generated
 		/// Arguments:
 		/// </summary>
 		public abstract void RespawnWithoutBedRequest(RpcArgs args);
+		/// <summary>
+		/// Arguments:
+		/// </summary>
+		public abstract void ServerSendAllThisToNewPlayer(RpcArgs args);
 
 		// DO NOT TOUCH, THIS GETS GENERATED PLEASE EXTEND THIS CLASS IF YOU WISH TO HAVE CUSTOM CODE ADDITIONS
 	}

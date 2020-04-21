@@ -45,7 +45,7 @@ public class NetworkContainer_items : NetworkContainerItemsBehavior
         {
 
             if (this.predmeti[i] != null)
-                if (this.predmeti[i].item.Equals(item))
+                if (this.predmeti[i].getItem().Equals(item))
                 {
                     if (this.predmeti[i].quantity <= q)
                     {
@@ -97,7 +97,7 @@ public class NetworkContainer_items : NetworkContainerItemsBehavior
         int c = 0;
         foreach (Predmet i in this.predmeti)
             if(i!=null)
-                if (i.item.id == id)
+                if (i.getItem().id == id)
                     c+=i.quantity;
         return c;
     }
@@ -108,7 +108,7 @@ public class NetworkContainer_items : NetworkContainerItemsBehavior
         for (int i = 0; i < this.size; i++)
         {
             if (this.predmeti[i] != null)
-                if (this.predmeti[i].item.id == id)
+                if (this.predmeti[i].getItem().id == id)
                     return popPredmet(i);
         }
         return null;
@@ -136,11 +136,11 @@ public class NetworkContainer_items : NetworkContainerItemsBehavior
         int kol = p.quantity;
         foreach (Predmet stack in this.predmeti)
             if (stack != null)
-                if (stack.item != null)
-                    if (stack.item.Equals(p.item))
-                        if (stack.quantity < stack.item.stackSize)
+                if (stack.getItem() != null)
+                    if (stack.getItem().Equals(p.getItem()))
+                        if (stack.quantity < stack.getItem().stackSize)
                         {
-                            kol -= stack.item.stackSize - stack.quantity;
+                            kol -= stack.getItem().stackSize - stack.quantity;
                             if (kol <= 0) return true;
                         }
         return false;
@@ -150,7 +150,7 @@ public class NetworkContainer_items : NetworkContainerItemsBehavior
         int q = 0;
         foreach (Predmet p in this.predmeti)
             if(p!=null)
-                if (p.item.id == i.id) q += p.quantity;
+                if (p.getItem().id == i.id) q += p.quantity;
         return (q >= amount) ? true : false;
     }
     /*
@@ -176,31 +176,9 @@ public class NetworkContainer_items : NetworkContainerItemsBehavior
     }
 
 
-    /// <summary>
-    /// zapise nekak v nek network format da pol plunes u rpc. magar csv al pa nekej
-    /// </summary>
-    /// <returns></returns>
-    internal string getItemsNetwork()
-    {
-        string s = "";
-        for (int i = 0; i < this.size; i++) {
-            if (this.predmeti[i] != null)
-                s = s + "|" + this.predmeti[i].toNetworkString();
-            else
-                s = s + "|-1";
-        }
-        Debug.Log(s);
-        return s;
-    }
 
-    internal Predmet[] parseItemsNetworkFormat(string s) {//implementacija te metode je garbage ker bo itak zamenjan ksnej z kšnmu serialized byte array al pa kej namest stringa. optimizacija ksnej
-        string[] ss = s.Split('|');
-        Predmet[] rez = new Predmet[ss.Length -1];//zacne se z "" zato en slot sfali
-        for (int i = 1; i < ss.Length; i++) {//zacne z 1 ker je ss[0] = ""
-            rez[i - 1] = Predmet.createNewPredmet(ss[i]);//ce je format networkstringa ured vrne predmet sicer vrne null
-        }
-        return rez;
-    }
+
+
 
     internal Predmet putFirst(Predmet predmet) {
         if (!networkObject.IsServer) return predmet;
@@ -226,9 +204,9 @@ public class NetworkContainer_items : NetworkContainerItemsBehavior
         Predmet p = resp;
         foreach (Predmet stack in this.predmeti)
             if (stack != null)
-                if (stack.item != null)
-                    if (stack.item.Equals(p.item))
-                        if (stack.quantity < stack.item.stackSize)
+                if (stack.getItem() != null)
+                    if (stack.getItem().Equals(p.getItem()))
+                        if (stack.quantity < stack.getItem().stackSize)
                         {
                             p = stack.addQuantity(p);
                             if (p == null)

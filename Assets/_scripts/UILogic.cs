@@ -541,7 +541,7 @@ public class UILogic : MonoBehaviour
     {
         if (this.placeable_for_durability_check == p) {
             this.panel_durability.SetActive(true);
-            this.panel_durability.GetComponentInChildren<Text>().text = "" + p.p.current_durabilty + " / " + p.p.item.Max_durability;
+            this.panel_durability.GetComponentInChildren<Text>().text = "" + p.p.current_durabilty + " / " + p.p.getItem().Max_durability;
         }
     }
 

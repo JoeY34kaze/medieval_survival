@@ -49,7 +49,7 @@ public class NetworkBackpack : NetworkBackpackBehavior
 
     public void sendBackpackItemsUpdate() {
         if (networkObject.IsServer) {
-            networkObject.SendRpc(networkObject.Owner, RPC_BACKPACK_ITEMS_OWNER_RESPONSE, nci.getItemsNetwork());
+            networkObject.SendRpc(networkObject.Owner, RPC_BACKPACK_ITEMS_OWNER_RESPONSE, nci.predmeti.ObjectToByteArray());
         }
     }
 
@@ -96,7 +96,7 @@ public class NetworkBackpack : NetworkBackpackBehavior
             }
         }
         else if (tip == 1 && (networkObject.Owner.NetworkId == args.Info.SendingPlayer.NetworkId)) {//look request od ownerja. pomen da je odpru inventorij al ravnokar dubu ownership response in rab pohendlat panelo
-            networkObject.SendRpc(networkObject.Owner, RPC_BACKPACK_ITEMS_OWNER_RESPONSE, nci.getItemsNetwork());
+            networkObject.SendRpc(networkObject.Owner, RPC_BACKPACK_ITEMS_OWNER_RESPONSE, nci.predmeti.ObjectToByteArray());
         }
     }
 
@@ -130,7 +130,7 @@ public class NetworkBackpack : NetworkBackpackBehavior
     {
         if (!args.Info.SendingPlayer.IsHost) return;
 
-        Predmet[] serverjevi_predmeti = nci.parseItemsNetworkFormat(args.GetNext<string>());
+        Predmet[] serverjevi_predmeti = args.GetNext<byte[]>().ByteArrayToObject<Predmet[]>();
         nci.setAll(serverjevi_predmeti);
         //izrisat iteme k jih mamo tle u arrayu na panele.
 
@@ -185,7 +185,7 @@ public class NetworkBackpack : NetworkBackpackBehavior
             //ce je backpack null ga samo not dej, ce je occupied probej nrdit swap, sicer nared nč
             if (this.nci.getPredmet(back_index) != null)
             {//swap
-                if (this.npi.GetItemLoadout(this.npi.getItemTypefromString(type)).item.type == this.nci.getPredmet(back_index).item.type)
+                if (this.npi.GetItemLoadout(this.npi.getItemTypefromString(type)).getItem().type == this.nci.getPredmet(back_index).getItem().type)
                 {//ce se itema ujemata, sicer nima smisla
                     Predmet l = this.npi.popPredmetLoadout(t);
                     Predmet b = this.nci.popPredmet(back_index);
@@ -301,7 +301,7 @@ public class NetworkBackpack : NetworkBackpackBehavior
             
             
             
-            load = this.npi.popPredmetLoadout(i.item.type);
+            load = this.npi.popPredmetLoadout(i.getItem().type);
 
 
             //nared swap
@@ -314,7 +314,7 @@ public class NetworkBackpack : NetworkBackpackBehavior
 
             //poslat loadout. loadout u celotiu pohandla networkPlayerInventory, medtem ko backapack pohendlamo tle.
             this.npi.sendNetworkUpdate(false, true);
-            networkObject.SendRpc(networkObject.Owner, RPC_BACKPACK_ITEMS_OWNER_RESPONSE, nci.getItemsNetwork());
+            networkObject.SendRpc(networkObject.Owner, RPC_BACKPACK_ITEMS_OWNER_RESPONSE, nci.predmeti.ObjectToByteArray());
         }
     }
 

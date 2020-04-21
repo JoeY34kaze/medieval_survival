@@ -102,8 +102,8 @@ public class NetworkGuildFlag : NetworkLandClaimObjectBehavior
         //vzel bomo prvo vrednost iz arraya recepta. recept za placeable iteme bo zmer biu samo wood - kolicina. kaj se placa je odvisn od tiera objekta.
         //t0 -wood
         //w1 - stone -> iron
-        if (p.p.item.recepie.ingredient_quantities.Length < 1) return true;
-        int cost = p.p.item.recepie.ingredient_quantities[0];
+        if (p.p.getItem().recepie.ingredient_quantities.Length < 1) return true;
+        int cost = p.p.getItem().recepie.ingredient_quantities[0];
         cost = (int)(cost * upkeep_rate);
 
         //upkeep resourcov
@@ -135,9 +135,9 @@ public class NetworkGuildFlag : NetworkLandClaimObjectBehavior
 
         int[] r = new int[4];//wood,stone,iron,gold
         for (int i = 0; i < r.Length; i++) r[i] = 0;
-        if (p.p.item.recepie.ingredient_quantities.Length == 0) return r;
+        if (p.p.getItem().recepie.ingredient_quantities.Length == 0) return r;
 
-        int cost = p.p.item.recepie.ingredient_quantities[0];
+        int cost = p.p.getItem().recepie.ingredient_quantities[0];
         cost = (int)(cost * upkeep_rate);
 
         switch (p.p.tier)
@@ -182,7 +182,7 @@ public class NetworkGuildFlag : NetworkLandClaimObjectBehavior
         for (int i = 0; i < r.Length; i++) r[i] = 0;
 
         foreach (NetworkPlaceable p in this.placeables_for_upkeep) {
-                if (p.p.item.needs_upkeep)
+                if (p.p.getItem().needs_upkeep)
                 {
                     int[] s = get_upkeep_for_single_block_per_tick(p);
                     for (int i = 0; i < r.Length; i++) {

@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace BeardedManStudios.Forge.Networking.Generated
 {
-	[GeneratedRPC("{\"types\":[[\"byte\"][\"uint\"][\"int\", \"Vector3\", \"Vector3\"][\"int\", \"int\"][\"int\", \"int\"][\"string\", \"int\", \"int\"][][][\"string\"][\"int\"][\"int\", \"int\"][\"int\", \"int\"]]")]
+	[GeneratedRPC("{\"types\":[[\"byte\"][\"uint\"][\"int\", \"Vector3\", \"Vector3\"][\"int\", \"int\"][\"int\", \"int\"][\"string\", \"int\", \"int\"][][][\"byte[]\"][\"int\"][\"int\", \"int\"][\"int\", \"int\"]]")]
 	[GeneratedRPCVariableNames("{\"types\":[[\"tip\"][\"newOwner\"][\"index\", \"pos\", \"dir\"][\"i\", \"j\"][\"backpack_index\", \"inventory_index\"][\"loadout_type\", \"loadout_index\", \"inventory_index\"][][][\"data\"][\"index\"][\"backpack_index\", \"bar_index\"][\"backInd\", \"BarInd\"]]")]
 	public abstract partial class NetworkBackpackBehavior : NetworkBehavior
 	{
@@ -41,7 +41,7 @@ namespace BeardedManStudios.Forge.Networking.Generated
 			networkObject.RegisterRpc("LoadoutToBackpackRequest", LoadoutToBackpackRequest, typeof(string), typeof(int), typeof(int));
 			networkObject.RegisterRpc("BackpackUnequipRequest", BackpackUnequipRequest);
 			networkObject.RegisterRpc("BackpackUnequipResponse", BackpackUnequipResponse);
-			networkObject.RegisterRpc("BackpackItemsOwnerResponse", BackpackItemsOwnerResponse, typeof(string));
+			networkObject.RegisterRpc("BackpackItemsOwnerResponse", BackpackItemsOwnerResponse, typeof(byte[]));
 			networkObject.RegisterRpc("BackpackToLoadoutRequest", BackpackToLoadoutRequest, typeof(int));
 			networkObject.RegisterRpc("BackpackToBarRequest", BackpackToBarRequest, typeof(int), typeof(int));
 			networkObject.RegisterRpc("BarToBackpackRequest", BarToBackpackRequest, typeof(int), typeof(int));

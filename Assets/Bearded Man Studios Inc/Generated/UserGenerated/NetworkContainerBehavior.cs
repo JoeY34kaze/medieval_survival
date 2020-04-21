@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace BeardedManStudios.Forge.Networking.Generated
 {
-	[GeneratedRPC("{\"types\":[[\"int\", \"int\"][\"int\", \"int\"][\"int\", \"int\"][\"int\", \"int\"][\"int\", \"int\"][\"int\", \"int\"][\"int\", \"int\"][\"int\", \"int\"][][][\"int\", \"string\"][\"int\", \"int\"][\"int\"][\"int\", \"string\", \"int\", \"int\", \"int\", \"int\"]]")]
+	[GeneratedRPC("{\"types\":[[\"int\", \"int\"][\"int\", \"int\"][\"int\", \"int\"][\"int\", \"int\"][\"int\", \"int\"][\"int\", \"int\"][\"int\", \"int\"][\"int\", \"int\"][][][\"int\", \"byte[]\"][\"int\", \"int\"][\"int\"][\"int\", \"byte[]\", \"int\", \"int\", \"int\", \"int\"]]")]
 	[GeneratedRPCVariableNames("{\"types\":[[\"p\", \"c\"][\"c\", \"p\"][\"b\", \"c\"][\"c\", \"b\"][\"b\", \"c\"][\"c\", \"b\"][\"l\", \"c\"][\"c\", \"l\"][][][\"succ\", \"items\"][\"f\", \"t\"][\"index\"][\"succ\", \"items\", \"wood_upkeep\", \"stone_upkeep\", \"iron_upkeep\", \"gold_upkeep\"]]")]
 	public abstract partial class NetworkContainerBehavior : NetworkBehavior
 	{
@@ -45,10 +45,10 @@ namespace BeardedManStudios.Forge.Networking.Generated
 			networkObject.RegisterRpc("ContainerToLoadout", ContainerToLoadout, typeof(int), typeof(int));
 			networkObject.RegisterRpc("pickupRequest", pickupRequest);
 			networkObject.RegisterRpc("openRequest", openRequest);
-			networkObject.RegisterRpc("openResponse", openResponse, typeof(int), typeof(string));
+			networkObject.RegisterRpc("openResponse", openResponse, typeof(int), typeof(byte[]));
 			networkObject.RegisterRpc("ContainerToContainer", ContainerToContainer, typeof(int), typeof(int));
 			networkObject.RegisterRpc("dropItem", dropItem, typeof(int));
-			networkObject.RegisterRpc("openResponseWithUpkeep", openResponseWithUpkeep, typeof(int), typeof(string), typeof(int), typeof(int), typeof(int), typeof(int));
+			networkObject.RegisterRpc("openResponseWithUpkeep", openResponseWithUpkeep, typeof(int), typeof(byte[]), typeof(int), typeof(int), typeof(int), typeof(int));
 
 			networkObject.onDestroy += DestroyGameObject;
 

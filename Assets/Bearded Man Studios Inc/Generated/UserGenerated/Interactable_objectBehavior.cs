@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace BeardedManStudios.Forge.Networking.Generated
 {
-	[GeneratedRPC("{\"types\":[[][][\"Vector3\", \"Vector3\"][\"uint\"][][\"int\"][\"bool\"][\"string\"][\"Vector3\"]]")]
+	[GeneratedRPC("{\"types\":[[][][\"Vector3\", \"Vector3\"][\"uint\"][][\"int\"][\"bool\"][\"byte[]\"][\"Vector3\"]]")]
 	[GeneratedRPCVariableNames("{\"types\":[[][][\"pos\", \"dir\"][\"helper_id\"][][\"tip\"][\"Closed\"][\"p\"][\"position\"]]")]
 	public abstract partial class Interactable_objectBehavior : NetworkBehavior
 	{
@@ -37,7 +37,7 @@ namespace BeardedManStudios.Forge.Networking.Generated
 			networkObject.RegisterRpc("ReviveDownedPlayerResponse", ReviveDownedPlayerResponse);
 			networkObject.RegisterRpc("DoorInteractionRequest", DoorInteractionRequest, typeof(int));
 			networkObject.RegisterRpc("DoorStateUpdate", DoorStateUpdate, typeof(bool));
-			networkObject.RegisterRpc("SetPredmetForPickup", SetPredmetForPickup, typeof(string));
+			networkObject.RegisterRpc("SetPredmetForPickup", SetPredmetForPickup, typeof(byte[]));
 			networkObject.RegisterRpc("OnClientAfterPickup", OnClientAfterPickup, typeof(Vector3));
 
 			networkObject.onDestroy += DestroyGameObject;

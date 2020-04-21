@@ -37,7 +37,7 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
 
     private NetworkPlayerInventory npi;
 
-    private uint[] team; //array networkId-jev team memberjev. server vedno hrani to vrednost za vse playerje. drugi dobijo samo update od serverja
+    internal uint[] team; //array networkId-jev team memberjev. server vedno hrani to vrednost za vse playerje. drugi dobijo samo update od serverja
 
     private List<uint> already_processed_inviters;
     private bool team_invite_pending = false;
@@ -107,8 +107,6 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
             FloatingTextController.Initialize();
             reticle_hit_controller.Initialize();
 
-            // NetworkManager.Instance.Networker.onPingPong += PingEvent;
-
             NetworkManager.Instance.Networker.onPingPong += (ping, sender) =>
             {
                 MainThreadManager.Run(() =>
@@ -121,12 +119,15 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
                 });
             };
 
+
+
+
         }
         
 
 
         //----------------------------SERVER SAVES SCRIPT DATA WHEN PLAYER DISCONNECTS ----------------------------------------------------------------------------------------
-        if (networkObject.IsServer && !networkObject.IsOwner)
+        if (networkObject.IsServer && !networkObject.IsOwner)//&& !networkObject.IsOwner mislm da je brezpredmeten ker ko se player dc-ja vzame server ownership...pustu bom tle ker zaenrkat dela
         {
             NetworkManager.Instance.Networker.playerDisconnected += (networkingPlayer_that_has_disconnected, disconnecting_networker) =>
             {
@@ -136,15 +137,218 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
                         save_player_on_disconnect(networkingPlayer_that_has_disconnected, disconnecting_networker);
                     });
             };
-        }
+        }//--------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-        if (!networkObject.IsServer) { 
-        //server se itak nemore disconnectat sam od sebe
+        if (!networkObject.IsServer)
+        {
+            //server se itak nemore disconnectat sam od sebe
             NetworkManager.Instance.Networker.disconnected += OnLocalClientDisconnected;
         }
+        if(networkObject.IsServer && !networkObject.IsOwner) {
+            load_player_data_on_connected();
+            send_other_players_data_to_newly_connected_player(networkObject.Owner);
+        }
+
+    }
+
+
+    //od DRUGIH not k playerju
+    private void send_other_players_data_to_newly_connected_player(NetworkingPlayer owner)
+    {
+        //ubistvu moramo dobit vse skripte na playerju, spestat najboljs da v en rpc (ker je potem flow sinhron, sicer leti 5 rpcjev na yolo k rabjo bit u dolocenem vrstnem redu) in poslat playerju
+        //skript je 7
+
+        foreach (NetworkPlayerStats stats in GameObject.FindObjectsOfType<NetworkPlayerStats>()) {
+            if (stats.networkObject.Owner.Equals(networkObject.Owner))
+            {
+                continue;
+            }
+            else {
+                stats.send_this_player_data_to_newly_connected_player( owner);
+            }
+        }
+    }
+
+    private void send_this_player_data_to_newly_connected_player( NetworkingPlayer new_player)
+    {
+        //skript je 7 indolocene stvari so ze pohandlane, nekatere pa manjkajo tko da gremo cez vse
+
+
+        //interaction inma nc
+        //movement je treba vsaj pozicijo poslat, ker sce se player ne premakne odkat se je client connectov ga nebo vidu pol se pa teleportira k njemu. omae wa mou shindeiru
+        NetworkPlayerMovement mov = GetComponent<NetworkPlayerMovement>();
+        Vector3 pos = transform.position;
+        Quaternion rot = transform.rotation;
+        bool crouched = mov.isCrouched;
+        //---------------Stats 
+        string displayName = this.playerName;
+        bool downed = this.downed;
+        bool dead = this.dead;
+        float health = this.health;
+        //---------------------INVENTORY 0
+        NetworkPlayerInventory inv = GetComponent<NetworkPlayerInventory>();
+
+        Predmet head = inv.head;
+        Predmet chest = inv.chest;
+        Predmet hands = inv.hands;
+        Predmet legs = inv.legs;
+        Predmet feet = inv.feet; //na drug stran rpcja je treba klicat onLoaddoutChanged();
+
+        //--------------------- NEUTRALSTATEHANDLER 1
+        NetworkPlayerNeutralStateHandler neut = GetComponent<NetworkPlayerNeutralStateHandler>();
+        Predmet tool = neut.activeTool;
+        //---------------------COMBAT 2
+        //tle se najde tud trenutni weapon
+        NetworkPlayerCombatHandler c = GetComponent<NetworkPlayerCombatHandler>();
+        byte combat_State = c.Combat_mode;
+        bool blocking = c.Blocking;
+        Predmet equipped_shield = c.currently_equipped_shield;
+        Predmet equipped_weapon = c.currently_equipped_weapon;
+        byte direction = c.weapon_direction;
+        bool is_readying = c.is_readying_attack;
+        bool ready_atk = c.ready_attack;
+        bool exec_atk = c.executing_attack;
+        //--------------------- ANIMATION 3
+        //animacije bom ubistvu DIREKT preslikov trenutno stanje kot je. ce se da forsirat state machine bi blo awesome.  skripta ne hrani cist nic tko da me zanima izkljucno samo Animator
+        Animator an = GetComponent<Animator>();//cmo probat poslat direkt animator cez? :D jk
+
+        int an_combat = an.GetInteger("combat_mode");
+        //walking vertical
+        //ready_attack trigger pomoje skippamo? you cant rly get trigger
+        int an_dir = an.GetInteger("attack_direction");
+        bool an_shield = an.GetBool("shield_equipped");
+        bool an_blocking = an.GetBool("combat_blocking");
+        bool an_crouched = an.GetBool("crouched");
+        bool an_grounded = an.GetBool("grounded");
+        int an_weapon_anim_cl = an.GetInteger("weapon_animation_class");
+
+
+        PlayerSynchronizationContainer Player_Data_Full = new PlayerSynchronizationContainer(
+             pos,
+             rot,
+             crouched,
+             displayName,
+             downed,
+             dead,
+             health,
+             head,
+             chest,
+             hands,
+             legs,
+             feet,
+             tool,
+             combat_State,
+             blocking,
+             equipped_shield,
+             equipped_weapon,
+             direction,
+             is_readying,
+             ready_atk,
+             exec_atk,
+             an_combat,
+             an_dir,
+             an_shield,
+             an_blocking,
+             an_crouched,
+             an_grounded,
+             an_weapon_anim_cl
+        );
+
+        networkObject.SendRpc(new_player, RPC_SERVER_SEND_ALL_THIS_TO_NEW_PLAYER, Player_Data_Full.ObjectToByteArray());
+
+    }
+
+    private void update_non_owner_gameObject_with_data_on_startup(PlayerSynchronizationContainer data) {
+        Debug.Log("Started update of player with owner  networkid " + networkObject.Owner.NetworkId);
+
+
+
+        Debug.Log("Updating movement for " + networkObject.Owner.NetworkId);
+        NetworkPlayerMovement mov = GetComponent<NetworkPlayerMovement>();
+        transform.position=new Vector3(data.pos_x,data.pos_y,data.pos_z);//Vector3 in Quaternion nosta serializable... nc od unity ni serializable pac
+        transform.rotation = new Quaternion(data.rot_x, data.rot_y, data.rot_z,data.rot_w);
+        mov.isCrouched=data.crouched;
+
+        mov.OnRemotePlayerDataSet();
+
+        Debug.Log("Movement updated for " + networkObject.Owner.NetworkId);
+
+        //---------------Stats 
+        Debug.Log("Updating stats for " + networkObject.Owner.NetworkId);
+        this.playerName = data.displayName;
+        this.downed = data.downed;
+        this.dead=data.dead;
+        this.health=data.health;
+
+        OnRemotePlayerDataSet();
         
 
+        //---------------------INVENTORY 0
+        Debug.Log("Updating inventory for " + networkObject.Owner.NetworkId);
+        NetworkPlayerInventory inv = GetComponent<NetworkPlayerInventory>();
 
+        inv.head=data.head;
+        inv.chest=data.chest;
+        inv.hands=data.hands;
+        inv.legs=data.legs;
+        inv.feet=data.feet; //na drug stran rpcja je treba klicat onLoaddoutChanged();
+        inv.OnRemotePlayerDataSet();
+
+        //--------------------- NEUTRALSTATEHANDLER 1
+        Debug.Log("Updating neutralStateHandler for " + networkObject.Owner.NetworkId);
+        NetworkPlayerNeutralStateHandler neut = GetComponent<NetworkPlayerNeutralStateHandler>();
+        neut.activeTool=data.tool;
+
+        neut.OnRemotePlayerDataSet(data.equipped_weapon,data.equipped_shield);// izbiro toola rabmo nastimat po tem ko dobimo shield! pohandla tud izbiro weapona tko da nerabmo tega u combathandlerju!
+       
+
+        //---------------------COMBAT 2
+        Debug.Log("Updating combat for " + networkObject.Owner.NetworkId);
+        //tle se najde tud trenutni weapon
+        NetworkPlayerCombatHandler c = GetComponent<NetworkPlayerCombatHandler>();
+        c.Combat_mode=data.combat_State;
+        c.Blocking=data.blocking;
+        
+        c.weapon_direction = data.direction;
+        c.is_readying_attack = data.is_readying;
+        c.ready_attack=data.ready_atk;
+        c.executing_attack=data.exec_atk;
+        c.OnRemotePlayerDataSet();
+        //--------------------- ANIMATION 3
+        //animacije bom ubistvu DIREKT preslikov trenutno stanje kot je. ce se da forsirat state machine bi blo awesome.  skripta ne hrani cist nic tko da me zanima izkljucno samo Animator
+        Debug.Log("Updating animator for " + networkObject.Owner.NetworkId);
+        Animator an = GetComponent<Animator>();
+
+        //za animator pomoje bi blo treba kr u skriptah handlat stvari al kko....
+        //tole bo se konkretna jeba...
+
+        an.SetInteger("combat_mode",data.an_combat);
+        an.SetInteger("attack_direction", data.an_dir);
+        an.SetBool("shield_equipped", data.an_shield);
+        an.SetBool("combat_blocking", data.an_blocking);
+        an.SetBool("crouched", data.an_crouched);
+        an.SetInteger("weapon_animation_class", data.an_weapon_anim_cl);
+
+
+        //kar je kode za animator je treba pohandlat tukej zaenkrat
+
+        //bool an_grounded = an.GetBool("grounded");
+
+        Debug.Log("REMOTE PLAYER UPDATE COMPLETE FOR " + networkObject.Owner.NetworkId);
+    }
+
+    private void OnRemotePlayerDataSet()
+    {
+        updateDisplayName();
+        //ce je downed nj bi animator handlov??
+        if (this.dead)
+            local_setDrawingPlayer(false);//i think this is enough
+    }
+
+    private void load_player_data_on_connected() {
+        uint steamId = 666;
+        Debug.Log("Checking if Player with steamid of " + steamId + " has any saved data.");
+        PlayerManager.load_player_from_saved_data(steamId,gameObject);
     }
 
     private void save_player_on_disconnect(NetworkingPlayer disconnecting_networkingPlayer, NetWorker disconnecting_networker) {
@@ -196,6 +400,24 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
 
         networkObject.Destroy();
     }
+
+    /// <summary>
+    /// KO SE DATA NALOZI MORAMO NEKAK PAMETNO POSKRBET DA SE STVARI APPLAYAjo
+    /// </summary>
+    internal void OnPlayerDataLoaded()
+    {
+        Debug.Log("Applying Stats.");
+        //UpdateTeam rpc     nevem kko bo pohandlat team zaenkrat.
+        if (!networkObject.IsServer) return;
+        updateDisplayName();
+        //health
+        if (this.dead)        
+            handle_death_player();
+        else
+            networkObject.SendRpc(RPC_SET_HEALTH,Receivers.All, this.health,"null");
+    }
+
+
 
     private void pre_disconnect_cleanup()
     {
@@ -375,28 +597,28 @@ napadenmu playerju da si poupdejta health. ta player pol ko si je updejtov healt
             {
                 temp = npi.getHeadItem();
                 if (temp != null)
-                    armor_damage_reduction_modifier = temp.item.damage_reduction;
+                    armor_damage_reduction_modifier = temp.getItem().damage_reduction;
 
             }
             else if (tag_passive.Equals("coll_1"))
             {
                 temp = npi.getChestItem();
                 if (temp != null)
-                    armor_damage_reduction_modifier = temp.item.damage_reduction;
+                    armor_damage_reduction_modifier = temp.getItem().damage_reduction;
 
                 temp = npi.getHandsItem();
                 if (temp != null)
-                    armor_damage_reduction_modifier += temp.item.damage_reduction;
+                    armor_damage_reduction_modifier += temp.getItem().damage_reduction;
 
             }
             else if (tag_passive.Equals("coll_2")) {
                 temp = npi.getLegsItem();
                 if (temp != null)
-                    armor_damage_reduction_modifier = temp.item.damage_reduction;
+                    armor_damage_reduction_modifier = temp.getItem().damage_reduction;
 
                 temp = npi.getFeetItem();
                 if (temp != null)
-                    armor_damage_reduction_modifier += temp.item.damage_reduction;
+                    armor_damage_reduction_modifier += temp.getItem().damage_reduction;
             }
 
             armor_damage_reduction_modifier = 1 - armor_damage_reduction_modifier;
@@ -472,29 +694,29 @@ napadenmu playerju da si poupdejta health. ta player pol ko si je updejtov healt
             {
                 temp = npi.getHeadItem();
                 if (temp != null)
-                    armor_damage_reduction_modifier = temp.item.damage_reduction;
+                    armor_damage_reduction_modifier = temp.getItem().damage_reduction;
 
             }
             else if (tag.Equals("coll_1"))
             {
                 temp = npi.getChestItem();
                 if (temp != null)
-                    armor_damage_reduction_modifier = temp.item.damage_reduction;
+                    armor_damage_reduction_modifier = temp.getItem().damage_reduction;
 
                 temp = npi.getHandsItem();
                 if (temp != null)
-                    armor_damage_reduction_modifier += temp.item.damage_reduction;
+                    armor_damage_reduction_modifier += temp.getItem().damage_reduction;
 
             }
             else if (tag.Equals("coll_2"))
             {
                 temp = npi.getLegsItem();
                 if (temp != null)
-                    armor_damage_reduction_modifier = temp.item.damage_reduction;
+                    armor_damage_reduction_modifier = temp.getItem().damage_reduction;
 
                 temp = npi.getFeetItem();
                 if (temp != null)
-                    armor_damage_reduction_modifier += temp.item.damage_reduction;
+                    armor_damage_reduction_modifier += temp.getItem().damage_reduction;
             }
 
             armor_damage_reduction_modifier = 1 - armor_damage_reduction_modifier;
@@ -699,7 +921,7 @@ napadenmu playerju da si poupdejta health. ta player pol ko si je updejtov healt
 
 
         string tag = args.GetNext<string>();
-        if (!tag.Equals("block_player") && !tag.Equals("revive"))
+        if (tag.Equals("coll_0") || tag.Equals("coll_1") || tag.Equals("coll_2"))
             play_random_sound_effect(this.sfx_player_hit_with_sword);
         this.healthBar.fillAmount = this.health / (this.max_health);
         UILogic.TeamPanel.refreshHp(networkObject.NetworkId, this.healthBar.fillAmount);
@@ -1184,84 +1406,6 @@ napadenmu playerju da si poupdejta health. ta player pol ko si je updejtov healt
         }
     }
 
-    
-
-
-
-
-
-
-
-
-
-
-    /// <summary>
-    /// sprozi se na vsah clientih za ta objekt. poslje server vsem podatke o tem objektu. ta objekt se je ravnokar REconnectal na server in to je bilo njegovo prejsnje stanje.
-    /// </summary>
-    /// <param name="args"></param>
-    public override void ReceivePersonalDataOnConnection(RpcArgs args)
-    {
-
-        if (args.Info.SendingPlayer.NetworkId == 0)
-        {
-            Debug.Log("Client: Updating player data with server side data.");
-
-            transform.position = args.GetNext<Vector3>();
-            transform.rotation = args.GetNext<Quaternion>();
-            this.playerName = args.GetNext<string>();
-            this.dead = args.GetNext<bool>();
-            this.health = args.GetNext<float>();
-
-            this.npi.SetPredmetLoadout(Predmet.createNewPredmet(args.GetNext<string>()));
-            this.npi.SetPredmetLoadout(Predmet.createNewPredmet(args.GetNext<string>()));
-            this.npi.SetPredmetLoadout(Predmet.createNewPredmet(args.GetNext<string>()));
-            this.npi.SetPredmetLoadout(Predmet.createNewPredmet(args.GetNext<string>()));
-            this.npi.SetPredmetLoadout(Predmet.createNewPredmet(args.GetNext<string>()));
-            this.npi.SetPredmetLoadout(Predmet.createNewPredmet(args.GetNext<string>()));//Backpack??
-
-
-
-            updateDisplayName();
-            this.npi.refresh_UMA_equipped_gear();
-            GetComponent<NetworkPlayerCombatHandler>().update_equipped_weapons();
-
-        }
-    }
-
-
-
-
-
-    /// <summary>
-    /// sprozi se, ko se player sconnecta na server. poskrbi, da se playerju prinesejo pravilni podatki o njegovem characterju. moral bi poskrbet tud da drugi vidjo njegovga characterja updejtano normalno
-    /// </summary>
-    /// <param name="p"></param>
-    public void ServerSendAll(NetworkingPlayer p) {
-        if (!networkObject.IsServer) return;
-
-        //kar se tice guilda nrdimo kr guild update.
-        NetworkGuildManager.Instance.sendUserInfoResponseTo(p);
-        //health
-        networkObject.SendRpc(p, RPC_REFRESH_HEALTH, this.health);
-        //ostalo
-        networkObject.SendRpc(p,RPC_SEND_ALL, this.playerName, this.downed, this.dead);
-
-    }
-
-    /// <summary>
-    /// player dobi podatke od NetworkPlayerStats skripte ki mu se manjklajo za sinhronizacijo
-    /// </summary>
-    /// <param name="args"></param>
-    public override void SendAll(RpcArgs args)
-    {
-        if (args.Info.SendingPlayer.NetworkId == 0) {
-            this.playerName=args.GetNext<string>();
-            this.downed = args.GetNext<bool>();
-            this.dead = args.GetNext<bool>();
-            updateDisplayName();
-        }
-    }
-
     public override void RefreshHealth(RpcArgs args)
     {
         if (args.Info.SendingPlayer.NetworkId == 0)
@@ -1333,4 +1477,13 @@ napadenmu playerju da si poupdejta health. ta player pol ko si je updejtov healt
             networkObject.SendRpc(RPC_RESPAWN_SIGNAL, Receivers.All, new Vector3(315, 38, 564));
     }
 
+    public override void ServerSendAllThisToNewPlayer(RpcArgs args)
+    {
+        if (args.Info.SendingPlayer.IsHost) {
+            Debug.Log("Received data from server to setup other clients and server player objects");
+            byte[] b_arr = args.GetNext<byte[]>();
+            PlayerSynchronizationContainer dat = b_arr.ByteArrayToObject<PlayerSynchronizationContainer>();
+            update_non_owner_gameObject_with_data_on_startup(dat);
+        }
+    }
 }

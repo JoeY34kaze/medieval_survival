@@ -20,7 +20,7 @@ public class ItemDropHandler : MonoBehaviour, IDropHandler , IPointerClickHandle
         RectTransform invSlot = transform as RectTransform;
         Debug.Log("dropped "+invSlot.name);
         if (GetComponent<InventorySlot>().GetPredmet() != null) {//ce smo potegnil backpack loh sam vrzemo na tla. nemors ga dat u inventorij k ni tak item
-            if (GetComponent<InventorySlot>().GetPredmet().item.type == Item.Type.backpack)
+            if (GetComponent<InventorySlot>().GetPredmet().getItem().type == Item.Type.backpack)
             {
                 this.npi.backpackSpot.GetComponentInChildren<NetworkBackpack>().local_player_backpack_unequip_request();
                 return;
@@ -111,7 +111,7 @@ public class ItemDropHandler : MonoBehaviour, IDropHandler , IPointerClickHandle
         InventorySlot iss= GetComponent<InventorySlot>();
         if (eventData.button == PointerEventData.InputButton.Right && iss.GetPredmet() != null)
         {
-            if (iss.GetPredmet().item.type == Item.Type.backpack)//ce je backpack ga dropa
+            if (iss.GetPredmet().getItem().type == Item.Type.backpack)//ce je backpack ga dropa
                 this.npi.backpackSpot.GetComponentInChildren<NetworkBackpack>().local_player_backpack_unequip_request();
             else if (iss is InventorySlotPersonal)//ce je personal inventorij al pa loadout k je blo to spisan ze prej
                 this.npi.OnRightClickPersonalInventory(gameObject);

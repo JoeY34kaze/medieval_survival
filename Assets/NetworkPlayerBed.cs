@@ -56,7 +56,7 @@ public class NetworkPlayerBed : NetworkPlayerBedBehavior
     public override void SetTimer(RpcArgs args)
     {
         if (args.Info.SendingPlayer.IsHost) {
-            this.seconds = transform.GetComponent<NetworkPlaceable>().p.item.respawn_time;//TOLE TREBA NEKAK PAMETNO NRDIT DA SE ODSTEVA. MOGOCE DA PRIMERJA TIMESTAMPE AL PA DA SE FURA KORUTINA KO JE CD AKTIVEN. ( NE NA VSEH POSTELJAH! ) NAJBRZ TIMESTAMP
+            this.seconds = transform.GetComponent<NetworkPlaceable>().p.getItem().respawn_time;//TOLE TREBA NEKAK PAMETNO NRDIT DA SE ODSTEVA. MOGOCE DA PRIMERJA TIMESTAMPE AL PA DA SE FURA KORUTINA KO JE CD AKTIVEN. ( NE NA VSEH POSTELJAH! ) NAJBRZ TIMESTAMP
         }
     }
     public override void nameRequest(RpcArgs args)

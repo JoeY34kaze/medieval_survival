@@ -266,24 +266,6 @@ public class NetworkPlayerAnimationLogic : NetworkPlayerAnimationBehavior
         anim.SetBool("crouched", b);
     }
 
-    public override void SendAll(RpcArgs args)
-    {
-        if (args.Info.SendingPlayer.NetworkId == 0) {
-            anim.SetInteger("combat_mode", args.GetNext<int>());
-            anim.SetBool("combat_blocking", args.GetNext<bool>());
-            anim.SetBool("crouched", args.GetNext<bool>());
-            anim.SetInteger("weapon_animation_class", args.GetNext<int>());
-            anim.SetBool("downed", args.GetNext<bool>());
-        }
-    }
-
-    public void ServerSendAll(NetworkingPlayer p) {
-        if (networkObject.IsServer)
-        {
-            networkObject.SendRpc(p, RPC_SEND_ALL, anim.GetInteger("combat_mode"), anim.GetBool("combat_blocking"), anim.GetBool("crouched"), anim.GetInteger("weapon_animation_class"), anim.GetBool("downed"));
-        }
-    }
-
     public void BeginExecution() {
         //Debug.Log(NetworkManager.Instance.Networker.Me.NetworkId + " " + networkObject.Owner.NetworkId);
         networkObject.SendRpc(RPC_NETWORK_EXECUTION_UPDATE, Receivers.All);
@@ -320,7 +302,7 @@ public class NetworkPlayerAnimationLogic : NetworkPlayerAnimationBehavior
     {
         
         if(p!=null)
-            anim.SetInteger("weapon_animation_class", p.item.weapon_animation_class);
+            anim.SetInteger("weapon_animation_class", p.getItem().weapon_animation_class);
     }
 
     internal void setCombatBlocking(bool blocking, byte dir)

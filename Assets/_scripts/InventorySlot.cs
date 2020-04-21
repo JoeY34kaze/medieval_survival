@@ -40,15 +40,15 @@ public abstract class InventorySlot : MonoBehaviour
         if (p == null) { ClearSlot(); return; };
 
         predmet = p;
-        icon.sprite = p.item.icon;
+        icon.sprite = p.getItem().icon;
         icon.enabled = true;
 
-        if (p.item.hasDurability)
+        if (p.getItem().hasDurability)
         {
             if (this.durability_bar != null)
             {
                 this.durability_bar.transform.parent.gameObject.SetActive(true);
-                this.durability_bar.fillAmount = p.current_durabilty / p.item.Max_durability;
+                this.durability_bar.fillAmount = p.current_durabilty / p.getItem().Max_durability;
             }
         }
         else {

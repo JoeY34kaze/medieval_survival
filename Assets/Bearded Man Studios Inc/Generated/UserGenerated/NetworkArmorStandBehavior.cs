@@ -4,8 +4,8 @@ using UnityEngine;
 
 namespace BeardedManStudios.Forge.Networking.Generated
 {
-	[GeneratedRPC("{\"types\":[[\"uint\", \"int\"][\"string\", \"string\", \"string\", \"string\", \"string\", \"string\", \"string\", \"string\"][][\"uint\", \"byte\"]]")]
-	[GeneratedRPCVariableNames("{\"types\":[[\"server_id\", \"collider\"][\"head\", \"chest\", \"hands\", \"legs\", \"feet\", \"weapon\", \"shield\", \"ranged\"][][\"server_id\", \"tip_interakcije\"]]")]
+	[GeneratedRPC("{\"types\":[[\"uint\", \"int\"][\"byte[]\"][][\"uint\", \"byte\"]]")]
+	[GeneratedRPCVariableNames("{\"types\":[[\"server_id\", \"collider\"][\"predmet_arr\"][][\"server_id\", \"tip_interakcije\"]]")]
 	public abstract partial class NetworkArmorStandBehavior : NetworkBehavior
 	{
 		public const byte RPC_ARMOR_STAND_INTERACTION_REQUEST = 0 + 5;
@@ -26,7 +26,7 @@ namespace BeardedManStudios.Forge.Networking.Generated
 
 			base.SetupHelperRpcs(networkObject);
 			networkObject.RegisterRpc("ArmorStandInteractionRequest", ArmorStandInteractionRequest, typeof(uint), typeof(int));
-			networkObject.RegisterRpc("ArmorStandRefresh", ArmorStandRefresh, typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string));
+			networkObject.RegisterRpc("ArmorStandRefresh", ArmorStandRefresh, typeof(byte[]));
 			networkObject.RegisterRpc("NetworkRefreshRequest", NetworkRefreshRequest);
 			networkObject.RegisterRpc("ArmorStandBulkInteractionRequest", ArmorStandBulkInteractionRequest, typeof(uint), typeof(byte));
 
@@ -113,14 +113,7 @@ namespace BeardedManStudios.Forge.Networking.Generated
 		public abstract void ArmorStandInteractionRequest(RpcArgs args);
 		/// <summary>
 		/// Arguments:
-		/// string head
-		/// string chest
-		/// string hands
-		/// string legs
-		/// string feet
-		/// string weapon
-		/// string shield
-		/// string ranged
+		/// byte[] predmet_arr
 		/// </summary>
 		public abstract void ArmorStandRefresh(RpcArgs args);
 		/// <summary>

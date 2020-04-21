@@ -80,7 +80,7 @@ public class PlayerManager : MonoBehaviour
     {
         try
         {
-            Debug.LogWarning("Not implemented yet.");
+            Debug.LogWarning("Nothing to save in Interaction.");
             return true;
         }
         catch (Exception e) {
@@ -93,6 +93,9 @@ public class PlayerManager : MonoBehaviour
     {
         try
         {
+            uint net_id = s.networkObject.Owner.NetworkId;
+            uint steamId = 666;
+            PlayerState ps = PlayerManager.get_playerStateForPlayer(steamId);
             Debug.LogWarning("Not implemented yet.");
             return true;
         }
@@ -107,7 +110,7 @@ public class PlayerManager : MonoBehaviour
     {
         try
         {
-            Debug.LogWarning("Not implemented yet.");
+            Debug.LogWarning("Not saving anything in combat handler.");
             return true;
         }
         catch (Exception e)
@@ -121,8 +124,21 @@ public class PlayerManager : MonoBehaviour
     {
         try
         {
-            Debug.LogWarning("Not implemented yet.");
+            uint net_id = s.networkObject.Owner.NetworkId;
+            uint steamId = 666;
+            PlayerState ps = PlayerManager.get_playerStateForPlayer(steamId);
+            //List<PredmetRecepie> craftingQueue;   kaj nrdit z crafting queue?- skenslat vse i guess pa pol shrant pomoje
+            s.cancelAllCrafting_server();
+            ps.predmeti_personal = s.predmeti_personal;
+            ps.predmeti_hotbar = s.predmeti_hotbar;
+            ps.head=s.head;
+            ps.chest=s.chest;
+            ps.hands=s.hands;
+            ps.legs=s.legs;
+            ps.feet=s.feet;
+            //public Predmet backpack;   ????????? zaenkrat pade na tla
             return true;
+
         }
         catch (Exception e)
         {
@@ -135,7 +151,7 @@ public class PlayerManager : MonoBehaviour
     {
         try
         {
-            Debug.LogWarning("Not implemented yet.");
+            Debug.LogWarning("Not saving anything in animation logic.");
             return true;
         }
         catch (Exception e)
@@ -149,7 +165,26 @@ public class PlayerManager : MonoBehaviour
     {
         try
         {
-            Debug.LogWarning("Not implemented yet.");
+            uint net_id = s.networkObject.Owner.NetworkId;
+            uint steamId = 666;
+            PlayerState ps = PlayerManager.get_playerStateForPlayer(steamId);
+
+            ps.playerName = s.playerName;
+            if (s.downed || s.dead) {
+                ps.dead = true;
+                ps.health = 0;
+            } else
+                ps.health = s.health;
+            ps.player_displayed_name = s.player_displayed_name.text;//tole verjetn nastavt drugje - runtime mashup
+            ps.team=s.getTeam();
+
+            //---------------------------------------------------- GUILD NAJ BI NACELOMA SOU U GUILD MANAGER
+            /*
+            public string name_guild = "no guild yet";
+            public string tag_guild = "no tag yet";
+            public Color color_guild = Color.red;
+            public byte[] image_guild;
+            */
             return true;
         }
         catch (Exception e)
@@ -157,6 +192,50 @@ public class PlayerManager : MonoBehaviour
             Debug.LogError("Exception when saving player" + s.GetType().Name + " " + e.Message);
             return false;
         }
+    }
+
+    internal static void load_player_from_saved_data(uint steamId, GameObject player_gameObject)
+    {
+        NetworkPlayerStats nps = player_gameObject.GetComponent<NetworkPlayerStats>();
+
+        uint net_id = nps.networkObject.Owner.NetworkId;
+
+        PlayerState ps = PlayerManager.get_playerStateForPlayer(steamId);
+        if (ps == null) { Debug.Log("No player data found for steamid "+steamId+"."); return; }
+
+        Debug.Log("Saved data found for player " + steamId);
+        //-------------------------------------MOVEMENT-------------------------
+        Debug.Log("Loading Movement");
+        NetworkPlayerMovement m = player_gameObject.GetComponent<NetworkPlayerMovement>();
+        m.current_gravity_velocity=ps.current_gravity_velocity; 
+        player_gameObject.transform.position = ps.position;
+        player_gameObject.transform.rotation=ps.rotation; 
+        m.OnPlayerDataLoaded();
+
+
+        //-----------------------------------Inventory---------------------------
+        NetworkPlayerInventory npi = player_gameObject.GetComponent<NetworkPlayerInventory>();
+        Debug.Log("Loading Inventory");
+        npi.predmeti_personal=ps.predmeti_personal;
+        npi.predmeti_hotbar=ps.predmeti_hotbar;
+        npi.head=ps.head;
+        npi.chest=ps.chest;
+        npi.hands=ps.hands; 
+        npi.legs=ps.legs;
+        npi.feet=ps.feet;
+        npi.OnPlayerDataLoaded();
+
+        //------------------------------------STATS------------------------------
+        Debug.Log("Loading Stats");
+        nps.playerName = ps.playerName;
+        nps.dead = ps.dead;
+        nps.health = ps.health;
+        nps.player_displayed_name.text = ps.player_displayed_name;
+        nps.team = ps.team;
+        nps.OnPlayerDataLoaded();
+        //-----------------------------------------------------------------------
+        Debug.Log("No other scripts contain anything that needs loaded. Complete!");
+
     }
 
     #endregion
@@ -198,7 +277,26 @@ public class PlayerManager : MonoBehaviour
         public Vector3 position { get; internal set; }
         public Quaternion rotation { get; internal set; }
 
-        //-------------------------------------------------------------------
+    //-----------------------NETWORKPLAYERINVENTORY.CS--------------------------------------------
+        public Predmet[] predmeti_personal { get; internal set; }
+        public Predmet[] predmeti_hotbar { get; internal set; }
+        public Predmet head { get; internal set; }
+        public Predmet chest { get; internal set; }
+        public Predmet hands { get; internal set; }
+        public Predmet legs { get; internal set; }
+        public Predmet feet { get; internal set; }
+
+    //-----------------------NETWORKPLAYERSTATS.CS--------------------------------------------
+
+
+        public string playerName { get; internal set; }
+        public bool dead { get; internal set; }
+        public float health { get; internal set; }
+        public string player_displayed_name { get; internal set; }
+        public uint[] team { get; internal set; }
+
+    //------------------------------------   CONSTRUCTOR ---------------------------------------
+
         public PlayerState(uint previousNetworkId, uint steamId) {
             this.previousNetworkId = previousNetworkId;
             this.steamId = steamId;

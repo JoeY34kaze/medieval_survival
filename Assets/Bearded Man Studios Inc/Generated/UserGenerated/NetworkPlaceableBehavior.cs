@@ -4,8 +4,8 @@ using UnityEngine;
 
 namespace BeardedManStudios.Forge.Networking.Generated
 {
-	[GeneratedRPC("{\"types\":[[\"Quaternion\", \"int\"][\"int\", \"bool\"][][\"string\"][]]")]
-	[GeneratedRPCVariableNames("{\"types\":[[\"rotation\", \"sibling_index_of_attachment_point\"][\"sib\", \"status\"][][\"predmet_string\"][]]")]
+	[GeneratedRPC("{\"types\":[[\"Quaternion\", \"int\"][\"int\", \"bool\"][][\"byte[]\"][]]")]
+	[GeneratedRPCVariableNames("{\"types\":[[\"rotation\", \"sibling_index_of_attachment_point\"][\"sib\", \"status\"][][\"predmet\"][]]")]
 	public abstract partial class NetworkPlaceableBehavior : NetworkBehavior
 	{
 		public const byte RPC_NETWORK_PLACEABLE_ATTACHMENT_REQUEST = 0 + 5;
@@ -29,7 +29,7 @@ namespace BeardedManStudios.Forge.Networking.Generated
 			networkObject.RegisterRpc("NetworkPlaceableAttachmentRequest", NetworkPlaceableAttachmentRequest, typeof(Quaternion), typeof(int));
 			networkObject.RegisterRpc("NetworkAttachmentUpdate", NetworkAttachmentUpdate, typeof(int), typeof(bool));
 			networkObject.RegisterRpc("ClientDurabilityRequest", ClientDurabilityRequest);
-			networkObject.RegisterRpc("ServerUpdatePredmet", ServerUpdatePredmet, typeof(string));
+			networkObject.RegisterRpc("ServerUpdatePredmet", ServerUpdatePredmet, typeof(byte[]));
 			networkObject.RegisterRpc("clientRequestPredmetUpdate", clientRequestPredmetUpdate);
 
 			networkObject.onDestroy += DestroyGameObject;

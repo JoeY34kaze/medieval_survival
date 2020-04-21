@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace BeardedManStudios.Forge.Networking.Generated
 {
-	[GeneratedRPC("{\"types\":[[\"int\"][\"int\", \"bool\", \"string\", \"string\", \"byte\", \"bool\", \"bool\", \"bool\"][\"byte\"][\"bool\", \"byte\"][][\"bool\"][\"byte\"][\"byte\"][][]]")]
+	[GeneratedRPC("{\"types\":[[\"int\"][\"int\", \"bool\", \"byte[]\", \"byte[]\", \"byte\", \"bool\", \"bool\", \"bool\"][\"byte\"][\"bool\", \"byte\"][][\"bool\"][\"byte\"][\"byte\"][][]]")]
 	[GeneratedRPCVariableNames("{\"types\":[[\"mode\"][\"remote_combat_mode\", \"remote_blocking\", \"equipped_weapon\", \"equipped_shield\", \"remote_direction\", \"readying_attack\", \"ready_attack\", \"executing_attack\"][\"direction\"][\"readying\", \"direction\"][][\"executing_attack\"][\"dir\"][\"dir\"][][]]")]
 	public abstract partial class NetworkPlayerCombatBehavior : NetworkBehavior
 	{
@@ -32,7 +32,7 @@ namespace BeardedManStudios.Forge.Networking.Generated
 
 			base.SetupHelperRpcs(networkObject);
 			networkObject.RegisterRpc("ChangeCombatModeResponse", ChangeCombatModeResponse, typeof(int));
-			networkObject.RegisterRpc("SendAll", SendAll, typeof(int), typeof(bool), typeof(string), typeof(string), typeof(byte), typeof(bool), typeof(bool), typeof(bool));
+			networkObject.RegisterRpc("SendAll", SendAll, typeof(int), typeof(bool), typeof(byte[]), typeof(byte[]), typeof(byte), typeof(bool), typeof(bool), typeof(bool));
 			networkObject.RegisterRpc("start_attack_request", start_attack_request, typeof(byte));
 			networkObject.RegisterRpc("start_attack_response", start_attack_response, typeof(bool), typeof(byte));
 			networkObject.RegisterRpc("execute_attack_request", execute_attack_request);
@@ -126,8 +126,8 @@ namespace BeardedManStudios.Forge.Networking.Generated
 		/// Arguments:
 		/// int remote_combat_mode
 		/// bool remote_blocking
-		/// string equipped_weapon
-		/// string equipped_shield
+		/// byte[] equipped_weapon
+		/// byte[] equipped_shield
 		/// byte remote_direction
 		/// bool readying_attack
 		/// bool ready_attack

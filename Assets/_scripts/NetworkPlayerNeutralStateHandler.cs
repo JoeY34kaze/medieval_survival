@@ -286,10 +286,18 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
         return false;
     }
 
+    internal void OnRemotePlayerDataSet(Predmet weapon,Predmet shield)
+    {
+        if (weapon == null)
+            setSelectedItems(this.activeTool, shield);
+        else
+            setSelectedItems(weapon, shield);
+    }
+
     private bool is_in_range_for_placement(Vector3 placeable_position)
     {
         float range = this.regular_placement_range;
-        if (this.activePlaceable.item.PlacementType == Item.SnappableType.siege_weapon) range = 30f;
+        if (this.activePlaceable.getItem().PlacementType == Item.SnappableType.siege_weapon) range = 30f;
 
         float distance = Vector3.Distance(transform.position, placeable_position);
         return distance < range;
@@ -529,20 +537,19 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
         if (this.selected_index_shield != -1)
         {
             if (npi.predmeti_hotbar[this.selected_index_shield] == null) this.selected_index = -1;
-            else if (npi.predmeti_hotbar[this.selected_index_shield].item.type != Item.Type.shield) this.selected_index_shield = -1;
+            else if (npi.predmeti_hotbar[this.selected_index_shield].getItem().type != Item.Type.shield) this.selected_index_shield = -1;
         }
 
         if (networkObject.IsServer)
         {
             npi.sendNetworkUpdate(true, false);
-            networkObject.SendRpc(RPC_BAR_SLOT_SELECTION_RESPONSE, Receivers.All, (this.selected_index == -1) ? "-1" : npi.predmeti_hotbar[this.selected_index].toNetworkString(), this.selected_index, (this.selected_index_shield == -1) ? "-1" : npi.predmeti_hotbar[this.selected_index_shield].toNetworkString(), selected_index_shield);
+            networkObject.SendRpc(RPC_BAR_SLOT_SELECTION_RESPONSE, Receivers.All, npi.predmeti_hotbar[this.selected_index].ObjectToByteArray(), this.selected_index, npi.predmeti_hotbar[this.selected_index_shield].ObjectToByteArray(), selected_index_shield);
         }
     }
 
     internal void NeutralStateSetup()
     {
-        //Debug.Log("not implemented yet");
-        if (!networkObject.IsOwner) Debug.Log("NeutralStateSetup se klice tudi na clientu! juhu!");
+
     }
 
     /// <summary>
@@ -569,14 +576,14 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
     private int getBarItemIdFromIndex(int id) {
         Predmet k = npi.getBarPredmet(id);
         if (k == null) return -1;
-        else return k.item.id;
+        else return k.getItem().id;
     }
 
     private Item.Type getBarItemTypeFromIndex(int id)
     {
         Predmet k = npi.getBarPredmet(id);
         if (k == null) return Item.Type.chest;
-        else return k.item.type;
+        else return k.getItem().type;
     }
 
     public override void BarSlotSelectionRequest(RpcArgs args)
@@ -601,7 +608,7 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
                         this.selected_index_shield = -1;
                     }
                     //ce mamo izbran shield in smo dobil index druzga shielda mormo zamenjat shield
-                    else if (this.selected_index_shield != -1 && i.item.type == Item.Type.shield)
+                    else if (this.selected_index_shield != -1 && i.getItem().type == Item.Type.shield)
                     {
                         this.selected_index_shield = index;
                     }//dobil smo ukaz da nj damo weapon stran
@@ -610,7 +617,7 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
                         this.selected_index = -1;
                     }
                     //ce mamo izbran weapon in shield in smo dobil nov weapon mormo zamenjat weapon
-                    else if (this.selected_index_shield != -1 && getBarItemTypeFromIndex(this.selected_index) == Item.Type.weapon && i.item.type == Item.Type.weapon)
+                    else if (this.selected_index_shield != -1 && getBarItemTypeFromIndex(this.selected_index) == Item.Type.weapon && i.getItem().type == Item.Type.weapon)
                     {
                         this.selected_index = index;
                     }
@@ -632,7 +639,7 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
 
                 //tle posljemo zdej rpc
                 //TODO: ownerju poslat druugacn rpc kot drugim, drugi nebi smel vidt indexa ker je to slaba stvar - ESP
-                networkObject.SendRpc(RPC_BAR_SLOT_SELECTION_RESPONSE, Receivers.All, (this.selected_index==-1)?"-1" : npi.predmeti_hotbar[this.selected_index].toNetworkString(), this.selected_index, (this.selected_index_shield == -1) ? "-1" : npi.predmeti_hotbar[this.selected_index_shield].toNetworkString(), selected_index_shield);
+                networkObject.SendRpc(RPC_BAR_SLOT_SELECTION_RESPONSE, Receivers.All,  npi.predmeti_hotbar[this.selected_index].ObjectToByteArray(), this.selected_index, npi.predmeti_hotbar[this.selected_index_shield].ObjectToByteArray(), selected_index_shield);
             }
         }
     }
@@ -649,43 +656,42 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
     public override void BarSlotSelectionResponse(RpcArgs args)
     {
         if (args.Info.SendingPlayer.NetworkId == 0) {
-            string predmet1 = args.GetNext<string>();
+            Predmet p = args.GetNext<byte[]>().ByteArrayToObject<Predmet>();
             int index = args.GetNext<int>();
 
-            string predmet2 = args.GetNext<string>();//za shield rabmo met 2 indexa in tko
+            Predmet predmet2 = args.GetNext<byte[]>().ByteArrayToObject<Predmet>();//za shield rabmo met 2 indexa in tko
             int index2 = args.GetNext<int>();
 
-            //Debug.Log("bar update - " + index);
-            Predmet p = Predmet.createNewPredmet(predmet1);
+
 
 
             //ce je enako stanje kot je zdj in je izbran indeks indeks placeable itema ne nrdimo nic ker to samo pomen da smo postavli en item z stacka k ga imamo. zdi se mal hacky ampak tak je. restructure code ksnej i guess - mogoce bo treba enako nrdit za puscice / javelins ksnej
             if(p!=null)
-                if(p.item!=null)
-                    if (p.item.type == Item.Type.placeable && this.current_placeable_item!=null)
-                        if(p.item.id == this.current_placeable_item.id)
+                if(p.getItem()!=null)
+                    if (p.getItem().type == Item.Type.placeable && this.current_placeable_item!=null)
+                        if(p.getItem().id == this.current_placeable_item.id)
                             return;
 
             //pohandlat rabmo sound effecte za izbiranje itema..
             if (p != null)
-                if (p.item != null)
-                    if (p.item.type == Item.Type.weapon)
+                if (p.getItem() != null)
+                    if (p.getItem().type == Item.Type.weapon)
                         stats.play_random_sound_effect(stats.sfx_draw_sword);
 
             if (networkObject.IsOwner)
             {
-                setSelectedItems(p, Predmet.createNewPredmet(predmet2));
+                setSelectedItems(p, predmet2);
                 bar_handler.setSelectedSlots(index,index2);
             }
             else {
-                setSelectedItems(p, Predmet.createNewPredmet(predmet2));
+                setSelectedItems(p, predmet2);
             }
 
             //ZA COMBAT MODE - precej neefektivno ker pri menjavi itema na baru se klice dvakrat rpc...........
             if (combat_handler.currently_equipped_weapon != null)
-                combat_handler.ChangeCombatMode(combat_handler.currently_equipped_weapon.item);
+                combat_handler.ChangeCombatMode(combat_handler.currently_equipped_weapon.getItem());
             else if (combat_handler.currently_equipped_shield != null)
-                combat_handler.ChangeCombatMode(combat_handler.currently_equipped_shield.item);
+                combat_handler.ChangeCombatMode(combat_handler.currently_equipped_shield.getItem());
             else//nimamo nc equipan
                 combat_handler.ChangeCombatMode(null);
             
@@ -708,18 +714,18 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
 
         if (i != null)
         {
-            if (i.item.type == Item.Type.tool)
+            if (i.getItem().type == Item.Type.tool)
             {
                 SetToolSelected(i);
                 //combat_handler.currently_equipped_weapon = null;
 
             }
-            else if (i.item.type == Item.Type.weapon || i.item.type == Item.Type.ranged)
+            else if (i.getItem().type == Item.Type.weapon || i.getItem().type == Item.Type.ranged)
             {
                 combat_handler.currently_equipped_weapon = i;
 
             }
-            else if (i.item.type == Item.Type.placeable)
+            else if (i.getItem().type == Item.Type.placeable)
             {
                 //Debug.Log("lets try to place down " + i.item.Display_name);
                 setPlaceableState(i);
@@ -763,12 +769,12 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
     private void setPlaceableState(Predmet i)
     {
         this.inPlaceableMode = true;
-        this.current_placeable_item = i.item;
+        this.current_placeable_item = i.getItem();
         this.activePlaceable = i;
 
         if (networkObject.IsOwner)
         {
-            this.CurrentLocalPlaceable = Instantiate(i.item.placeable_Local_object);
+            this.CurrentLocalPlaceable = Instantiate(i.getItem().placeable_Local_object);
             this.currentPlaceableCollider = this.CurrentLocalPlaceable.GetComponent<LocalPlaceableHelper>().getColliderForPlacement();
             this.currentPlaceableRenderers = this.CurrentLocalPlaceable.GetComponentsInChildren<MeshRenderer>();
         }
@@ -786,7 +792,7 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
                 {
                     if (i != null)
                     {
-                        if (temp.item.id == i.item.id)
+                        if (temp.item.id == i.item_id)
                         {
                             child.gameObject.SetActive(true);
                         }
@@ -807,7 +813,7 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
                 {
                     if (i != null)
                     {
-                        if (hammer.item.id == i.item.id)
+                        if (hammer.item.id == i.item_id)
                         {
                             child.gameObject.SetActive(true);
                         }
@@ -1015,7 +1021,7 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
         if (networkObject.IsServer && args.Info.SendingPlayer.NetworkId == networkObject.Owner.NetworkId) {
             Debug.Log("server - trying to place "+this.current_placeable_item.Display_name);
 
-            if (this.activePlaceable.item.PlacementType == Item.SnappableType.foundation || this.activePlaceable.item.PlacementType == Item.SnappableType.free_in_range || this.activePlaceable.item.PlacementType == Item.SnappableType.none || this.activePlaceable.item.PlacementType == Item.SnappableType.wall_attachment_free || this.activePlaceable.item.PlacementType == Item.SnappableType.siege_weapon)
+            if (this.activePlaceable.getItem().PlacementType == Item.SnappableType.foundation || this.activePlaceable.getItem().PlacementType == Item.SnappableType.free_in_range || this.activePlaceable.getItem().PlacementType == Item.SnappableType.none || this.activePlaceable.getItem().PlacementType == Item.SnappableType.wall_attachment_free || this.activePlaceable.getItem().PlacementType == Item.SnappableType.siege_weapon)
             {
                 Vector3 pos = args.GetNext<Vector3>();
                 if (!has_building_privilege(networkObject.Owner, pos)) return;
@@ -1026,7 +1032,7 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
                 NetworkPlaceableInstantiationServer(p, pos, rot);
                 this.npi.reduceCurrentActivePlaceable(this.selected_index);//sicer vrne bool da nam pove ce smo pobral celotn stack, ampak nima veze ker rabmo poslat update za kvantiteto v vsakem primeru.
                                                                            //nastavi selected index na -1 ce smo pobral vse - da gre lepo v rpc                       
-                networkObject.SendRpc(RPC_BAR_SLOT_SELECTION_RESPONSE, Receivers.All, (this.selected_index == -1) ? "-1" : npi.predmeti_hotbar[this.selected_index].toNetworkString(), this.selected_index, (this.selected_index_shield == -1) ? "-1" : npi.predmeti_hotbar[this.selected_index_shield].toNetworkString(), selected_index_shield);
+                networkObject.SendRpc(RPC_BAR_SLOT_SELECTION_RESPONSE, Receivers.All, npi.predmeti_hotbar[this.selected_index].ObjectToByteArray(), this.selected_index,  npi.predmeti_hotbar[this.selected_index_shield].ObjectToByteArray(), selected_index_shield);
 
             }
             else
@@ -1048,7 +1054,7 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
         Predmet p = new Predmet(pp);
 
         if (!networkObject.IsServer) { Debug.LogError("instanciacija na clientu ne na serverju!"); return null; }
-        int net_id = getPlaceableNetworkIdFromItem(p.item);
+        int net_id = getPlaceableNetworkIdFromItem(p.getItem());
         if (net_id == -1) return null;//item is not placeable object
         NetworkPlaceableBehavior b = NetworkManager.Instance.InstantiateNetworkPlaceable(net_id, pos, rot);
 

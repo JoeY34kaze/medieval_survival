@@ -50,7 +50,7 @@ public class NetworkPlaceable : NetworkPlaceableBehavior
             networkObject.TakeOwnership();//server prevzame ownership
             if (this.p != null)
             {
-                networkObject.SendRpc(RPC_SERVER_UPDATE_PREDMET, Receivers.Others, this.p.toNetworkString());
+                networkObject.SendRpc(RPC_SERVER_UPDATE_PREDMET, Receivers.Others, this.p.ObjectToByteArray());
                 sent_update_on_start = true;
             }
         }
@@ -81,7 +81,7 @@ public class NetworkPlaceable : NetworkPlaceableBehavior
     private void Update()
     {
         if (!sent_update_on_start && networkObject.IsServer && this.p != null) {
-            networkObject.SendRpc(RPC_SERVER_UPDATE_PREDMET, Receivers.Others, this.p.toNetworkString());
+            networkObject.SendRpc(RPC_SERVER_UPDATE_PREDMET, Receivers.Others, this.p.ObjectToByteArray());
             sent_update_on_start = true;
         }
     }
@@ -119,7 +119,7 @@ public class NetworkPlaceable : NetworkPlaceableBehavior
     internal void on_upkeep_pay() {
         //Debug.Log("Paying upkeep for " + this.p.item.Display_name);
         if (this.upkeep_flag == null || !this.upkeep_flag.pay_upkeep_for(this))//ce ni flaga ali pa placevanje upkeepa faila
-            take_damage((int)this.p.item.Max_durability / 24);
+            take_damage((int)this.p.getItem().Max_durability / 24);
     }
 
     internal void take_weapon_damage(Predmet p) {
@@ -129,7 +129,7 @@ public class NetworkPlaceable : NetworkPlaceableBehavior
             take_damage(250);
         }
         else
-            take_damage(p.item.damage);
+            take_damage(p.getItem().damage);
     }
 
     private void take_damage(int d) {
@@ -211,7 +211,7 @@ public class NetworkPlaceable : NetworkPlaceableBehavior
         if (all_AttachmentPoints == null) return false;
         all_AttachmentPoints = removeTakenAttachmentPoints(all_AttachmentPoints);
         if (all_AttachmentPoints == null) return false;
-        all_AttachmentPoints = removeNotValidSnappableTypeAttachmentPoints(all_AttachmentPoints, this.p.item.blocks_placements);
+        all_AttachmentPoints = removeNotValidSnappableTypeAttachmentPoints(all_AttachmentPoints, this.p.getItem().blocks_placements);
 
         foreach (AttachmentPoint p in all_AttachmentPoints)
         {
@@ -243,7 +243,7 @@ public class NetworkPlaceable : NetworkPlaceableBehavior
         if (all_AttachmentPoints == null) return;
         all_AttachmentPoints = removeTakenAttachmentPoints(all_AttachmentPoints);
         if (all_AttachmentPoints == null) return;
-        all_AttachmentPoints = removeNotValidSnappableTypeAttachmentPoints(all_AttachmentPoints, this.p.item.blocks_placements);
+        all_AttachmentPoints = removeNotValidSnappableTypeAttachmentPoints(all_AttachmentPoints, this.p.getItem().blocks_placements);
 
         foreach (AttachmentPoint p in all_AttachmentPoints) {
 
@@ -252,7 +252,7 @@ public class NetworkPlaceable : NetworkPlaceableBehavior
                 if (p.acceptsAttachmentOfType(this.snappableType))
                 {
 
-                    if (this.p.item.PlacementType == Item.SnappableType.door) { //ce je vrata, mora poblikirat vsa druga vrata na parent objektu.
+                    if (this.p.getItem().PlacementType == Item.SnappableType.door) { //ce je vrata, mora poblikirat vsa druga vrata na parent objektu.
                         if (p.is_sibling_attachment_point_occupied_by(this.gameObject)) { //to mora poblokirat sicer bi na en frame vrat nalimal lahko dvoje vrat, vsaka pod svojim kotom
                             p.attach(this.gameObject);
                         }
@@ -282,7 +282,7 @@ public class NetworkPlaceable : NetworkPlaceableBehavior
         if (all_AttachmentPoints == null) return;
         all_AttachmentPoints = removeTakenAttachmentPoints(all_AttachmentPoints);
         if (all_AttachmentPoints == null) return;
-        all_AttachmentPoints = removeNotValidSnappableTypeAttachmentPoints(all_AttachmentPoints, this.p.item.blocks_placements);
+        all_AttachmentPoints = removeNotValidSnappableTypeAttachmentPoints(all_AttachmentPoints, this.p.getItem().blocks_placements);
 
         foreach (AttachmentPoint p in all_AttachmentPoints)
         {
@@ -308,11 +308,11 @@ public class NetworkPlaceable : NetworkPlaceableBehavior
 
         //3-----------------------------------------------------------------------------------------------------------------------------------------
 
-        if (this.p.item.PlacementType == Item.SnappableType.door || this.p.item.PlacementType == Item.SnappableType.stairs_narrow || this.p.item.PlacementType == Item.SnappableType.stairs_wide)
+        if (this.p.getItem().PlacementType == Item.SnappableType.door || this.p.getItem().PlacementType == Item.SnappableType.stairs_narrow || this.p.getItem().PlacementType == Item.SnappableType.stairs_wide)
         { //ce je vrata, mora poblikirat vsa druga vrata na parent objektu.
             foreach (AttachmentPoint att in attachedTo) { //za vsak networkplaceable na kterga smo attachan ( naceloma samo en ker je samo vrata in stenge)
                 NetworkPlaceable np = att.GetComponentInParent<NetworkPlaceable>();
-                np.blockChildAttachmentPointsOfTypeWith(this.p.item.PlacementType, gameObject);
+                np.blockChildAttachmentPointsOfTypeWith(this.p.getItem().PlacementType, gameObject);
             }
         }
 
@@ -444,8 +444,8 @@ public class NetworkPlaceable : NetworkPlaceableBehavior
         if (networkObject.IsServer) {
             if (is_allowed_to_be_repaired()) {
                 if (burn_resources_for_repair())
-                    this.p.current_durabilty += this.p.item.Max_durability * NetworkPlaceable.repair_rate;
-                if (this.p.current_durabilty > this.p.item.Max_durability) this.p.current_durabilty = this.p.item.Max_durability;
+                    this.p.current_durabilty += this.p.getItem().Max_durability * NetworkPlaceable.repair_rate;
+                if (this.p.current_durabilty > this.p.getItem().Max_durability) this.p.current_durabilty = this.p.getItem().Max_durability;
             }
         }
     }
@@ -474,7 +474,7 @@ public class NetworkPlaceable : NetworkPlaceableBehavior
                 temp = FindByid(player.NetworkId);
                 if (Vector3.Distance(temp.transform.position, transform.position)<=NetworkPlaceable.max_distance_for_durability_check && temp.GetComponent<NetworkPlayerNeutralStateHandler>().is_repair_hammer_active()) //passive target
                 {
-                    networkObject.SendRpc(player, RPC_SERVER_UPDATE_PREDMET, this.p.toNetworkString());
+                    networkObject.SendRpc(player, RPC_SERVER_UPDATE_PREDMET, this.p.ObjectToByteArray());
                 }
             });
 
@@ -491,7 +491,7 @@ public class NetworkPlaceable : NetworkPlaceableBehavior
             if (p != null)
                 if (Vector3.Distance(p.transform.position, transform.position) < NetworkPlaceable.max_distance_for_durability_check)
                 {
-                    networkObject.SendRpc(args.Info.SendingPlayer, RPC_SERVER_UPDATE_PREDMET, this.p.toNetworkString());
+                    networkObject.SendRpc(args.Info.SendingPlayer, RPC_SERVER_UPDATE_PREDMET, this.p.ObjectToByteArray());
                 }
         }
     }
@@ -538,9 +538,7 @@ public class NetworkPlaceable : NetworkPlaceableBehavior
     {
         if (args.Info.SendingPlayer.IsHost)
         {
-            string pred = args.GetNext<String>();
-            if (this.p == null) this.p = new Predmet();
-            this.p.setParametersFromNetworkString(pred);
+            this.p = args.GetNext<byte[]>().ByteArrayToObject<Predmet>();
             UILogic.Instance.try_drawing_durability_for_placeable(this);
         }
     }
@@ -548,6 +546,6 @@ public class NetworkPlaceable : NetworkPlaceableBehavior
     public override void clientRequestPredmetUpdate(RpcArgs args)
     {
         if (networkObject.IsServer)
-            networkObject.SendRpc(args.Info.SendingPlayer, RPC_SERVER_UPDATE_PREDMET, this.p.toNetworkString());
+            networkObject.SendRpc(args.Info.SendingPlayer, RPC_SERVER_UPDATE_PREDMET, this.p.ObjectToByteArray());
     }
 }

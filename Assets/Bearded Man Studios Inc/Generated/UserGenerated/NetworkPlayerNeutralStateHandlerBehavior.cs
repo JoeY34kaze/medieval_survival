@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace BeardedManStudios.Forge.Networking.Generated
 {
-	[GeneratedRPC("{\"types\":[[\"int\"][\"string\", \"int\", \"string\", \"int\"][][\"int\"][\"Vector3\", \"Quaternion\"]]")]
+	[GeneratedRPC("{\"types\":[[\"int\"][\"byte[]\", \"int\", \"byte[]\", \"int\"][][\"int\"][\"Vector3\", \"Quaternion\"]]")]
 	[GeneratedRPCVariableNames("{\"types\":[[\"index\"][\"item\", \"index_selected\", \"item2\", \"index_selected2\"][][\"tool_id\"][\"pos\", \"rot\"]]")]
 	public abstract partial class NetworkPlayerNeutralStateHandlerBehavior : NetworkBehavior
 	{
@@ -27,7 +27,7 @@ namespace BeardedManStudios.Forge.Networking.Generated
 
 			base.SetupHelperRpcs(networkObject);
 			networkObject.RegisterRpc("BarSlotSelectionRequest", BarSlotSelectionRequest, typeof(int));
-			networkObject.RegisterRpc("BarSlotSelectionResponse", BarSlotSelectionResponse, typeof(string), typeof(int), typeof(string), typeof(int));
+			networkObject.RegisterRpc("BarSlotSelectionResponse", BarSlotSelectionResponse, typeof(byte[]), typeof(int), typeof(byte[]), typeof(int));
 			networkObject.RegisterRpc("ToolUsageRequest", ToolUsageRequest);
 			networkObject.RegisterRpc("ToolUsageResponse", ToolUsageResponse, typeof(int));
 			networkObject.RegisterRpc("PlacementofItemRequest", PlacementofItemRequest, typeof(Vector3), typeof(Quaternion));
@@ -114,9 +114,9 @@ namespace BeardedManStudios.Forge.Networking.Generated
 		public abstract void BarSlotSelectionRequest(RpcArgs args);
 		/// <summary>
 		/// Arguments:
-		/// string item
+		/// byte[] item
 		/// int index_selected
-		/// string item2
+		/// byte[] item2
 		/// int index_selected2
 		/// </summary>
 		public abstract void BarSlotSelectionResponse(RpcArgs args);

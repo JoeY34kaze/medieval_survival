@@ -65,8 +65,9 @@ public class NetworkGuildManager : NetworkGuildManagerBehavior
             networkObject.TakeOwnership();
             this.valid_invites = new List<uint[]>();
         }
-        localPlayer = FindByid(NetworkManager.Instance.Networker.Me.NetworkId);//?? i guess it should work. mrde bols da player pogleda pa poveze z druge strani..
-        localPlayerGuildInfoUpdateRequest();
+
+       // localPlayer = FindByid(NetworkManager.Instance.Networker.Me.NetworkId);//?? i guess it should work. mrde bols da player pogleda pa poveze z druge strani..
+       // localPlayerGuildInfoUpdateRequest();
         
     }
 

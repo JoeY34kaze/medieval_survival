@@ -74,7 +74,7 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
     public Vector3 direction;
     public Vector3 current_gravity_velocity;
     
-    private bool isCrouched;
+    internal bool isCrouched;
     private int dodge_direction;
     private NetworkPlayerAnimationLogic animation_logic_script;
 
@@ -93,29 +93,18 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
 
     }
 
-    protected override void NetworkStart()
+    /// <summary>
+    /// KO SE DATA NALOZI MORAMO NEKAK PAMETNO POSKRBET DA SE STVARI APPLAYAjo
+    /// </summary>
+    internal void OnPlayerDataLoaded()//tole imamo namest networkSTart ker morajo nekatere skripe bit nalozene v zaporedju in je samo onnetworkStart za vsako pa yolo
     {
-        base.NetworkStart();
-
-        /*
-                NetworkManager.Instance.Networker.playerAccepted += PlayerAccepted;
-                NetworkManager.Instance.Networker.playerDisconnected += OnPlayerDisconnected;
-         */
-
-
-
-
+        Debug.Log("Applying movement.");
         if (networkObject.IsServer)
         {
-            //------------------------- SERVER UPDATES EVERYONE OF THIS PLAYERS SCRIPT DATA WHEN PLAYER CONNECTS IF SERVER HAS SAVED DATA -----------------------------------------
-            uint steamId = 666;// hack ker nimamo se steamWorks
-            PlayerState ps = PlayerManager.get_playerStateForPlayer(steamId);
-            if (ps != null)
-                networkObject.SendRpc(RPC_SERVER_UPDATE_FROM_SAVED_DATA,Receivers.All, ps.current_gravity_velocity, ps.position, ps.rotation);
-        
+            networkObject.SendRpc(RPC_SERVER_UPDATE_FROM_SAVED_DATA, Receivers.All, current_gravity_velocity.y, transform.position, transform.rotation);
         }
-
     }
+
 
     protected virtual void LateUpdate()
     {
@@ -239,6 +228,8 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
 
         }
     }
+
+
     private void SetDodgeInput()
     {
         if (Input.GetButtonDown("Dodge") && isGrounded && !isDodging)
@@ -354,6 +345,12 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
             this.transform.position = args.GetNext<Vector3>();
             this.transform.rotation = args.GetNext<Quaternion>();
         }
+    }
+
+    internal void OnRemotePlayerDataSet()
+    {
+        //throw new NotImplementedException();
+        //nevem kaj bi blo sploh za pohandlat zaenkrat. crouches se nastima v metodi zunej te
     }
 
 

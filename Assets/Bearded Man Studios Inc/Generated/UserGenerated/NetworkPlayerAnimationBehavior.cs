@@ -4,16 +4,15 @@ using UnityEngine;
 
 namespace BeardedManStudios.Forge.Networking.Generated
 {
-	[GeneratedRPC("{\"types\":[[\"float\", \"float\"][\"bool\"][][][\"int\", \"bool\", \"bool\", \"int\", \"bool\"][]]")]
-	[GeneratedRPCVariableNames("{\"types\":[[\"vertical\", \"horizontal\"][\"status\"][][][\"mode\", \"blocking\", \"crouched\", \"weapon_animation_class\", \"downed\"][]]")]
+	[GeneratedRPC("{\"types\":[[\"float\", \"float\"][\"bool\"][][][]]")]
+	[GeneratedRPCVariableNames("{\"types\":[[\"vertical\", \"horizontal\"][\"status\"][][][]]")]
 	public abstract partial class NetworkPlayerAnimationBehavior : NetworkBehavior
 	{
 		public const byte RPC_NETWORK_MOVEMENT_ANIMATION_UPDATE = 0 + 5;
 		public const byte RPC_NETWORK_MOVEMENT_ANIMATION_CROUCHED_UPDATE = 1 + 5;
 		public const byte RPC_NETWORK_START_JUMP_REMOTE = 2 + 5;
 		public const byte RPC_NETWORK_LAND_JUMP_REMOTE = 3 + 5;
-		public const byte RPC_SEND_ALL = 4 + 5;
-		public const byte RPC_NETWORK_EXECUTION_UPDATE = 5 + 5;
+		public const byte RPC_NETWORK_EXECUTION_UPDATE = 4 + 5;
 		
 		public NetworkPlayerAnimationNetworkObject networkObject = null;
 
@@ -31,7 +30,6 @@ namespace BeardedManStudios.Forge.Networking.Generated
 			networkObject.RegisterRpc("NetworkMovementAnimationCrouchedUpdate", NetworkMovementAnimationCrouchedUpdate, typeof(bool));
 			networkObject.RegisterRpc("NetworkStartJumpRemote", NetworkStartJumpRemote);
 			networkObject.RegisterRpc("NetworkLandJumpRemote", NetworkLandJumpRemote);
-			networkObject.RegisterRpc("SendAll", SendAll, typeof(int), typeof(bool), typeof(bool), typeof(int), typeof(bool));
 			networkObject.RegisterRpc("NetworkExecutionUpdate", NetworkExecutionUpdate);
 
 			networkObject.onDestroy += DestroyGameObject;
@@ -128,10 +126,6 @@ namespace BeardedManStudios.Forge.Networking.Generated
 		/// Arguments:
 		/// </summary>
 		public abstract void NetworkLandJumpRemote(RpcArgs args);
-		/// <summary>
-		/// Arguments:
-		/// </summary>
-		public abstract void SendAll(RpcArgs args);
 		/// <summary>
 		/// Arguments:
 		/// </summary>

@@ -187,7 +187,7 @@ public class ItemPickup : Interactable {
         {
             setForce(pos, dir);
             this.p = p;
-            networkObject.SendRpc(RPC_SET_PREDMET_FOR_PICKUP, Receivers.Others, p.toNetworkString());
+            networkObject.SendRpc(RPC_SET_PREDMET_FOR_PICKUP, Receivers.Others, p.ObjectToByteArray());
 
         }
         
@@ -197,9 +197,9 @@ public class ItemPickup : Interactable {
     {
         if (args.Info.SendingPlayer.NetworkId == 0)
         {
-            Predmet k = Predmet.createNewPredmet(args.GetNext<string>());
+            Predmet k = args.GetNext<byte[]>().ByteArrayToObject<Predmet>();
             this.p = k;
-            //Debug.Log("predmer on pickup set to " + p.item.Display_name);
+            //Debug.Log("predmer on pickup set to " + p.getItem().Display_name);
         }
     }
 

@@ -4,8 +4,8 @@ using UnityEngine;
 
 namespace BeardedManStudios.Forge.Networking.Generated
 {
-	[GeneratedRPC("{\"types\":[[\"string\"][\"string\", \"string\", \"string\", \"string\", \"string\", \"string\"][][\"string\", \"Vector3\", \"Vector3\"][\"int\", \"Vector3\", \"Vector3\"][\"string\", \"int\", \"Vector3\", \"Vector3\"][\"int\", \"string\", \"int\"][\"int\", \"string\", \"int\"][\"int\", \"int\"][][\"int\", \"int\"][\"int\", \"int\"][\"int\", \"int\"][\"int\", \"int\", \"int\"][\"string\", \"int\"][\"int\", \"int\"][][\"int\"]]")]
-	[GeneratedRPCVariableNames("{\"types\":[[\"personalAndhotbarNetworkString\"][\"head\", \"chest\", \"arms\", \"legs\", \"feet\", \"backpack\"][][\"predmet\", \"pos\", \"dir\"][\"inventorySlotIndex\", \"camera_vector\", \"camera_forward\"][\"item_type\", \"index\", \"camera_vector\", \"camera_forward\"][\"index\", \"type\", \"index_inv\"][\"inv_index\", \"type\", \"loadout_index\"][\"a\", \"b\"][][\"a\", \"b\"][\"c\", \"d\"][\"e\", \"f\"][\"item_id\", \"quantity\", \"skin_id\"][\"item_ids\", \"remaining_crating_time_oif_first_item\"][\"index_itema\", \"index_sibling\"][][\"index\"]]")]
+	[GeneratedRPC("{\"types\":[[\"byte[]\", \"byte[]\"][\"byte[]\"][][\"byte[]\", \"Vector3\", \"Vector3\"][\"int\", \"Vector3\", \"Vector3\"][\"string\", \"int\", \"Vector3\", \"Vector3\"][\"int\", \"string\", \"int\"][\"int\", \"string\", \"int\"][\"int\", \"int\"][][\"int\", \"int\"][\"int\", \"int\"][\"int\", \"int\"][\"int\", \"int\", \"int\"][\"string\", \"int\"][\"int\", \"int\"][][\"int\"]]")]
+	[GeneratedRPCVariableNames("{\"types\":[[\"personal_predmeti\", \"hotbar_predmeti\"][\"loadout_predmeti\"][][\"predmet\", \"pos\", \"dir\"][\"inventorySlotIndex\", \"camera_vector\", \"camera_forward\"][\"item_type\", \"index\", \"camera_vector\", \"camera_forward\"][\"index\", \"type\", \"index_inv\"][\"inv_index\", \"type\", \"loadout_index\"][\"a\", \"b\"][][\"a\", \"b\"][\"c\", \"d\"][\"e\", \"f\"][\"item_id\", \"quantity\", \"skin_id\"][\"item_ids\", \"remaining_crating_time_oif_first_item\"][\"index_itema\", \"index_sibling\"][][\"index\"]]")]
 	public abstract partial class NetworkPlayerInventoryBehavior : NetworkBehavior
 	{
 		public const byte RPC_SEND_PERSONAL_INVENTORY_UPDATE = 0 + 5;
@@ -39,10 +39,10 @@ namespace BeardedManStudios.Forge.Networking.Generated
 			networkObject.AttachedBehavior = this;
 
 			base.SetupHelperRpcs(networkObject);
-			networkObject.RegisterRpc("SendPersonalInventoryUpdate", SendPersonalInventoryUpdate, typeof(string));
-			networkObject.RegisterRpc("SendLoadoutUpdate", SendLoadoutUpdate, typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string));
+			networkObject.RegisterRpc("SendPersonalInventoryUpdate", SendPersonalInventoryUpdate, typeof(byte[]), typeof(byte[]));
+			networkObject.RegisterRpc("SendLoadoutUpdate", SendLoadoutUpdate, typeof(byte[]));
 			networkObject.RegisterRpc("RequestLoadoutOnConnect", RequestLoadoutOnConnect);
-			networkObject.RegisterRpc("NetworkInstantiationServerRequest", NetworkInstantiationServerRequest, typeof(string), typeof(Vector3), typeof(Vector3));
+			networkObject.RegisterRpc("NetworkInstantiationServerRequest", NetworkInstantiationServerRequest, typeof(byte[]), typeof(Vector3), typeof(Vector3));
 			networkObject.RegisterRpc("DropItemFromPersonalInventoryRequest", DropItemFromPersonalInventoryRequest, typeof(int), typeof(Vector3), typeof(Vector3));
 			networkObject.RegisterRpc("DropItemFromLoadoutRequest", DropItemFromLoadoutRequest, typeof(string), typeof(int), typeof(Vector3), typeof(Vector3));
 			networkObject.RegisterRpc("InventoryToLoadoutRequest", InventoryToLoadoutRequest, typeof(int), typeof(string), typeof(int));
@@ -135,17 +135,13 @@ namespace BeardedManStudios.Forge.Networking.Generated
 
 		/// <summary>
 		/// Arguments:
-		/// string personalAndhotbarNetworkString
+		/// byte[] personal_predmeti
+		/// byte[] hotbar_predmeti
 		/// </summary>
 		public abstract void SendPersonalInventoryUpdate(RpcArgs args);
 		/// <summary>
 		/// Arguments:
-		/// string head
-		/// string chest
-		/// string arms
-		/// string legs
-		/// string feet
-		/// string backpack
+		/// byte[] loadout_predmeti
 		/// </summary>
 		public abstract void SendLoadoutUpdate(RpcArgs args);
 		/// <summary>

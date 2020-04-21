@@ -65,7 +65,7 @@ public class AttachmentPoint : MonoBehaviour
 
     internal void attachTryReverse(GameObject trenutnoPostavljamo)
     {
-        Item i = trenutnoPostavljamo.GetComponent<NetworkPlaceable>().p.item;
+        Item i = trenutnoPostavljamo.GetComponent<NetworkPlaceable>().p.getItem();
         attach(trenutnoPostavljamo);
 
         //poiskat vse valid attachemnt pointe in izbrat najblizjo
@@ -116,7 +116,7 @@ public class AttachmentPoint : MonoBehaviour
     internal void OnPlaceableDestroyed(NetworkPlaceable destroyedPlaceable)
     {
         if (attached_placeable != null) {//ce je nekaj attachan gor (recimo foudnation -> wall)
-            if (attached_placeable.GetComponent<NetworkPlaceable>().p.item.needsToBeAttached) {//ce je attachan objekt nekaj kar nemore obstajat sam po seb ( foundation lahko | wall nemore )
+            if (attached_placeable.GetComponent<NetworkPlaceable>().p.getItem().needsToBeAttached) {//ce je attachan objekt nekaj kar nemore obstajat sam po seb ( foundation lahko | wall nemore )
                 if (!attached_placeable.GetComponent<NetworkPlaceable>().isAttachedToAlternativeAttachmentPoint(this)) { //pogleda na ta placeable (wall ki je zgubil attachment) če se lahko attacha nekam drugam na valid
                     NetworkPlaceable previous = this.detach(true);
                     previous.handle_object_destruction(); //ce je tukaj pomeni da se ni mogel attachat nikamor. treba ga je unicit in pohendlat unicenje naprej.
@@ -128,7 +128,7 @@ public class AttachmentPoint : MonoBehaviour
     internal bool has_attached_placeable_that_block_placement_of(Item.SnappableType placementType)
     {
         if (this.attached_placeable != null)
-            foreach (Item.SnappableType s in this.attached_placeable.GetComponent<NetworkPlaceable>().p.item.blocks_placements)
+            foreach (Item.SnappableType s in this.attached_placeable.GetComponent<NetworkPlaceable>().p.getItem().blocks_placements)
                 if (s == placementType)
                     return true;
         return false;
