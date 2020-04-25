@@ -22,7 +22,7 @@ public class NetworkSiegeTrebuchet : NetworkedSiegeWeaponBehavior
     private float min_vertical_coeff = 0f;
     private float max_vertical_coeff = 2f;
     public  float current_vertical_coefficient = 1.0f;//tole nj bo med 0-2 ?
-    public float debug_projectile_force;
+
 
     public Transform platform;
     public direction_vector_helper direction;
@@ -98,7 +98,6 @@ public class NetworkSiegeTrebuchet : NetworkedSiegeWeaponBehavior
                     NetworkedSiegeProjectileBehavior b = NetworkManager.Instance.InstantiateNetworkedSiegeProjectile(net_id, this.shot_spawn_location.transform.position);
                     //apply force on clients, sets predmet
                     Predmet predmet = new Predmet(this.ready_shot);
-                    
                     b.gameObject.GetComponent<Networked_siege_projectile>().init(predmet, get_spawn_location(), get_direction_vector(), get_force());
                 }
             }
@@ -116,7 +115,11 @@ public class NetworkSiegeTrebuchet : NetworkedSiegeWeaponBehavior
 
     private float get_force() {
         Debug.LogWarning("force needs to be calculated based on weight in inventory!! right now it isnt");
-        return this.debug_projectile_force;
+        float weight = 0f;
+        foreach (Predmet p in this.container.getAllOfType(Item.Type.resource)) {
+            weight += p.GetWeight();
+        }
+        return weight;
     }
 
     public static int get_id_for_instantiation_from_treb_shot(GameObject shot) {

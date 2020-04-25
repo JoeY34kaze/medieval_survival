@@ -25,6 +25,9 @@ public class UILogic : MonoBehaviour
     public GameObject deathScreenBeds;
     public GameObject playerBedRenamePanel;
     public GameObject disconnect_screen;
+    public GameObject New_item_panel;
+    public GameObject new_item_prefab;
+
     public Text latencyText;
     public Text bandwidth_in_text;
     public Text bandwidth_out_text;
@@ -97,6 +100,8 @@ public class UILogic : MonoBehaviour
     private ulong last_band_in;
     private ulong last_band_out;
 
+
+    public bool test;
     private void Start()
     {
         if (UILogic.Instance != null) Destroy(this); else UILogic.Instance = this;
@@ -191,6 +196,8 @@ public class UILogic : MonoBehaviour
             }
         }
     }
+
+
 
     internal void setTimeStamp(ulong timestep)
     {
@@ -607,5 +614,13 @@ public class UILogic : MonoBehaviour
     /// </summary>
     public void onDisconnectedWindow_exit_button_quit() {
         SceneManager.LoadScene(0);
+    }
+
+    public void OnInventoryChanged(List<Predmet> spremenjeni_predmeti) {
+        foreach (Predmet p in spremenjeni_predmeti)
+        {
+            GameObject g = GameObject.Instantiate(this.new_item_prefab, this.New_item_panel.transform);
+            g.GetComponent<UI_NewItemDisplayLocalHandler>().init(p);
+        }
     }
 }

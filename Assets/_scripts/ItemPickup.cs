@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.Collections;
 
 public class ItemPickup : Interactable {
-    public Predmet p; //ujemat se mora z id-jem itema na playerju ce je na playerju al pa nevem
+    [HideInInspector] internal Predmet p; //ujemat se mora z id-jem itema na playerju ce je na playerju al pa nevem
 
     public bool stackable = false;
     //zaenkrat smao pove da je item k se ga lahko pobere

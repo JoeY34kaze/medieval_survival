@@ -41,14 +41,11 @@ MonoBehaviour:
     filename: 
     thumb: {fileID: 0}
   wardrobeSlot: Chest
-  Hides:
-  - MaleTorso
-  - FR_High_MaleTorso
-  - FemaleTorso
-  - FR_High_FemaleTorso
+  Hides: []
   suppressWardrobeSlots: []
   activeWardrobeSet: []
-  MeshHideAssets: []
+  MeshHideAssets:
+  - {fileID: 11400000, guid: f675986a055a2ef48b09087b6f3db23a, type: 2}
   recipeString: '{"version":3,"packedSlotDataList":[],"slotsV2":[],"slotsV3":[{"id":"TheAssasin_Tabbard_ClothPart","scale":100,"copyIdx":-1,"overlays":[{"id":"TheAssasin_Tabbard_Cloth_Overlay","colorIdx":0,"rect":[0,0,0,0]}]}],"colors":[],"fColors":[{"name":"-","colors":[255,255,255,255,0,0,0,0,255,255,255,255,0,0,0,0,255,255,255,255,0,0,0,0]}],"sharedColorCount":0,"race":"","packedDna":[]}'
   IncompatibleRecipes: []
   UserField: 

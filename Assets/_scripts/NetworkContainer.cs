@@ -135,6 +135,11 @@ public class NetworkContainer : NetworkContainerBehavior
         }
     }
 
+    internal IEnumerable<Predmet> getAllOfType(Item.Type t)
+    {
+        return this.nci.getAllOfType(t);
+    }
+
     internal Predmet getPredmet()
     {
         return this.p;
@@ -314,7 +319,7 @@ public class NetworkContainer : NetworkContainerBehavior
                 }
             }
             //poslat update za container
-            networkObject.SendRpc(args.Info.SendingPlayer, RPC_OPEN_RESPONSE, 1, this.nci.ObjectToByteArray());
+            networkObject.SendRpc(args.Info.SendingPlayer, RPC_OPEN_RESPONSE, 1, this.nci.predmeti.ObjectToByteArray());
             //poslat update za personal inventory
             requester_npi.sendNetworkUpdate(true, false);
         }
@@ -358,7 +363,7 @@ public class NetworkContainer : NetworkContainerBehavior
             }
 
             //poslat update za container
-            networkObject.SendRpc(args.Info.SendingPlayer, RPC_OPEN_RESPONSE, 1, this.nci.ObjectToByteArray());
+            networkObject.SendRpc(args.Info.SendingPlayer, RPC_OPEN_RESPONSE, 1, this.nci.predmeti.ObjectToByteArray());
             //poslat update za personal inventory
             requester_npi.sendNetworkUpdate(true, false);
         }
@@ -390,7 +395,7 @@ public class NetworkContainer : NetworkContainerBehavior
                 }
             }
             //poslat update za container
-            networkObject.SendRpc(args.Info.SendingPlayer, RPC_OPEN_RESPONSE, 1, this.nci.ObjectToByteArray());
+            networkObject.SendRpc(args.Info.SendingPlayer, RPC_OPEN_RESPONSE, 1, this.nci.predmeti.ObjectToByteArray());
             //poslat update za personal inventory
             requester_npi.sendNetworkUpdate(true, false);
         }
@@ -414,7 +419,7 @@ public class NetworkContainer : NetworkContainerBehavior
             requester_npi.setBarPredmet(c, bar_index);
 
             //poslat update za container
-            networkObject.SendRpc(args.Info.SendingPlayer, RPC_OPEN_RESPONSE, 1, this.nci.ObjectToByteArray());
+            networkObject.SendRpc(args.Info.SendingPlayer, RPC_OPEN_RESPONSE, 1, this.nci.predmeti.ObjectToByteArray());
             //poslat update za personal inventory
             requester_npi.sendNetworkUpdate(true, false);
         }
@@ -450,7 +455,7 @@ public class NetworkContainer : NetworkContainerBehavior
                 }
             }
             //poslat update za container
-            networkObject.SendRpc(args.Info.SendingPlayer, RPC_OPEN_RESPONSE, 1, this.nci.ObjectToByteArray());
+            networkObject.SendRpc(args.Info.SendingPlayer, RPC_OPEN_RESPONSE, 1, this.nci.predmeti.ObjectToByteArray());
             //poslat update za personal inventory
             requester_npi.backpack_inventory.sendBackpackItemsUpdate();
         }
@@ -476,7 +481,7 @@ public class NetworkContainer : NetworkContainerBehavior
 
 
             //poslat update za container
-            networkObject.SendRpc(args.Info.SendingPlayer, RPC_OPEN_RESPONSE, 1, this.nci.ObjectToByteArray());
+            networkObject.SendRpc(args.Info.SendingPlayer, RPC_OPEN_RESPONSE, 1, this.nci.predmeti.ObjectToByteArray());
             //poslat update za personal inventory
             requester_npi.backpack_inventory.sendBackpackItemsUpdate();
         }
@@ -504,7 +509,7 @@ public class NetworkContainer : NetworkContainerBehavior
                 }
 
                 //poslat update za container
-                networkObject.SendRpc(args.Info.SendingPlayer, RPC_OPEN_RESPONSE, 1, this.nci.ObjectToByteArray());
+                networkObject.SendRpc(args.Info.SendingPlayer, RPC_OPEN_RESPONSE, 1, this.nci.predmeti.ObjectToByteArray());
 
                 requesterNpi.sendNetworkUpdate(false, true);
             }
@@ -533,7 +538,7 @@ public class NetworkContainer : NetworkContainerBehavior
                     requesterNpi.SetPredmetLoadout(c);
 
                     //poslat update za container
-                    networkObject.SendRpc(args.Info.SendingPlayer, RPC_OPEN_RESPONSE, 1, this.nci.ObjectToByteArray());
+                    networkObject.SendRpc(args.Info.SendingPlayer, RPC_OPEN_RESPONSE, 1, this.nci.predmeti.ObjectToByteArray());
 
                     requesterNpi.sendNetworkUpdate(false, true);
                 }
@@ -549,7 +554,7 @@ public class NetworkContainer : NetworkContainerBehavior
         {
             this.nci.swap(args.GetNext<int>(), args.GetNext<int>());
             //poslat update za container
-            networkObject.SendRpc(args.Info.SendingPlayer, RPC_OPEN_RESPONSE, 1, this.nci.ObjectToByteArray());
+            networkObject.SendRpc(args.Info.SendingPlayer, RPC_OPEN_RESPONSE, 1, this.nci.predmeti.ObjectToByteArray());
         }
     }
 
@@ -568,7 +573,7 @@ public class NetworkContainer : NetworkContainerBehavior
             Predmet p = this.nci.popPredmet(args.GetNext<int>());
             FindByid(args.Info.SendingPlayer.NetworkId).GetComponent<NetworkPlayerInventory>().instantiateDroppedPredmet(p);
             //poslat update za container
-            networkObject.SendRpc(args.Info.SendingPlayer, RPC_OPEN_RESPONSE, 1, this.nci.ObjectToByteArray());
+            networkObject.SendRpc(args.Info.SendingPlayer, RPC_OPEN_RESPONSE, 1, this.nci.predmeti.ObjectToByteArray());
         }
     }
 

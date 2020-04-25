@@ -210,7 +210,7 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
         bool exec_atk = c.executing_attack;
         //--------------------- ANIMATION 3
         //animacije bom ubistvu DIREKT preslikov trenutno stanje kot je. ce se da forsirat state machine bi blo awesome.  skripta ne hrani cist nic tko da me zanima izkljucno samo Animator
-        Animator an = GetComponent<Animator>();//cmo probat poslat direkt animator cez? :D jk
+        Animator an = GetComponent<Animator>();
 
         int an_combat = an.GetInteger("combat_mode");
         //walking vertical
@@ -328,6 +328,33 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
         an.SetBool("combat_blocking", data.an_blocking);
         an.SetBool("crouched", data.an_crouched);
         an.SetInteger("weapon_animation_class", data.an_weapon_anim_cl);
+
+
+        //pohandlat je treba animacije zdj nekak da player k se je sconnectov gort nekak pravilno vid druge playerje ce so trenutno nasred animacijskega postopka
+        //reset
+        an.SetBool("synchronization_ready_attack", false);
+        an.SetBool("synchronization_executing_attack", false);
+        an.SetBool("synchronization_combat_blocking", false);
+        an.SetBool("synchronization_downed", false);
+
+
+        if (data.downed || data.dead)
+        {
+            if (data.downed)
+                an.SetBool("synchronization_downed", true);
+        }
+        else 
+        {
+            if (c.is_readying_attack)
+                GetComponent<NetworkPlayerAnimationLogic>().handle_readying_of_attack((byte)data.an_dir);
+            else if (c.ready_attack)
+                an.SetBool("synchronization_ready_attack", true);
+            else if (c.executing_attack)
+                an.SetBool("synchronization_executing_attack", true);
+            else if (c.Blocking)
+                an.SetBool("synchronization_combat_blocking", true);
+        }
+        
 
 
         //kar je kode za animator je treba pohandlat tukej zaenkrat
@@ -747,18 +774,23 @@ napadenmu playerju da si poupdejta health. ta player pol ko si je updejtov healt
         }
     }
 
-    internal void localDisconnectRequest()
+    internal bool localDisconnectRequest()
     {
         if (networkObject.IsOwner && !NetworkManager.Instance.Networker.Me.IsHost)
         {
             NetworkManager.Instance.Networker.Disconnect(false);
+            return true;
         }
         else if (NetworkManager.Instance.Networker.Me.IsHost) {
-            Debug.LogWarning("Host tried disconnecting. Im not sure of what to do about this at this point to be honest.");
+            Debug.LogWarning("Host tried disconnecting..");
+            NetworkManager.Instance.Disconnect();
+            return true;
         }
         else
         {
             Debug.LogError("tried disconnecting from a networkplayer that isnt owned by me.");
+            return false;
+            
         }
     }
 

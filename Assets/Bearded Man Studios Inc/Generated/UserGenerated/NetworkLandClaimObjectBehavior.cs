@@ -4,8 +4,8 @@ using UnityEngine;
 
 namespace BeardedManStudios.Forge.Networking.Generated
 {
-	[GeneratedRPC("{\"types\":[[\"byte[]\"][\"byte[]\"][\"int\", \"int\", \"int\", \"int\", \"int\", \"int\", \"int\"][][][][\"byte[]\"]]")]
-	[GeneratedRPCVariableNames("{\"types\":[[\"flag_image\"][\"img\"][\"year\", \"month\", \"day\", \"hour\", \"min\", \"s\", \"ms\"][][][][\"playerlist\"]]")]
+	[GeneratedRPC("{\"types\":[[\"byte[]\", \"int\", \"int\"][\"byte[]\", \"int\", \"int\"][\"int\", \"int\", \"int\", \"int\", \"int\", \"int\", \"int\"][][][][\"byte[]\"][]]")]
+	[GeneratedRPCVariableNames("{\"types\":[[\"flag_image\", \"x\", \"y\"][\"img\", \"x\", \"y\"][\"year\", \"month\", \"day\", \"hour\", \"min\", \"s\", \"ms\"][][][][\"playerlist\"][]]")]
 	public abstract partial class NetworkLandClaimObjectBehavior : NetworkBehavior
 	{
 		public const byte RPC_SEND_FLAG_TEXTURE_TO_SERVER = 0 + 5;
@@ -15,6 +15,7 @@ namespace BeardedManStudios.Forge.Networking.Generated
 		public const byte RPC_REMOVE_AUTHORIZATION_REQUEST = 4 + 5;
 		public const byte RPC_CLEAR_ALL_AUTHORIZED_REQUEST = 5 + 5;
 		public const byte RPC_UPDATE_AUTHORIZED_LIST = 6 + 5;
+		public const byte RPC_CLIENT_ON_CONNECT_REQUEST = 7 + 5;
 		
 		public NetworkLandClaimObjectNetworkObject networkObject = null;
 
@@ -28,13 +29,14 @@ namespace BeardedManStudios.Forge.Networking.Generated
 			networkObject.AttachedBehavior = this;
 
 			base.SetupHelperRpcs(networkObject);
-			networkObject.RegisterRpc("SendFlagTextureToServer", SendFlagTextureToServer, typeof(byte[]));
-			networkObject.RegisterRpc("UpdateFlagTextureOnClients", UpdateFlagTextureOnClients, typeof(byte[]));
+			networkObject.RegisterRpc("SendFlagTextureToServer", SendFlagTextureToServer, typeof(byte[]), typeof(int), typeof(int));
+			networkObject.RegisterRpc("UpdateFlagTextureOnClients", UpdateFlagTextureOnClients, typeof(byte[]), typeof(int), typeof(int));
 			networkObject.RegisterRpc("SendDateTimePlaced", SendDateTimePlaced, typeof(int), typeof(int), typeof(int), typeof(int), typeof(int), typeof(int), typeof(int));
 			networkObject.RegisterRpc("Authorization_request", Authorization_request);
 			networkObject.RegisterRpc("Remove_authorization_request", Remove_authorization_request);
 			networkObject.RegisterRpc("Clear_all_authorized_request", Clear_all_authorized_request);
 			networkObject.RegisterRpc("UpdateAuthorizedList", UpdateAuthorizedList, typeof(byte[]));
+			networkObject.RegisterRpc("client_on_connect_request", client_on_connect_request);
 
 			networkObject.onDestroy += DestroyGameObject;
 
@@ -114,11 +116,15 @@ namespace BeardedManStudios.Forge.Networking.Generated
 		/// <summary>
 		/// Arguments:
 		/// byte[] flag_image
+		/// int x
+		/// int y
 		/// </summary>
 		public abstract void SendFlagTextureToServer(RpcArgs args);
 		/// <summary>
 		/// Arguments:
 		/// byte[] img
+		/// int x
+		/// int y
 		/// </summary>
 		public abstract void UpdateFlagTextureOnClients(RpcArgs args);
 		/// <summary>
@@ -148,6 +154,10 @@ namespace BeardedManStudios.Forge.Networking.Generated
 		/// Arguments:
 		/// </summary>
 		public abstract void UpdateAuthorizedList(RpcArgs args);
+		/// <summary>
+		/// Arguments:
+		/// </summary>
+		public abstract void client_on_connect_request(RpcArgs args);
 
 		// DO NOT TOUCH, THIS GETS GENERATED PLEASE EXTEND THIS CLASS IF YOU WISH TO HAVE CUSTOM CODE ADDITIONS
 	}

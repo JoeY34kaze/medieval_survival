@@ -15,8 +15,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
     public int dragged_gameobjectSiblingIndex = -1;
     public int draggedParent_parent_sibling_index = -1;
 
-    public int space = 20; // kao space inventorija
-    public Predmet[] predmeti_personal = new Predmet[20]; // seznam itemov, ubistvu inventorij
+    [HideInInspector] public Predmet[] predmeti_personal = new Predmet[20]; // seznam itemov, ubistvu inventorij
     public delegate void OnItemChanged();
     public OnItemChanged onItemChangedCallback;
 
@@ -34,21 +33,24 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
     internal InventorySlotLoadout loadout_backpack;//ni loadout item ubistvu. logika je cist locena ker je prioriteta da se backpack lahko cimlazje fukne dol. tle ga mam samo za izrisovanje v inventorij panel
 
     internal InventorySlotBar[] bar_slots;
-    [SerializeField]
-    internal Predmet[] predmeti_hotbar;
 
-    internal Predmet head;
-    internal Predmet chest;
+    [HideInInspector] internal Predmet[] predmeti_hotbar;
+    private List<Predmet> previous_combines_inventories = new List<Predmet>();
+
+    [HideInInspector] internal Predmet head;
+    [HideInInspector] internal Predmet chest;
 
 
-    internal Predmet hands;
-    internal Predmet legs;
-    internal Predmet feet;
+    [HideInInspector] internal Predmet hands;
+    [HideInInspector] internal Predmet legs;
+    [HideInInspector] internal Predmet feet;
 
     public delegate void OnLoadoutChanged();
     public OnLoadoutChanged onLoadoutChangedCallback;
 
-    public Predmet backpack;
+
+    [HideInInspector]
+    internal Predmet backpack;
     private Camera c;
 
 
@@ -70,6 +72,14 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
 
     private void Start()
     {
+        try
+        {
+            predmeti_hotbar = new Predmet[this.bar_slots.Length];
+            predmeti_personal = new Predmet[personal_inventory_slots.Length];
+        }catch(Exception e){
+        //client je owner
+        }
+
         this.craftingQueue = new List<PredmetRecepie>();
         this.combatHandler = GetComponent<NetworkPlayerCombatHandler>();
         this.neutralStateHandler = GetComponent<NetworkPlayerNeutralStateHandler>();
@@ -80,8 +90,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
     }
 
     internal void on_UI_linked() {//klice se z UILogic.on_local_player_linked
-        predmeti_hotbar = new Predmet[this.bar_slots.Length];
-        predmeti_personal = new Predmet[personal_inventory_slots.Length];
+
     }
 
     protected override void NetworkStart()
@@ -91,9 +100,10 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         if (networkObject.IsOwner)
         {
             onItemChangedCallback += UpdateUI;    // Subscribe to the onItemChanged callback
+            onItemChangedCallback += Display_new_items_on_canvas;
         }
 
-        if (networkObject.IsServer) {
+        if (networkObject.IsServer || networkObject.IsOwner) {
             if(this.predmeti_hotbar==null)
                 this.predmeti_hotbar = new Predmet[this.bar_slots_Length];
             if(this.predmeti_personal==null)
@@ -106,6 +116,116 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
 
        // if (networkObject.IsOwner && networkObject.IsServer) instantiate_server_weapons_for_testing();
         if (networkObject.IsOwner) UpdateUI();//bugfix
+    }
+
+    void Display_new_items_on_canvas()
+    {
+        if (networkObject.IsOwner) {
+            List<Predmet> all_items = combine_inventories();
+            List<Predmet> razlika = get_difference_from_inventories(all_items, this.previous_combines_inventories);
+            this.previous_combines_inventories = all_items;
+            UILogic.Instance.OnInventoryChanged(razlika);
+        }
+    }
+
+    private List<Predmet> get_difference_from_inventories(List<Predmet> all_items, List<Predmet> previous_combines_inventories)
+    {
+        List<Predmet> razlika = new List<Predmet>();
+
+        foreach (Predmet p in all_items)
+        {
+            bool found = false;
+            foreach (Predmet s in previous_combines_inventories)
+            {
+                if (p.item_id == s.item_id)
+                {
+                    if (p.quantity - s.quantity != 0)
+                        razlika.Add(new Predmet(p.getItem(), p.quantity - s.quantity));
+                    found = true;
+                    break;
+                }
+            }
+            //nismo najdli
+            if(!found)razlika.Add(p);
+        }
+        return razlika;
+    }
+
+    /// <summary>
+    /// naredi list vseh predmetov, sesteje njihove kvantitete in vrne nazaj. uporablja se samo za display novo dobljenih itemov
+    /// </summary>
+    /// <returns></returns>
+    private List<Predmet> combine_inventories()
+    {
+        List<Predmet> sum = new List<Predmet>();
+
+        //personal
+        foreach (Predmet p in this.predmeti_personal) {
+            if (p == null) continue;
+            bool found = false;
+            foreach (Predmet s in sum) {
+                if (s.item_id == p.item_id)
+                {
+                    s.quantity += p.quantity;
+                    found = true;
+                    break;
+                }
+            }
+            if(!found)sum.Add(new Predmet(p.getItem(), p.quantity));
+        }
+        //hotbar
+        foreach (Predmet p in this.predmeti_hotbar)
+        {
+            if (p == null) continue;
+            bool found = false;
+            foreach (Predmet s in sum)
+            {
+                if (s.item_id == p.item_id)
+                {
+                    s.quantity += p.quantity;
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) sum.Add(new Predmet(p.getItem(), p.quantity));
+        }
+        //potential backpack
+        if(this.backpack !=null)
+            foreach (Predmet p in this.backpack_inventory.nci.predmeti)
+            {
+                bool found = false;
+                if (p == null) continue;
+                foreach (Predmet s in sum)
+                {
+                    if (s.item_id == p.item_id)
+                    {
+                        s.quantity += p.quantity;
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found) sum.Add(new Predmet(p.getItem(), p.quantity));
+            }
+
+        //LOADOUT!!!!!!!!!!!!!!
+
+        if (this.head != null)
+            sum.Add(new Predmet(this.head.getItem(), 1));
+
+        if (this.chest != null)
+            sum.Add(new Predmet(this.chest.getItem(), 1));
+
+        if (this.hands != null)
+            sum.Add(new Predmet(this.hands.getItem(), 1));
+
+        if (this.legs != null)
+            sum.Add(new Predmet(this.legs.getItem(),1));
+
+        if (this.feet != null)
+            sum.Add(new Predmet(this.feet.getItem(),1));
+
+
+        return sum;
     }
 
     /// <summary>
@@ -129,7 +249,9 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         if (!networkObject.IsOwner) return;
         //personal inventory
         if (personal_inventory_slots == null) return;
-        for (int i = 0; i < personal_inventory_slots.Length; i++)
+        if (predmeti_personal.Length != personal_inventory_slots.Length) return;
+
+        for (int i = 0; i < predmeti_personal.Length; i++)
         {
             if (predmeti_personal[i] != null)  // If there is an item to add
             {
@@ -1601,7 +1723,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
     public void instantiate_server_weapons_for_testing()
     {
         if (!networkObject.IsServer) return;
-        Predmet p = new Predmet();
+        Predmet p = new Predmet(Mapper.instance.items[0]);
         int k = 0;
         foreach (Item i in Mapper.instance.items)
         {

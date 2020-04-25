@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: sword_0_predmetRecipe
   m_EditorClassIdentifier: 
   Product: {fileID: 11400000, guid: 1e6680dd9cef3914fb0d6e58a50e7b5d, type: 2}
-  final_quantity: 0
+  final_quantity: 1
   ingredients: []
   ingredient_quantities: 
   tier: 0

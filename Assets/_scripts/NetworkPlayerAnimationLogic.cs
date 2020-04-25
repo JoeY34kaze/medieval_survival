@@ -122,6 +122,7 @@ public class NetworkPlayerAnimationLogic : NetworkPlayerAnimationBehavior
 
     private void LateUpdate()
     {
+        if (networkObject == null) return;
         if (hookChestRotation)
             if (!stats.downed) {
                 if (networkObject.IsOwner)

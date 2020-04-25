@@ -108,6 +108,7 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
 
     protected virtual void LateUpdate()
     {
+        if (networkObject == null) return;
         if (networkObject.IsOwner)
         {
             if(!UILogic.hasControlOfInput)InputHandle();                      // update input methods
@@ -117,6 +118,7 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
 
     protected virtual void FixedUpdate()
     {
+        if (networkObject == null) return;
         if (networkObject.IsOwner)
         {
             if (!UILogic.hasControlOfInput) Rotate_character_horizontally();
@@ -130,6 +132,7 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
 
     protected virtual void Update()
     {
+        if (networkObject == null) return;
         if (networkObject.IsOwner)
         {
             if(!stats.dead && !UILogic.hasControlOfInput ){ 

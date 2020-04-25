@@ -17,7 +17,7 @@ MonoBehaviour:
   icon: {fileID: 21300000, guid: c13828597679d0b48bdf3f20d5462564, type: 3}
   damage: 0
   hasDurability: 0
-  durability: 1000
+  Max_durability: 1000
   stackSize: 1000
   capacity: 0
   damage_reduction: 0
@@ -25,13 +25,18 @@ MonoBehaviour:
   prefab_pickup: {fileID: 4344458020859959958, guid: 4d857fb3f3804e540b9c4ac4ce5da7b1,
     type: 3}
   weapon_animation_class: 0
-  uma_item_recipe_name: 
+  UMARecipes: []
   stone_gather_rate: 0
   wood_gather_rate: 0
   flesh_gather_rate: 0
   description: no description yet.
   placeable_Local_object: {fileID: 0}
-  placeable_networked_object: {fileID: 0}
+  networked_physical_instantiated_object: {fileID: 0}
   ignorePlacementNormal: 0
   PlacementType: 0
   blocks_placements: 
+  needs_upkeep: 0
+  recepie: {fileID: 0}
+  needsToBeAttached: 0
+  respawn_time: 0
+  weight: 5

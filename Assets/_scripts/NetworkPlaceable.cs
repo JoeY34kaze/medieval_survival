@@ -18,7 +18,7 @@ public class NetworkPlaceable : NetworkPlaceableBehavior
     internal static float distanceForSnappingHandling = 0.05f;
 
 
-    public Predmet p;
+    [HideInInspector] internal Predmet p;
     [SerializeField]
     public Item.SnappableType snappableType;
 

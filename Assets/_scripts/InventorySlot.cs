@@ -14,6 +14,7 @@ public abstract class InventorySlot : MonoBehaviour
 
     private void Start()
     {
+        this.predmet = null;
         this.durability_bar = transform.GetChild(1).GetChild(0).GetComponent<Image>();
         //this.durability_bar.fillAmount = 0.5f;
         this.text_quantity = transform.GetChild(2).GetComponent<Text>();
@@ -37,7 +38,7 @@ public abstract class InventorySlot : MonoBehaviour
 
         if (this.durability_bar == null || this.text_quantity == null)
             setReferences();
-        if (p == null) { ClearSlot(); return; };
+            if (p == null) { ClearSlot(); return; };
 
         predmet = p;
         icon.sprite = p.getItem().icon;

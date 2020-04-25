@@ -29,8 +29,8 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
     public Transform weapon_slot;
     public Transform shield_slot;
 
-    public Predmet currently_equipped_shield;
-    public Predmet currently_equipped_weapon;//melee in ranged
+    [HideInInspector] internal Predmet currently_equipped_shield=null;
+    [HideInInspector] internal Predmet currently_equipped_weapon=null;
 
     private NetworkPlayerAnimationLogic animator;
 
@@ -377,7 +377,8 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
 
     internal void OnRemotePlayerDataSet()
     {
-        ChangeCombatMode(currently_equipped_weapon.getItem());
+        if(currently_equipped_weapon!=null)
+            ChangeCombatMode(currently_equipped_weapon.getItem());
     }
 
     private void setCombatStateLocally(byte new_mode)

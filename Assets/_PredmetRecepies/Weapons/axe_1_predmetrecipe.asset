@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: axe_1_predmetrecipe
   m_EditorClassIdentifier: 
   Product: {fileID: 11400000, guid: aefb49ea94e55ae4d91809916ca159cc, type: 2}
-  final_quantity: 0
+  final_quantity: 1
   ingredients: []
   ingredient_quantities: 
   tier: 0

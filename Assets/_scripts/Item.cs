@@ -35,4 +35,5 @@ public class Item : ScriptableObject
     public PredmetRecepie recepie;
     public bool needsToBeAttached = false;
     public int respawn_time;
+    public float weight;
 }

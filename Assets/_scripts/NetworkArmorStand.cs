@@ -14,15 +14,15 @@ public class NetworkArmorStand : NetworkArmorStandBehavior
     private DynamicCharacterAvatar avatar;
 
 
-    public Predmet head;
-    public Predmet chest ;
-    public Predmet hands ;
-    public Predmet legs ;
-    public Predmet feet ;
+    [HideInInspector] internal Predmet head;
+    [HideInInspector] internal Predmet chest ;
+    [HideInInspector] internal Predmet hands ;
+    [HideInInspector] internal Predmet legs ;
+    [HideInInspector] internal Predmet feet ;
 
-    public Predmet weapon;
-    public Predmet shield;
-    public Predmet ranged; //empty ker nimamo ranged weaponov
+    [HideInInspector] internal Predmet weapon;
+    [HideInInspector] internal Predmet shield;
+    [HideInInspector] internal Predmet ranged; //empty ker nimamo ranged weaponov
 
     public Transform w0;
     public Transform w1;

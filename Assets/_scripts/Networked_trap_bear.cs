@@ -74,6 +74,9 @@ public class Networked_trap_bear : NetworkTrapBehavior
     protected override void NetworkStart()
     {
         base.NetworkStart();
+        if (!networkObject.IsServer) {
+            networkObject.SendRpc(RPC_NETWORK_REFRESH_REQUEST, Receivers.Server);
+        }
     }
 
     /// <summary>

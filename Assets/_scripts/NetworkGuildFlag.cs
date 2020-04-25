@@ -34,11 +34,18 @@ public class NetworkGuildFlag : NetworkLandClaimObjectBehavior
     public Item iron;
     public Item gold;
 
-    private void Start()
+
+    protected override void NetworkStart()
     {
-        //this.flag_texture = get_random_texture();
-        if (!this.networkObject.IsServer)
-            authorized_players = new List<uint>();
+        base.NetworkStart();
+        if (networkObject.IsServer)
+        {
+            networkObject.TakeOwnership();
+            networkObject.SendRpc(RPC_UPDATE_FLAG_TEXTURE_ON_CLIENTS, Receivers.Others, this.flag_texture.GetRawTextureData(), this.flag_texture.width, this.flag_texture.height);
+        }
+        else {
+            networkObject.SendRpc(RPC_CLIENT_ON_CONNECT_REQUEST, Receivers.Server);
+        }
     }
 
     internal void init() {//init, ker moramo v networkplaceable postimat parametre, preden lahko klicemo to metodo. sicer bi bila na networkstart()
@@ -50,8 +57,15 @@ public class NetworkGuildFlag : NetworkLandClaimObjectBehavior
             networkObject.SendRpc(RPC_UPDATE_AUTHORIZED_LIST, Receivers.Others, this.authorized_players.ObjectToByteArray());
             this.placeables_for_upkeep = new List<NetworkPlaceable>();
             refresh_all_placeables_in_range();
+            networkObject.onDestroy += Clear_upkeep_placeables();
 
-            networkObject.onDestroy += Clear_upkeep_placeables(); 
+
+            Debug.Log(flag_rend.material.mainTexture);
+            Debug.Log(flag_rend.material.mainTexture.GetType());
+
+
+            this.flag_texture = flag_rend.material.mainTexture as Texture2D;
+
         }
     }
 
@@ -91,8 +105,8 @@ public class NetworkGuildFlag : NetworkLandClaimObjectBehavior
         Texture2D user_texture = ((UnityEngine.Networking.DownloadHandlerTexture)www.downloadHandler).texture;
         //user_texture.Resize(1024, 1024);
         // put the downloaded image file into the new Texture2D
-        this.flag_rend.material.mainTexture = user_texture;           // put the new image into the current material as defuse material for testing.
         this.flag_texture = user_texture;
+        this.flag_rend.material.mainTexture = this.flag_texture;          // put the new image into the current material as defuse material for testing.
         local_send_flag_texture_to_server();
     }
 
@@ -287,10 +301,14 @@ public class NetworkGuildFlag : NetworkLandClaimObjectBehavior
     {
         if (networkObject.IsServer) {
             if (is_user_allowed_to_change_flag_image(args.Info.SendingPlayer.NetworkId)) {
-                Byte[] raw_data_byte = args.GetNext<byte[]>();
-                this.flag_texture.LoadRawTextureData(raw_data_byte.ByteArrayToObject<byte[]>());//lol tole ubistvu dvakrat zakodiran lol. eh
+
+                byte[] img = args.GetNext<byte[]>();
+                int x = args.GetNext<int>();
+                int y = args.GetNext<int>();
+                if (this.flag_texture == null) this.flag_texture = new Texture2D(x, y);
+                this.flag_texture.LoadRawTextureData(img);
                 this.flag_rend.material.mainTexture = this.flag_texture;
-                networkObject.SendRpc(RPC_UPDATE_FLAG_TEXTURE_ON_CLIENTS, Receivers.Others, this.flag_texture.GetRawTextureData());
+                networkObject.SendRpc(RPC_UPDATE_FLAG_TEXTURE_ON_CLIENTS, Receivers.Others, img,x,y);
             }
         }
 
@@ -304,7 +322,12 @@ public class NetworkGuildFlag : NetworkLandClaimObjectBehavior
     public override void UpdateFlagTextureOnClients(RpcArgs args)
     {
         if (args.Info.SendingPlayer.IsHost) {
-            this.flag_texture.LoadRawTextureData(args.GetNext<byte[]>());//lol tole ubistvu dvakrat zakodiran lol. eh
+            byte[] img = args.GetNext<byte[]>();
+            int x = args.GetNext<int>();
+            int y = args.GetNext<int>();
+
+            if (this.flag_texture == null) this.flag_texture = new Texture2D(x,y);
+            this.flag_texture.LoadRawTextureData(img);
             this.flag_rend.material.mainTexture = this.flag_texture;
         }
     }
@@ -318,7 +341,11 @@ public class NetworkGuildFlag : NetworkLandClaimObjectBehavior
 
 
     private void local_send_flag_texture_to_server() {
-        networkObject.SendRpc(RPC_SEND_FLAG_TEXTURE_TO_SERVER, Receivers.Server, this.flag_texture.GetRawTextureData());
+        MainThreadManager.Instance.Execute(
+            () => {
+                networkObject.SendRpc(RPC_SEND_FLAG_TEXTURE_TO_SERVER, Receivers.Server, this.flag_texture.GetRawTextureData(),this.flag_texture.width,this.flag_texture.height);
+            }
+            );
     }
 
     public GameObject FindByid(uint targetNetworkId) //koda kopširana povsod
@@ -366,5 +393,11 @@ public class NetworkGuildFlag : NetworkLandClaimObjectBehavior
         }
         return dominant;
 
+    }
+
+    public override void client_on_connect_request(RpcArgs args)
+    {
+        if (networkObject.IsServer)
+            networkObject.SendRpc(args.Info.SendingPlayer, RPC_UPDATE_FLAG_TEXTURE_ON_CLIENTS, this.flag_texture.GetRawTextureData(), this.flag_texture.width,this.flag_texture.height);
     }
 }

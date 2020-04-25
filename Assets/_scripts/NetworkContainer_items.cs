@@ -146,6 +146,16 @@ public class NetworkContainer_items : NetworkContainerItemsBehavior
         return false;
     }
 
+    internal IEnumerable<Predmet> getAllOfType(Item.Type t)
+    {
+        List<Predmet> p = new List<Predmet>();
+        foreach (Predmet pr in this.predmeti)
+            if(pr!=null)
+                if (pr.getItem().type == t)
+                    p.Add(pr);
+        return p;
+    }
+
     internal bool containsAmount(Item i, int amount) {
         int q = 0;
         foreach (Predmet p in this.predmeti)

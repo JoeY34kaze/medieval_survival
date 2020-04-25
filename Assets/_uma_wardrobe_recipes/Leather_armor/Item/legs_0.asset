@@ -41,3 +41,5 @@ MonoBehaviour:
   needs_upkeep: 0
   recepie: {fileID: 11400000, guid: ffd1b391eff1c3f46a1531aaadc9f15c, type: 2}
   needsToBeAttached: 0
+  respawn_time: 0
+  weight: 2

@@ -41,6 +41,7 @@ using UnityEngine;
      internal bool an_grounded;
      internal int an_weapon_anim_cl;
 
+
     public PlayerSynchronizationContainer(
             Vector3 pos,
             Quaternion rot,
@@ -104,6 +105,7 @@ using UnityEngine;
         this.an_crouched=an_crouched;
         this.an_grounded=an_grounded;
         this.an_weapon_anim_cl = an_weapon_anim_cl;
+
     }
 
     

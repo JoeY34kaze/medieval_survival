@@ -16,6 +16,7 @@ using UnityEngine;
     public int tier = 0;
     private Predmet pp;
 
+
     public Predmet(Predmet ppp)
     {
         if (ppp != null)
@@ -25,9 +26,6 @@ using UnityEngine;
             this.current_durabilty = ppp.current_durabilty;
             this.creator = ppp.creator;
         }
-    }
-    public Predmet() { 
-    
     }
     public Predmet(Item i) {
         this.item_id = i.id;
@@ -55,6 +53,14 @@ using UnityEngine;
         this.creator = creator;
     }
 
+    public Predmet(int v)
+    {
+        this.item_id = v;
+        this.quantity = 0;
+        this.tier = -1;
+        this.creator = "if you see this tell developers.";
+    }
+
     internal Predmet addQuantity(Predmet p)
     {
         if (p.item_id!=this.item_id || this.quantity >= this.getItem().stackSize) return p;
@@ -72,5 +78,8 @@ using UnityEngine;
         return Mapper.instance.getItemById(this.item_id);
     }
 
+    public float GetWeight() {
+        return this.getItem().weight * this.quantity;
+    }
 
 }

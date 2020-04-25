@@ -20,13 +20,13 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
 
     internal int selected_index = -1;
     internal int selected_index_shield = -1;
-    public Predmet activeTool = null;
-    public Predmet activePlaceable = null;
+    [HideInInspector] internal Predmet activeTool = null;
+    [HideInInspector] internal Predmet activePlaceable = null;
     private bool inPlaceableMode;
     private GameObject CurrentLocalPlaceable;
     private Vector3 previously_valid_position;
     private Quaternion previously_valid_rotation;
-    internal Item current_placeable_item;
+    [HideInInspector] internal Item current_placeable_item;
     private BoxCollider currentPlaceableCollider;
     private Renderer[] currentPlaceableRenderers;
     private bool placeable_currently_valid = false;
@@ -46,6 +46,15 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
     private float rotation_effset_for_normal_rotation;
     private float rotational_speed_modifier = 4f;
 
+    private void Awake()
+    {/*
+        selected_index = -1;
+        selected_index_shield = -1;
+        activeTool = null;
+        activePlaceable = null;
+        current_placeable_item=null;*/
+    
+    }
     private void Start()
     {
         this.combat_handler = GetComponent<NetworkPlayerCombatHandler>();
@@ -543,7 +552,18 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
         if (networkObject.IsServer)
         {
             npi.sendNetworkUpdate(true, false);
-            networkObject.SendRpc(RPC_BAR_SLOT_SELECTION_RESPONSE, Receivers.All, npi.predmeti_hotbar[this.selected_index].ObjectToByteArray(), this.selected_index, npi.predmeti_hotbar[this.selected_index_shield].ObjectToByteArray(), selected_index_shield);
+
+            Predmet p = new Predmet(404);
+            if(this.selected_index!=-1)
+                if (npi.predmeti_hotbar[this.selected_index] != null) p = npi.predmeti_hotbar[this.selected_index];
+
+            Predmet p2 = new Predmet(404);
+            if (this.selected_index_shield != -1)
+                if (npi.predmeti_hotbar[this.selected_index_shield] != null) p2 = npi.predmeti_hotbar[this.selected_index_shield];
+
+
+
+            networkObject.SendRpc(RPC_BAR_SLOT_SELECTION_RESPONSE, Receivers.All, p.ObjectToByteArray(), this.selected_index, p2.ObjectToByteArray(), selected_index_shield);
         }
     }
 
@@ -639,7 +659,15 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
 
                 //tle posljemo zdej rpc
                 //TODO: ownerju poslat druugacn rpc kot drugim, drugi nebi smel vidt indexa ker je to slaba stvar - ESP
-                networkObject.SendRpc(RPC_BAR_SLOT_SELECTION_RESPONSE, Receivers.All,  npi.predmeti_hotbar[this.selected_index].ObjectToByteArray(), this.selected_index, npi.predmeti_hotbar[this.selected_index_shield].ObjectToByteArray(), selected_index_shield);
+                Predmet wep = new Predmet(404);
+                if (this.selected_index != -1)
+                    if (this.selected_index > -1) wep = npi.predmeti_hotbar[this.selected_index];
+
+                Predmet sh = new Predmet(404);
+                if (this.selected_index_shield != -1)
+                    if (this.selected_index_shield > -1) sh = npi.predmeti_hotbar[this.selected_index_shield];
+
+                networkObject.SendRpc(RPC_BAR_SLOT_SELECTION_RESPONSE, Receivers.All,  wep.ObjectToByteArray(), this.selected_index, sh.ObjectToByteArray(), selected_index_shield);
             }
         }
     }
@@ -657,16 +685,17 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
     {
         if (args.Info.SendingPlayer.NetworkId == 0) {
             Predmet p = args.GetNext<byte[]>().ByteArrayToObject<Predmet>();
+            if (p.item_id == 404) p = null;
             int index = args.GetNext<int>();
 
             Predmet predmet2 = args.GetNext<byte[]>().ByteArrayToObject<Predmet>();//za shield rabmo met 2 indexa in tko
             int index2 = args.GetNext<int>();
-
+            if (predmet2.item_id == 404) predmet2 = null;
 
 
 
             //ce je enako stanje kot je zdj in je izbran indeks indeks placeable itema ne nrdimo nic ker to samo pomen da smo postavli en item z stacka k ga imamo. zdi se mal hacky ampak tak je. restructure code ksnej i guess - mogoce bo treba enako nrdit za puscice / javelins ksnej
-            if(p!=null)
+            if (p!=null)
                 if(p.getItem()!=null)
                     if (p.getItem().type == Item.Type.placeable && this.current_placeable_item!=null)
                         if(p.getItem().id == this.current_placeable_item.id)
@@ -953,7 +982,7 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
         if (networkObject.IsServer) {
             this.selected_index = -1;
             this.selected_index_shield = -1;
-            networkObject.SendRpc(RPC_BAR_SLOT_SELECTION_RESPONSE, Receivers.All, "-1", -1, "-1", -1);
+            networkObject.SendRpc(RPC_BAR_SLOT_SELECTION_RESPONSE, Receivers.All, new Predmet(404).ObjectToByteArray(), -1, new Predmet(404).ObjectToByteArray(), -1);
         }
     }
     private GameObject getCurrentTool() {
@@ -1032,7 +1061,14 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
                 NetworkPlaceableInstantiationServer(p, pos, rot);
                 this.npi.reduceCurrentActivePlaceable(this.selected_index);//sicer vrne bool da nam pove ce smo pobral celotn stack, ampak nima veze ker rabmo poslat update za kvantiteto v vsakem primeru.
                                                                            //nastavi selected index na -1 ce smo pobral vse - da gre lepo v rpc                       
-                networkObject.SendRpc(RPC_BAR_SLOT_SELECTION_RESPONSE, Receivers.All, npi.predmeti_hotbar[this.selected_index].ObjectToByteArray(), this.selected_index,  npi.predmeti_hotbar[this.selected_index_shield].ObjectToByteArray(), selected_index_shield);
+
+                Predmet p1 = new Predmet(404);
+                if (this.selected_index != -1)
+                    if (npi.predmeti_hotbar[this.selected_index] != null) p1 = npi.predmeti_hotbar[this.selected_index];
+                Predmet p2 = new Predmet(404);
+                if (this.selected_index_shield != -1)
+                    if (npi.predmeti_hotbar[this.selected_index_shield] != null) p2 = npi.predmeti_hotbar[this.selected_index_shield];
+                networkObject.SendRpc(RPC_BAR_SLOT_SELECTION_RESPONSE, Receivers.All, p1.ObjectToByteArray(), this.selected_index,  p2.ObjectToByteArray(), selected_index_shield);
 
             }
             else

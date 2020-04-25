@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: shield_0_predmetrecipe
   m_EditorClassIdentifier: 
   Product: {fileID: 11400000, guid: f39e5ee31f03c14479e1ecc7cbfbfe9e, type: 2}
-  final_quantity: 0
+  final_quantity: 1
   ingredients: []
   ingredient_quantities: 
   tier: 0

@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: mace_0_predmetRecipe
   m_EditorClassIdentifier: 
   Product: {fileID: 11400000, guid: 69f3f67bc295425468441493a759707c, type: 2}
-  final_quantity: 0
+  final_quantity: 1
   ingredients: []
   ingredient_quantities: 
   tier: 0
