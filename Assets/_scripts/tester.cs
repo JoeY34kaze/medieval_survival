@@ -10,10 +10,15 @@ public class tester : MonoBehaviour
     private bool prev_test=false;
 
     public bool release = false;
+    private Animator anim;
+    [Range(-1,2f)]
+    public float forward;
+    [Range(-1, 1f)]
+    public float horizontal;
 
     void Start()
     {
-        
+        this.anim = GetComponent<Animator>();
     }
 
     // Update is called once per frame
@@ -24,8 +29,8 @@ public class tester : MonoBehaviour
             test = false;
             prev_test = false;
             release = false;
-            GetComponent<Animator>().SetBool("test", false);
-            GetComponent<Animator>().ResetTrigger("release");
+            anim.SetBool("test", false);
+            anim.ResetTrigger("release");
         }
 
 
@@ -37,8 +42,12 @@ public class tester : MonoBehaviour
         if (test && release ) {
             
             release = false;
-            GetComponent<Animator>().SetTrigger("release");
+            anim.SetTrigger("release");
             test = false;
         }
+        anim.SetFloat("forward", this.forward);
+        anim.SetFloat("horizontal", this.horizontal);
+
+
     }
 }

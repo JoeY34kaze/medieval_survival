@@ -42,9 +42,23 @@ public class Networked_siege_projectile : NetworkedSiegeProjectileBehavior
     protected override void NetworkStart()
     {
         base.NetworkStart();
-        if (networkObject.IsServer) {
+        if (networkObject.IsServer)
+        {
             networkObject.TakeOwnership();
         }
+        else {
+            //bugfix od forga. na clientu zarad interne interpolacije objekta spawna objekt na 0,0,0 in zaslida na pravilno pozicijo. tole pofixa to
+            networkObject.positionInterpolation.Enabled = false;
+            networkObject.positionChanged += WarpToFirstValue;
+        }
+    }
+
+    void WarpToFirstValue(Vector3 field, ulong timestep)
+    {
+        networkObject.positionChanged -= WarpToFirstValue;
+        networkObject.positionInterpolation.Enabled = true;
+        networkObject.positionInterpolation.current = networkObject.position;
+        networkObject.positionInterpolation.target = networkObject.position;
     }
 
     private void Update()

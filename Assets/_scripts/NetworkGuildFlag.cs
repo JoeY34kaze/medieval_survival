@@ -13,8 +13,9 @@ public class NetworkGuildFlag : NetworkLandClaimObjectBehavior
 {
 
     [SerializeField] private Renderer flag_rend;
-    public Texture2D flag_texture;
+    public byte[] flag_image_bytes;
 
+    public Texture2D flag_tex;
     public float interactable_distance = 5f;
 
     public string path_flag_image = "\\Medieval Survival\\images\\company_flag.png";
@@ -41,11 +42,52 @@ public class NetworkGuildFlag : NetworkLandClaimObjectBehavior
         if (networkObject.IsServer)
         {
             networkObject.TakeOwnership();
-            networkObject.SendRpc(RPC_UPDATE_FLAG_TEXTURE_ON_CLIENTS, Receivers.Others, this.flag_texture.GetRawTextureData(), this.flag_texture.width, this.flag_texture.height);
+
+            
+
+
+
+
+            Debug.Log(flag_rend.material.mainTexture);
+            Debug.Log(flag_rend.material.mainTexture.GetType());
+
+
+            
+
+            
+            paint_flag(get_random_texture().EncodeToPNG());
+            ///user_texture.Resize(512, 512);
+            //user_texture.Apply();
+            Debug.Log(this.flag_tex.format + " | " + this.flag_tex.graphicsFormat);
+            // put the downloaded image file into the new Texture2D
+           // this.flag_texture = user_texture;
+            //this.flag_rend.material.mainTexture = this.flag_texture;
+
+
+            networkObject.SendRpc(RPC_UPDATE_FLAG_TEXTURE_ON_CLIENTS, Receivers.Others, get_bytes_from_image(), 512, 512);
         }
         else {
             networkObject.SendRpc(RPC_CLIENT_ON_CONNECT_REQUEST, Receivers.Server);
         }
+    }
+
+    private Texture2D get_new_blank_texture()
+    {
+        return new Texture2D(512, 512, TextureFormat.ARGB32, false);
+    }
+
+    private void paint_flag(byte[] tex) {
+        Texture2D n = get_new_blank_texture();
+      //  n.LoadImage(arr);
+        
+        this.flag_tex = get_new_blank_texture();
+        this.flag_tex.LoadImage(tex);
+        this.flag_tex.Apply();
+        this.flag_rend.material.mainTexture = this.flag_tex;
+    }
+
+    private byte[] get_bytes_from_image() {
+        return this.flag_tex.EncodeToPNG();
     }
 
     internal void init() {//init, ker moramo v networkplaceable postimat parametre, preden lahko klicemo to metodo. sicer bi bila na networkstart()
@@ -57,23 +99,262 @@ public class NetworkGuildFlag : NetworkLandClaimObjectBehavior
             networkObject.SendRpc(RPC_UPDATE_AUTHORIZED_LIST, Receivers.Others, this.authorized_players.ObjectToByteArray());
             this.placeables_for_upkeep = new List<NetworkPlaceable>();
             refresh_all_placeables_in_range();
-            networkObject.onDestroy += Clear_upkeep_placeables();
+            networkObject.onDestroy += (sender) => { Clear_upkeep_placeables(); };
 
 
-            Debug.Log(flag_rend.material.mainTexture);
-            Debug.Log(flag_rend.material.mainTexture.GetType());
-
-
-            this.flag_texture = flag_rend.material.mainTexture as Texture2D;
 
         }
     }
 
-    private NetWorker.BaseNetworkEvent Clear_upkeep_placeables()
+
+
+
+    public Texture2D get_random_texture()
+    {
+        int width = 512;
+        int height = 512;
+
+        Texture2D texture = get_new_blank_texture();
+        texture.filterMode = FilterMode.Point;
+        float k = 0;
+        for (int i = 0; i < width; i++)
+        {
+             if(i%10 ==0)k = Random.Range(0.0f, 1.0f);
+            for (int j = 0; j < height; j++)
+            {
+                texture.SetPixel(j, height - 1 - i, Color.red * k);
+            }
+        }
+        texture.Apply();
+        return texture;
+    }
+
+    #region TEXTURE
+
+
+    private IEnumerator load_flag_from_file()
+    {
+        if (!File.Exists(System.IO.Path.Combine(Environment.ExpandEnvironmentVariables("%userprofile%"), "Documents") + path_flag_image))
+        {
+            Debug.Log("flag not found!");
+
+        }
+        else
+        {
+
+
+            UnityEngine.Networking.UnityWebRequest www = UnityEngine.Networking.UnityWebRequestTexture.GetTexture("file://" + System.IO.Path.Combine(Environment.ExpandEnvironmentVariables("%userprofile%"), "Documents") + path_flag_image);                  // "download" the first file from disk
+            yield return www.SendWebRequest();                                                               // Wait unill its loaded
+            Texture2D user_texture = ((UnityEngine.Networking.DownloadHandlerTexture)www.downloadHandler).texture;
+
+            if (user_texture.height != 512 || user_texture.width != 512)
+            {
+                Debug.LogWarning("External texture is not 512 by 512!");
+            }
+            else
+            {
+
+
+                paint_flag(user_texture.EncodeToPNG());
+
+                Debug.Log(user_texture.format + " | " + user_texture.graphicsFormat);
+                // put the downloaded image file into the new Texture2D
+
+                local_send_flag_texture_to_server();
+            }
+        }
+    }
+
+
+    private void local_send_flag_texture_to_server()
+    {
+      //  MainThreadManager.Instance.Execute(
+       //     () => {
+                networkObject.SendRpc(RPC_SEND_FLAG_TEXTURE_TO_SERVER, Receivers.Server, get_bytes_from_image(), 512, 512);
+       //     }
+       //     );
+    }
+
+    public override void SendFlagTextureToServer(RpcArgs args)
+    {
+        if (networkObject.IsServer)
+        {
+            if (is_user_allowed_to_change_flag_image(args.Info.SendingPlayer.NetworkId))
+            {
+
+                byte[] img = args.GetNext<byte[]>();
+                int x = args.GetNext<int>();
+                int y = args.GetNext<int>();
+                paint_flag(img);
+                networkObject.SendRpc(RPC_UPDATE_FLAG_TEXTURE_ON_CLIENTS, Receivers.Others, img, x, y);
+            }
+        }
+
+    }
+
+    private bool is_user_allowed_to_change_flag_image(uint network_id)
+    {
+        return this.authorized_players.Contains(network_id);
+    }
+
+    public override void UpdateFlagTextureOnClients(RpcArgs args)
+    {
+        if (args.Info.SendingPlayer.IsHost)
+        {
+            byte[] img = args.GetNext<byte[]>();
+            paint_flag(img);
+        }
+    }
+    internal void local_flag_toggle_authorized_request()
+    {
+        networkObject.SendRpc(RPC_AUTHORIZATION_REQUEST, Receivers.Server);
+    }
+
+    internal void local_flag_upload_image_request()
+    {
+        if (is_user_allowed_to_change_flag_image(networkObject.MyPlayerId))
+            StartCoroutine(load_flag_from_file());
+    }
+
+    public override void client_on_connect_request(RpcArgs args)
+    {
+        if (networkObject.IsServer)
+            networkObject.SendRpc(args.Info.SendingPlayer, RPC_UPDATE_FLAG_TEXTURE_ON_CLIENTS, this.flag_image_bytes, 512, 512);
+    }
+    /* ----- resizing
+
+    public enum ImageFilterMode : int
+    {
+        Nearest = 0,
+        Biliner = 1,
+        Average = 2
+    }
+    public static Texture2D ResizeTexture(Texture2D pSource, ImageFilterMode pFilterMode, float pScale)
+    {
+
+        //*** Variables
+        int i;
+
+        //*** Get All the source pixels
+        Color[] aSourceColor = pSource.GetPixels(0);
+        Vector2 vSourceSize = new Vector2(pSource.width, pSource.height);
+
+        //*** Calculate New Size
+        float xWidth = Mathf.RoundToInt((float)pSource.width * pScale);
+        float xHeight = Mathf.RoundToInt((float)pSource.height * pScale);
+
+        //*** Make New
+        Texture2D oNewTex = new Texture2D((int)xWidth, (int)xHeight, TextureFormat.RGBA32, false);
+
+        //*** Make destination array
+        int xLength = (int)xWidth * (int)xHeight;
+        Color[] aColor = new Color[xLength];
+
+        Vector2 vPixelSize = new Vector2(vSourceSize.x / xWidth, vSourceSize.y / xHeight);
+
+        //*** Loop through destination pixels and process
+        Vector2 vCenter = new Vector2();
+        for (i = 0; i < xLength; i++)
+        {
+
+            //*** Figure out x&y
+            float xX = (float)i % xWidth;
+            float xY = Mathf.Floor((float)i / xWidth);
+
+            //*** Calculate Center
+            vCenter.x = (xX / xWidth) * vSourceSize.x;
+            vCenter.y = (xY / xHeight) * vSourceSize.y;
+
+            //*** Do Based on mode
+            //*** Nearest neighbour (testing)
+            if (pFilterMode == ImageFilterMode.Nearest)
+            {
+
+                //*** Nearest neighbour (testing)
+                vCenter.x = Mathf.Round(vCenter.x);
+                vCenter.y = Mathf.Round(vCenter.y);
+
+                //*** Calculate source index
+                int xSourceIndex = (int)((vCenter.y * vSourceSize.x) + vCenter.x);
+
+                //*** Copy Pixel
+                aColor[i] = aSourceColor[xSourceIndex];
+            }
+
+            //*** Bilinear
+            else if (pFilterMode == ImageFilterMode.Biliner)
+            {
+
+                //*** Get Ratios
+                float xRatioX = vCenter.x - Mathf.Floor(vCenter.x);
+                float xRatioY = vCenter.y - Mathf.Floor(vCenter.y);
+
+                //*** Get Pixel index's
+                int xIndexTL = (int)((Mathf.Floor(vCenter.y) * vSourceSize.x) + Mathf.Floor(vCenter.x));
+                int xIndexTR = (int)((Mathf.Floor(vCenter.y) * vSourceSize.x) + Mathf.Ceil(vCenter.x));
+                int xIndexBL = (int)((Mathf.Ceil(vCenter.y) * vSourceSize.x) + Mathf.Floor(vCenter.x));
+                int xIndexBR = (int)((Mathf.Ceil(vCenter.y) * vSourceSize.x) + Mathf.Ceil(vCenter.x));
+
+                //*** Calculate Color
+                aColor[i] = Color.Lerp(
+                    Color.Lerp(aSourceColor[xIndexTL], aSourceColor[xIndexTR], xRatioX),
+                    Color.Lerp(aSourceColor[xIndexBL], aSourceColor[xIndexBR], xRatioX),
+                    xRatioY
+                );
+            }
+
+            //*** Average
+            else if (pFilterMode == ImageFilterMode.Average)
+            {
+
+                //*** Calculate grid around point
+                int xXFrom = (int)Mathf.Max(Mathf.Floor(vCenter.x - (vPixelSize.x * 0.5f)), 0);
+                int xXTo = (int)Mathf.Min(Mathf.Ceil(vCenter.x + (vPixelSize.x * 0.5f)), vSourceSize.x);
+                int xYFrom = (int)Mathf.Max(Mathf.Floor(vCenter.y - (vPixelSize.y * 0.5f)), 0);
+                int xYTo = (int)Mathf.Min(Mathf.Ceil(vCenter.y + (vPixelSize.y * 0.5f)), vSourceSize.y);
+
+                //*** Loop and accumulate
+                Vector4 oColorTotal = new Vector4();
+                Color oColorTemp = new Color();
+                float xGridCount = 0;
+                for (int iy = xYFrom; iy < xYTo; iy++)
+                {
+                    for (int ix = xXFrom; ix < xXTo; ix++)
+                    {
+
+                        //*** Get Color
+                        oColorTemp += aSourceColor[(int)(((float)iy * vSourceSize.x) + ix)];
+
+                        //*** Sum
+                        xGridCount++;
+                    }
+                }
+
+                //*** Average Color
+                aColor[i] = oColorTemp / (float)xGridCount;
+            }
+        }
+
+        //*** Set Pixels
+        oNewTex.SetPixels(aColor);
+        oNewTex.Apply();
+
+        //*** Return
+        return oNewTex;
+    }
+    */
+    #endregion
+
+
+
+    #region OTHER
+
+
+    private void Clear_upkeep_placeables()
     {
         foreach (NetworkPlaceable p in this.placeables_for_upkeep)
             p.upkeep_flag = null;
-        return null;
+        
     }
 
     private void refresh_all_placeables_in_range() {
@@ -97,18 +378,7 @@ public class NetworkGuildFlag : NetworkLandClaimObjectBehavior
     }
 
 
-    private IEnumerator load_flag_from_file()
-    {
 
-        UnityEngine.Networking.UnityWebRequest www = UnityEngine.Networking.UnityWebRequestTexture.GetTexture("file://" + System.IO.Path.Combine(Environment.ExpandEnvironmentVariables("%userprofile%"), "Documents") + path_flag_image);                  // "download" the first file from disk
-        yield return www.SendWebRequest();                                                               // Wait unill its loaded
-        Texture2D user_texture = ((UnityEngine.Networking.DownloadHandlerTexture)www.downloadHandler).texture;
-        //user_texture.Resize(1024, 1024);
-        // put the downloaded image file into the new Texture2D
-        this.flag_texture = user_texture;
-        this.flag_rend.material.mainTexture = this.flag_texture;          // put the new image into the current material as defuse material for testing.
-        local_send_flag_texture_to_server();
-    }
 
     internal bool pay_upkeep_for(NetworkPlaceable p)
     {
@@ -223,24 +493,6 @@ public class NetworkGuildFlag : NetworkLandClaimObjectBehavior
         
     }
 
-    public Texture2D get_random_texture()
-    {
-        int width = 10;
-        int height = 10;
-
-        Texture2D texture = new Texture2D(width, height, TextureFormat.ARGB32, false);
-        texture.filterMode = FilterMode.Point;
-
-        for (int i = 0; i < width; i++)
-        {
-            for (int j = 0; j < height; j++)
-            {
-                texture.SetPixel(j, height - 1 - i, Color.red * Random.Range(0f, 1.0f));
-            }
-        }
-        texture.Apply();
-        return texture;
-    }
     public override void SendDateTimePlaced(RpcArgs args)
     {
         if (args.Info.SendingPlayer.IsHost) {
@@ -297,40 +549,6 @@ public class NetworkGuildFlag : NetworkLandClaimObjectBehavior
             }
     }
 
-    public override void SendFlagTextureToServer(RpcArgs args)
-    {
-        if (networkObject.IsServer) {
-            if (is_user_allowed_to_change_flag_image(args.Info.SendingPlayer.NetworkId)) {
-
-                byte[] img = args.GetNext<byte[]>();
-                int x = args.GetNext<int>();
-                int y = args.GetNext<int>();
-                if (this.flag_texture == null) this.flag_texture = new Texture2D(x, y);
-                this.flag_texture.LoadRawTextureData(img);
-                this.flag_rend.material.mainTexture = this.flag_texture;
-                networkObject.SendRpc(RPC_UPDATE_FLAG_TEXTURE_ON_CLIENTS, Receivers.Others, img,x,y);
-            }
-        }
-
-    }
-
-    private bool is_user_allowed_to_change_flag_image(uint network_id)
-    {
-        return this.authorized_players.Contains(network_id);
-    }
-
-    public override void UpdateFlagTextureOnClients(RpcArgs args)
-    {
-        if (args.Info.SendingPlayer.IsHost) {
-            byte[] img = args.GetNext<byte[]>();
-            int x = args.GetNext<int>();
-            int y = args.GetNext<int>();
-
-            if (this.flag_texture == null) this.flag_texture = new Texture2D(x,y);
-            this.flag_texture.LoadRawTextureData(img);
-            this.flag_rend.material.mainTexture = this.flag_texture;
-        }
-    }
 
     public override void UpdateAuthorizedList(RpcArgs args)
     {
@@ -340,13 +558,6 @@ public class NetworkGuildFlag : NetworkLandClaimObjectBehavior
     }
 
 
-    private void local_send_flag_texture_to_server() {
-        MainThreadManager.Instance.Execute(
-            () => {
-                networkObject.SendRpc(RPC_SEND_FLAG_TEXTURE_TO_SERVER, Receivers.Server, this.flag_texture.GetRawTextureData(),this.flag_texture.width,this.flag_texture.height);
-            }
-            );
-    }
 
     public GameObject FindByid(uint targetNetworkId) //koda kopširana povsod
     {
@@ -357,16 +568,7 @@ public class NetworkGuildFlag : NetworkLandClaimObjectBehavior
         return null;
     }
 
-    internal void local_flag_toggle_authorized_request()
-    {
-        networkObject.SendRpc(RPC_AUTHORIZATION_REQUEST, Receivers.Server);
-    }
-
-    internal void local_flag_upload_image_request()
-    {
-        if(is_user_allowed_to_change_flag_image(networkObject.MyPlayerId))
-            StartCoroutine(load_flag_from_file());
-    }
+   
 
     internal void local_clear_all_request()
     {
@@ -394,10 +596,5 @@ public class NetworkGuildFlag : NetworkLandClaimObjectBehavior
         return dominant;
 
     }
-
-    public override void client_on_connect_request(RpcArgs args)
-    {
-        if (networkObject.IsServer)
-            networkObject.SendRpc(args.Info.SendingPlayer, RPC_UPDATE_FLAG_TEXTURE_ON_CLIENTS, this.flag_texture.GetRawTextureData(), this.flag_texture.width,this.flag_texture.height);
-    }
+    #endregion
 }

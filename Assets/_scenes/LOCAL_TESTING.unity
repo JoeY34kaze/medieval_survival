@@ -395,6 +395,8 @@ MonoBehaviour:
   resetAll: 0
   test: 0
   release: 0
+  forward: 0
+  horizontal: 0
 --- !u!1001 &1785829444
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1055,6 +1057,8 @@ MonoBehaviour:
   resetAll: 0
   test: 0
   release: 0
+  forward: 0
+  horizontal: 0
 --- !u!1 &1892149370
 GameObject:
   m_ObjectHideFlags: 0
