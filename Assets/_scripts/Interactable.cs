@@ -130,4 +130,11 @@ public class Interactable : Interactable_objectBehavior
     {
         throw new NotImplementedException();
     }
+
+    public override void update_position(RpcArgs args)
+    {
+        throw new NotImplementedException();
+    }
+
+
 }

@@ -158,7 +158,7 @@ public class UILogic : MonoBehaviour
                     this.hasOpenWindow = true;
                     NetworkGuildManager.Instance.SetMemberPanel(true);
                     NetworkGuildManager.Instance.localPlayerGuildInfoUpdateRequest();
-                    enableMouse();
+                    enableMouse(false);
                 }
             }
 
@@ -191,7 +191,7 @@ public class UILogic : MonoBehaviour
                 {
                     this.crafting_panel.SetActive(true);
                     this.hasOpenWindow = true;
-                    enableMouse();
+                    enableMouse(false);
                 }
             }
         }
@@ -304,7 +304,7 @@ public class UILogic : MonoBehaviour
     private void set_main_menu_state(bool visible) {
         if (visible) {
             this.hasOpenWindow = true;
-            enableMouse();
+            enableMouse(false);
         }
         this.menuController.transform.parent.gameObject.SetActive(visible);
     }
@@ -315,7 +315,7 @@ public class UILogic : MonoBehaviour
         this.original_trebuchet_rotation = trebuchet.get_rotation_of_platform(); ;
         this.trebuchet_rotation_panel.SetActive(true);
         this.hasOpenWindow = true;
-        enableMouse();
+        enableMouse(false);
     }
 
     public void on_rotation_set_button_clicked() {
@@ -349,13 +349,13 @@ public class UILogic : MonoBehaviour
         Debug.Log("rotation input changed");
     }
 
-    public void enableMouse() {
+    public void enableMouse(bool forced) {
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
     }
 
-    public void DisableMouse() {
-        if (this.hasOpenWindow || this.active_container_panel != null) { Debug.Log("NOT disabling mouse curson because we still have open windows!."); return; }
+    public void DisableMouse(bool forced) {
+        if(!forced)if (this.hasOpenWindow || this.active_container_panel != null) { Debug.Log("NOT disabling mouse curson because we still have open windows!."); return; }
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
     }
@@ -388,7 +388,7 @@ public class UILogic : MonoBehaviour
 
         NetworkGuildManager.Instance.SetMemberPanel(false);
 
-        DisableMouse();
+        DisableMouse(false);
         set_main_menu_state(false);
         UILogic.localPlayerGameObject.GetComponent<NetworkPlayerAnimationLogic>().hookChestRotation = true;
         this.input_trebuchet_rotation.text = "0 degrees";
@@ -400,7 +400,7 @@ public class UILogic : MonoBehaviour
         this.inventoryPanel.SetActive(true);
         local_npi.requestLocalUIUpdate();
         this.hasOpenWindow = true;
-        enableMouse();
+        enableMouse(false);
     }
 
     internal void clearContainerPanel() {
@@ -528,7 +528,7 @@ public class UILogic : MonoBehaviour
 
     public void OnGuildModificationButtonClick() {
         ClearAll();
-        enableMouse();
+        enableMouse(false);
         NetworkGuildManager.Instance.OnButtonModifyClick();
         
     }
@@ -561,12 +561,12 @@ public class UILogic : MonoBehaviour
 
     internal void showDeathScreen()
     {
-        enableMouse();
+        enableMouse(false);
         this.deathScreen.SetActive(true);
     }
 
     internal void closeDeathScreen() {
-        DisableMouse();
+        DisableMouse(false);
         this.deathScreen.SetActive(false);
         this.deathScreenBeds.SetActive(false);
     }
@@ -577,7 +577,7 @@ public class UILogic : MonoBehaviour
 
     internal void local_open_playerBed_rename_panel(NetworkPlayerBed networkPlayerBed)
     {
-        enableMouse();
+        enableMouse(false);
         UILogic.hasControlOfInput = true;
         this.hasOpenWindow = true;
         this.bed_currently_being_modified = networkPlayerBed;
@@ -605,7 +605,7 @@ public class UILogic : MonoBehaviour
     {
         //pokaze info da je biu disconnectan. ima en gumb -> quit server  / reconnect mogoce tud?
         this.disconnect_screen.SetActive(true);
-        this.enableMouse();
+        this.enableMouse(false);
         UILogic.hasControlOfInput = true;
     }
 

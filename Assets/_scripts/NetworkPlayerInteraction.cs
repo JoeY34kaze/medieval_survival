@@ -380,7 +380,7 @@ public class NetworkPlayerInteraction : NetworkPlayerInteractionBehavior
     internal void local_player_interaction_guild_invite_request(GameObject target)
     {
         //target.GetComponent<Interactable_player>().local_player_guild_invite_request(stats.Get_server_id());
-        GameObject.FindGameObjectWithTag("GuildManager").GetComponent<NetworkGuildManager>().localSendGuildInvite(target.GetComponent<NetworkPlayerStats>().Get_server_id());//z networkManagerja klicemo rpc na server da pohendla pa posle response
+        NetworkGuildManager.Instance.localSendGuildInvite(target.GetComponent<NetworkPlayerStats>().Get_server_id());//z networkManagerja klicemo rpc na server da pohendla pa posle response
     }
 
     internal void local_player_interaction_team_invite_request(GameObject target)

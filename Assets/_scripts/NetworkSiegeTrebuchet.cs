@@ -27,6 +27,23 @@ public class NetworkSiegeTrebuchet : NetworkedSiegeWeaponBehavior
     public Transform platform;
     public direction_vector_helper direction;
 
+    protected override void NetworkStart()
+    {
+        base.NetworkStart();
+        // TODO:  Your initialization code that relies on network setup for this object goes here
+        if (networkObject.IsServer)
+        {
+            networkObject.TakeOwnership();
+            NetworkManager.Instance.Networker.playerConnected += (player, networker) =>
+            {
+                Debug.Log("Started sending trebuchet synch");
+                MainThreadManager.Run(() => {
+                    networkObject.SendRpc(RPC_INITIALIZATION, Receivers.Others, transform.position, transform.rotation, this.platform.rotation, state);
+                });
+            };
+        }
+    }
+
     private void Start()
     {
         this.anim = GetComponent<Animator>();
@@ -233,6 +250,17 @@ public class NetworkSiegeTrebuchet : NetworkedSiegeWeaponBehavior
                 FindByid(args.Info.SendingPlayer.NetworkId).GetComponent<NetworkPlayerInventory>().handleItemPickup(pl.p);
                 networkObject.Destroy();
             }
+        }
+    }
+
+    public override void initialization(RpcArgs args)
+    {
+        if (args.Info.SendingPlayer.IsHost) {
+            transform.position = args.GetNext<Vector3>();
+            transform.rotation = args.GetNext<Quaternion>();
+            this.platform.rotation= args.GetNext<Quaternion>();
+            this.state = (int)args.GetNext<byte>();
+            this.anim.SetInteger("state", this.state); ;
         }
     }
 }

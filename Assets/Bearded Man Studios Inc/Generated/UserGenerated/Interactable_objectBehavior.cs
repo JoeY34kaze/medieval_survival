@@ -4,8 +4,8 @@ using UnityEngine;
 
 namespace BeardedManStudios.Forge.Networking.Generated
 {
-	[GeneratedRPC("{\"types\":[[][][\"Vector3\", \"Vector3\"][\"uint\"][][\"int\"][\"bool\"][\"byte[]\"][\"Vector3\"]]")]
-	[GeneratedRPCVariableNames("{\"types\":[[][][\"pos\", \"dir\"][\"helper_id\"][][\"tip\"][\"Closed\"][\"p\"][\"position\"]]")]
+	[GeneratedRPC("{\"types\":[[][][\"Vector3\", \"Vector3\"][\"uint\"][][\"int\"][\"bool\"][\"byte[]\"][\"Vector3\"][\"Vector3\"]]")]
+	[GeneratedRPCVariableNames("{\"types\":[[][][\"pos\", \"dir\"][\"helper_id\"][][\"tip\"][\"Closed\"][\"p\"][\"position\"][\"pos\"]]")]
 	public abstract partial class Interactable_objectBehavior : NetworkBehavior
 	{
 		public const byte RPC_DESTROY_WRAPPER = 0 + 5;
@@ -17,6 +17,7 @@ namespace BeardedManStudios.Forge.Networking.Generated
 		public const byte RPC_DOOR_STATE_UPDATE = 6 + 5;
 		public const byte RPC_SET_PREDMET_FOR_PICKUP = 7 + 5;
 		public const byte RPC_ON_CLIENT_AFTER_PICKUP = 8 + 5;
+		public const byte RPC_UPDATE_POSITION = 9 + 5;
 		
 		public Interactable_objectNetworkObject networkObject = null;
 
@@ -39,6 +40,7 @@ namespace BeardedManStudios.Forge.Networking.Generated
 			networkObject.RegisterRpc("DoorStateUpdate", DoorStateUpdate, typeof(bool));
 			networkObject.RegisterRpc("SetPredmetForPickup", SetPredmetForPickup, typeof(byte[]));
 			networkObject.RegisterRpc("OnClientAfterPickup", OnClientAfterPickup, typeof(Vector3));
+			networkObject.RegisterRpc("update_position", update_position, typeof(Vector3));
 
 			networkObject.onDestroy += DestroyGameObject;
 
@@ -151,6 +153,10 @@ namespace BeardedManStudios.Forge.Networking.Generated
 		/// Arguments:
 		/// </summary>
 		public abstract void OnClientAfterPickup(RpcArgs args);
+		/// <summary>
+		/// Arguments:
+		/// </summary>
+		public abstract void update_position(RpcArgs args);
 
 		// DO NOT TOUCH, THIS GETS GENERATED PLEASE EXTEND THIS CLASS IF YOU WISH TO HAVE CUSTOM CODE ADDITIONS
 	}

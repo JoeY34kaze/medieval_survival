@@ -1,5 +1,6 @@
 ﻿using BeardedManStudios.Forge.Networking;
 using BeardedManStudios.Forge.Networking.Generated;
+using BeardedManStudios.Forge.Networking.Unity;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -22,8 +23,44 @@ public class NetworkBackpack : NetworkBackpackBehavior
             nci.init(this.item.capacity);
             GetComponent<NetworkContainer>().init(new Predmet(item, 1, item.Max_durability, "creator not found. devs should check this"));
         }
-            
         r = GetComponent<Rigidbody>();
+    }
+
+
+    protected override void NetworkStart()
+    {
+        base.NetworkStart();
+        // TODO:  Your initialization code that relies on network setup for this object goes here
+        if (networkObject.IsServer)
+        {
+            networkObject.TakeOwnership();
+            NetworkManager.Instance.Networker.playerConnected += (player, networker) =>
+            {
+                Debug.Log("Started sending item synch");
+                MainThreadManager.Run(() => {
+                    StartCoroutine(send_update_to_new_client_for_awhile(player));
+                });
+            };
+        }
+    }
+
+    private IEnumerator send_update_to_new_client_for_awhile(NetworkingPlayer connected_player)
+    {
+        bool good_enough = false;
+        float delay = 0.5f;
+        while (!good_enough)
+        {
+
+            //send rpc to new player update its position
+
+            networkObject.SendRpc(connected_player, RPC_UPDATE_POSITION, transform.position);
+
+
+            yield return new WaitForSeconds(delay);
+            delay = 1.2f + delay;
+            if (delay > 5f) good_enough = true;
+        }
+
     }
 
     public bool hasSpace() {
@@ -423,5 +460,13 @@ public class NetworkBackpack : NetworkBackpackBehavior
     internal void requestUIUpdate()
     {
         this.panel_handler.updateUI();
+    }
+
+    public override void update_position(RpcArgs args)
+    {
+        if (args.Info.SendingPlayer.IsHost)
+        {
+            transform.position = args.GetNext<Vector3>();
+        }
     }
 }

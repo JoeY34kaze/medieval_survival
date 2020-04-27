@@ -99,6 +99,8 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
         //this.server_id = NetworkManager.Instance.Networker.Me.NetworkId; -- SAMO ZA DEBUGGING CE BO TREBA POGLEDAT V INSPEKTORJU ID AL PA KEJ
         //this.playerName = "Janez Kranjski";
         //updateDisplayName();
+        if (networkObject.IsServer) NetworkGuildManager.Instance.OnStartup();
+
         if (networkObject.IsOwner)
         {
             UILogic.set_local_player_gameObject(gameObject);
@@ -118,10 +120,6 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
                     UILogic.Instance.setLatencyText(ping);
                 });
             };
-
-
-
-
         }
         
 
@@ -143,12 +141,26 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
         {
             //server se itak nemore disconnectat sam od sebe
             NetworkManager.Instance.Networker.disconnected += OnLocalClientDisconnected;
+           
         }
         if(networkObject.IsServer && !networkObject.IsOwner) {
             load_player_data_on_connected();
             send_other_players_data_to_newly_connected_player(networkObject.Owner);
         }
 
+    }
+
+    /// <summary>
+    /// klice se z NetworkGuildManager ko se vse vzpostavi. pohandla vse kar je v zvezi z guildi
+    /// </summary>
+    internal void startup_guild_manager_handler()
+    {
+        ///klice se na serverju. pogleda ce pripada ksnemu guildu sicer naredi novega
+        NetworkGuildManager.Guild g = NetworkGuildManager.Instance.GetGuildFromSteamId(666);
+        if (g == null) {
+            g = NetworkGuildManager.Instance.CreateGuild(networkObject.Owner.NetworkId,this.playerName+"'s Guild","","red",null);
+        }
+        NetworkGuildManager.Instance.sendUserInfoResponseTo(networkObject.Owner);
     }
 
 
@@ -529,7 +541,7 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
     }
 
     public void OnSubmitModifiedGuildDataClick() {
-        GameObject.FindGameObjectWithTag("GuildManager").GetComponent<NetworkGuildManager>().OnModifyGuildConfirmClick();
+        NetworkGuildManager.Instance.OnModifyGuildConfirmClick();
     }
 
 
@@ -898,6 +910,7 @@ napadenmu playerju da si poupdejta health. ta player pol ko si je updejtov healt
 
         if (networkObject.IsServer)
         {
+            combatStateHandler.set_shield_collider(false);
             if (this.death_timer_coroutine != null) Debug.LogError("Death Coroutine is busy!! this shouldnt be happening");
             this.death_timer_coroutine = downed_timer(this.death_timer);
             StartCoroutine(this.death_timer_coroutine);
@@ -923,6 +936,9 @@ napadenmu playerju da si poupdejta health. ta player pol ko si je updejtov healt
         {
             StopCoroutine(this.death_timer_coroutine);
             this.death_timer_coroutine = null;
+        }
+        if (networkObject.IsServer) {
+            combatStateHandler.set_shield_collider(true);
         }
     }
 

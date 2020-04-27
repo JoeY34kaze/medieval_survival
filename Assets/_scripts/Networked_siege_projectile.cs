@@ -30,10 +30,8 @@ public class Networked_siege_projectile : NetworkedSiegeProjectileBehavior
         if (this.rb == null) GetComponent<Rigidbody>();
 
         this.rb.AddForce(direction * force);
+        networkObject.SendRpc( RPC_INITIALIZATION,Receivers.OthersProximity, transform.position);
 
-        //poslat vsem clientim!!
-
-        //razen seveda trenutno ker je nrjen z fieldi in ne rpcji..... - to eb changed before release trenutno ne nrdi nic, samo groundwork za presaltanje na rpcje
     }
 
     private void Start()
@@ -138,5 +136,10 @@ public class Networked_siege_projectile : NetworkedSiegeProjectileBehavior
     internal void OnPlayerPickup()
     {
         networkObject.Destroy();
+    }
+
+    public override void initialization(RpcArgs args)
+    {
+        if (args.Info.SendingPlayer.IsHost) transform.position = args.GetNext<Vector3>();
     }
 }

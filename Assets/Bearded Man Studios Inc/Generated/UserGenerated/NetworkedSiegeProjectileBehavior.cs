@@ -4,12 +4,13 @@ using UnityEngine;
 
 namespace BeardedManStudios.Forge.Networking.Generated
 {
-	[GeneratedRPC("{\"types\":[[\"Vector3\"][]]")]
-	[GeneratedRPCVariableNames("{\"types\":[[\"position\"][]]")]
+	[GeneratedRPC("{\"types\":[[\"Vector3\"][][\"Vector3\"]]")]
+	[GeneratedRPCVariableNames("{\"types\":[[\"position\"][][\"pos\"]]")]
 	public abstract partial class NetworkedSiegeProjectileBehavior : NetworkBehavior
 	{
 		public const byte RPC_SEND_HIT_TO_CLIENTS = 0 + 5;
 		public const byte RPC_SEND_HIT_RESPONSE_TO_OWNER = 1 + 5;
+		public const byte RPC_INITIALIZATION = 2 + 5;
 		
 		public NetworkedSiegeProjectileNetworkObject networkObject = null;
 
@@ -25,6 +26,7 @@ namespace BeardedManStudios.Forge.Networking.Generated
 			base.SetupHelperRpcs(networkObject);
 			networkObject.RegisterRpc("sendHitToClients", sendHitToClients, typeof(Vector3));
 			networkObject.RegisterRpc("send_hit_response_to_owner", send_hit_response_to_owner);
+			networkObject.RegisterRpc("initialization", initialization, typeof(Vector3));
 
 			networkObject.onDestroy += DestroyGameObject;
 
@@ -110,6 +112,10 @@ namespace BeardedManStudios.Forge.Networking.Generated
 		/// Arguments:
 		/// </summary>
 		public abstract void send_hit_response_to_owner(RpcArgs args);
+		/// <summary>
+		/// Arguments:
+		/// </summary>
+		public abstract void initialization(RpcArgs args);
 
 		// DO NOT TOUCH, THIS GETS GENERATED PLEASE EXTEND THIS CLASS IF YOU WISH TO HAVE CUSTOM CODE ADDITIONS
 	}

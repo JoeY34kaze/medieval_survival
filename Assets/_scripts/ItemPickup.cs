@@ -46,9 +46,36 @@ public class ItemPickup : Interactable {
         {
             networkObject.TakeOwnership();
             StartCoroutine(despawner(get_time_for_despawn()));
+            
+                NetworkManager.Instance.Networker.playerConnected += (player, networker) =>
+                {
+                    Debug.Log("Started sending item synch");
+                    MainThreadManager.Run(() => {
+                        StartCoroutine(send_update_to_new_client_for_awhile(player));
+                    });
+                };
+           
         }
 
     }
+
+    private IEnumerator send_update_to_new_client_for_awhile(NetworkingPlayer connected_player) {
+        bool good_enough = false;
+        float delay = 0.5f;
+        while (!good_enough) {
+
+            //send rpc to new player update its position
+   
+                networkObject.SendRpc(connected_player, RPC_UPDATE_POSITION, transform.position);
+        
+
+            yield return new WaitForSeconds(delay);
+            delay = 1.2f + delay;
+            if (delay > 5f) good_enough = true;
+        }
+        
+    }
+
 
     private float get_time_for_despawn()
     {
@@ -220,6 +247,11 @@ public class ItemPickup : Interactable {
             this.renderers[i].material = this.original_materials[i];
     }
 
-
+    public override void update_position(RpcArgs args)
+    {
+        if (args.Info.SendingPlayer.IsHost) {
+            transform.position = args.GetNext<Vector3>();
+        }
+    }
 
 }

@@ -9,9 +9,9 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
 {
     private byte combat_mode = 0; //0 = no combat, 1= combat  
     private bool blocking = false;
-    public bool Blocking { 
-        get { return this.blocking; } 
-        set { this.blocking = value; } 
+    public bool Blocking {
+        get { return this.blocking; }
+        set { this.blocking = value; }
     }
     public byte Combat_mode
     {
@@ -29,8 +29,8 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
     public Transform weapon_slot;
     public Transform shield_slot;
 
-    [HideInInspector] internal Predmet currently_equipped_shield=null;
-    [HideInInspector] internal Predmet currently_equipped_weapon=null;
+    [HideInInspector] internal Predmet currently_equipped_shield = null;
+    [HideInInspector] internal Predmet currently_equipped_weapon = null;
 
     private NetworkPlayerAnimationLogic animator;
 
@@ -39,11 +39,11 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
     public bool ready_attack = false;
     public bool executing_attack = false;
 
-    public bool locally_buffered_execute_attack_request =false;
+    public bool locally_buffered_execute_attack_request = false;
 
     private void disable_all_shields()
     {
-        foreach(Transform c in shield_slot) {
+        foreach (Transform c in shield_slot) {
             if (c.gameObject.activeSelf) c.gameObject.SetActive(false);
         }
     }
@@ -70,13 +70,13 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
         this.neutralStateHandler = GetComponent<NetworkPlayerNeutralStateHandler>();
     }
 
-     private void Update()
+    private void Update()
     {
         if (networkObject == null) {
             Debug.LogWarning("networkObject is null. - najbrz zato ker se se connecta gor.");
             return; }
 
- 
+
 
 
         if (!networkObject.IsOwner || !is_allowed_to_attack_local())
@@ -96,10 +96,10 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
         {
             if (hasWeaponSelected())
             {
-                if (Input.GetButtonDown("Fire1") && !this.executing_attack && !this.is_readying_attack && !this.ready_attack &&!this.blocking)
+                if (Input.GetButtonDown("Fire1") && !this.executing_attack && !this.is_readying_attack && !this.ready_attack && !this.blocking)
                 {
                     locally_buffered_execute_attack_request = false;
-                    
+
                     networkObject.SendRpc(RPC_START_ATTACK_REQUEST, Receivers.Server, this.weapon_direction);
                 }
                 else if (Input.GetButtonDown("Fire2"))
@@ -129,11 +129,11 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
                 else if (Input.GetButtonUp("Fire2"))
                 {
                     //nehov blokirat
-                    networkObject.SendRpc(RPC_STOP_BLOCK_REQ, Receivers.Server );
+                    networkObject.SendRpc(RPC_STOP_BLOCK_REQ, Receivers.Server);
                 }
             }
         }
-        
+
     }
 
 
@@ -145,9 +145,9 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
         // Debug.Log(x + " " + y);
 
         if (y > 0 && xx < yy) { if (this.weapon_direction != 0) { this.weapon_direction = 0; UILogic.Instance.OnWeaponDirectionChanged(0); } }
-        else if (y < 0 && xx < yy){ if (this.weapon_direction != 2) { this.weapon_direction = 2; UILogic.Instance.OnWeaponDirectionChanged(2); } }
-        else if (x > 0 && xx > yy){ if (this.weapon_direction != 1) { this.weapon_direction = 1; UILogic.Instance.OnWeaponDirectionChanged(1); } }
-        else if (x < 0 && xx > yy){ if (this.weapon_direction != 3) { this.weapon_direction = 3; UILogic.Instance.OnWeaponDirectionChanged(3); } }
+        else if (y < 0 && xx < yy) { if (this.weapon_direction != 2) { this.weapon_direction = 2; UILogic.Instance.OnWeaponDirectionChanged(2); } }
+        else if (x > 0 && xx > yy) { if (this.weapon_direction != 1) { this.weapon_direction = 1; UILogic.Instance.OnWeaponDirectionChanged(1); } }
+        else if (x < 0 && xx > yy) { if (this.weapon_direction != 3) { this.weapon_direction = 3; UILogic.Instance.OnWeaponDirectionChanged(3); } }
 
     }
 
@@ -186,7 +186,7 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
     /// </summary>
     /// <returns></returns>
     public bool is_allowed_to_attack_local() {
-        if (stats.downed || stats.dead )
+        if (stats.downed || stats.dead)
         {
             return false; //Ce je downan da nemora vec napadat pa take fore. to je precej loše ker je na clientu. ksnej bo treba prenest to logiko na server ker tole zjebe ze cheatengine
         }
@@ -197,20 +197,20 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
         return true;
     }
 
-   
+
 
     /// <summary>
     /// klice animatiopn event ki je na koncu vsake attack animacije
     /// </summary>
     public void handleEndOfAttackAnimation() {
-        if (this.is_readying_attack  || this.ready_attack || this.executing_attack)
+        if (this.is_readying_attack || this.ready_attack || this.executing_attack)
         {
             animator.setFeign();
         }
         this.ready_attack = false;
         this.is_readying_attack = false;
         this.executing_attack = false;
-  
+
         animator.reset_swing_IK();
     }
 
@@ -229,7 +229,7 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
     /// <returns></returns>
     private bool current_shield_can_perform_block()
     {
-       // Debug.Log("Trying to perform block!");
+        // Debug.Log("Trying to perform block!");
         return true;
     }
 
@@ -257,43 +257,43 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
     /// </summary>
     public void update_equipped_weapons()
     {
-            foreach (Transform c in weapon_slot)
+        foreach (Transform c in weapon_slot)
+        {
+            if (this.currently_equipped_weapon != null)
             {
-                if (this.currently_equipped_weapon != null)
+                if (c.GetComponent<Weapon_collider_handler>().item.id == this.currently_equipped_weapon.getItem().id)
                 {
-                    if (c.GetComponent<Weapon_collider_handler>().item.id == this.currently_equipped_weapon.getItem().id)
-                    {
-                        c.gameObject.SetActive(true);
-                    }
-                    else
-                    {
-                        c.gameObject.SetActive(false);
-                    }
+                    c.gameObject.SetActive(true);
                 }
-                else {
-                    c.gameObject.SetActive(false);
-                    //treba tud pohendlat animacijo da vrze iz combat state-a. lahko klicemo kr combatstatesetter - ker se to nastavi na vsah playerjih, tud na serverju.
-                }
-            }
-        
-            foreach (Transform c in shield_slot)
-            {
-                if (this.currently_equipped_shield != null)
+                else
                 {
-                    if (c.GetComponent<identifier_helper>().id == this.currently_equipped_shield.getItem().id)
-                    {
-                        c.gameObject.SetActive(true);
-                    }
-                    else
-                    {
-                        c.gameObject.SetActive(false);
-                    }
-                }
-                else {
                     c.gameObject.SetActive(false);
                 }
             }
-            
+            else {
+                c.gameObject.SetActive(false);
+                //treba tud pohendlat animacijo da vrze iz combat state-a. lahko klicemo kr combatstatesetter - ker se to nastavi na vsah playerjih, tud na serverju.
+            }
+        }
+
+        foreach (Transform c in shield_slot)
+        {
+            if (this.currently_equipped_shield != null)
+            {
+                if (c.GetComponent<identifier_helper>().id == this.currently_equipped_shield.getItem().id)
+                {
+                    c.gameObject.SetActive(true);
+                }
+                else
+                {
+                    c.gameObject.SetActive(false);
+                }
+            }
+            else {
+                c.gameObject.SetActive(false);
+            }
+        }
+
     }
 
 
@@ -356,7 +356,7 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
         {
             if (child.GetComponent<Weapon_collider_handler>().item.id == this.currently_equipped_weapon.getItem().id)
                 child.GetComponent<Weapon_collider_handler>().set_defensive_colliders(b);
-            
+
         }
     }
     ///klice se potem, ki ze zamenjamo item z hotbara.
@@ -377,7 +377,7 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
 
     internal void OnRemotePlayerDataSet()
     {
-        if(currently_equipped_weapon!=null)
+        if (currently_equipped_weapon != null)
             ChangeCombatMode(currently_equipped_weapon.getItem());
     }
 
@@ -403,12 +403,21 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
 
     internal void SetShield(Predmet s) {
         this.currently_equipped_shield = s;
+        set_shield_collider(true);
         animator.onShieldChanged(s);
     }
 
+    internal void set_shield_collider(bool v)
+    {
+        for (int i = 0; i < this.shield_slot.childCount; i++) { 
+
+        this.shield_slot.GetChild(i).gameObject.GetComponent<Collider>().enabled = v;
+    }
+}
+
     //--------------------------RPC's
 
-   
+
 
 
     /// <summary>
@@ -556,4 +565,6 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
     }
 
 
+
 }
+

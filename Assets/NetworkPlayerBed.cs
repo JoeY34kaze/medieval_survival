@@ -1,5 +1,6 @@
 ﻿using BeardedManStudios.Forge.Networking;
 using BeardedManStudios.Forge.Networking.Generated;
+using BeardedManStudios.Forge.Networking.Unity;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -11,10 +12,19 @@ public class NetworkPlayerBed : NetworkPlayerBedBehavior
     public int seconds=0;
     public string name = "unnamed bed";
 
+
     protected override void NetworkStart()
     {
         base.NetworkStart();
-
+        if (networkObject.IsServer) {
+            NetworkManager.Instance.Networker.playerConnected += (player, networker) =>
+            {
+                //MainThreadManager.Run(() =>
+               // {
+                    networkObject.SendRpc(player, RPC_NAME_UPDATE, this.name);
+               // });
+            };
+        }
     }
 
     internal bool is_owner(NetworkingPlayer p)

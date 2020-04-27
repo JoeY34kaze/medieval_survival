@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System;
+using BeardedManStudios.Forge.Networking.Unity;
 
 /// <summary>
 /// Class used for handling the networked behaviour of crafting stations : campfire, furnace, smithy, stove. Players will not be crafting like in ROK or Conan, but like in RUST, as in inside their inventory.
@@ -53,6 +54,22 @@ public class NetworkCraftingStation : NetworkCraftingStationBehavior
             start_coroutine();
             
 
+        }
+    }
+    protected override void NetworkStart()
+    {
+        base.NetworkStart();
+        // TODO:  Your initialization code that relies on network setup for this object goes here
+        if (networkObject.IsServer)
+        {
+            networkObject.TakeOwnership();
+            NetworkManager.Instance.Networker.playerConnected += (player, networker) =>
+            {
+                Debug.Log("Started sending item synch");
+                MainThreadManager.Run(() => {
+                    networkObject.SendRpc(RPC_SEND_ACTIVE_UPDATE, Receivers.All, this.active);
+                });
+            };
         }
     }
 

@@ -14,12 +14,6 @@ public class NetworkGuildManager : NetworkGuildManagerBehavior
 {
     #region FIELDS
 
-    public GameObject localPlayer;
-
-
-    public Text name_guild;
-    public Text tag_guild;
-    public Text color_guild;
 
     public List<Guild> guilds;
 
@@ -32,7 +26,7 @@ public class NetworkGuildManager : NetworkGuildManagerBehavior
     #endregion
 
     #region SINGLETON PATTERN
-    public static NetworkGuildManager _instance;
+    private static NetworkGuildManager _instance;
     public static NetworkGuildManager Instance
     {
         get
@@ -64,6 +58,7 @@ public class NetworkGuildManager : NetworkGuildManagerBehavior
             if(this.guilds==null)this.guilds = new List<Guild>();
             networkObject.TakeOwnership();
             this.valid_invites = new List<uint[]>();
+            UILogic.localPlayerGameObject.GetComponent<NetworkPlayerStats>().startup_guild_manager_handler();
         }
 
        // localPlayer = FindByid(NetworkManager.Instance.Networker.Me.NetworkId);//?? i guess it should work. mrde bols da player pogleda pa poveze z druge strani..
@@ -90,7 +85,7 @@ public class NetworkGuildManager : NetworkGuildManagerBehavior
             uint faggot = args.GetNext<uint>();
 
 
-            Guild from = getGuildFromNetworkId(requester);
+            Guild from = GetGuildFromSteamId(requester);
 
             if (requester == from.guildMaster) {
                 if (requester != faggot) {
@@ -116,7 +111,7 @@ public class NetworkGuildManager : NetworkGuildManagerBehavior
     {
         if (networkObject.IsServer) {
             uint requester = args.Info.SendingPlayer.NetworkId;
-            Guild from = getGuildFromNetworkId(requester);
+            Guild from = GetGuildFromSteamId(requester);
             if (from.members.Count <= 1)
             {
                 //nemora leavat ce je sam not, to je njegov starter guild al pa nekej
@@ -134,6 +129,14 @@ public class NetworkGuildManager : NetworkGuildManagerBehavior
                 sendUserInfoResponseTo(args.Info.SendingPlayer);
             }
         }
+    }
+
+    /// <summary>
+    /// instanca ne obstaja dokler e je z nekje ne pokliče. server z NetworkPlayerStats klice to metodo da se nastavi _instance v tem classu
+    /// </summary>
+    internal void OnStartup()
+    {
+    
     }
 
 
@@ -199,7 +202,7 @@ public class NetworkGuildManager : NetworkGuildManagerBehavior
 
 
             Guild g = null;
-            if ((g = getGuildFromNetworkId(requester)) != null)
+            if ((g = GetGuildFromSteamId(requester)) != null)
             {
                 if (g.guildMaster == requester)
                 {
@@ -221,6 +224,8 @@ public class NetworkGuildManager : NetworkGuildManagerBehavior
         else
             return;
     }
+
+
 
     private void sendGuildModifiedResponse(Guild g)
     {
@@ -336,16 +341,17 @@ public class NetworkGuildManager : NetworkGuildManagerBehavior
         bool next = !UILogic.PanelGuildHander.gameObject.activeSelf;
         UILogic.PanelGuildHander.Clear();//pobrise prejsne memberje
         UILogic.PanelGuildHander.gameObject.SetActive(!UILogic.PanelGuildHander.gameObject.activeSelf);
-        /*if (next)
+         if(next)
         {
-            Cursor.lockState = CursorLockMode.None;
-            Cursor.visible = true;
+            UILogic.Instance.enableMouse(true);
             localGetMembersRequest();
         }
         else {
-            Cursor.lockState = CursorLockMode.Locked;
-            Cursor.visible = false;
-        }*/
+            
+            UILogic.Instance.hasOpenWindow = false;
+            UILogic.hasControlOfInput = false;
+            UILogic.Instance.DisableMouse(true);
+        }
     }
 
     internal void SetMemberPanel(bool v)
@@ -368,10 +374,24 @@ public class NetworkGuildManager : NetworkGuildManagerBehavior
     public override void GetGuildMembersRequest(RpcArgs args)
     {
         if (networkObject.IsServer) {
-            Guild g = getGuildFromNetworkId(args.Info.SendingPlayer.NetworkId);
+            Guild g = GetGuildFromSteamId(args.Info.SendingPlayer.NetworkId);
             if(g!=null)
-                networkObject.SendRpc(args.Info.SendingPlayer, RPC_GUILD_MEMBERS_UPDATE,g.guildMaster, g.GetMembersToString(), g.name);
+                networkObject.SendRpc(args.Info.SendingPlayer, RPC_GUILD_MEMBERS_UPDATE,g.guildMaster, g.members.ObjectToByteArray(), g.name);
         }
+    }
+
+    internal Guild GetGuildFromSteamId(uint p)
+    {
+ 
+        if (this.guilds != null)
+            if (this.guilds.Count > 0)
+                foreach (Guild g in this.guilds)
+                {
+                    if (g.isMember(p))
+                        return g;
+                }
+        return null;
+        
     }
 
     #endregion
@@ -386,36 +406,16 @@ public class NetworkGuildManager : NetworkGuildManagerBehavior
         return g;
     }
 
-    public Guild getGuildFromNetworkId(uint p) {
-        if (this.guilds != null)
-            if(this.guilds.Count>0)
-                foreach (Guild g in this.guilds) {
-                    if (g.isMember(p))
-                        return g;
-                }
-        return null;
-    }
+
+
+
 
     private void DestroyGuild(Guild g2)
     {
         this.guilds.Remove(g2);
     }
 
-    /// <summary>
-    /// "uint,uint,uint" -> [uint,uint,uint]
-    /// </summary>
-    /// <param name="members_string"></param>
-    /// <returns></returns>
-    private uint[] GetMembersFromRPCString(string members_string)
-    {
-        string[] s = members_string.Split(',');
-        uint[] r = new uint[s.Length];
-        for (int i = 0; i < s.Length; i++)
-        {
-            r[i] = UInt32.Parse(s[i]);
-        }
-        return r;
-    }
+
 
     [Serializable]
     public class Guild
@@ -443,14 +443,7 @@ public class NetworkGuildManager : NetworkGuildManagerBehavior
             //id??
         }
 
-        /// <summary>
-        /// baje da vrne csv
-        /// </summary>
-        /// <returns></returns>
-        public string GetMembersToString()
-        {
-            return String.Join(",", Array.ConvertAll(this.members.ToArray(), element => element.ToString()));
-        }
+
 
 
         public void addMember(uint i)
@@ -493,8 +486,8 @@ public class NetworkGuildManager : NetworkGuildManagerBehavior
         if (networkObject.IsServer) {
             uint pleb = args.GetNext<uint>();
             uint gm = args.Info.SendingPlayer.NetworkId;
-            Guild g = getGuildFromNetworkId(gm);
-            Guild g2 = getGuildFromNetworkId(pleb);
+            Guild g = GetGuildFromSteamId(gm);
+            Guild g2 = GetGuildFromSteamId(pleb);
             if (g != null && (g2==null || g2.members.Count==1)) {//samo guild master lahko invita in samo ce player ni ze u guildu lahko invita
                 if (g.guildMaster == gm) {//lahko poslje invite naprej
                     AddToValidInvites(gm, pleb);
@@ -503,6 +496,7 @@ public class NetworkGuildManager : NetworkGuildManagerBehavior
             }
         }
     }
+
 
     /// <summary>
     /// dobi kandidat od serverja. odpre se mu panela, kjer pise kdo ga je invitov kam, lahko sprejme ali zavrne invite.
@@ -546,11 +540,11 @@ public class NetworkGuildManager : NetworkGuildManagerBehavior
             bool status = args.GetNext<bool>();
             if (isGuildInvitationResponseValid(gm, from))
             {
-                Guild g = getGuildFromNetworkId(gm);
+                Guild g = GetGuildFromSteamId(gm);
                 if (g != null)
                 {
                     //naenkrat treba zbrisat in dodat v tem zaporedju, sicer zbrise guild v katerga ga je ubistvu hotu dodat lol
-                    Guild g2 = getGuildFromNetworkId(from);
+                    Guild g2 = GetGuildFromSteamId(from);
                     DestroyGuild(g2);
 
                     g.addMember(from);
@@ -585,12 +579,9 @@ public class NetworkGuildManager : NetworkGuildManagerBehavior
 
 
             uint gm = args.GetNext<uint>();
-            string members_string = args.GetNext<string>();
+            List<uint> members = args.GetNext<byte[]>().ByteArrayToObject<List<uint>>();
             string gName = args.GetNext<string>();
             UILogic.PanelGuildHander.GuildNameText.text = gName;
-
-            uint[] members = GetMembersFromRPCString(members_string);
-
             UILogic.PanelGuildHander.initGm(gm, FindByid(gm).GetComponent<NetworkPlayerStats>().playerName, NetworkManager.Instance.Networker.Me.NetworkId == gm);
             foreach (uint ui in members)
             {
@@ -605,7 +596,7 @@ public class NetworkGuildManager : NetworkGuildManagerBehavior
 
     internal void RefreshPlayersNetworkId(uint previousNetworkId, uint v)
     {
-        Guild g = getGuildFromNetworkId(previousNetworkId);
+        Guild g = GetGuildFromSteamId(previousNetworkId);
         for (int i = 0; i < g.members.Count; i++){ 
             if (g.members[i] == previousNetworkId) g.members[i] = v;
             break;
@@ -624,7 +615,7 @@ public class NetworkGuildManager : NetworkGuildManagerBehavior
     {
         if (networkObject.IsServer) {
             //vrnt mora podatke userju v ktermu guildu je pa take fore
-            Guild g = getGuildFromNetworkId(args.Info.SendingPlayer.NetworkId);
+            Guild g = GetGuildFromSteamId(args.Info.SendingPlayer.NetworkId);
             networkObject.SendRpc(args.Info.SendingPlayer, RPC_USER_INFO_RESPONSE, g.ObjectToByteArray());
         }
     }
@@ -633,7 +624,7 @@ public class NetworkGuildManager : NetworkGuildManagerBehavior
         if (networkObject.IsServer)
         {
             //vrnt mora podatke userju v ktermu guildu je pa take fore
-            Guild g = getGuildFromNetworkId(p.NetworkId);
+            Guild g = GetGuildFromSteamId(p.NetworkId);
             networkObject.SendRpc(p, RPC_USER_INFO_RESPONSE, g.ObjectToByteArray());
         }
     }
@@ -649,7 +640,7 @@ public class NetworkGuildManager : NetworkGuildManagerBehavior
                     if (player.NetworkId == p) //passive target
                     {
                         //vrnt mora podatke userju v ktermu guildu je pa take fore
-                        Guild g = getGuildFromNetworkId(p);
+                        Guild g = GetGuildFromSteamId(p);
                         networkObject.SendRpc(player, RPC_USER_INFO_RESPONSE, g.ObjectToByteArray());
                     }
                 });

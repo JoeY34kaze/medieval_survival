@@ -674,7 +674,7 @@ public class Interactable_radial_menu : MonoBehaviour
         }
         center_label.text = "";
         this.radialMenu.SetActive(false);
-       UILogic.Instance.DisableMouse();
+       UILogic.Instance.DisableMouse(false);
     }
 
     public void player_interaction_button_execution()

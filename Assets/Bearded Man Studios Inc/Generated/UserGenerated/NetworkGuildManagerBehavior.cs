@@ -4,8 +4,8 @@ using UnityEngine;
 
 namespace BeardedManStudios.Forge.Networking.Generated
 {
-	[GeneratedRPC("{\"types\":[[\"string\", \"string\", \"Color\", \"byte[]\"][\"uint\"][\"uint\", \"string\"][\"uint\", \"bool\"][\"uint\", \"string\", \"string\"][][][\"uint\"][][\"byte[]\"]]")]
-	[GeneratedRPCVariableNames("{\"types\":[[\"name\", \"tag\", \"GuildColor\", \"Optional_Image\"][\"candidate\"][\"gm\", \"guild_name\"][\"gm\", \"response_guild\"][\"gm\", \"members_string\", \"gName\"][][][\"player\"][][\"guild\"]]")]
+	[GeneratedRPC("{\"types\":[[\"string\", \"string\", \"Color\", \"byte[]\"][\"uint\"][\"uint\", \"string\"][\"uint\", \"bool\"][\"uint\", \"byte[]\", \"string\"][][][\"uint\"][][\"byte[]\"]]")]
+	[GeneratedRPCVariableNames("{\"types\":[[\"name\", \"tag\", \"GuildColor\", \"Optional_Image\"][\"candidate\"][\"gm\", \"guild_name\"][\"gm\", \"response_guild\"][\"gm\", \"members\", \"gName\"][][][\"player\"][][\"guild\"]]")]
 	public abstract partial class NetworkGuildManagerBehavior : NetworkBehavior
 	{
 		public const byte RPC_CREATE_OR_MODIFY_GUILD_REQUEST = 0 + 5;
@@ -35,7 +35,7 @@ namespace BeardedManStudios.Forge.Networking.Generated
 			networkObject.RegisterRpc("RequestSendGuildInvite", RequestSendGuildInvite, typeof(uint));
 			networkObject.RegisterRpc("SendGuildInviteToCandidate", SendGuildInviteToCandidate, typeof(uint), typeof(string));
 			networkObject.RegisterRpc("GuildInviteResponse", GuildInviteResponse, typeof(uint), typeof(bool));
-			networkObject.RegisterRpc("GuildMembersUpdate", GuildMembersUpdate, typeof(uint), typeof(string), typeof(string));
+			networkObject.RegisterRpc("GuildMembersUpdate", GuildMembersUpdate, typeof(uint), typeof(byte[]), typeof(string));
 			networkObject.RegisterRpc("GetGuildMembersRequest", GetGuildMembersRequest);
 			networkObject.RegisterRpc("LeaveGuildRequest", LeaveGuildRequest);
 			networkObject.RegisterRpc("KickGuildRequest", KickGuildRequest, typeof(uint));
@@ -145,7 +145,7 @@ namespace BeardedManStudios.Forge.Networking.Generated
 		/// <summary>
 		/// Arguments:
 		/// uint gm
-		/// string members_string
+		/// byte[] members
 		/// string gName
 		/// </summary>
 		public abstract void GuildMembersUpdate(RpcArgs args);
