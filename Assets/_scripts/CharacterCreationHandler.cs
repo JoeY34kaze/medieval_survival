@@ -1,5 +1,7 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using UMA.CharacterSystem;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -103,7 +105,11 @@ public class CharacterCreationHandler : MonoBehaviour
     public void OnUMACreated()
     {
         this.dna = avatar.GetDNA();
+
+        update_uma_from_file();
     }
+
+
 
     private void Update()
     {
@@ -474,7 +480,57 @@ public class CharacterCreationHandler : MonoBehaviour
     public void randomizeCharacter()
     {
 
+        randomizeSlider(basic_height_slider);
+        randomizeSlider(basic_weight_slider);
+        randomizeSlider(basic_muscle_slider);
 
+        randomizeSlider(headSize);
+        randomizeSlider(headWidth);
+        randomizeSlider(neckThickness);
+        randomizeSlider(earsSize);
+        randomizeSlider(earsPosition);
+        randomizeSlider(earsRotation);
+        randomizeSlider(noseSize);
+        randomizeSlider(noseCurve);
+        randomizeSlider(noseWidth);
+        randomizeSlider(noseInclination);
+        randomizeSlider(nosePosition);
+        randomizeSlider(nosePronounced);
+        randomizeSlider(noseFlatten);
+        randomizeSlider(chinSize);
+        randomizeSlider(chinPronounced);
+        randomizeSlider(chinPosition);
+        randomizeSlider(mandibleSize);
+        randomizeSlider(jawsSize);
+        randomizeSlider(jawsPosition);
+        randomizeSlider(cheekSize);
+        randomizeSlider(cheekPosition);
+        randomizeSlider(lowCheekPronounced);
+        randomizeSlider(lowCheekPosition);
+        randomizeSlider(foreheadSize);
+        randomizeSlider(foreheadPosition);
+        randomizeSlider(lipsSize);
+        randomizeSlider(mouthSize);
+        randomizeSlider(eyeRotation);
+        randomizeSlider(eyeSize);
+        randomizeSlider(eyeSpacing);
+        randomizeSlider(armLength);
+        randomizeSlider(forearmLength);
+        randomizeSlider(handsSize);
+        randomizeSlider(breastSize);
+        randomizeSlider(breastCleavage);
+        randomizeSlider(feetSize);
+        randomizeSlider(legSeparation);
+        randomizeSlider(legsSize);
+        randomizeSlider(gluteusSize);
+
+        avatar.BuildCharacter();
+
+    }
+
+    private void randomizeSlider(Slider s)
+    {
+        s.value = UnityEngine.Random.Range(s.minValue, s.maxValue);
     }
 
     public void openResetDialog() {
@@ -488,6 +544,15 @@ public class CharacterCreationHandler : MonoBehaviour
     public void SaveCharacter() {
         this.SaveDialogue.SetActive(false);
         this.ResetDialogue.SetActive(false);
+
+        string s = "";
+        foreach(KeyValuePair<string, DnaSetter> entry in dna)
+        {
+            // do something with entry.Value or entry.Key
+            s=s+entry.Key+","+ dna[entry.Key].Value + System.Environment.NewLine;
+        }
+        WriteString(s);
+
     }
 
     public void CancelDialogue() {
@@ -502,6 +567,52 @@ public class CharacterCreationHandler : MonoBehaviour
     public void ResetCharacter() {
         this.SaveDialogue.SetActive(false);
         this.ResetDialogue.SetActive(false);
+
+            basic_height_slider.value = 0.5f;
+             basic_weight_slider.value = 0.5f;
+            basic_muscle_slider.value = 0.5f;
+
+          headSize.value = 0.5f;
+          headWidth.value = 0.5f;
+          neckThickness.value = 0.5f;
+          earsSize.value = 0.5f;
+          earsPosition.value = 0.5f;
+          earsRotation.value = 0.5f;
+          noseSize.value = 0.5f;
+          noseCurve.value = 0.5f;
+          noseWidth.value = 0.5f;
+          noseInclination.value = 0.5f;
+          nosePosition.value = 0.5f;
+          nosePronounced.value = 0.5f;
+          noseFlatten.value = 0.5f;
+          chinSize.value = 0.5f;
+          chinPronounced.value = 0.5f;
+          chinPosition.value = 0.5f;
+          mandibleSize.value = 0.5f;
+          jawsSize.value = 0.5f;
+          jawsPosition.value = 0.5f;
+          cheekSize.value = 0.5f;
+          cheekPosition.value = 0.5f;
+          lowCheekPronounced.value = 0.5f;
+          lowCheekPosition.value = 0.5f;
+          foreheadSize.value = 0.5f;
+          foreheadPosition.value = 0.5f;
+          lipsSize.value = 0.5f;
+          mouthSize.value = 0.5f;
+          eyeRotation.value = 0.5f;
+          eyeSize.value = 0.5f;
+          eyeSpacing.value = 0.5f;
+          armLength.value = 0.5f;
+          forearmLength.value = 0.5f;
+          handsSize.value = 0.5f;
+          breastSize.value = 0.5f;
+          breastCleavage.value = 0.5f;
+          feetSize.value = 0.5f;
+          legSeparation.value = 0.5f;
+          legsSize.value = 0.5f;
+          gluteusSize.value = 0.5f;
+          avatar.BuildCharacter();
+
     }
     
     private IEnumerator FadeToBlack(string v)
@@ -520,5 +631,134 @@ public class CharacterCreationHandler : MonoBehaviour
         }
 
         SceneManager.LoadScene(v);
+    }
+
+    static void WriteString(string s)
+    {
+        string path = System.IO.Path.Combine(Environment.ExpandEnvironmentVariables("%userprofile%"), "Documents") + "\\Medieval Survival\\characters\\current.txt";
+        File.WriteAllText(path, s);
+    }
+
+    static string ReadString()
+    {
+        string path = System.IO.Path.Combine(Environment.ExpandEnvironmentVariables("%userprofile%"), "Documents") + "\\Medieval Survival\\characters\\current.txt";
+        if (File.Exists(path))
+        {
+            
+
+            //Read the text from directly from the test.txt file
+            StreamReader reader = new StreamReader(path);
+            string s = reader.ReadToEnd();
+            reader.Close();
+            return s;
+        }
+        return null;
+    }
+
+    private void update_uma_from_file()
+    {
+        string s =ReadString();
+        if (s == null) return;
+
+        string[] lines = s.Split(new[] { Environment.NewLine },    StringSplitOptions.None);//jok
+
+
+        foreach (string l in lines) {
+            string[] dn = l.Split(',');//ker je csv
+            float val = float.Parse(dn[1]);
+            SetSliderValue(dn[0],val);
+        }
+        avatar.BuildCharacter();
+    }
+
+    private void SetSliderValue(string v, float val)
+    {
+        if(v.Equals("upperMuscle") || v.Equals("lowerMuscle"))
+            basic_muscle_slider.value = val;
+
+        if (v.Equals("neckThickness") || v.Equals("armWidth") || v.Equals("forearmWidth") || v.Equals("upperWeight") || v.Equals("lowerWeight") || v.Equals("belly") || v.Equals("waist"))
+            this.basic_weight_slider.value = val;
+
+        if (v.Equals("height"))
+            this.basic_height_slider.value = val;
+        //---------------------------posamezne
+        if (v.Equals("headSize"))
+            this.headSize.value = val;
+        if (v.Equals("headWidth"))
+            this.headWidth.value = val;
+        if (v.Equals("neckThickness"))
+            this.neckThickness.value = val;
+        if (v.Equals("earsSize"))
+            this.earsSize.value = val;
+        if (v.Equals("earsPosition"))
+            this.earsPosition.value = val;
+        if (v.Equals("earsRotation"))
+            this.earsRotation.value = val;
+        if (v.Equals("noseSize"))
+            this.noseSize.value = val;
+        if (v.Equals("noseCurve"))
+            this.noseCurve.value = val;
+        if (v.Equals("noseWidth"))
+            this.noseWidth.value = val;
+        if (v.Equals("noseInclination"))
+            this.noseInclination.value = val;
+        if (v.Equals("nosePosition"))
+            this.nosePosition.value = val;
+        if (v.Equals("nosePronounced"))
+            this.nosePronounced.value = val;
+        if (v.Equals("noseFlatten"))
+            this.noseFlatten.value = val;
+        if (v.Equals("chinSize"))
+            this.chinSize.value = val;
+        if (v.Equals("chinPronounced"))
+            this.chinPronounced.value = val;
+        if (v.Equals("chinPosition"))
+            this.chinPosition.value = val;
+        if (v.Equals("mandibleSize"))
+            this.mandibleSize.value = val;
+        if (v.Equals("jawsSize"))
+            this.jawsSize.value = val;
+        if (v.Equals("jawsPosition"))
+            this.jawsPosition.value = val;
+        if (v.Equals("cheekSize"))
+            this.cheekSize.value = val;
+        if (v.Equals("cheekPosition"))
+            this.cheekPosition.value = val;
+        if (v.Equals("lowCheekPronounced"))
+            this.lowCheekPronounced.value = val;
+        if (v.Equals("lowCheekPosition"))
+            this.lowCheekPosition.value = val;
+        if (v.Equals("foreheadSize"))
+            this.foreheadSize.value = val;
+        if (v.Equals("foreheadPosition"))
+            this.foreheadPosition.value = val;
+        if (v.Equals("lipsSize"))
+            this.lipsSize.value = val;
+        if (v.Equals("mouthSize"))
+            this.mouthSize.value = val;
+        if (v.Equals("eyeRotation"))
+            this.eyeRotation.value = val;
+        if (v.Equals("eyeSize"))
+            this.eyeSize.value = val;
+        if (v.Equals("eyeSpacing"))
+            this.eyeSpacing.value = val;
+        if (v.Equals("armLength"))
+            this.armLength.value = val;
+        if (v.Equals("forearmLength"))
+            this.forearmLength.value = val;
+        if (v.Equals("handsSize"))
+            this.handsSize.value = val;
+        if (v.Equals("breastSize"))
+            this.breastSize.value = val;
+        if (v.Equals("breastCleavage"))
+            this.breastCleavage.value = val;
+        if (v.Equals("feetSize"))
+            this.feetSize.value = val;
+        if (v.Equals("legSeparation"))
+            this.legSeparation.value = val;
+        if (v.Equals("legsSize"))
+            this.legsSize.value = val;
+        if (v.Equals("gluteusSize"))
+            this.gluteusSize.value = val;
     }
 }
