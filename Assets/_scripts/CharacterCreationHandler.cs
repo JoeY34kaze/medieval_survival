@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UMA.CharacterSystem;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class CharacterCreationHandler : MonoBehaviour
@@ -22,19 +23,21 @@ public class CharacterCreationHandler : MonoBehaviour
     public static bool mouse_is_over_canvas = false;
     private EventSystem _eventSystem;
     private EventSystem EventSystem {
-        get { 
-            if(_eventSystem==null)
+        get {
+            if (_eventSystem == null)
                 _eventSystem = GameObject.FindObjectOfType<EventSystem>();
             return _eventSystem;
         }
     }
-    [SerializeField]private DynamicCharacterAvatar avatar;
+    [SerializeField] private DynamicCharacterAvatar avatar;
     private Dictionary<string, DnaSetter> dna;
 
+    [Header("general sliders ")]
     public Slider basic_height_slider;
     public Slider basic_weight_slider;
     public Slider basic_muscle_slider;
 
+    [Header("head sliders")]
     public Slider headSize;
     public Slider headWidth;
     public Slider neckThickness;
@@ -64,9 +67,39 @@ public class CharacterCreationHandler : MonoBehaviour
     public Slider mouthSize;
     public Slider eyeRotation;
     public Slider eyeSize;
+    public Slider eyeSpacing;
+
+    [Header("torso sliders ")]
+    public Slider armLength;
+    public Slider forearmLength;
+    public Slider handsSize;
+    public Slider breastSize;
+    public Slider breastCleavage;
+
+    [Header("legs sliders ")]
+
+    public Slider feetSize;
+    public Slider legSeparation;
+    public Slider legsSize;
+    public Slider gluteusSize;
+
+    [Header(" panels ")]
+    public GameObject ResetDialogue;
+    public GameObject SaveDialogue;
+    public GameObject OverLay;
 
     #endregion
 
+    private void Start()
+    {
+        if (PlayerPrefs.HasKey("effectsVolume"))
+            set_effects_volume(PlayerPrefs.GetFloat("effectsVolume"));
+    }
+
+    void set_effects_volume(float v)
+    {
+        GetComponent<AudioSource>().volume = v;
+    }
     public void OnUMACreated()
     {
         this.dna = avatar.GetDNA();
@@ -127,12 +160,12 @@ public class CharacterCreationHandler : MonoBehaviour
         }
 
 
-    min = 0;
+        min = 0;
         max = 1f;
-        if (this.neckThickness.value<max && this.neckThickness.value> min)
+        if (this.neckThickness.value < max && this.neckThickness.value > min)
         {
-        dna["neckThickness"].Set(this.neckThickness.value);
-    }
+            dna["neckThickness"].Set(this.neckThickness.value);
+        }
 
         min = 0;
         max = 1f;
@@ -141,12 +174,12 @@ public class CharacterCreationHandler : MonoBehaviour
             dna["earsSize"].Set(this.earsSize.value);
         }
 
-    min = 0;
+        min = 0;
         max = 1f;
-        if (this.earsPosition.value<max && this.earsPosition.value> min)
+        if (this.earsPosition.value < max && this.earsPosition.value > min)
         {
-        dna["earsPosition"].Set(this.earsPosition.value);
-    }
+            dna["earsPosition"].Set(this.earsPosition.value);
+        }
 
         min = 0;
         max = 1f;
@@ -266,18 +299,18 @@ public class CharacterCreationHandler : MonoBehaviour
         }
         min = 0;
         max = 1f;
-        if (this.cheekPosition.value < max && this.cheekPosition.value > min) { 
-        
+        if (this.cheekPosition.value < max && this.cheekPosition.value > min) {
+
             dna["cheekPosition"].Set(this.cheekPosition.value);
 
         }
 
         min = 0;
         max = 1f;
-        if (this.lowCheekPronounced.value<max && this.lowCheekPronounced.value> min){ 
-        
-            dna ["lowCheekPronounced"].Set(this.lowCheekPronounced.value);
-         }
+        if (this.lowCheekPronounced.value < max && this.lowCheekPronounced.value > min) {
+
+            dna["lowCheekPronounced"].Set(this.lowCheekPronounced.value);
+        }
 
 
         min = 0;
@@ -339,11 +372,97 @@ public class CharacterCreationHandler : MonoBehaviour
 
         }
 
-    //----------------- TORSO OPTIONS
+        min = 0;
+        max = 1;
+        if (this.eyeSpacing.value < max && this.eyeSpacing.value > min)
+        {
 
-    //----------------- LEGS OPTIONS
+            dna["eyeSpacing"].Set(this.eyeSpacing.value);
 
-    avatar.BuildCharacter();
+        }
+
+        //----------------- TORSO OPTIONS
+
+        min = 0.45f;
+        max = 0.55f;
+        if (this.armLength.value < max && this.armLength.value > min)
+        {
+
+            dna["armLength"].Set(this.armLength.value);
+
+        }
+        min = 0.45f;
+        max = 0.55f;
+        if (this.forearmLength.value < max && this.forearmLength.value > min)
+        {
+
+            dna["forearmLength"].Set(this.forearmLength.value);
+
+        }
+        min = 0;
+        max = 1;
+        if (this.handsSize.value < max && this.handsSize.value > min)
+        {
+
+            dna["handsSize"].Set(this.handsSize.value);
+
+        }
+        min = 0;
+        max = 1;
+        if (this.breastSize.value < max && this.breastSize.value > min)
+        {
+
+            dna["breastSize"].Set(this.breastSize.value);
+
+        }
+        min = 0;
+        max = 1;
+        if (this.breastCleavage.value < max && this.breastCleavage.value > min)
+        {
+
+            dna["breastCleavage"].Set(this.breastCleavage.value);
+
+        }
+
+
+
+        //----------------- LEGS OPTIONS
+
+
+        min = 0.35f;
+        max = 0.65f;
+        if (this.feetSize.value < max && this.feetSize.value > min)
+        {
+
+            dna["feetSize"].Set(this.feetSize.value);
+
+        }
+        min = 0;
+        max = 1;
+        if (this.legSeparation.value < max && this.legSeparation.value > min)
+        {
+
+            dna["legSeparation"].Set(this.legSeparation.value);
+
+        }
+        min = 0.35f;
+        max = 0.65f;
+        if (this.legsSize.value < max && this.legsSize.value > min)
+        {
+
+            dna["legsSize"].Set(this.legsSize.value);
+
+        }
+        min = 0;
+        max = 1;
+        if (this.gluteusSize.value < max && this.gluteusSize.value > min)
+        {
+
+            dna["gluteusSize"].Set(this.gluteusSize.value);
+
+        }
+
+        avatar.BuildCharacter();
 
     }
 
@@ -352,5 +471,54 @@ public class CharacterCreationHandler : MonoBehaviour
 
     #endregion
 
+    public void randomizeCharacter()
+    {
 
+
+    }
+
+    public void openResetDialog() {
+        this.ResetDialogue.SetActive(true);
+    }
+
+    public void openSaveDialogue() {
+        this.SaveDialogue.SetActive(true);
+    }
+
+    public void SaveCharacter() {
+        this.SaveDialogue.SetActive(false);
+        this.ResetDialogue.SetActive(false);
+    }
+
+    public void CancelDialogue() {
+        this.SaveDialogue.SetActive(false);
+        this.ResetDialogue.SetActive(false);
+    }
+
+    public void ReturnToMainMenu() {
+        StartCoroutine(FadeToBlack("MainMenu"));
+    }
+
+    public void ResetCharacter() {
+        this.SaveDialogue.SetActive(false);
+        this.ResetDialogue.SetActive(false);
+    }
+    
+    private IEnumerator FadeToBlack(string v)
+    {
+
+        
+        Image im = this.OverLay.GetComponent<Image>();
+        im.raycastTarget = true;
+        while (im.color.a < 1.0f)
+        {
+            if (im.color.a + 0.2f * Time.deltaTime > 1.0f)
+                im.color = new Color(0, 0, 0, 1);
+            else
+                im.color = new Color(0, 0, 0, im.color.a + 1f * Time.deltaTime);
+            yield return new WaitForEndOfFrame();
+        }
+
+        SceneManager.LoadScene(v);
+    }
 }
