@@ -48,12 +48,19 @@ public class CharacterCreationHandler : MonoBehaviour
     public Color[] hair_colors;
     public Button[] hair_color_buttons;
 
+
+    public UMAWardrobeRecipe[] male_Hair;
+    public UMAWardrobeRecipe[] female_Hair;
+
+
     [Header("general sliders ")]
     public Slider basic_height_slider;
     public Slider basic_weight_slider;
     public Slider basic_muscle_slider;
 
     [Header("head sliders")]
+    public Slider hairVariantSlider;
+
     public Slider headSize;
     public Slider headWidth;
     public Slider neckThickness;
@@ -114,6 +121,7 @@ public class CharacterCreationHandler : MonoBehaviour
     private int current_skin_color;
     private int current_eye_color;
     private int current_hair_color;
+    private int hairIndex;
 
 
 
@@ -580,6 +588,8 @@ public class CharacterCreationHandler : MonoBehaviour
     public void randomizeCharacter()
     {
 
+        randomizeSlider(this.hairVariantSlider);
+
         randomizeSlider(basic_height_slider);
         randomizeSlider(basic_weight_slider);
         randomizeSlider(basic_muscle_slider);
@@ -699,9 +709,11 @@ public class CharacterCreationHandler : MonoBehaviour
         this.ResetDialogue.SetActive(false);
 
         string s =avatar.activeRace.name+ "|";
-        //skindata
+        //colors
         s = s + this.current_skin_color +","+this.current_eye_color+","+this.current_hair_color+ "|";
-        //
+
+        //hair variant
+        s = s + this.hairIndex + "|";
 
         foreach(KeyValuePair<string, DnaSetter> entry in dna)
         {
@@ -724,6 +736,12 @@ public class CharacterCreationHandler : MonoBehaviour
     public void ResetCharacter() {
         this.SaveDialogue.SetActive(false);
         this.ResetDialogue.SetActive(false);
+
+
+        change_eye_color_runtime_silent(0);
+        change_hair_color_runtime_silent(0);
+        ChangeSkinRuntimeSilent(0);
+        OnHairVariantChanged();
 
             basic_height_slider.value = 0.5f;
              basic_weight_slider.value = 0.5f;
@@ -768,6 +786,9 @@ public class CharacterCreationHandler : MonoBehaviour
           legSeparation.value = 0.5f;
           legsSize.value = 0.5f;
           gluteusSize.value = 0.5f;
+
+
+
           avatar.BuildCharacter();
 
     }
@@ -855,7 +876,18 @@ public class CharacterCreationHandler : MonoBehaviour
         //hair
         change_hair_color_runtime_silent(Int32.Parse(color_parameters[2]));
 
-        string[] lines =data[2].Split(new[] { Environment.NewLine },    StringSplitOptions.None);//jok
+        //hair variant
+        int index_hair = Int32.Parse(data[2]);
+        this.hairIndex = index_hair;
+        if (data[0].Equals(this.male))
+        { //male hair
+            setHairSilent(this.male_Hair[index_hair]);
+        }
+        else { //female hair
+            setHairSilent(this.female_Hair[index_hair]);
+        }
+
+        string[] lines =data[3].Split(new[] { Environment.NewLine },    StringSplitOptions.None);//jok
         this.pendingReadData = lines;
         
     }
@@ -1009,5 +1041,33 @@ public class CharacterCreationHandler : MonoBehaviour
     {
         avatar.SetColor("Hair", this.hair_colors[childIndex], default, 0.1f, false);
         this.current_hair_color = childIndex;
+    }
+
+    private void setHairSilent(int index) {
+        this.hairIndex = index;
+        UMAWardrobeRecipe[] hair = this.female_Hair;
+        if (isMale())
+            hair = this.male_Hair;
+        avatar.SetSlot(hair[index]);
+
+    }
+
+    private void setHairSilent(UMAWardrobeRecipe r) {
+        avatar.SetSlot(r);
+    }
+
+    public void OnHairVariantChanged() {
+        int index = (int)this.hairVariantSlider.value;
+        this.hairIndex = index;
+        UMAWardrobeRecipe[] hair=this.female_Hair;
+        if (isMale())
+            hair = this.male_Hair;
+        avatar.SetSlot(hair[index]);
+
+        avatar.BuildCharacter();
+    }
+
+    private bool isMale() {
+        return avatar.activeRace.name.Equals(this.male);
     }
 }
