@@ -205,6 +205,7 @@ public class CharacterCreationHandler : MonoBehaviour
         this.dna = avatar.GetDNA();
         setActive_gameobjects_based_on_gender();
         update_uma_from_file();
+        Debug.Log(avatar.GetDNA()["height"].Value);
 
     }
 
@@ -662,7 +663,7 @@ public class CharacterCreationHandler : MonoBehaviour
             this.genderBender = false;
             StartCoroutine(DelayedBuildCharacter());
         }
-        else if (this.genderBender && this.pendingReadData != null  ) {
+        else if (this.pendingReadData != null  ) {
             ///nastavit moramo sliderje ker se jih ni dalo ob branju, ker spreminjanje rase traja par frameov
             foreach (string l in this.pendingReadData)
             {
@@ -829,6 +830,9 @@ public class CharacterCreationHandler : MonoBehaviour
     static void WriteString(string s)
     {
         string path = System.IO.Path.Combine(Environment.ExpandEnvironmentVariables("%userprofile%"), "Documents") + "\\Medieval Survival\\characters\\current.txt";
+
+        (new FileInfo(path)).Directory.Create();
+
         File.WriteAllText(path, s);
     }
 
@@ -889,7 +893,8 @@ public class CharacterCreationHandler : MonoBehaviour
 
         string[] lines =data[3].Split(new[] { Environment.NewLine },    StringSplitOptions.None);//jok
         this.pendingReadData = lines;
-        
+        if(!this.genderBender) avatar.BuildCharacter();//ker se ni sprozil prej ker nismo menjal rase.
+
     }
 
     private void SetSliderValue(string v, float val)

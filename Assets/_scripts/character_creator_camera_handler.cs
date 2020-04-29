@@ -34,7 +34,7 @@ public class character_creator_camera_handler : MonoBehaviour
     {
         float Y = -Input.GetAxis("Mouse Y");
         
-        if((transform.position + transform.up * Y*Time.deltaTime).y >40.5f && (transform.position + transform.up * Y * Time.deltaTime).y<42f)
+        if((transform.position + transform.up * Y*Time.deltaTime).y >40.5f && (transform.position + transform.up * Y * Time.deltaTime).y<42.5f)
             transform.position = transform.position + transform.up * Y * Time.deltaTime;
     }
 
