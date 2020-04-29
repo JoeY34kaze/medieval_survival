@@ -12,6 +12,10 @@ public class CharacterCreationHandler : MonoBehaviour
 {
 
     #region Variables
+    private string female = "HumanFemaleDCS";
+    private string male = "HumanMaleDCS";
+
+
     private CharacterCreationHandler _instance;
     public CharacterCreationHandler Instance
     {
@@ -33,6 +37,10 @@ public class CharacterCreationHandler : MonoBehaviour
     }
     [SerializeField] private DynamicCharacterAvatar avatar;
     private Dictionary<string, DnaSetter> dna;
+
+    [Header(" Colors ")]
+    public Color[] skin_colors;
+    public Button[] skin_color_buttons;
 
     [Header("general sliders ")]
     public Slider basic_height_slider;
@@ -90,12 +98,43 @@ public class CharacterCreationHandler : MonoBehaviour
     public GameObject SaveDialogue;
     public GameObject OverLay;
 
+
+    [Header(" gender Specific Objects ")]
+    private bool genderBender;//bool ki se nastavi na true ko menjamo raso, rabmo neki ker nimamo eventa oz callbacka da nastavmo DNS z sliderjev.
+
+    public GameObject[] male_specific_objects;
+    public GameObject[] female_specific_objects;
+    private string[] pendingReadData;
+    private int current_skin_color;
+
+
+
     #endregion
 
     private void Start()
     {
         if (PlayerPrefs.HasKey("effectsVolume"))
             set_effects_volume(PlayerPrefs.GetFloat("effectsVolume"));
+
+        setup_button_colors();
+    }
+
+    private void setup_button_colors()
+    {
+        if (this.skin_colors.Length != this.skin_color_buttons.Length) Debug.LogError("SIZE MISMATCH! FIx IT!");
+        else {
+            for (int i = 0; i < this.skin_color_buttons.Length; i++) {
+                ColorBlock b = skin_color_buttons[i].colors;
+                b.normalColor = this.skin_colors[i];
+                Color withAplha = this.skin_colors[i];
+                withAplha.a = 0.75f;
+
+                b.selectedColor = withAplha;
+                b.pressedColor = withAplha;
+                b.highlightedColor = withAplha;
+                skin_color_buttons[i].colors = b;
+            }
+        }
     }
 
     void set_effects_volume(float v)
@@ -104,9 +143,16 @@ public class CharacterCreationHandler : MonoBehaviour
     }
     public void OnUMACreated()
     {
+        
         this.dna = avatar.GetDNA();
-
+        setActive_gameobjects_based_on_gender();
         update_uma_from_file();
+
+    }
+
+    private void OnSceneSetup() {
+        Debug.Log("Character should be loaded!");
+        StartCoroutine(FadeFromBlack(1f));
     }
 
 
@@ -121,6 +167,8 @@ public class CharacterCreationHandler : MonoBehaviour
 
     public void OnUmaDataModified()
     {
+        
+
         float min = 0;
         float max = 1f;
         //----------------MUSCLE
@@ -421,15 +469,17 @@ public class CharacterCreationHandler : MonoBehaviour
             dna["breastSize"].Set(this.breastSize.value);
 
         }
-        min = 0;
-        max = 1;
-        if (this.breastCleavage.value < max && this.breastCleavage.value > min)
-        {
 
-            dna["breastCleavage"].Set(this.breastCleavage.value);
+        if (avatar.activeRace.name.Equals(this.female))//ce je male je disablan
+        {
+            min = 0;
+            max = 1;
+            if (this.breastCleavage.value < max && this.breastCleavage.value > min)
+            {
+                dna["breastCleavage"].Set(this.breastCleavage.value);
+            }
 
         }
-
 
 
         //----------------- LEGS OPTIONS
@@ -468,7 +518,7 @@ public class CharacterCreationHandler : MonoBehaviour
 
         }
 
-        avatar.BuildCharacter();
+      avatar.BuildCharacter();
 
     }
 
@@ -518,7 +568,8 @@ public class CharacterCreationHandler : MonoBehaviour
         randomizeSlider(forearmLength);
         randomizeSlider(handsSize);
         randomizeSlider(breastSize);
-        randomizeSlider(breastCleavage);
+        if (this.breastCleavage.gameObject.activeSelf)//ce je male je disablan
+            randomizeSlider(breastCleavage);
         randomizeSlider(feetSize);
         randomizeSlider(legSeparation);
         randomizeSlider(legsSize);
@@ -541,11 +592,67 @@ public class CharacterCreationHandler : MonoBehaviour
         this.SaveDialogue.SetActive(true);
     }
 
+    public void OnCharacterUpdated()
+    {
+        Debug.Log("character updated!" + avatar.activeRace.name);
+        this.dna = avatar.GetDNA();
+        setActive_gameobjects_based_on_gender();
+        if (this.genderBender && this.pendingReadData == null)
+        {
+            this.genderBender = false;
+            StartCoroutine(DelayedBuildCharacter());
+        }
+        else if (this.genderBender && this.pendingReadData != null  ) {
+            ///nastavit moramo sliderje ker se jih ni dalo ob branju, ker spreminjanje rase traja par frameov
+            foreach (string l in this.pendingReadData)
+            {
+                if (l == null) break;
+                if (l == "") break;
+                string[] dn = l.Split(',');//ker je csv
+                float val = float.Parse(dn[1]);
+                SetSliderValue(dn[0], val);
+            }
+            this.pendingReadData = null;
+            genderBender = false;
+            StartCoroutine(DelayedBuildCharacter(true));
+            
+        }
+        //treba prej nrdit da se lahko povozjo vrednosti z sliderjev ki so dodani extra za to raso. female cleavage recimo, mybe dick size or something
+    }
+    private IEnumerator DelayedBuildCharacter(bool startup=false) {
+        yield return new WaitForSeconds(1f);
+        avatar.UpdateColors(true);
+        OnUmaDataModified();
+        if(startup) OnSceneSetup();
+    }
+
+    public void toMale() {
+        if (avatar.activeRace.name.Equals(this.female)) {
+            this.genderBender = true;
+            avatar.ChangeRace(this.male);
+        }
+      
+        
+    }
+
+    public void toFemale() {
+        if (avatar.activeRace.name.Equals(this.male))
+        {
+            this.genderBender = true;
+            avatar.ChangeRace(this.female);
+        }
+    }
+
+
     public void SaveCharacter() {
         this.SaveDialogue.SetActive(false);
         this.ResetDialogue.SetActive(false);
 
-        string s = "";
+        string s =avatar.activeRace.name+ "|";
+        //skindata
+        s = s + this.current_skin_color + "|";
+        //
+
         foreach(KeyValuePair<string, DnaSetter> entry in dna)
         {
             // do something with entry.Value or entry.Key
@@ -623,7 +730,7 @@ public class CharacterCreationHandler : MonoBehaviour
         im.raycastTarget = true;
         while (im.color.a < 1.0f)
         {
-            if (im.color.a + 0.2f * Time.deltaTime > 1.0f)
+            if (im.color.a + 1f * Time.deltaTime > 1.0f)
                 im.color = new Color(0, 0, 0, 1);
             else
                 im.color = new Color(0, 0, 0, im.color.a + 1f * Time.deltaTime);
@@ -631,6 +738,21 @@ public class CharacterCreationHandler : MonoBehaviour
         }
 
         SceneManager.LoadScene(v);
+    }
+
+    private IEnumerator FadeFromBlack(float t=0f)
+    {
+        yield return new WaitForSeconds(t);
+        Image im = this.OverLay.GetComponent<Image>();
+        while (im.color.a > 0.0f)
+        {
+            if (im.color.a - 1f * Time.deltaTime < 0.0f)
+                im.color = new Color(0, 0, 0, 0);
+            else
+                im.color = new Color(0, 0, 0, im.color.a - 1f * Time.deltaTime);
+            yield return new WaitForEndOfFrame();
+        }
+        im.raycastTarget = false;
     }
 
     static void WriteString(string s)
@@ -658,17 +780,34 @@ public class CharacterCreationHandler : MonoBehaviour
     private void update_uma_from_file()
     {
         string s =ReadString();
-        if (s == null) return;
-
-        string[] lines = s.Split(new[] { Environment.NewLine },    StringSplitOptions.None);//jok
-
-
-        foreach (string l in lines) {
-            string[] dn = l.Split(',');//ker je csv
-            float val = float.Parse(dn[1]);
-            SetSliderValue(dn[0],val);
+        if (s == null) {
+            OnSkinChangeButtonClicked(0);
+            OnSceneSetup();
+            return; 
         }
-        avatar.BuildCharacter();
+
+        string[] data = s.Split('|');
+        if (!avatar.activeRace.name.Equals(data[0]))
+        {
+            this.genderBender = true;
+            avatar.ChangeRace(data[0]);
+        }
+
+        string color_data = data[1];
+
+        string[] color_parameters = color_data.Split(',');//[ skin_index  eye_index,hair_index,r,g,b,a]
+
+
+        ///skin data
+        ChangeSkinRuntimeSilent(Int32.Parse(color_parameters[0]));
+        //eyes
+        
+        //hair
+
+
+        string[] lines =data[2].Split(new[] { Environment.NewLine },    StringSplitOptions.None);//jok
+        this.pendingReadData = lines;
+        
     }
 
     private void SetSliderValue(string v, float val)
@@ -750,7 +889,8 @@ public class CharacterCreationHandler : MonoBehaviour
             this.handsSize.value = val;
         if (v.Equals("breastSize"))
             this.breastSize.value = val;
-        if (v.Equals("breastCleavage"))
+        if (avatar.activeRace.name.Equals(this.female))//ce je male je disablan
+            if (v.Equals("breastCleavage"))
             this.breastCleavage.value = val;
         if (v.Equals("feetSize"))
             this.feetSize.value = val;
@@ -760,5 +900,40 @@ public class CharacterCreationHandler : MonoBehaviour
             this.legsSize.value = val;
         if (v.Equals("gluteusSize"))
             this.gluteusSize.value = val;
+        if (v.Equals("foreheadPosition"))
+            this.foreheadPosition.value = val;
+    }
+
+    private void setActive_gameobjects_based_on_gender(string name=null)
+    {
+        if (name == null) name = avatar.activeRace.name;
+
+        if (name.Equals(this.female))
+        {
+            //disable male
+            //enable female
+            foreach (GameObject b in this.male_specific_objects)
+                b.SetActive(false);
+            foreach (GameObject f in this.female_specific_objects)
+                f.SetActive(true);
+        }
+        else if (name.Equals(this.male)) {
+            //enable male
+            //disable female
+            foreach (GameObject b in this.female_specific_objects)
+                b.SetActive(false);
+            foreach (GameObject f in this.male_specific_objects)
+                f.SetActive(true);
+        }
+    }
+
+    public void ChangeSkinRuntimeSilent(int index) {
+        avatar.SetColor("Skin", this.skin_colors[index], default, 0.25f, false);
+        this.current_skin_color = index;
+    }
+
+    public void OnSkinChangeButtonClicked(int childIndex) {
+        avatar.SetColor("Skin", this.skin_colors[childIndex],default,0.25f,true);
+        this.current_skin_color = childIndex;
     }
 }
