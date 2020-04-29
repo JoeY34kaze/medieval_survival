@@ -42,6 +42,12 @@ public class CharacterCreationHandler : MonoBehaviour
     public Color[] skin_colors;
     public Button[] skin_color_buttons;
 
+    public Color[] eye_colors;
+    public Button[] eye_color_buttons;
+
+    public Color[] hair_colors;
+    public Button[] hair_color_buttons;
+
     [Header("general sliders ")]
     public Slider basic_height_slider;
     public Slider basic_weight_slider;
@@ -106,6 +112,8 @@ public class CharacterCreationHandler : MonoBehaviour
     public GameObject[] female_specific_objects;
     private string[] pendingReadData;
     private int current_skin_color;
+    private int current_eye_color;
+    private int current_hair_color;
 
 
 
@@ -122,8 +130,10 @@ public class CharacterCreationHandler : MonoBehaviour
     private void setup_button_colors()
     {
         if (this.skin_colors.Length != this.skin_color_buttons.Length) Debug.LogError("SIZE MISMATCH! FIx IT!");
-        else {
-            for (int i = 0; i < this.skin_color_buttons.Length; i++) {
+        else
+        {
+            for (int i = 0; i < this.skin_color_buttons.Length; i++)
+            {
                 ColorBlock b = skin_color_buttons[i].colors;
                 b.normalColor = this.skin_colors[i];
                 Color withAplha = this.skin_colors[i];
@@ -133,6 +143,46 @@ public class CharacterCreationHandler : MonoBehaviour
                 b.pressedColor = withAplha;
                 b.highlightedColor = withAplha;
                 skin_color_buttons[i].colors = b;
+            }
+        }
+
+        //eye
+
+
+        if (this.eye_colors.Length != this.eye_color_buttons.Length) Debug.LogError("SIZE MISMATCH! FIx IT!");
+        else
+        {
+            for (int i = 0; i < this.eye_color_buttons.Length; i++)
+            {
+                ColorBlock b = eye_color_buttons[i].colors;
+                b.normalColor = this.eye_colors[i];
+                Color withAplha = this.eye_colors[i];
+                withAplha.a = 0.75f;
+
+                b.selectedColor = withAplha;
+                b.pressedColor = withAplha;
+                b.highlightedColor = withAplha;
+                eye_color_buttons[i].colors = b;
+            }
+        }
+
+        //hair
+
+
+        if (this.hair_colors.Length != this.hair_color_buttons.Length) Debug.LogError("SIZE MISMATCH! FIx IT!");
+        else
+        {
+            for (int i = 0; i < this.hair_color_buttons.Length; i++)
+            {
+                ColorBlock b = hair_color_buttons[i].colors;
+                b.normalColor = this.hair_colors[i];
+                Color withAplha = this.hair_colors[i];
+                withAplha.a = 0.75f;
+
+                b.selectedColor = withAplha;
+                b.pressedColor = withAplha;
+                b.highlightedColor = withAplha;
+                hair_color_buttons[i].colors = b;
             }
         }
     }
@@ -650,7 +700,7 @@ public class CharacterCreationHandler : MonoBehaviour
 
         string s =avatar.activeRace.name+ "|";
         //skindata
-        s = s + this.current_skin_color + "|";
+        s = s + this.current_skin_color +","+this.current_eye_color+","+this.current_hair_color+ "|";
         //
 
         foreach(KeyValuePair<string, DnaSetter> entry in dna)
@@ -801,9 +851,9 @@ public class CharacterCreationHandler : MonoBehaviour
         ///skin data
         ChangeSkinRuntimeSilent(Int32.Parse(color_parameters[0]));
         //eyes
-        
+        change_eye_color_runtime_silent(Int32.Parse(color_parameters[1]));
         //hair
-
+        change_hair_color_runtime_silent(Int32.Parse(color_parameters[2]));
 
         string[] lines =data[2].Split(new[] { Environment.NewLine },    StringSplitOptions.None);//jok
         this.pendingReadData = lines;
@@ -935,5 +985,29 @@ public class CharacterCreationHandler : MonoBehaviour
     public void OnSkinChangeButtonClicked(int childIndex) {
         avatar.SetColor("Skin", this.skin_colors[childIndex],default,0.25f,true);
         this.current_skin_color = childIndex;
+    }
+
+    public void OnEyeChangeButtonClicked(int childIndex)
+    {
+        avatar.SetColor("Eyes", this.eye_colors[childIndex], default, 1f, true);
+        this.current_eye_color = childIndex;
+    }
+
+    public void OnHairChangeButtonClicked(int childIndex)
+    {
+        avatar.SetColor("Hair", this.hair_colors[childIndex], default, 0.1f, true);
+        this.current_hair_color = childIndex;
+    }
+
+    public void change_eye_color_runtime_silent(int childIndex)
+    {
+        avatar.SetColor("Eyes", this.eye_colors[childIndex], default, 1f, false);
+        this.current_eye_color = childIndex;
+    }
+
+    public void change_hair_color_runtime_silent(int childIndex)
+    {
+        avatar.SetColor("Hair", this.hair_colors[childIndex], default, 0.1f, false);
+        this.current_hair_color = childIndex;
     }
 }
