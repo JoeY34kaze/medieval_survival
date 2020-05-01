@@ -387,7 +387,15 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
     private void load_player_data_on_connected() {
         uint steamId = 666;
         Debug.Log("Checking if Player with steamid of " + steamId + " has any saved data.");
-        PlayerManager.load_player_from_saved_data(steamId,gameObject);
+        if (!PlayerManager.load_player_from_saved_data(steamId, gameObject))
+        {
+            //nimamo podatkov, rect moramo playerju da nj nam poslje svoj UMADNA. tko je zaenkrat.
+            
+            
+        //ZA KASNEJSO IMPLEMENTACIJO CE BO SERVER NADZIROV DNA PLAYERJEV! TRENUTNO CLIENT POSLJE DATA SERVERJU IN SERVER PROPAGIRA NAPREJ CE JE DATA OK
+            
+            //GetComponent<NetworkUMADnaHandler>().requestDNAFromPlayer();
+        }
     }
 
     private void save_player_on_disconnect(NetworkingPlayer disconnecting_networkingPlayer, NetWorker disconnecting_networker) {

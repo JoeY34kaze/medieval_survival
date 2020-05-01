@@ -2266,6 +2266,7 @@ GameObject:
   - component: {fileID: 535439563577510796}
   - component: {fileID: 1468247664159053134}
   - component: {fileID: 2374609157464248949}
+  - component: {fileID: 257695258184714681}
   m_Layer: 10
   m_Name: NetworkPlayer
   m_TagString: Player
@@ -2330,8 +2331,8 @@ MonoBehaviour:
   horizontalInput: Horizontal
   verticallInput: Vertical
   rotateCameraXInput: Mouse X
-  walk_speed: 2
-  sprint_speed: 4
+  walk_speed: 1.8
+  sprint_speed: 4.5
   crouched_speed: 0.6
   dodge_speed: 4
   gravity: -35
@@ -2431,18 +2432,6 @@ MonoBehaviour:
   - {fileID: 5834470938225872258, guid: 75fae846ed60a9344b8226a84c76a726, type: 3}
   weapon_slot: {fileID: 2048528667891861577}
   shield_slot: {fileID: 2169459720401964971}
-  currently_equipped_shield:
-    item_id: 0
-    quantity: 0
-    current_durabilty: 0
-    creator: 
-    tier: 0
-  currently_equipped_weapon:
-    item_id: 0
-    quantity: 0
-    current_durabilty: 0
-    creator: 
-    tier: 0
   weapon_direction: 0
   is_readying_attack: 0
   ready_attack: 0
@@ -2512,15 +2501,7 @@ MonoBehaviour:
   draggedItemParent: {fileID: 0}
   dragged_gameobjectSiblingIndex: -1
   draggedParent_parent_sibling_index: -1
-  space: 20
   predmeti_personal: []
-  predmeti_hotbar: []
-  backpack:
-    item_id: 0
-    quantity: 0
-    current_durabilty: 0
-    creator: 
-    tier: 0
   backpackSpot: {fileID: 6670972216543416233}
   barPanel: {fileID: 0}
 --- !u!114 &709254120835692662
@@ -2548,12 +2529,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   toolContainerOnHand: {fileID: 2691272318832156016}
-  activePlaceable:
-    item_id: 0
-    quantity: 0
-    current_durabilty: 0
-    creator: 
-    tier: 0
   placement_layer_mask:
     serializedVersion: 2
     m_Bits: 4113
@@ -2583,7 +2558,18 @@ MonoBehaviour:
   animationController: {fileID: 9100000, guid: e8578e83444fdcc4ea97d7e00a69e0a4, type: 2}
   CharacterCreated:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 257695258184714681}
+        m_MethodName: OnUmaCreated
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
   CharacterBegun:
     m_PersistentCalls:
       m_Calls: []
@@ -2609,11 +2595,7 @@ MonoBehaviour:
   rebuildSkeleton: 0
   preloadWardrobeRecipes:
     loadDefaultRecipes: 1
-    recipes:
-    - _recipeName: FemaleHair1
-      _compatibleRaces:
-      - HumanFemaleDCS
-      - HumanFemale
+    recipes: []
   raceAnimationControllers:
     defaultAnimationController: {fileID: 0}
     animators: []
@@ -2698,6 +2680,26 @@ Animator:
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorControllerStateOnDisable: 0
+--- !u!114 &257695258184714681
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4050820139605508289}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3e8e5fa46cc420442b1d400841178df3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  male_Hair:
+  - {fileID: 11400000, guid: 4acc51a73e0e5884eb7e770d8f803e81, type: 2}
+  - {fileID: 11400000, guid: bc2ac8c776a97fa46a5a1a9455599f2c, type: 2}
+  - {fileID: 11400000, guid: cbac10d2bc6792c43b0d89e71534cf77, type: 2}
+  female_Hair:
+  - {fileID: 11400000, guid: 53a236a7ccb00374dbbed2f13dc8509d, type: 2}
+  - {fileID: 11400000, guid: 967f84b71a1548d4580a76c279ec5389, type: 2}
+  - {fileID: 11400000, guid: bdae23dff0f3d3648882f2f087840fef, type: 2}
 --- !u!1 &4071417591800162448
 GameObject:
   m_ObjectHideFlags: 0

@@ -154,7 +154,7 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
         if (!isCameraRotationAllowed()) return;
         var X = Input.GetAxis(rotateCameraXInput);
         float rotation = Input.GetAxis("Mouse X") * Prefs.mouse_sensitivity;
-        rotation *=  (1+(camera_frame.transform.localRotation.x * 1 / 0.7f) * horizontal_angle_offset_multiplier);
+       // rotation *=  (1+(camera_frame.transform.localRotation.x * 1 / 0.7f) * horizontal_angle_offset_multiplier);
         Quaternion turnAngle = Quaternion.AngleAxis(rotation, Vector3.up);
         transform.eulerAngles = transform.eulerAngles + turnAngle.eulerAngles;
 
@@ -194,6 +194,8 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
         float y = Input.GetAxis(verticallInput);
 
         this.direction = Vector3.Normalize(transform.forward * y + transform.right * x);
+
+        
         this.speed = this.walk_speed;
     }
 
@@ -205,8 +207,7 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
             isSprinting=true;
         else if (Input.GetButtonUp("Sprint"))
             isSprinting = false;
-        if (this.isSprinting)
-            this.speed = this.sprint_speed;
+       
     }
     protected virtual void SetCrouchedInput()
     {
@@ -235,6 +236,7 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
 
     private void SetDodgeInput()
     {
+        return;
         if (Input.GetButtonDown("Dodge") && isGrounded && !isDodging)
         {
             handle_dodge_start();
@@ -279,8 +281,22 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
     }
     void ControlMovement()
     {
+        float angle = Vector3.Angle(this.direction, transform.forward);
+        if (this.isCrouched) this.speed = this.crouched_speed;
+        else if (angle > 40f)
+        {
+            angle -= 40f;
+            this.speed = this.speed - this.speed * 2 / 3 * (angle / 140f);
+        }
+        else {
+            if (this.isSprinting)
+                this.speed = this.sprint_speed;
+        }
 
-           controller.Move(this.direction * this.speed * Time.deltaTime);  
+
+
+
+            controller.Move(this.direction * this.speed * Time.deltaTime);  
     }
 
     #endregion

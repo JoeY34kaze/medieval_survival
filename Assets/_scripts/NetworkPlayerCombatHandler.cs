@@ -520,7 +520,7 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
     {
         if (networkObject.IsServer && args.Info.SendingPlayer.NetworkId == networkObject.Owner.NetworkId)
         {
-            if (!this.blocking)
+            if (!this.blocking && !this.executing_attack)
             {//starts blocking
                 if (currently_equipped_shield == null)
                 {

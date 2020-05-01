@@ -15,7 +15,6 @@ GameObject:
   - component: {fileID: 8452941681511589541}
   - component: {fileID: 8815208978924338143}
   - component: {fileID: 3184638034317637495}
-  - component: {fileID: 7223981982538913998}
   m_Layer: 11
   m_Name: sword_2_pickup
   m_TagString: Untagged
@@ -143,15 +142,3 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   item_allows_interaction: 1
   item_waiting_for_destruction: 0
---- !u!114 &7223981982538913998
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1566654935662004460}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fdc48a4a539a6a742a7fe7d89733e0ac, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 

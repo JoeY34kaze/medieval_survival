@@ -15,7 +15,6 @@ GameObject:
   - component: {fileID: 3215903339925601207}
   - component: {fileID: 3215903339925601206}
   - component: {fileID: 3215903339925601205}
-  - component: {fileID: 8906435174519898515}
   m_Layer: 11
   m_Name: chest_1_pickup
   m_TagString: Untagged
@@ -44,7 +43,7 @@ MeshFilter:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3215903339925601204}
-  m_Mesh: {fileID: 4300000, guid: 4f865d750f36ea14fbaf5145415bf4e9, type: 2}
+  m_Mesh: {fileID: 0}
 --- !u!23 &3215903339925601201
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -59,10 +58,11 @@ MeshRenderer:
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 522c70cae67ffd445984ef2f88a618e2, type: 2}
+  - {fileID: 0}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -70,6 +70,7 @@ MeshRenderer:
   m_ProbeAnchor: {fileID: 0}
   m_LightProbeVolumeOverride: {fileID: 0}
   m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
   m_PreserveUVs: 0
   m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0
@@ -110,10 +111,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5327fb6c6a24cc849aecfd7685c43422, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  i: {fileID: 11400000, guid: 68802012f16c8cc48a3f1839b38d6dc7, type: 2}
-  quantity: 1
   stackable: 0
-  original_material: {fileID: 0}
+  original_materials: []
 --- !u!114 &3215903339925601206
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -141,15 +140,3 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 0.78042126, y: 1.380625, z: 0.49400187}
   m_Center: {x: 0.008729696, y: 1.2319976, z: -0.056164294}
---- !u!114 &8906435174519898515
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3215903339925601204}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fdc48a4a539a6a742a7fe7d89733e0ac, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 

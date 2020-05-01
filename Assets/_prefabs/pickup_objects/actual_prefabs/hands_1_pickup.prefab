@@ -15,7 +15,6 @@ GameObject:
   - component: {fileID: 7999107153611608426}
   - component: {fileID: 7999107153611608428}
   - component: {fileID: 7999107153611608427}
-  - component: {fileID: 8676731118897577545}
   m_Layer: 11
   m_Name: hands_1_pickup
   m_TagString: Untagged
@@ -44,7 +43,7 @@ MeshFilter:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7999107153611608437}
-  m_Mesh: {fileID: 4300000, guid: 187e7eeb7215dbb4d84928f5750f60b8, type: 2}
+  m_Mesh: {fileID: 0}
 --- !u!23 &7999107153611608439
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -59,10 +58,11 @@ MeshRenderer:
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: eb9888849fc22b149a2f4eaa9d297c15, type: 2}
+  - {fileID: 0}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -70,6 +70,7 @@ MeshRenderer:
   m_ProbeAnchor: {fileID: 0}
   m_LightProbeVolumeOverride: {fileID: 0}
   m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
   m_PreserveUVs: 0
   m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0
@@ -123,10 +124,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5327fb6c6a24cc849aecfd7685c43422, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  i: {fileID: 11400000, guid: f58b266d8eba4f5448efbf9f5c0940f9, type: 2}
-  quantity: 1
   stackable: 0
-  original_material: {fileID: 0}
+  original_materials: []
 --- !u!114 &7999107153611608427
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -141,15 +140,3 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   item_allows_interaction: 1
   item_waiting_for_destruction: 0
---- !u!114 &8676731118897577545
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7999107153611608437}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fdc48a4a539a6a742a7fe7d89733e0ac, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 

@@ -194,14 +194,14 @@ public class PlayerManager : MonoBehaviour
         }
     }
 
-    internal static void load_player_from_saved_data(uint steamId, GameObject player_gameObject)
+    internal static bool load_player_from_saved_data(uint steamId, GameObject player_gameObject)
     {
         NetworkPlayerStats nps = player_gameObject.GetComponent<NetworkPlayerStats>();
 
         uint net_id = nps.networkObject.Owner.NetworkId;
 
         PlayerState ps = PlayerManager.get_playerStateForPlayer(steamId);
-        if (ps == null) { Debug.Log("No player data found for steamid "+steamId+"."); return; }
+        if (ps == null) { Debug.Log("No player data found for steamid "+steamId+"."); return false; }
 
         Debug.Log("Saved data found for player " + steamId);
         //-------------------------------------MOVEMENT-------------------------
@@ -235,6 +235,7 @@ public class PlayerManager : MonoBehaviour
         nps.OnPlayerDataLoaded();
         //-----------------------------------------------------------------------
         Debug.Log("No other scripts contain anything that needs loaded. Complete!");
+        return true;
 
     }
 

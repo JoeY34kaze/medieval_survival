@@ -15,7 +15,6 @@ GameObject:
   - component: {fileID: 7066038424638375748}
   - component: {fileID: 2900738277275932339}
   - component: {fileID: 3026790601549032613}
-  - component: {fileID: 8489039186648117779}
   m_Layer: 11
   m_Name: gloves_2_placeholder
   m_TagString: Untagged
@@ -59,6 +58,7 @@ MeshRenderer:
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -70,6 +70,7 @@ MeshRenderer:
   m_ProbeAnchor: {fileID: 0}
   m_LightProbeVolumeOverride: {fileID: 0}
   m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
   m_PreserveUVs: 0
   m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0
@@ -137,19 +138,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5327fb6c6a24cc849aecfd7685c43422, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  i: {fileID: 11400000, guid: c34c7d6578046dc4a9ec955ab179fdaf, type: 2}
-  quantity: 1
   stackable: 0
-  original_material: {fileID: 0}
---- !u!114 &8489039186648117779
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 139793432851148391}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fdc48a4a539a6a742a7fe7d89733e0ac, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
+  original_materials: []

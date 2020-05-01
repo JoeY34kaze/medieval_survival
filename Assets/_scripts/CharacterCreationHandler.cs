@@ -118,9 +118,9 @@ public class CharacterCreationHandler : MonoBehaviour
     public GameObject[] male_specific_objects;
     public GameObject[] female_specific_objects;
     private string[] pendingReadData;
-    private int current_skin_color;
-    private int current_eye_color;
-    private int current_hair_color;
+   // private int current_skin_color;
+   // private int current_eye_color;
+   // private int current_hair_color;
     private int hairIndex;
 
 
@@ -273,8 +273,8 @@ public class CharacterCreationHandler : MonoBehaviour
         }
 
 
-        min = 0;
-        max = 1f;
+        min = 0.4f;
+        max = 0.6f;
         if (this.neckThickness.value < max && this.neckThickness.value > min)
         {
             dna["neckThickness"].Set(this.neckThickness.value);
@@ -512,8 +512,8 @@ public class CharacterCreationHandler : MonoBehaviour
             dna["forearmLength"].Set(this.forearmLength.value);
 
         }
-        min = 0;
-        max = 1;
+        min = 0.35f;
+        max = 0.65f;
         if (this.handsSize.value < max && this.handsSize.value > min)
         {
 
@@ -552,8 +552,8 @@ public class CharacterCreationHandler : MonoBehaviour
             dna["feetSize"].Set(this.feetSize.value);
 
         }
-        min = 0;
-        max = 1;
+        min = 0.35f;
+        max = 0.75f;
         if (this.legSeparation.value < max && this.legSeparation.value > min)
         {
 
@@ -588,26 +588,45 @@ public class CharacterCreationHandler : MonoBehaviour
 
     public void randomizeCharacter()
     {
-
+        float mid = UnityEngine.Random.Range(0.0f, 1f);
+        float dev = 0.2f;
+        
         randomizeSlider(this.hairVariantSlider);
+
+
+        //colors
+        change_eye_color_runtime_silent(getRandomColor(this.eye_colors));
+        change_hair_color_runtime_silent(getRandomColor(this.hair_colors));
+        ChangeSkinRuntimeSilent(getRandomColor(this.skin_colors));
+
+
 
         randomizeSlider(basic_height_slider);
         randomizeSlider(basic_weight_slider);
         randomizeSlider(basic_muscle_slider);
-
+       
         randomizeSlider(headSize);
+        
+
         randomizeSlider(headWidth);
         randomizeSlider(neckThickness);
         randomizeSlider(earsSize);
         randomizeSlider(earsPosition);
         randomizeSlider(earsRotation);
-        randomizeSlider(noseSize);
-        randomizeSlider(noseCurve);
-        randomizeSlider(noseWidth);
-        randomizeSlider(noseInclination);
-        randomizeSlider(nosePosition);
-        randomizeSlider(nosePronounced);
-        randomizeSlider(noseFlatten);
+
+        //nose mora bit nekak ublazen randomization
+        mid = UnityEngine.Random.Range(0.35f, 0.65f);
+        dev = 0.2f;
+
+        randomizeSlider(noseSize,mid,dev);
+        randomizeSlider(noseCurve, mid, dev);
+        randomizeSlider(noseWidth, mid, dev);
+        randomizeSlider(noseInclination, mid, dev);
+        randomizeSlider(nosePosition, mid, dev);
+        randomizeSlider(nosePronounced, mid, dev);
+        randomizeSlider(noseFlatten, mid, dev);
+
+        
         randomizeSlider(chinSize);
         randomizeSlider(chinPronounced);
         randomizeSlider(chinPosition);
@@ -640,9 +659,26 @@ public class CharacterCreationHandler : MonoBehaviour
 
     }
 
-    private void randomizeSlider(Slider s)
+    private Color getRandomColor(Color[] color_array)
     {
+        return color_array[UnityEngine.Random.Range(0, color_array.Length)];
+    }
+
+    private void randomizeSlider(Slider s) {
         s.value = UnityEngine.Random.Range(s.minValue, s.maxValue);
+    }
+
+    private void randomizeSlider(Slider s, float mid, float deviation)
+    {
+        if (deviation > ((s.maxValue - s.minValue) / 2)) deviation = (s.maxValue - s.minValue) / 2;
+
+        if (mid - deviation < s.minValue) deviation = mid - s.minValue;
+
+        if (mid + deviation > s.maxValue) deviation = s.maxValue - mid;
+
+        
+
+        s.value = UnityEngine.Random.Range(mid-deviation, mid+deviation);
     }
 
     public void openResetDialog() {
@@ -710,9 +746,17 @@ public class CharacterCreationHandler : MonoBehaviour
         this.ResetDialogue.SetActive(false);
 
         string s =avatar.activeRace.name+ "|";
-        //colors
-        s = s + this.current_skin_color +","+this.current_eye_color+","+this.current_hair_color+ "|";
+        Debug.Log(avatar.ActiveColors);
 
+        Color skinColor = avatar.ActiveColors[0].Color;
+        Color hairColor = avatar.ActiveColors[1].Color;
+        Color eyeColor = avatar.ActiveColors[2].Color;
+
+
+        s = s + skinColor.r + "," + skinColor.g + "," + skinColor.b + "," + skinColor.a + ","
+            + hairColor.r + "," + hairColor.g + "," + hairColor.b + "," + hairColor.a + ","
+            + eyeColor.r+ "," + eyeColor.g + "," + eyeColor.b + "," + eyeColor.a + "|";
+        
         //hair variant
         s = s + this.hairIndex + "|";
 
@@ -739,9 +783,9 @@ public class CharacterCreationHandler : MonoBehaviour
         this.ResetDialogue.SetActive(false);
 
 
-        change_eye_color_runtime_silent(0);
-        change_hair_color_runtime_silent(0);
-        ChangeSkinRuntimeSilent(0);
+        change_eye_color_runtime_silent(this.eye_colors[0]);
+        change_hair_color_runtime_silent(this.hair_colors[0]);
+        ChangeSkinRuntimeSilent(this.skin_colors[0]);
         OnHairVariantChanged();
 
             basic_height_slider.value = 0.5f;
@@ -874,11 +918,11 @@ public class CharacterCreationHandler : MonoBehaviour
 
 
         ///skin data
-        ChangeSkinRuntimeSilent(Int32.Parse(color_parameters[0]));
+        ChangeSkinRuntimeSilent(float.Parse(color_parameters[0]), float.Parse(color_parameters[1]), float.Parse(color_parameters[2]), float.Parse(color_parameters[3]));
         //eyes
-        change_eye_color_runtime_silent(Int32.Parse(color_parameters[1]));
+        change_eye_color_runtime_silent(float.Parse(color_parameters[4]), float.Parse(color_parameters[5]), float.Parse( color_parameters[6]), float.Parse(color_parameters[7]));
         //hair
-        change_hair_color_runtime_silent(Int32.Parse(color_parameters[2]));
+        change_hair_color_runtime_silent(float.Parse(color_parameters[8]), float.Parse(color_parameters[9]), float.Parse(color_parameters[10]), float.Parse(color_parameters[11]));
 
         //hair variant
         int index_hair = Int32.Parse(data[2]);
@@ -1014,38 +1058,48 @@ public class CharacterCreationHandler : MonoBehaviour
         }
     }
 
-    public void ChangeSkinRuntimeSilent(int index) {
-        avatar.SetColor("Skin", this.skin_colors[index], default, 0.25f, false);
-        this.current_skin_color = index;
+    public void ChangeSkinRuntimeSilent(float r, float g, float b, float a) {
+        avatar.SetColor("Skin", new Color(r,g,b,a), default, 0.25f, false);
+
+    }
+    public void ChangeSkinRuntimeSilent(Color c)
+    {
+        avatar.SetColor("Skin", c, default, 0.25f, false);
+
     }
 
     public void OnSkinChangeButtonClicked(int childIndex) {
         avatar.SetColor("Skin", this.skin_colors[childIndex],default,0.25f,true);
-        this.current_skin_color = childIndex;
     }
 
     public void OnEyeChangeButtonClicked(int childIndex)
     {
         avatar.SetColor("Eyes", this.eye_colors[childIndex], default, 1f, true);
-        this.current_eye_color = childIndex;
     }
 
     public void OnHairChangeButtonClicked(int childIndex)
     {
         avatar.SetColor("Hair", this.hair_colors[childIndex], default, 0.1f, true);
-        this.current_hair_color = childIndex;
     }
 
-    public void change_eye_color_runtime_silent(int childIndex)
+    public void change_eye_color_runtime_silent(float r, float g, float b, float a) {
+        avatar.SetColor("Eyes", new Color(r, g, b, a), default, 0.25f, false);
+
+    }
+    public void change_eye_color_runtime_silent(Color c)
     {
-        avatar.SetColor("Eyes", this.eye_colors[childIndex], default, 1f, false);
-        this.current_eye_color = childIndex;
+        avatar.SetColor("Eyes", c, default, 0.25f, false);
+
     }
 
-    public void change_hair_color_runtime_silent(int childIndex)
+    public void change_hair_color_runtime_silent(float r, float g, float b, float a)
     {
-        avatar.SetColor("Hair", this.hair_colors[childIndex], default, 0.1f, false);
-        this.current_hair_color = childIndex;
+        avatar.SetColor("Hair", new Color(r, g, b, a), default, 0.25f, false);
+
+    }
+    public void change_hair_color_runtime_silent(Color c)
+    {
+        avatar.SetColor("Hair",c, default, 0.25f, false);
     }
 
     private void setHairSilent(int index) {

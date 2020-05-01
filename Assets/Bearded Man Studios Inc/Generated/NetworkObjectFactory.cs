@@ -123,6 +123,10 @@ namespace BeardedManStudios.Forge.Networking.Generated
 						availableCallback = true;
 						obj = new NetworkPlayerStatsNetworkObject(networker, id, frame);
 						break;
+					case NetworkPlayerUMADNANetworkObject.IDENTITY:
+						availableCallback = true;
+						obj = new NetworkPlayerUMADNANetworkObject(networker, id, frame);
+						break;
 					case NetworkResourceNetworkObject.IDENTITY:
 						availableCallback = true;
 						obj = new NetworkResourceNetworkObject(networker, id, frame);

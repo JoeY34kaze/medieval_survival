@@ -67,6 +67,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
     internal int draggedGameobjectParent_parentSiblingIndex;
     internal int draggedGameobjectParent_parent_parentSiblingIndex;
     internal int draggedGameobjectParent_parent_parent_parentSiblingIndex;
+    private List<string> slots_to_clear;
     private readonly int bar_slots_Length = 10;
     private readonly int personal_inventory_space=20;
 
@@ -85,8 +86,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         this.neutralStateHandler = GetComponent<NetworkPlayerNeutralStateHandler>();
         this.avatar = GetComponent<DynamicCharacterAvatar>();
         this.stats = GetComponent<NetworkPlayerStats>();
-
-
+        this.slots_to_clear = null;
     }
 
     internal void on_UI_linked() {//klice se z UILogic.on_local_player_linked
@@ -405,7 +405,18 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
     public void refresh_UMA_equipped_gear()
     {
         if (avatar == null) return;
-        avatar.ClearSlots();
+
+        if (this.slots_to_clear == null)
+        {
+            this.slots_to_clear = new List<string>();
+            foreach (string s in avatar.CurrentWardrobeSlots)
+            {
+                if (!s.Equals("Hair"))
+                    this.slots_to_clear.Add(s);
+            }
+        }
+
+        avatar.ClearSlots(this.slots_to_clear);
 
         if (this.head != null)
         {

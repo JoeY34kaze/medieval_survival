@@ -15,7 +15,6 @@ GameObject:
   - component: {fileID: 8210173592186475130}
   - component: {fileID: 7975978644590971890}
   - component: {fileID: 2687700613903342651}
-  - component: {fileID: 3177362765369199979}
   m_Layer: 11
   m_Name: chest_0_pickup
   m_TagString: Untagged
@@ -63,10 +62,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5327fb6c6a24cc849aecfd7685c43422, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  i: {fileID: 11400000, guid: 061310f3e568ee848827444467c0b17c, type: 2}
-  quantity: 1
   stackable: 0
-  original_material: {fileID: 0}
+  original_materials: []
 --- !u!54 &723486358275923371
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -105,6 +102,7 @@ MeshRenderer:
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -116,6 +114,7 @@ MeshRenderer:
   m_ProbeAnchor: {fileID: 0}
   m_LightProbeVolumeOverride: {fileID: 0}
   m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
   m_PreserveUVs: 0
   m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0
@@ -141,15 +140,3 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 70.083084, y: 36.728436, z: 63.381927}
   m_Center: {x: 0, y: -1.3559418, z: 141.93459}
---- !u!114 &3177362765369199979
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5136732390987847126}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fdc48a4a539a6a742a7fe7d89733e0ac, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
