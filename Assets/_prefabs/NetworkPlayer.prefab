@@ -2360,6 +2360,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   chest: {fileID: 7660646124619198192}
+  spine: {fileID: 4547417012337884400}
+  neck: {fileID: 2005728290371401974}
   _camera_framework: {fileID: 6878084338605114859}
   hookChestRotation: 1
 --- !u!114 &6306427986985945629

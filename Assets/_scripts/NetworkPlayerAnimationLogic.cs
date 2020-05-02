@@ -11,8 +11,12 @@ public class NetworkPlayerAnimationLogic : NetworkPlayerAnimationBehavior
 
 
     //private bool needNetworkAnimUpdate = false;
-    private Quaternion chestRotation;
+    private Quaternion rotation_remote;
     public Transform chest;
+    public Transform spine;
+    public Transform neck;
+    
+
     public Transform _camera_framework;
     private NetworkPlayerStats stats;
     private NetworkPlayerCombatHandler combat_handler;
@@ -127,18 +131,30 @@ public class NetworkPlayerAnimationLogic : NetworkPlayerAnimationBehavior
             if (!stats.downed) {
                 if (networkObject.IsOwner)
                 {
-                
-                    chestRotation = _camera_framework.rotation;
-                    networkObject.chestRotation = chestRotation;
+                    rotation_remote = _camera_framework.rotation * Quaternion.Euler(new Vector3(0, 0, -90));
+                    networkObject.chestRotation = rotation_remote;
                 }
                 else
                 {
-                    chestRotation = networkObject.chestRotation;
+                    
+                    rotation_remote = networkObject.chestRotation;
                 }
-            chest.rotation = chestRotation * Quaternion.Euler(new Vector3(0, 0, -90));
-        }
+                //  chest.rotation = expected_rotation_for_head * Quaternion.Euler(new Vector3(0, 0, -90));
+                apply_vertical_rotation(rotation_remote);
+            }
+    }
 
-        
+    private void apply_vertical_rotation(Quaternion q)
+    {
+
+        //zacetni q.eulerAngles je zmer 0,0,270
+        Quaternion BaseRotation = transform.rotation;
+        Debug.Log("base "+BaseRotation.eulerAngles);
+        Debug.Log("q " + q.eulerAngles);
+
+        Debug.Log("x axis: "+Vector3.Angle(new Vector3(q.eulerAngles.x, 0, 0),new Vector3(BaseRotation.eulerAngles.x,0,0)));
+
+        chest.rotation = q ;
     }
 
     private void Update_Crouched_State_Owner() {
