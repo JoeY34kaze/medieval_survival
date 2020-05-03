@@ -136,7 +136,6 @@ public class NetworkPlayerAnimationLogic : NetworkPlayerAnimationBehavior
                 }
                 else
                 {
-                    
                     rotation_remote = networkObject.chestRotation;
                 }
                 //  chest.rotation = expected_rotation_for_head * Quaternion.Euler(new Vector3(0, 0, -90));
@@ -147,14 +146,15 @@ public class NetworkPlayerAnimationLogic : NetworkPlayerAnimationBehavior
     private void apply_vertical_rotation(Quaternion q)
     {
 
-        //zacetni q.eulerAngles je zmer 0,0,270
-        Quaternion BaseRotation = transform.rotation;
-        Debug.Log("base "+BaseRotation.eulerAngles);
-        Debug.Log("q " + q.eulerAngles);
+         Quaternion BaseRotation = Quaternion.Euler(q.x, q.eulerAngles.y, q.eulerAngles.z);   
 
-        Debug.Log("x axis: "+Vector3.Angle(new Vector3(q.eulerAngles.x, 0, 0),new Vector3(BaseRotation.eulerAngles.x,0,0)));
-
-        chest.rotation = q ;
+        //Quaternion BaseRotation = Quaternion.Euler(q.eulerAngles.x, q.eulerAngles.y, q.eulerAngles.z);
+    //    Debug.Log("base "+BaseRotation.eulerAngles);
+    //    Debug.Log("q " + q.eulerAngles);
+        float vertical_angle = Quaternion.Angle(q, BaseRotation);
+        if (q.eulerAngles.x > 180) vertical_angle *= -1;
+    //    Debug.Log("x axis: "+vertical_angle);
+        chest.Rotate(0,vertical_angle,0);
     }
 
     private void Update_Crouched_State_Owner() {

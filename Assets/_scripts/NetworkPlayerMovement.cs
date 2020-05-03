@@ -283,7 +283,7 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
     {
         float angle = Vector3.Angle(this.direction, transform.forward);
         if (this.isCrouched) this.speed = this.crouched_speed;
-        else if (angle > 40f)
+        else if (angle > 60f)
         {
             angle -= 40f;
             this.speed = this.speed - this.speed * 2 / 3 * (angle / 140f);
