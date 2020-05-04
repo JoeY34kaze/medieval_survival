@@ -76,8 +76,8 @@ public class UILogic : MonoBehaviour
     public static decicions_handler_ui DecisionsHandler;
     public static local_team_panel_handler TeamPanel;
     public Interactable_radial_menu interactable_radial_menu;
-
     public MenuControllerInGame menuController;
+    public InventoryPredmetDescriptionHandler predmetDescriptionPanel;
 
 
     //----------------za linkat z npi
@@ -623,4 +623,21 @@ public class UILogic : MonoBehaviour
             g.GetComponent<UI_NewItemDisplayLocalHandler>().init(p);
         }
     }
+
+
+    //predmet description
+    public void OnInventoryPredmetSelected(int index_slota, InventorySlot slot) {
+
+        if (slot is InventorySlotPersonal)
+        {
+            Debug.Log(slot.GetPredmet());
+
+            this.predmetDescriptionPanel.init(slot.GetPredmet(), slot);
+        }
+        else {
+            Debug.LogError("Samo za personal slot zdle delamo.");
+        }
+    
+    }
+
 }

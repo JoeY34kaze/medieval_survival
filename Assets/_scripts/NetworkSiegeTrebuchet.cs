@@ -131,8 +131,7 @@ public class NetworkSiegeTrebuchet : NetworkedSiegeWeaponBehavior
     }
 
     private float get_force() {
-        Debug.LogWarning("force needs to be calculated based on weight in inventory!! right now it isnt");
-        float weight = 0f;
+        float weight = 100f;//neka vrednost da se prazen treb ne ubije
         foreach (Predmet p in this.container.getAllOfType(Item.Type.resource)) {
             weight += p.GetWeight();
         }

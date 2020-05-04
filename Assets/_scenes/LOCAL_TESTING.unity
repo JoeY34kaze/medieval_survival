@@ -3956,6 +3956,18 @@ Avatar:
     m_HasTranslationDoF: 0
     m_HasExtraRoot: 0
     m_SkeletonHasParents: 0
+--- !u!4 &1468072481 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 7024083416460997793, guid: 3f93805539c1e0047bf1be959d36b710,
+    type: 3}
+  m_PrefabInstance: {fileID: 2093356824}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &1533717261 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 3491204891291702752, guid: 03ab9616141198b47b1b33f410bd6c70,
+    type: 3}
+  m_PrefabInstance: {fileID: 1785829444}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1717789685 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 4050820139605508289, guid: 03ab9616141198b47b1b33f410bd6c70,
@@ -3979,6 +3991,11 @@ MonoBehaviour:
   release: 0
   forward: 0
   horizontal: 0
+  crouched_walk_right_y: 0
+  crouched_walk_right_z: 0
+  crouched_walk_left_y: 0
+  crouched_walk_left_x: 0
+  hips: {fileID: 1533717261}
 --- !u!1001 &1785829444
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -4646,6 +4663,11 @@ MonoBehaviour:
   release: 0
   forward: 0
   horizontal: 0
+  crouched_walk_right_y: 0
+  crouched_walk_right_z: 0
+  crouched_walk_left_y: 0
+  crouched_walk_left_x: 0
+  hips: {fileID: 1468072481}
 --- !u!1 &1892149370
 GameObject:
   m_ObjectHideFlags: 0

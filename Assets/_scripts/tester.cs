@@ -15,6 +15,11 @@ public class tester : MonoBehaviour
     public float forward;
     [Range(-1, 1f)]
     public float horizontal;
+    public float crouched_walk_right_y;
+    public float crouched_walk_right_z;
+    public float crouched_walk_left_y;
+    public float crouched_walk_left_x;
+    public Transform hips;
 
     void Start()
     {
@@ -22,7 +27,7 @@ public class tester : MonoBehaviour
     }
 
     // Update is called once per frame
-    void Update()
+    void LateUpdate()
     {
         if (resetAll) {
             resetAll = false;
@@ -48,6 +53,29 @@ public class tester : MonoBehaviour
         anim.SetFloat("forward", this.forward);
         anim.SetFloat("horizontal", this.horizontal);
 
+        apply_vertical_rotation();
+
+    }
+
+    private void apply_vertical_rotation()
+    {
+
+
+           float horizontal_angle = 90f;
+            if (horizontal > 0f)
+            {
+
+
+                    hips.Rotate(-horizontal_angle, this.crouched_walk_right_y, this.crouched_walk_right_z);
+
+
+            }
+            else if (horizontal < 0f)
+            {
+                hips.Rotate(horizontal_angle, this.crouched_walk_left_y, this.crouched_walk_left_x);
+                
+            }
+        
 
     }
 }

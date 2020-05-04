@@ -12,7 +12,10 @@ public class panel_bar_handler : MonoBehaviour
     private void Start()
     {
         this.selected = new List<int>();
+        GetComponent<RectTransform>().localPosition = new Vector3(0f, -490f, 0f);
+
     }
+
 
 
     //TODO zamenjat GetComponent. namest da polinkamo gameobject bi loh dal direkt image

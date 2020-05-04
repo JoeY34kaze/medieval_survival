@@ -2359,9 +2359,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5526340e01b1e7d4b8a1ea606cf122a8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  lower_back: {fileID: 7660646124619198192}
+  spine: {fileID: 1220263430119899676}
+  spine1: {fileID: 4547417012337884400}
   chest: {fileID: 7660646124619198192}
-  spine: {fileID: 4547417012337884400}
   neck: {fileID: 2005728290371401974}
+  head: {fileID: 3574024463027498205}
+  hips: {fileID: 3491204891291702752}
   _camera_framework: {fileID: 6878084338605114859}
   hookChestRotation: 1
 --- !u!114 &6306427986985945629

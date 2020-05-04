@@ -96,4 +96,12 @@ public abstract class InventorySlot : MonoBehaviour
             this.text_quantity.gameObject.SetActive(false);
     }
 
+    public void OnClicked() {
+        Debug.Log("UI clot clicked!");
+        if (this.predmet != null) {
+            Debug.Log("It Contains predmet!");
+            UILogic.Instance.OnInventoryPredmetSelected(this.index, this);
+        }
+    }
+
 }

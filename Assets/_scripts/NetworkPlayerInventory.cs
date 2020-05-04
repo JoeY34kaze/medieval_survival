@@ -64,6 +64,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
     private IEnumerator craftingRoutine;
     private int craftingTimeRemaining = 0;
     internal int draggedGameobjectParentSiblingIndex;
+
     internal int draggedGameobjectParent_parentSiblingIndex;
     internal int draggedGameobjectParent_parent_parentSiblingIndex;
     internal int draggedGameobjectParent_parent_parent_parentSiblingIndex;
@@ -2630,6 +2631,12 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
     internal void cancelAllCrafting_server()
     {
         //throw new NotImplementedException();
+    }
+
+    internal void localPlayerSplitStackRequest(InventorySlot currentSlot, int v)
+    {
+        Debug.Log("Local player requested stack splitting. checking local legitimacy and sending to server");
+
     }
 
 }

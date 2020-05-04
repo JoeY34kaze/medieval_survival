@@ -10,11 +10,18 @@ public class NetworkPlayerAnimationLogic : NetworkPlayerAnimationBehavior
     private Animator anim;
 
 
+
+
     //private bool needNetworkAnimUpdate = false;
     private Quaternion rotation_remote;
-    public Transform chest;
+    public Transform lower_back;
     public Transform spine;
+    public Transform spine1;
+    public Transform chest;
     public Transform neck;
+    public Transform head;
+
+    public Transform hips;
     
 
     public Transform _camera_framework;
@@ -26,6 +33,12 @@ public class NetworkPlayerAnimationLogic : NetworkPlayerAnimationBehavior
     private Vector3 IK_swing_target;
 
     public bool hookChestRotation=true;
+
+    public float crouched_walk_right_y;
+    public float crouched_walk_right_z;
+    public float crouched_walk_left_y;
+    public float crouched_walk_left_x;
+
     // ---------------------------------FUNCTIONS-------------------------------------
     void Awake()
     {
@@ -149,18 +162,91 @@ public class NetworkPlayerAnimationLogic : NetworkPlayerAnimationBehavior
          Quaternion BaseRotation = Quaternion.Euler(q.x, q.eulerAngles.y, q.eulerAngles.z);   
 
         //Quaternion BaseRotation = Quaternion.Euler(q.eulerAngles.x, q.eulerAngles.y, q.eulerAngles.z);
-    //    Debug.Log("base "+BaseRotation.eulerAngles);
-    //    Debug.Log("q " + q.eulerAngles);
+        //Debug.Log("base "+BaseRotation.eulerAngles);
+       // Debug.Log("q " + q.eulerAngles);
         float vertical_angle = Quaternion.Angle(q, BaseRotation);
         if (q.eulerAngles.x > 180) vertical_angle *= -1;
-    //    Debug.Log("x axis: "+vertical_angle);
+        //Debug.Log("x axis: "+vertical_angle);
+        vertical_angle = vertical_angle / 6;
+        neck.Rotate(0, vertical_angle, 0);
         chest.Rotate(0,vertical_angle,0);
+        spine.Rotate(0, vertical_angle, 0);
+        spine1.Rotate(0, vertical_angle, 0);
+        lower_back.Rotate(0, vertical_angle, 0);
+        head.Rotate(0, vertical_angle, 0);
+
+
+        //popravt rotacije za hojo?
+        float walk_vertical = anim.GetFloat("walking_vertical");
+        float walk_horizontal = anim.GetFloat("walking_horizontal");
+
+        float horizontal_angle = 45f;
+
+        if (walk_vertical > 0f && walk_horizontal > 0 || walk_vertical < 0f && walk_horizontal < 0)
+        {
+            // Debug.Log("walking diagonally forward right");
+            if(anim.GetBool("crouched"))hips.Rotate(-horizontal_angle, 0, 0);
+            else hips.Rotate(-horizontal_angle, 0, 0);
+
+            horizontal_angle = horizontal_angle / 5;
+            chest.Rotate(horizontal_angle, 0, 0);
+            spine.Rotate(horizontal_angle, 0, 0);
+            spine1.Rotate(horizontal_angle, 0, 0);
+            lower_back.Rotate(horizontal_angle, 0, 0);
+
+
+        }
+        else if (walk_vertical > 0f && walk_horizontal < 0 || walk_vertical < 0f && walk_horizontal > 0)
+        {
+            if (anim.GetBool("crouched")) hips.Rotate(horizontal_angle, 0, 0);
+            else hips.Rotate(horizontal_angle, 0, 0);
+            horizontal_angle = -horizontal_angle / 5;
+            chest.Rotate(horizontal_angle, 0, 0);
+            spine.Rotate(horizontal_angle, 0, 0);
+            spine1.Rotate(horizontal_angle, 0, 0);
+            lower_back.Rotate(horizontal_angle, 0, 0);
+        }
+        else if (walk_vertical == 0f)
+        {
+            horizontal_angle = 90f;
+            if (walk_horizontal > 0f)
+            {
+
+                // Debug.Log("walking right");
+                if (anim.GetBool("crouched")) {
+
+                    hips.Rotate(-horizontal_angle, this.crouched_walk_right_y, this.crouched_walk_right_z);
+                    
+                
+                }
+                else hips.Rotate(-horizontal_angle, 0, 0);
+
+                horizontal_angle = horizontal_angle / 5;
+                chest.Rotate(horizontal_angle, 0, 0);
+                spine.Rotate(horizontal_angle, 0, 0);
+                spine1.Rotate(horizontal_angle, 0, 0);
+                lower_back.Rotate(horizontal_angle, 0, 0);
+            }
+            else if (walk_horizontal < 0f)
+            {
+
+                if (anim.GetBool("crouched")) hips.Rotate(horizontal_angle, this.crouched_walk_left_y, this.crouched_walk_left_x);
+                else hips.Rotate(horizontal_angle, 0, 0);
+
+                horizontal_angle = -horizontal_angle / 5;
+                chest.Rotate(horizontal_angle, 0, 0);
+                spine.Rotate(horizontal_angle, 0, 0);
+                spine1.Rotate(horizontal_angle, 0, 0);
+                lower_back.Rotate(horizontal_angle, 0, 0);
+            }
+        }
+      //  Debug.Log(hips.localRotation.eulerAngles);
     }
 
     private void Update_Crouched_State_Owner() {
         bool current_status = anim.GetBool("crouched");
         anim.SetBool("crouched", !current_status);
-
+        //treba je tud upddejtat weight layerja mogoce?
         networkObject.SendRpc(RPC_NETWORK_MOVEMENT_ANIMATION_CROUCHED_UPDATE, Receivers.OthersProximity, !current_status);
     }
 
