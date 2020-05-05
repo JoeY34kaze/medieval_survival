@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class backpack_local_panel_handler : MonoBehaviour
 {
@@ -36,6 +37,13 @@ public class backpack_local_panel_handler : MonoBehaviour
             g.transform.localScale = new Vector3(1, 1, 1);
             this.slots[i] = g.GetComponent<InventorySlotBackpack>();
             g.name = "InventorySlotBackpack (" + i + ")";
+
+            Button b = g.GetComponent<Button>();
+            InventorySlotBackpack bp = g.GetComponent<InventorySlotBackpack>();
+            //nastavt onClick.
+            b.onClick.AddListener(() => { bp.OnClicked(); });
+            bp.index = i;
+
         }
        
     }

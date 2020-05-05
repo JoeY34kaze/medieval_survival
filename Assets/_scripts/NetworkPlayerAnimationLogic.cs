@@ -39,6 +39,11 @@ public class NetworkPlayerAnimationLogic : NetworkPlayerAnimationBehavior
     public float crouched_walk_left_y;
     public float crouched_walk_left_x;
 
+    private float current_horizontal_angle;
+    private float horizontal_angle_limit = 0f;
+
+    private int k = 0;
+
     // ---------------------------------FUNCTIONS-------------------------------------
     void Awake()
     {
@@ -168,79 +173,92 @@ public class NetworkPlayerAnimationLogic : NetworkPlayerAnimationBehavior
         if (q.eulerAngles.x > 180) vertical_angle *= -1;
         //Debug.Log("x axis: "+vertical_angle);
         vertical_angle = vertical_angle / 6;
-        neck.Rotate(0, vertical_angle, 0);
-        chest.Rotate(0,vertical_angle,0);
-        spine.Rotate(0, vertical_angle, 0);
-        spine1.Rotate(0, vertical_angle, 0);
-        lower_back.Rotate(0, vertical_angle, 0);
-        head.Rotate(0, vertical_angle, 0);
+        rotate_bone_transform(neck,0, vertical_angle, 0);
+        rotate_bone_transform(chest,0,vertical_angle,0);
+        rotate_bone_transform(spine,0, vertical_angle, 0);
+        rotate_bone_transform(spine1,0, vertical_angle, 0);
+        rotate_bone_transform(lower_back,0, vertical_angle, 0);
+        rotate_bone_transform(head,0, vertical_angle, 0);
+
+
 
 
         //popravt rotacije za hojo?
         float walk_vertical = anim.GetFloat("walking_vertical");
         float walk_horizontal = anim.GetFloat("walking_horizontal");
+        // if (this.horizontal_angle_limit < 0)
 
-        float horizontal_angle = 45f;
+      //  float min = this.current_horizontal_angle;
+      //  float max = this.horizontal_angle_limit;
 
-        if (walk_vertical > 0f && walk_horizontal > 0 || walk_vertical < 0f && walk_horizontal < 0)
+
+       // if (this.current_horizontal_angle > this.horizontal_angle_limit) { min = horizontal_angle_limit; max = current_horizontal_angle; }
+
+        if(this.current_horizontal_angle<this.horizontal_angle_limit)
+            this.current_horizontal_angle = Mathf.LerpAngle(this.current_horizontal_angle, this.horizontal_angle_limit, 5*Time.deltaTime);
+        else
+            this.current_horizontal_angle = Mathf.LerpAngle(this.horizontal_angle_limit, this.current_horizontal_angle, 1-5*Time.deltaTime);
+
+
+        //if(k++%10==0) Debug.Log(" max: " + max + " min: " + min+" current: " +this.current_horizontal_angle);
+        //  else
+        //     this.current_horizontal_angle = Mathf.Lerp(this.current_horizontal_angle, this.horizontal_angle_limit, Time.deltaTime);
+
+
+
+
+        if (walk_vertical > 0f && walk_horizontal > 0 || walk_vertical < 0f && walk_horizontal < 0)//naprej desno ali nazaj levo
         {
-            // Debug.Log("walking diagonally forward right");
-            if(anim.GetBool("crouched"))hips.Rotate(-horizontal_angle, 0, 0);
-            else hips.Rotate(-horizontal_angle, 0, 0);
-
-            horizontal_angle = horizontal_angle / 5;
-            chest.Rotate(horizontal_angle, 0, 0);
-            spine.Rotate(horizontal_angle, 0, 0);
-            spine1.Rotate(horizontal_angle, 0, 0);
-            lower_back.Rotate(horizontal_angle, 0, 0);
-
-
+            this.horizontal_angle_limit = -45f;
         }
-        else if (walk_vertical > 0f && walk_horizontal < 0 || walk_vertical < 0f && walk_horizontal > 0)
+        else if (walk_vertical > 0f && walk_horizontal < 0 || walk_vertical < 0f && walk_horizontal > 0)//naprej levo ali nazaj desno
         {
-            if (anim.GetBool("crouched")) hips.Rotate(horizontal_angle, 0, 0);
-            else hips.Rotate(horizontal_angle, 0, 0);
-            horizontal_angle = -horizontal_angle / 5;
-            chest.Rotate(horizontal_angle, 0, 0);
-            spine.Rotate(horizontal_angle, 0, 0);
-            spine1.Rotate(horizontal_angle, 0, 0);
-            lower_back.Rotate(horizontal_angle, 0, 0);
+            this.horizontal_angle_limit = 45f;
         }
         else if (walk_vertical == 0f)
         {
-            horizontal_angle = 90f;
-            if (walk_horizontal > 0f)
+            if (walk_horizontal > 0f)//desno
             {
-
-                // Debug.Log("walking right");
-                if (anim.GetBool("crouched")) {
-
-                    hips.Rotate(-horizontal_angle, this.crouched_walk_right_y, this.crouched_walk_right_z);
-                    
-                
-                }
-                else hips.Rotate(-horizontal_angle, 0, 0);
-
-                horizontal_angle = horizontal_angle / 5;
-                chest.Rotate(horizontal_angle, 0, 0);
-                spine.Rotate(horizontal_angle, 0, 0);
-                spine1.Rotate(horizontal_angle, 0, 0);
-                lower_back.Rotate(horizontal_angle, 0, 0);
+                this.horizontal_angle_limit = -90f;
             }
-            else if (walk_horizontal < 0f)
+            else if (walk_horizontal < 0f)//levo
             {
+                this.horizontal_angle_limit = 90f;
 
-                if (anim.GetBool("crouched")) hips.Rotate(horizontal_angle, this.crouched_walk_left_y, this.crouched_walk_left_x);
-                else hips.Rotate(horizontal_angle, 0, 0);
-
-                horizontal_angle = -horizontal_angle / 5;
-                chest.Rotate(horizontal_angle, 0, 0);
-                spine.Rotate(horizontal_angle, 0, 0);
-                spine1.Rotate(horizontal_angle, 0, 0);
-                lower_back.Rotate(horizontal_angle, 0, 0);
+            }
+            else {
+                this.horizontal_angle_limit = 0f;
             }
         }
-      //  Debug.Log(hips.localRotation.eulerAngles);
+        else {
+            this.horizontal_angle_limit = 0f;
+        }
+
+        rotate_bone_transform(hips, this.current_horizontal_angle, 0, 0);
+
+        //to the opposite side
+        if (combat_handler.Combat_mode == 1)
+        {
+
+            rotate_bone_transform(head, -this.current_horizontal_angle / 6, 0, 0);
+            rotate_bone_transform(neck, -this.current_horizontal_angle / 6, 0, 0);
+            rotate_bone_transform(spine1, -this.current_horizontal_angle / 6, 0, 0);
+            rotate_bone_transform(spine, -this.current_horizontal_angle / 6, 0, 0);
+            rotate_bone_transform(chest, -this.current_horizontal_angle / 6, 0, 0);
+            rotate_bone_transform(lower_back, -this.current_horizontal_angle / 6, 0, 0);
+        }
+
+
+    }
+
+    private void rotate_bone_transform(Transform bone, float x_angle, float y_angle, float z_angle)
+    {
+        //rotate hip to one side
+
+                 
+        bone.Rotate(-transform.up, x_angle, Space.World);
+
+        bone.Rotate(transform.right, y_angle, Space.World);
     }
 
     private void Update_Crouched_State_Owner() {

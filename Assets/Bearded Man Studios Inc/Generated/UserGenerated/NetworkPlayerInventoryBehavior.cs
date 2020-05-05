@@ -4,8 +4,8 @@ using UnityEngine;
 
 namespace BeardedManStudios.Forge.Networking.Generated
 {
-	[GeneratedRPC("{\"types\":[[\"byte[]\", \"byte[]\"][\"byte[]\"][][\"byte[]\", \"Vector3\", \"Vector3\"][\"int\", \"Vector3\", \"Vector3\"][\"string\", \"int\", \"Vector3\", \"Vector3\"][\"int\", \"string\", \"int\"][\"int\", \"string\", \"int\"][\"int\", \"int\"][][\"int\", \"int\"][\"int\", \"int\"][\"int\", \"int\"][\"int\", \"int\", \"int\"][\"string\", \"int\"][\"int\", \"int\"][][\"int\"]]")]
-	[GeneratedRPCVariableNames("{\"types\":[[\"personal_predmeti\", \"hotbar_predmeti\"][\"loadout_predmeti\"][][\"predmet\", \"pos\", \"dir\"][\"inventorySlotIndex\", \"camera_vector\", \"camera_forward\"][\"item_type\", \"index\", \"camera_vector\", \"camera_forward\"][\"index\", \"type\", \"index_inv\"][\"inv_index\", \"type\", \"loadout_index\"][\"a\", \"b\"][][\"a\", \"b\"][\"c\", \"d\"][\"e\", \"f\"][\"item_id\", \"quantity\", \"skin_id\"][\"item_ids\", \"remaining_crating_time_oif_first_item\"][\"index_itema\", \"index_sibling\"][][\"index\"]]")]
+	[GeneratedRPC("{\"types\":[[\"byte[]\", \"byte[]\"][\"byte[]\"][][\"byte[]\", \"Vector3\", \"Vector3\"][\"int\", \"Vector3\", \"Vector3\"][\"string\", \"int\", \"Vector3\", \"Vector3\"][\"int\", \"string\", \"int\"][\"int\", \"string\", \"int\"][\"int\", \"int\"][][\"int\", \"int\"][\"int\", \"int\"][\"int\", \"int\"][\"int\", \"int\", \"int\"][\"string\", \"int\"][\"int\", \"int\"][][\"int\"][\"int\", \"int\"][\"int\", \"int\"]]")]
+	[GeneratedRPCVariableNames("{\"types\":[[\"personal_predmeti\", \"hotbar_predmeti\"][\"loadout_predmeti\"][][\"predmet\", \"pos\", \"dir\"][\"inventorySlotIndex\", \"camera_vector\", \"camera_forward\"][\"item_type\", \"index\", \"camera_vector\", \"camera_forward\"][\"index\", \"type\", \"index_inv\"][\"inv_index\", \"type\", \"loadout_index\"][\"a\", \"b\"][][\"a\", \"b\"][\"c\", \"d\"][\"e\", \"f\"][\"item_id\", \"quantity\", \"skin_id\"][\"item_ids\", \"remaining_crating_time_oif_first_item\"][\"index_itema\", \"index_sibling\"][][\"index\"][\"index\", \"amount\"][\"index\", \"quant\"]]")]
 	public abstract partial class NetworkPlayerInventoryBehavior : NetworkBehavior
 	{
 		public const byte RPC_SEND_PERSONAL_INVENTORY_UPDATE = 0 + 5;
@@ -26,6 +26,8 @@ namespace BeardedManStudios.Forge.Networking.Generated
 		public const byte RPC_ITEM_CRAFTING_CANCEL_REQUEST = 15 + 5;
 		public const byte RPC_CRAFTING_QUEUE_UPDATE_REQUEST = 16 + 5;
 		public const byte RPC_DROP_ITEM_FROM_BAR = 17 + 5;
+		public const byte RPC_SPLIT_REQUEST_PERSONAL_INVENTORY = 18 + 5;
+		public const byte RPC_SPLIT_REQUEST_BAR_INVENTORY = 19 + 5;
 		
 		public NetworkPlayerInventoryNetworkObject networkObject = null;
 
@@ -57,6 +59,8 @@ namespace BeardedManStudios.Forge.Networking.Generated
 			networkObject.RegisterRpc("ItemCraftingCancelRequest", ItemCraftingCancelRequest, typeof(int), typeof(int));
 			networkObject.RegisterRpc("CraftingQueueUpdateRequest", CraftingQueueUpdateRequest);
 			networkObject.RegisterRpc("DropItemFromBar", DropItemFromBar, typeof(int));
+			networkObject.RegisterRpc("SplitRequestPersonalInventory", SplitRequestPersonalInventory, typeof(int), typeof(int));
+			networkObject.RegisterRpc("SplitRequestBarInventory", SplitRequestBarInventory, typeof(int), typeof(int));
 
 			networkObject.onDestroy += DestroyGameObject;
 
@@ -208,6 +212,14 @@ namespace BeardedManStudios.Forge.Networking.Generated
 		/// Arguments:
 		/// </summary>
 		public abstract void DropItemFromBar(RpcArgs args);
+		/// <summary>
+		/// Arguments:
+		/// </summary>
+		public abstract void SplitRequestPersonalInventory(RpcArgs args);
+		/// <summary>
+		/// Arguments:
+		/// </summary>
+		public abstract void SplitRequestBarInventory(RpcArgs args);
 
 		// DO NOT TOUCH, THIS GETS GENERATED PLEASE EXTEND THIS CLASS IF YOU WISH TO HAVE CUSTOM CODE ADDITIONS
 	}

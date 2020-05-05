@@ -2633,10 +2633,173 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         //throw new NotImplementedException();
     }
 
-    internal void localPlayerSplitStackRequest(InventorySlot currentSlot, int v)
+    internal void localPlayerSplitStackRequest(InventorySlot currentSlot, int amount)
     {
         Debug.Log("Local player requested stack splitting. checking local legitimacy and sending to server");
+        if (networkObject.IsOwner)
+        {
+            if (currentSlot is InventorySlotPersonal)//ce je inventroySlot in ni hotbarPanel
+                networkObject.SendRpc(RPC_SPLIT_REQUEST_PERSONAL_INVENTORY, Receivers.Server, currentSlot.index, amount);
+            else if (currentSlot is InventorySlotBar)
+                networkObject.SendRpc(RPC_SPLIT_REQUEST_BAR_INVENTORY, Receivers.Server, currentSlot.index, amount);
+            else if (currentSlot is InventorySlotBackpack)
+                this.backpack_inventory.localPlayerSplitRequest(currentSlot, amount);
 
+        }
     }
 
+    public override void SplitRequestPersonalInventory(RpcArgs args)
+    {
+        if (networkObject.IsServer && args.Info.SendingPlayer.NetworkId == networkObject.Owner.NetworkId) {
+            ServerSplitStackPersonalInventory(args.GetNext<int>(), args.GetNext<int>());
+        
+        }
+    }
+
+    /// <summary>
+    /// splits the stack on index i by amount of amount
+    /// </summary>
+    /// <param name="v1"></param>
+    /// <param name="v2"></param>
+    private void ServerSplitStackPersonalInventory(int i, int amount)
+    {
+        if (!hasBarSpace() && !hasBackpackSpace() && !hasPersonalSpace()) { 
+            
+            return;
+        }
+
+        if (this.predmeti_personal[i] != null) {
+            if (this.predmeti_personal[i].quantity >= amount) {
+
+                Predmet original = this.predmeti_personal[i];
+                Predmet new_stack = new Predmet(original);
+                original.quantity -= amount;
+                if (original.quantity == 0) original = null;
+                new_stack.quantity = amount;
+
+                //i se prepise ker ga ne rabmo
+                ///najprej personal inventory
+                bool placed = false;
+                for (i = 0; i < this.predmeti_personal.Length; i++) {
+                    if (this.predmeti_personal[i] == null)
+                    {
+                        predmeti_personal[i] = new_stack;
+                        placed = true;
+                        break;
+                    }
+                }
+
+                //nato backpack ce ga imamo
+                if (!placed)
+                    if (this.backpack != null)
+                        for (i = 0; i < this.backpack_inventory.nci.predmeti.Length; i++) {
+                            if (this.backpack_inventory.nci.predmeti[i] == null)
+                            {
+                                this.backpack_inventory.nci.predmeti[i] = new_stack;
+                                placed = true;
+                                break;
+                            }
+                        }
+                //nato se hotbar se ima plac
+                if (!placed)
+                    for (i = 0; i < this.predmeti_hotbar.Length; i++)
+                        if (this.predmeti_hotbar[i] == null)
+                        {
+                            this.predmeti_hotbar[i] = new_stack;
+                            placed = true;
+                            break;
+                        }
+
+
+                if (!placed)//revert kind of
+                {
+                    Debug.LogError("newly created stack was not placed. This is not possible because we checked for space beforehand.");
+                    if (original != null)
+                        original.addQuantity(new_stack);
+                    else
+                        this.predmeti_personal[i] = new_stack;
+                    new_stack = null;
+                }
+
+                sendNetworkUpdate(true,false);
+            }
+        }
+    }
+
+    public override void SplitRequestBarInventory(RpcArgs args)
+    {
+        if (networkObject.IsServer && args.Info.SendingPlayer.NetworkId == networkObject.Owner.NetworkId)
+        {
+            int i = args.GetNext<int>();
+            int amount = args.GetNext<int>();
+            if (!hasBarSpace() && !hasBackpackSpace() && !hasPersonalSpace())
+            {
+
+                return;
+            }
+
+            if (this.predmeti_hotbar[i] != null)
+            {
+                if (this.predmeti_hotbar[i].quantity >= amount)
+                {
+
+                    Predmet original = this.predmeti_hotbar[i];
+                    Predmet new_stack = new Predmet(original);
+                    original.quantity -= amount;
+
+                    if (original.quantity == 0) original = null;
+
+                    new_stack.quantity = amount;
+
+                    //i se prepise ker ga ne rabmo
+                    bool placed = false;
+                    for (i = 0; i < this.predmeti_hotbar.Length; i++)
+                        if (this.predmeti_hotbar[i] == null)
+                        {
+                            this.predmeti_hotbar[i] = new_stack;
+                            placed = true;
+                            break;
+                        }
+
+                    /// personal inventory
+                    if (!placed)
+                        for (i = 0; i < this.predmeti_personal.Length; i++)
+                        {
+                            if (this.predmeti_personal[i] == null)
+                            {
+                                predmeti_personal[i] = new_stack;
+                                placed = true;
+                                break;
+                            }
+                        }
+
+                    //nato backpack ce ga imamo
+                    if (!placed)
+                        if (this.backpack != null)
+                            for (i = 0; i < this.backpack_inventory.nci.predmeti.Length; i++)
+                            {
+                                if (this.backpack_inventory.nci.predmeti[i] == null)
+                                {
+                                    this.backpack_inventory.nci.predmeti[i] = new_stack;
+                                    placed = true;
+                                    break;
+                                }
+                            }
+
+
+                    if (!placed)//revert kind of
+                    {
+                        Debug.LogError("newly created stack was not placed. This is not possible because we checked for space beforehand.");
+                        if (original != null)
+                            original.addQuantity(new_stack);
+                        else
+                            this.predmeti_hotbar[i] = new_stack;
+                        new_stack = null;
+                    }
+
+                    sendNetworkUpdate(true, false);
+                }
+            }
+        }
+    }
 }

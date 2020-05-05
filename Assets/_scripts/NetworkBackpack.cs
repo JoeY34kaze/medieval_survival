@@ -469,4 +469,51 @@ public class NetworkBackpack : NetworkBackpackBehavior
             transform.position = args.GetNext<Vector3>();
         }
     }
+
+    public override void SplitRequest(RpcArgs args)
+    {
+        if (networkObject.IsServer) {
+            int index = args.GetNext<int>();
+            int amount = args.GetNext<int>();
+
+            if (hasSpace()) {
+                if (this.nci.predmeti[index] != null)
+                {
+                    Predmet original = this.nci.predmeti[index];
+                    if (original.quantity >= amount) {
+                        Predmet new_stack = new Predmet(original);
+                        original.quantity -= amount;
+                        if (original.quantity == 0) original = null;
+                        new_stack.quantity = amount;
+                        bool success = false;
+                        for (int i = 0; i < this.nci.predmeti.Length; i++)
+                            if (this.nci.predmeti[i] == null)
+                            {
+                                this.nci.predmeti[i] = new_stack;
+                                success = true;
+                                break;
+                            }
+                        if (!success)//revert kind of
+                        {
+                            Debug.Log("newly created stack was not placed. This means someone tampered with the state while we were splitting.");
+                            if (original != null)
+                                original.addQuantity(new_stack);
+                            else
+                                this.nci.predmeti[index] = new_stack;
+                            new_stack = null;
+                        }
+                        else {
+                            sendBackpackItemsUpdate();
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    internal void localPlayerSplitRequest(InventorySlot currentSlot, int amount)
+    {
+
+        networkObject.SendRpc(RPC_SPLIT_REQUEST, Receivers.Server, currentSlot.index, amount);
+    }
 }

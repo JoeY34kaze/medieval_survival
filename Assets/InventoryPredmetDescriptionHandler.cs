@@ -11,8 +11,14 @@ public class InventoryPredmetDescriptionHandler : MonoBehaviour
     public Slider amount_slider;
     public InputField inputfield;
     public Text maxSliderLabel;
+    public Text minSliderLabel;
+
+    public GameObject minLabel;
+    public GameObject maxLabel;
+
     public Text ItemName;
     public Text ItemDescription;
+    public Button splitButton;
 
     private Predmet temporary_selected_predmet;
 
@@ -22,21 +28,35 @@ public class InventoryPredmetDescriptionHandler : MonoBehaviour
         this.currentSlot = slot;
         gameObject.SetActive(true);
         this.temporary_selected_predmet = p;
+        Item it = p.getItem();
+        this.predmet_image.sprite = it.icon;
+        this.ItemName.text = it.Display_name;
+        this.ItemDescription.text = it.description;
+
         if (p.quantity > 1)
         {
             this.amount_slider.gameObject.SetActive(true);
+            this.maxSliderLabel.gameObject.SetActive(true);
+            this.inputfield.gameObject.SetActive(true);
+            this.splitButton.gameObject.SetActive(true);
+            this.minSliderLabel.gameObject.SetActive(true);
+            this.minLabel.SetActive(true);
+            this.maxLabel.SetActive(true);
             amount_slider.minValue = 1;
             amount_slider.maxValue = p.quantity;
             amount_slider.value = Mathf.Round(amount_slider.minValue + amount_slider.maxValue / 2);
             this.inputfield.text = amount_slider.value + "";
-            Item it = p.getItem();
-            this.predmet_image.sprite =it.icon;
             this.maxSliderLabel.text = amount_slider.maxValue + "";
-            this.ItemName.text = it.Display_name;
-            this.ItemDescription.text = it.description;
         }
         else {
             this.amount_slider.gameObject.SetActive(false);
+            //4
+            this.maxSliderLabel.gameObject.SetActive(false);
+            this.inputfield.gameObject.SetActive(false);
+            this.splitButton.gameObject.SetActive(false);
+            this.minSliderLabel.gameObject.SetActive(false);
+            this.minLabel.SetActive(false);
+            this.maxLabel.SetActive(false);
         }
     }
 

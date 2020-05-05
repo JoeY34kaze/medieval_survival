@@ -13,8 +13,7 @@ using UnityEngine;
     //public string creator;
     public float current_durabilty;
     public string creator = "Server";
-    public int tier = 0;
-    private Predmet pp;
+    public int tier = 0;//mislm da je samo za pšosiljanje null vrednosti. dejanski tier je u itemu
 
 
     public Predmet(Predmet ppp)

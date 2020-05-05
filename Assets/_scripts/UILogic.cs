@@ -628,14 +628,14 @@ public class UILogic : MonoBehaviour
     //predmet description
     public void OnInventoryPredmetSelected(int index_slota, InventorySlot slot) {
 
-        if (slot is InventorySlotPersonal)
+        if (slot is InventorySlot)
         {
             Debug.Log(slot.GetPredmet());
 
             this.predmetDescriptionPanel.init(slot.GetPredmet(), slot);
         }
         else {
-            Debug.LogError("Samo za personal slot zdle delamo.");
+            Debug.LogError("I do not recognize this slot for info.");
         }
     
     }

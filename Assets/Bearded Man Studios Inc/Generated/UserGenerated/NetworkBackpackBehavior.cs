@@ -4,8 +4,8 @@ using UnityEngine;
 
 namespace BeardedManStudios.Forge.Networking.Generated
 {
-	[GeneratedRPC("{\"types\":[[\"byte\"][\"uint\"][\"int\", \"Vector3\", \"Vector3\"][\"int\", \"int\"][\"int\", \"int\"][\"string\", \"int\", \"int\"][][][\"byte[]\"][\"int\"][\"int\", \"int\"][\"int\", \"int\"][\"Vector3\"]]")]
-	[GeneratedRPCVariableNames("{\"types\":[[\"tip\"][\"newOwner\"][\"index\", \"pos\", \"dir\"][\"i\", \"j\"][\"backpack_index\", \"inventory_index\"][\"loadout_type\", \"loadout_index\", \"inventory_index\"][][][\"data\"][\"index\"][\"backpack_index\", \"bar_index\"][\"backInd\", \"BarInd\"][\"\"]]")]
+	[GeneratedRPC("{\"types\":[[\"byte\"][\"uint\"][\"int\", \"Vector3\", \"Vector3\"][\"int\", \"int\"][\"int\", \"int\"][\"string\", \"int\", \"int\"][][][\"byte[]\"][\"int\"][\"int\", \"int\"][\"int\", \"int\"][\"Vector3\"][\"int\", \"int\"]]")]
+	[GeneratedRPCVariableNames("{\"types\":[[\"tip\"][\"newOwner\"][\"index\", \"pos\", \"dir\"][\"i\", \"j\"][\"backpack_index\", \"inventory_index\"][\"loadout_type\", \"loadout_index\", \"inventory_index\"][][][\"data\"][\"index\"][\"backpack_index\", \"bar_index\"][\"backInd\", \"BarInd\"][\"\"][\"index\", \"amount\"]]")]
 	public abstract partial class NetworkBackpackBehavior : NetworkBehavior
 	{
 		public const byte RPC_BACKPACK_INTERACTION_REQUEST = 0 + 5;
@@ -21,6 +21,7 @@ namespace BeardedManStudios.Forge.Networking.Generated
 		public const byte RPC_BACKPACK_TO_BAR_REQUEST = 10 + 5;
 		public const byte RPC_BAR_TO_BACKPACK_REQUEST = 11 + 5;
 		public const byte RPC_UPDATE_POSITION = 12 + 5;
+		public const byte RPC_SPLIT_REQUEST = 13 + 5;
 		
 		public NetworkBackpackNetworkObject networkObject = null;
 
@@ -47,6 +48,7 @@ namespace BeardedManStudios.Forge.Networking.Generated
 			networkObject.RegisterRpc("BackpackToBarRequest", BackpackToBarRequest, typeof(int), typeof(int));
 			networkObject.RegisterRpc("BarToBackpackRequest", BarToBackpackRequest, typeof(int), typeof(int));
 			networkObject.RegisterRpc("update_position", update_position, typeof(Vector3));
+			networkObject.RegisterRpc("SplitRequest", SplitRequest, typeof(int), typeof(int));
 
 			networkObject.onDestroy += DestroyGameObject;
 
@@ -187,6 +189,10 @@ namespace BeardedManStudios.Forge.Networking.Generated
 		/// Arguments:
 		/// </summary>
 		public abstract void update_position(RpcArgs args);
+		/// <summary>
+		/// Arguments:
+		/// </summary>
+		public abstract void SplitRequest(RpcArgs args);
 
 		// DO NOT TOUCH, THIS GETS GENERATED PLEASE EXTEND THIS CLASS IF YOU WISH TO HAVE CUSTOM CODE ADDITIONS
 	}
