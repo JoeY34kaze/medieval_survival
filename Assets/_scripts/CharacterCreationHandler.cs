@@ -705,7 +705,7 @@ public class CharacterCreationHandler : MonoBehaviour
             {
                 if (l == null) break;
                 if (l == "") break;
-                string[] dn = l.Split(',');//ker je csv
+                string[] dn = l.Split('-');
                 float val = float.Parse(dn[1]);
                 SetSliderValue(dn[0], val);
             }
@@ -753,9 +753,9 @@ public class CharacterCreationHandler : MonoBehaviour
         Color eyeColor = avatar.ActiveColors[2].Color;
 
 
-        s = s + skinColor.r + "," + skinColor.g + "," + skinColor.b + "," + skinColor.a + ","
-            + hairColor.r + "," + hairColor.g + "," + hairColor.b + "," + hairColor.a + ","
-            + eyeColor.r+ "," + eyeColor.g + "," + eyeColor.b + "," + eyeColor.a + "|";
+        s = s + skinColor.r + "-" + skinColor.g + "-" + skinColor.b + "-" + skinColor.a + "-"
+            + hairColor.r + "-" + hairColor.g + "-" + hairColor.b + "-" + hairColor.a + "-"
+            + eyeColor.r+ "-" + eyeColor.g + "-" + eyeColor.b + "-" + eyeColor.a + "|";
         
         //hair variant
         s = s + this.hairIndex + "|";
@@ -763,7 +763,7 @@ public class CharacterCreationHandler : MonoBehaviour
         foreach(KeyValuePair<string, DnaSetter> entry in dna)
         {
             // do something with entry.Value or entry.Key
-            s=s+entry.Key+","+ dna[entry.Key].Value + System.Environment.NewLine;
+            s=s+entry.Key+"-"+ dna[entry.Key].Value + System.Environment.NewLine;
         }
         WriteString(s);
 
@@ -914,7 +914,7 @@ public class CharacterCreationHandler : MonoBehaviour
 
         string color_data = data[1];
 
-        string[] color_parameters = color_data.Split(',');//[ skin_index  eye_index,hair_index,r,g,b,a]
+        string[] color_parameters = color_data.Split('-');//[ skin_index  eye_index,hair_index,r,g,b,a]
 
 
         ///skin data

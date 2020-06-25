@@ -608,7 +608,7 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
 
     public override void BarSlotSelectionRequest(RpcArgs args)
     {
-        if (networkObject.IsServer && args.Info.SendingPlayer.NetworkId == networkObject.Owner.NetworkId) {
+            if (networkObject.IsServer && args.Info.SendingPlayer.NetworkId == networkObject.Owner.NetworkId) {
             if (isRequestValid()) {
                 int index = args.GetNext<int>();
                 
@@ -620,6 +620,7 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
                     if (getBarItemTypeFromIndex(index) == Item.Type.shield && this.selected_index_shield == -1)
                     {
                         this.selected_index_shield = index;
+                        if (combat_handler.currently_equipped_weapon==null) selected_index = -1;//ce imamo v roki karkoli kar ni weapon mormo dat stran (tool / building blocks)
                     }
 
                     //ce mamo izbran shield in smo dobil index shielda mormo disablat samo shield
@@ -631,6 +632,7 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
                     else if (this.selected_index_shield != -1 && i.getItem().type == Item.Type.shield)
                     {
                         this.selected_index_shield = index;
+                        if (combat_handler.currently_equipped_weapon == null) selected_index = -1;//ce imamo v roki karkoli kar ni weapon mormo dat stran (tool / building blocks)
                     }//dobil smo ukaz da nj damo weapon stran
                     else if (this.selected_index_shield != -1 && this.selected_index == index)
                     {
@@ -641,9 +643,15 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
                     {
                         this.selected_index = index;
                     }
-                    //ce smo dobil karkoli druzga mormo disablat shield in karkoli smo mel in poslat samo tisto
-                    else if (this.selected_index == index) {
+                    //ce smo dobil karkoli druzga mormo disablat shield in karkoli smo mel in poslat nazaj -1 da deselecta
+                    else if (this.selected_index == index)
+                    {
                         this.selected_index = -1;
+                    }
+                    //ce smo dobil zahtevo za izbor necesa kar ni shield ali weapon moramo disablat shield, sicer se vse zjebe zarad tool-a
+                    else if (getBarItemTypeFromIndex(index) != Item.Type.weapon && getBarItemTypeFromIndex(index) != Item.Type.shield) {
+                        this.selected_index = index;
+                        this.selected_index_shield = -1;
                     }
                     else
                     {
@@ -684,46 +692,42 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
     public override void BarSlotSelectionResponse(RpcArgs args)
     {
         if (args.Info.SendingPlayer.NetworkId == 0) {
-            Predmet p = args.GetNext<byte[]>().ByteArrayToObject<Predmet>();
-            if (p.item_id == 404) p = null;
+            Predmet primary_predmet = args.GetNext<byte[]>().ByteArrayToObject<Predmet>();
+            if (primary_predmet.item_id == 404) primary_predmet = null;
             int index = args.GetNext<int>();
 
-            Predmet predmet2 = args.GetNext<byte[]>().ByteArrayToObject<Predmet>();//za shield rabmo met 2 indexa in tko
+            Predmet shield_predmet = args.GetNext<byte[]>().ByteArrayToObject<Predmet>();//za shield rabmo met 2 indexa in tko
             int index2 = args.GetNext<int>();
-            if (predmet2.item_id == 404) predmet2 = null;
+            if (shield_predmet.item_id == 404) shield_predmet = null;
 
 
 
             //ce je enako stanje kot je zdj in je izbran indeks indeks placeable itema ne nrdimo nic ker to samo pomen da smo postavli en item z stacka k ga imamo. zdi se mal hacky ampak tak je. restructure code ksnej i guess - mogoce bo treba enako nrdit za puscice / javelins ksnej
-            if (p!=null)
-                if(p.getItem()!=null)
-                    if (p.getItem().type == Item.Type.placeable && this.current_placeable_item!=null)
-                        if(p.getItem().id == this.current_placeable_item.id)
+            if (primary_predmet!=null)
+                if(primary_predmet.getItem()!=null)
+                    if (primary_predmet.getItem().type == Item.Type.placeable && this.current_placeable_item!=null)
+                        if(primary_predmet.getItem().id == this.current_placeable_item.id)
                             return;
 
             //pohandlat rabmo sound effecte za izbiranje itema..
-            if (p != null)
-                if (p.getItem() != null)
-                    if (p.getItem().type == Item.Type.weapon)
-                        stats.play_random_sound_effect(stats.sfx_draw_sword);
+            if (primary_predmet != null)
+                if (primary_predmet.getItem() != null)
+                    if (primary_predmet.getItem().type == Item.Type.weapon)
+                        SFXManager.OnWeaponDrawn(transform, primary_predmet.getItem());
+
 
             if (networkObject.IsOwner)
             {
-                setSelectedItems(p, predmet2);
+                setSelectedItems(primary_predmet, shield_predmet);
                 bar_handler.setSelectedSlots(index,index2);
             }
             else {
-                setSelectedItems(p, predmet2);
+                setSelectedItems(primary_predmet, shield_predmet);
             }
 
-            //ZA COMBAT MODE - precej neefektivno ker pri menjavi itema na baru se klice dvakrat rpc...........
-            if (combat_handler.currently_equipped_weapon != null)
-                combat_handler.ChangeCombatMode(combat_handler.currently_equipped_weapon.getItem());
-            else if (combat_handler.currently_equipped_shield != null)
-                combat_handler.ChangeCombatMode(combat_handler.currently_equipped_shield.getItem());
-            else//nimamo nc equipan
-                combat_handler.ChangeCombatMode(null);
-            
+            if (primary_predmet != null) combat_handler.ResetAllParametersRelatedToAttack();//bit of a bugfix - ce zamenjas weapon med attackanjem se parametri zabuggajo
+
+
         }
     }
 
@@ -732,39 +736,38 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
     /// <summary>
     /// na podlagi tega itema i, ga nastela u roke playerju
     /// </summary>
-    /// <param name="i"></param>
-    private void setSelectedItems(Predmet i, Predmet shield) {//item je lahko null
+    /// <param name="p"></param>
+    private void setSelectedItems(Predmet p, Predmet shield) {//item je lahko null
         //if(i!=null)Debug.Log("Trying to place " + i.item.Display_name + " in the hands");
         //else Debug.Log("Trying to clear everything currently in the hands");
 
 
         clearAllPossiblySelected();//ne cleara shielda
         
-
-        if (i != null)
+        if (p != null)
         {
-            if (i.getItem().type == Item.Type.tool)
+            if (p.getItem().type == Item.Type.tool)
             {
-                SetToolSelected(i);
-                //combat_handler.currently_equipped_weapon = null;
+                SetToolSelected(p);
+                combat_handler.currently_equipped_weapon = null;
 
             }
-            else if (i.getItem().type == Item.Type.weapon || i.getItem().type == Item.Type.ranged)
+            else if (p.getItem().type == Item.Type.weapon || p.getItem().type == Item.Type.ranged)
             {
-                combat_handler.currently_equipped_weapon = i;
+                combat_handler.currently_equipped_weapon = p;
 
             }
-            else if (i.getItem().type == Item.Type.placeable)
+            else if (p.getItem().type == Item.Type.placeable)
             {
                 //Debug.Log("lets try to place down " + i.item.Display_name);
-                setPlaceableState(i);
+                setPlaceableState(p);
             }
             else {// Debug.Log("item youre trying to equip cannot be equipped : " + i.item.Display_name);
 
             }
         }
         else {//clearat vse razen shielda ce je slucajn equipan - bom vrgu u combat handler pa nj se tam jebe
-            SetToolSelected(i);
+            SetToolSelected(p);
             combat_handler.currently_equipped_weapon = null;
 
         }
@@ -773,7 +776,12 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
             combat_handler.SetShield(shield);
         else
             combat_handler.SetShield(null);
+
+
         combat_handler.update_equipped_weapons();//weapon in shield
+        combat_handler.RefreshCombatState(p);//podamo parameter p ker hocemo da se combat state spremeni ne samo ce imamo weapon/shield equippan ampak tudi ce imamo tol equippan
+
+
     }
 
     private void clearAllPossiblySelected()
@@ -1021,13 +1029,25 @@ public class NetworkPlayerNeutralStateHandler : NetworkPlayerNeutralStateHandler
     /// klice animation event v layer movement na animaciji za uporabo toolov kot so kramp, sekira, in podobno kar rabi collider
     /// </summary>
     public void OnToolSwingStart() {
-        getCurrentTool().GetComponent<Collider>().enabled = true;
+        if(getCurrentTool()!=null)//lahko zamenja med izvajanjem in postane null
+            getCurrentTool().GetComponent<Collider>().enabled = true;
     }
     /// <summary>
     /// klice animation event v layer movement na animaciji za uporabo toolov kot so kramp, sekira, in podobno kar rabi collider
     /// </summary>
     public void OnToolSwingEnd() {
-        if(getCurrentTool()!=null) getCurrentTool().GetComponent<Collider>().enabled = false;
+        disable_all_tool_colliders();
+    }
+
+    private void disable_all_tool_colliders()
+    {
+        foreach (Transform t in this.toolContainerOnHand)
+        {
+            if (is_tool(t))
+            {
+                t.gameObject.GetComponent<Collider>().enabled = false;
+            }
+        }
     }
 
     #region BUILDING

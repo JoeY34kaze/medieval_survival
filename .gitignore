@@ -24,6 +24,14 @@ Assets/CorcraStudio/
 Assets/_fileToIgnore/
 Assets/UMA/
 Assets/_sound
+Assets/BOXOPHOBIC/
+Assets/PrefabBrush
+Assets/Resources/GeoData/
+Assets/Resources/GeoData.meta
+Build.rar
+Assets/_scenes/Game/LightingData.asset
+Assets/_Terrain
+
 SERVER
 
 #village files

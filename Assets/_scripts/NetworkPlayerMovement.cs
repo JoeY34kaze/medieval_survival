@@ -12,6 +12,7 @@ using static PlayerManager;
 /// </summary>
 public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
 {
+    
     public Transform groundCheckPosition;
     [Tooltip("radius of spherecast.")]
     public float groundDistance = 0.3f;
@@ -83,6 +84,7 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
     #endregion
 
     private CharacterController controller;
+    private NetworkPlayerCombatHandler combatHandler;
 
     protected virtual void Start()
     {
@@ -90,6 +92,7 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
         animator = GetComponent<Animator>();
         stats = GetComponent<NetworkPlayerStats>();
         this.controller = GetComponent<CharacterController>();
+        this.combatHandler = GetComponent<NetworkPlayerCombatHandler>();
 
     }
 
@@ -136,8 +139,8 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
         if (networkObject.IsOwner)
         {
             if(!stats.dead && !UILogic.hasControlOfInput ){ 
-                UpdateMotor();                   // call ThirdPersonMotor methods               
-                UpdateAnimator();                // call ThirdPersonAnimator methods	
+                UpdateMotor();                            
+                UpdateAnimator();               
             }
             networkObject.position = transform.position;
             networkObject.rotation = transform.rotation;
@@ -151,7 +154,8 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
     }
     protected virtual void Rotate_character_horizontally()
     {
-        if (!isCameraRotationAllowed()) return;
+        if (!isCameraRotationAllowed() || Input.GetButton("FreeLook")) return;
+
         var X = Input.GetAxis(rotateCameraXInput);
         float rotation = Input.GetAxis("Mouse X") * Prefs.mouse_sensitivity;
        // rotation *=  (1+(camera_frame.transform.localRotation.x * 1 / 0.7f) * horizontal_angle_offset_multiplier);
@@ -211,11 +215,37 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
     }
     protected virtual void SetCrouchedInput()
     {
+        bool old_crouched = isCrouched;
         if (Input.GetButtonDown("Crouch"))
             isCrouched = true;
         else if (Input.GetButtonUp("Crouch"))
             isCrouched = false;
         if (this.isCrouched) this.speed = this.crouched_speed;
+
+        if (old_crouched != isCrouched)
+            handle_on_crouched_state_changed_movement(isCrouched);
+    }
+
+    private void handle_on_crouched_state_changed_movement(bool retard)
+    {
+        CharacterController cc = GetComponent<CharacterController>();
+        float crouched_height = 0.85f;
+        float standing_height = 1.7f;
+        float diff = standing_height-crouched_height;
+        if (retard)
+        {
+            cc.height = crouched_height;
+            cc.center = new Vector3(cc.center.x, cc.center.y - diff/2, cc.center.z);
+            //this.groundCheckPosition.localPosition = new Vector3(this.groundCheckPosition.localPosition.x,0.55f, this.groundCheckPosition.localPosition.z);
+            //transform.position += new Vector3(0, diff, 0);
+        }
+        else
+        {
+            cc.height = standing_height;
+            cc.center = new Vector3(cc.center.x, cc.center.y + diff/2, cc.center.z);
+            //this.groundCheckPosition.localPosition = new Vector3(this.groundCheckPosition.localPosition.x, 0.02f, this.groundCheckPosition.localPosition.z);
+            transform.position += new Vector3(0, diff/2, 0);
+        }
     }
 
     protected virtual void SetJumpInput()
@@ -223,11 +253,14 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
         if (Input.GetButtonDown("Jump"))
         {
             // conditions to do this action
-            bool jumpConditions = isGrounded && !isJumping && !isCrouched;
+            bool jumpConditions = isGrounded && !isJumping;
             // return if jumpCondigions is false
             if (!jumpConditions) return;
             // trigger jump behaviour
-            this.current_gravity_velocity.y =  this.jump_velocity;
+            if (!isCrouched)
+                this.current_gravity_velocity.y =  this.jump_velocity;
+            else
+                this.current_gravity_velocity.y = this.jump_velocity;
             this.isJumping = true;
 
         }
@@ -282,21 +315,36 @@ public class NetworkPlayerMovement : NetworkPlayerMovementBehavior
     void ControlMovement()
     {
         float angle = Vector3.Angle(this.direction, transform.forward);
-        if (this.isCrouched) this.speed = this.crouched_speed;
+        float expected_speed = this.walk_speed;
+
+
+
+
+        if (this.isCrouched) expected_speed = this.crouched_speed;
         else if (angle > 60f)
         {
-            angle -= 40f;
-            this.speed = this.speed - this.speed * 2 / 3 * (angle / 140f);
+            expected_speed = expected_speed - expected_speed * 0.5f * ( (angle -40f) / 140f);
         }
-        else {
-            if (this.isSprinting)
-                this.speed = this.sprint_speed;
+        else if (this.isSprinting) { 
+                expected_speed = this.sprint_speed;
         }
 
+        if (angle < 60f)//da ne vpliva na speed med hojo nazaj ker je ze dovolj pocasno
+        {
+            //ce je med zamahom je treba zmanjsat speed sicer je retardiran. mogoce tud cist ustavt or somethign like in conan. ceprov i dont like that...
+            if (this.combatHandler.is_in_action_that_merits_movement_speed_slow())
+            {
+                expected_speed = expected_speed * 0.75f;
+            }
+        }
 
 
 
-            controller.Move(this.direction * this.speed * Time.deltaTime);  
+
+
+
+        this.speed = expected_speed;
+        controller.Move(this.direction * this.speed * Time.deltaTime);  
     }
 
     #endregion

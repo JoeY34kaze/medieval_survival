@@ -19,9 +19,6 @@ public class Mapper : MonoBehaviour
     {
         instance = this;
     }
-
-    public GameObject[] pickup_sound_effects;
-
     public Item[] items;
     public PredmetRecepie[] recepies;
     #region ITEMS

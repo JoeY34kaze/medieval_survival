@@ -24,12 +24,10 @@ public class NetworkResource : NetworkResourceBehavior
 
     public enum ResourceType { stone, wood, ore};
     public ResourceType type;
-    public GameObject[] sound_effects_on_hit;
-    public GameObject[] sound_effects_on_depletion;
 
     private void Start()
     {
-        StartCoroutine(setupParentDelayed());
+        StartCoroutine(setupParentDelayed());//lol . lets fix this later. sej verjetno nebo tkole blo objektov sploh ampak bojo bli na terenu.
 
         this.start_position = transform.position;
         this.start_rotation = transform.rotation;
@@ -39,8 +37,8 @@ public class NetworkResource : NetworkResourceBehavior
 
     private IEnumerator setupParentDelayed()
     {
-        yield return new WaitForSeconds(2);
-        transform.SetParent(GameObject.FindGameObjectWithTag("world_manager").transform);
+        yield return new WaitForSeconds(1);
+        transform.SetParent(NetworkWorldManager.Instance.transform);
     }
 
     public Predmet onHitReturnItemWithQuantity(Item tool, string playerName)
@@ -116,22 +114,17 @@ public class NetworkResource : NetworkResourceBehavior
     private void on_resource_hit_effects() {
 
 
-        on_resource_hit_sound();
+        SFXManager.OnResourceHit(transform, this.type);
+        //other effects ..
     }
 
-    private void on_resource_hit_sound() {
-
-        if (this.sound_effects_on_hit.Length > 0) {
-            instantiate_random_gameobject_from_array(this.sound_effects_on_hit);
-        }
-    }
 
     private void on_resource_depleted()
     {
         this.recently_depleted = true;
 
-        if(this.sound_effects_on_depletion.Length>0)
-            instantiate_random_gameobject_from_array(this.sound_effects_on_depletion);
+        SFXManager.OnResourceDepleted(transform, this.type);
+
         switch (this.type) {
             case ResourceType.wood:
                 on_tree_depleted();
@@ -151,8 +144,8 @@ public class NetworkResource : NetworkResourceBehavior
     private void on_tree_depleted()
     {
         if (GetComponent<Rigidbody>() == null) gameObject.AddComponent<Rigidbody>();
-        GetComponent<Rigidbody>().mass = 500;
-        StartCoroutine("disable_resource_delayed", 10);
+        GetComponent<Rigidbody>().mass = 5000;
+        StartCoroutine(disable_resource_delayed(20));
 
     }
 
@@ -177,18 +170,6 @@ public class NetworkResource : NetworkResourceBehavior
         if (GetComponent<Collider>() != null) GetComponent<Collider>().enabled = false;
         if (GetComponent<MeshRenderer>() != null) GetComponent<MeshRenderer>().enabled = false;
         if (GetComponent<Rigidbody>() != null) Destroy(GetComponent<Rigidbody>());
-    }
-
-
-    /// <summary>
-    /// arr je array of prefab sound effects with onInstantiated -> play sound
-    /// </summary>
-    /// <param name="arr"></param>
-    private void instantiate_random_gameobject_from_array(GameObject[] arr) {
-        System.Random r = new System.Random();
-        int rInt = r.Next(0, arr.Length-1);
-        GameObject g = GameObject.Instantiate(arr[rInt], gameObject.transform.position+this.sound_effect_position, gameObject.transform.rotation);
-        g.transform.SetParent(null);
     }
 }
 

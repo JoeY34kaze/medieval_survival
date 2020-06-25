@@ -22,10 +22,6 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
 
     private NetworkPlayerStats stats;
 
-    private NetworkPlayerInventory networkPlayerInventory;
-
-    public GameObject[] combat_sound_effects;
-
     public Transform weapon_slot;
     public Transform shield_slot;
 
@@ -48,6 +44,10 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
         }
     }
 
+    public bool is_in_action_that_merits_movement_speed_slow() {
+        return this.is_readying_attack || this.ready_attack || this.executing_attack || this.Blocking;
+    }
+
     private NetworkPlayerNeutralStateHandler neutralStateHandler;
 
 
@@ -64,8 +64,6 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
         animator = GetComponent<NetworkPlayerAnimationLogic>();
 
         stats = GetComponent<NetworkPlayerStats>();
-        networkPlayerInventory = GetComponent<NetworkPlayerInventory>();
-
         //this.radial_menu = transform.GetComponentInChildren<RMF_RadialMenu>().gameObject; -treba dat v start ker sicer crkne k ni se vse nrjen
         this.neutralStateHandler = GetComponent<NetworkPlayerNeutralStateHandler>();
     }
@@ -92,7 +90,8 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
         }
 
         //input glede menjave orozja pa tega se izvaja v neutralStatehandlerju
-        if (this.combat_mode == 1)
+        if (this.combat_mode == 0) ResetAllCombatParameters();
+        else if (this.combat_mode == 1)
         {
             if (hasWeaponSelected())
             {
@@ -120,7 +119,8 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
                         this.locally_buffered_execute_attack_request = true;
                 }
             }
-            else if (this.currently_equipped_shield != null) {
+            else if (this.currently_equipped_shield != null)
+            {
                 if (Input.GetButtonDown("Fire2"))
                 {
                     //block
@@ -136,6 +136,22 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
 
     }
 
+    private void ResetAllCombatParameters()
+    {
+
+    combat_mode=0;
+    blocking = false;
+    is_readying_attack = false;
+    ready_attack = false;
+    executing_attack = false;
+    locally_buffered_execute_attack_request = false;
+}
+    internal void ResetAllParametersRelatedToAttack() {
+        is_readying_attack = false;
+        ready_attack = false;
+        executing_attack = false;
+        locally_buffered_execute_attack_request = false;
+    }
 
     private void checkAttackDirection() {
         float x = Input.GetAxis("Mouse X");
@@ -311,8 +327,7 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
     private void play_main_attack_sound_effect()
     {
         //poisc kter je taprav sound effect za predvajat, zaenkrat je samo edn
-        GameObject clip = GameObject.Instantiate(combat_sound_effects[0], transform.position, transform.rotation);
-        clip.transform.parent = transform;
+        SFXManager.OnWeaponAttackSFX(transform,this.currently_equipped_weapon.getItem());
     }
 
     private int getSiblingIndexOfFirstActiveChild_Weapon()
@@ -338,10 +353,13 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
 
             foreach (Transform child in weapon_slot)
             {
-                if (child.GetComponent<Weapon_collider_handler>().item.id == this.currently_equipped_weapon.getItem().id)
-                {
-                    child.GetComponent<Weapon_collider_handler>().set_offensive_colliders(active);
-                }
+                if(this.currently_equipped_weapon!=null)
+                    if (child.GetComponent<Weapon_collider_handler>().item.id == this.currently_equipped_weapon.getItem().id)
+                    {
+                        child.GetComponent<Weapon_collider_handler>().set_offensive_colliders(active);
+                    }
+                else
+                    child.GetComponent<Weapon_collider_handler>().set_offensive_colliders(false);//zamenjov weapon/tool rabmo disablat
             }
         }
     }
@@ -368,7 +386,7 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
         int next = 0;
         if (i != null)
         {
-            if (i.type == Item.Type.weapon || i.type == Item.Type.ranged || i.type == Item.Type.shield)
+            if (i.type == Item.Type.weapon || i.type == Item.Type.ranged || i.type == Item.Type.shield || i.type == Item.Type.tool)
                 next = 1;
         }
         networkObject.SendRpc(RPC_CHANGE_COMBAT_MODE_RESPONSE, Receivers.All, next);
@@ -564,7 +582,20 @@ public class NetworkPlayerCombatHandler : NetworkPlayerCombatBehavior
         }
     }
 
+    internal void RefreshCombatState(Predmet p)
+    {
+        if(p!=null)
+            if (p.getItem().type != Item.Type.tool) p = null;//da je spodnja metoda bolj pregledna odrezemo stran vse kar ni tool, ker p nas zanima samo ce je tool
 
-
+        //ZA COMBAT MODE - precej neefektivno ker pri menjavi itema na baru se klice dvakrat rpc...........
+        if (this.currently_equipped_weapon != null)
+            this.ChangeCombatMode(this.currently_equipped_weapon.getItem());
+        else if (this.currently_equipped_shield != null)
+            this.ChangeCombatMode(this.currently_equipped_shield.getItem());
+        else if (p != null) 
+           this.ChangeCombatMode(p.getItem());
+        else//nimamo nc equipan
+            this.ChangeCombatMode(null);
+    }
 }
 

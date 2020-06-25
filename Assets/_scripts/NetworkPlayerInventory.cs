@@ -15,7 +15,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
     public int dragged_gameobjectSiblingIndex = -1;
     public int draggedParent_parent_sibling_index = -1;
 
-    [HideInInspector] public Predmet[] predmeti_personal = new Predmet[20]; // seznam itemov, ubistvu inventorij
+    [HideInInspector] internal Predmet[] predmeti_personal = new Predmet[20]; // seznam itemov, ubistvu inventorij
     public delegate void OnItemChanged();
     public OnItemChanged onItemChangedCallback;
 
@@ -74,13 +74,12 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
 
     private void Start()
     {
-        try
+      /*  try
         {
-            predmeti_hotbar = new Predmet[this.bar_slots.Length];
-            predmeti_personal = new Predmet[personal_inventory_slots.Length];
+            initialize_inventory();
         }catch(Exception e){
         //client je owner
-        }
+        }*/
 
         this.craftingQueue = new List<PredmetRecepie>();
         this.combatHandler = GetComponent<NetworkPlayerCombatHandler>();
@@ -88,6 +87,13 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         this.avatar = GetComponent<DynamicCharacterAvatar>();
         this.stats = GetComponent<NetworkPlayerStats>();
         this.slots_to_clear = null;
+    }
+
+    private void initialize_inventory() {
+        if (this.predmeti_hotbar == null || this.predmeti_hotbar.Length==0)
+            this.predmeti_hotbar = new Predmet[this.bar_slots_Length];
+        if (this.predmeti_personal == null || this.predmeti_personal.Length==0)
+            this.predmeti_personal = new Predmet[personal_inventory_slots.Length];
     }
 
     internal void on_UI_linked() {//klice se z UILogic.on_local_player_linked
@@ -105,10 +111,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         }
 
         if (networkObject.IsServer || networkObject.IsOwner) {
-            if(this.predmeti_hotbar==null)
-                this.predmeti_hotbar = new Predmet[this.bar_slots_Length];
-            if(this.predmeti_personal==null)
-                this.predmeti_personal = new Predmet[personal_inventory_space];
+            initialize_inventory();
         }
 
         onLoadoutChangedCallback += refresh_UMA_equipped_gear;//vsi rabjo vidt loadout
@@ -117,6 +120,16 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
 
        // if (networkObject.IsOwner && networkObject.IsServer) instantiate_server_weapons_for_testing();
         if (networkObject.IsOwner) UpdateUI();//bugfix
+    }
+
+    void Update()
+    {
+        if (networkObject == null)
+        {
+            Debug.LogWarning("networkObject is null.");
+            return;
+        }
+        if (!networkObject.IsOwner) return;
     }
 
     void Display_new_items_on_canvas()
@@ -256,6 +269,14 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         {
             if (predmeti_personal[i] != null)  // If there is an item to add
             {
+                //-----------------HOTFIX-------------
+                // v personal inventory se nekje namecejo itemi k imajo 0,0,0,0 in mecejo exceptione. reprodukcija napake ni ravno mozna tako da tole
+                if (this.predmeti_personal[i].item_id == 0)
+                {
+                    this.predmeti_personal[i] = null;
+                    continue;
+                }
+                //------------------/HOTFIX------------
                 personal_inventory_slots[i].AddPredmet(this.predmeti_personal[i]);   // Add it
             }
             else
@@ -355,6 +376,12 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
             return p;
         }
         return null;
+    }
+
+    internal bool has_metal_feet()
+    {
+        if (this.getFeetItem() == null) return false;
+        return this.getFeetItem().tier > 0;
     }
 
 
@@ -860,6 +887,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         current_index = (current_index + 1) % predmeti_hotbar.Length;
 
         for (int i = 0; i < this.predmeti_hotbar.Length; i++) {
+            if ((current_index - i) > this.predmeti_hotbar.Length-1) return -1;
             if (predmeti_hotbar[(current_index + i) % predmeti_hotbar.Length] != null)
                 return (current_index + i) % predmeti_hotbar.Length;
         }
@@ -874,6 +902,7 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
 
         for (int i = 0; i < this.predmeti_hotbar.Length; i++)
         {
+            if ((current_index - i) < 0) return -1;
             if (predmeti_hotbar[(current_index - i) % predmeti_hotbar.Length] != null)
                 return (current_index - i) % predmeti_hotbar.Length;
         }
@@ -1173,22 +1202,6 @@ public class NetworkPlayerInventory : NetworkPlayerInventoryBehavior
         }
         Debug.LogError("Size mismatch");
         return null;
-    }
-
-    void Update()
-    {
-
-        if (networkObject == null)
-        {
-            Debug.LogWarning("networkObject is null.");
-            return;
-        }
-        if (!networkObject.IsOwner) return;
-        // Check to see if we should open/close the inventory
-        //Debug.Log("items - " + this.items.Length);
-        if (this.predmeti_personal.Length == 0) this.predmeti_personal = new Predmet[20];//hacky bug fix. makes me sick about this brah. mrde dat u onNetworkConnected al pa kej
-
-
     }
 
     public void addToPersonalInventory(Predmet item, int index)

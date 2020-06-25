@@ -16,10 +16,7 @@ public class ItemPickup : Interactable {
     public Material[] original_materials;
     private MeshRenderer[] renderers;
     private bool initialized = false;
-
-
-
-
+    public int rarity;
 
     private void Start()
     {
@@ -160,7 +157,7 @@ public class ItemPickup : Interactable {
     {
         if (args.Info.SendingPlayer.NetworkId != 0) return;
         Vector3 p = args.GetNext<Vector3>();
-        GameObject.Instantiate(Mapper.instance.pickup_sound_effects[0], p, Quaternion.identity).transform.SetParent(null);
+        SFXManager.OnItemPickup(UILogic.localPlayerGameObject.transform,this.rarity);
     }
 
     IEnumerator DestroyDelayed()//sends vertical and horizontal speed to network

@@ -23,7 +23,7 @@ MonoBehaviour:
   damage_reduction: 1
   id: 20
   prefab_pickup: {fileID: 274690713, guid: 6bee712664bee2f4c9f7ed3dda4d2f3f, type: 3}
-  weapon_animation_class: 3
+  weapon_animation_class: 2
   UMARecipes: []
   stone_gather_rate: 0
   wood_gather_rate: 0
@@ -38,3 +38,4 @@ MonoBehaviour:
   recepie: {fileID: 0}
   needsToBeAttached: 0
   respawn_time: 0
+  weight: 0

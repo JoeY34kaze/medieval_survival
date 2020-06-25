@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -19,6 +20,5 @@ public class Prefs : MonoBehaviour
     public static float volumeMusic;
     public static float volumeMaster;
     public static bool showDirectionalArrow;
-
 
 }

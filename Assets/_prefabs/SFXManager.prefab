@@ -1,0 +1,132 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &6784904380632746965
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 6784904380632746954}
+  - component: {fileID: 6784904380632746955}
+  m_Layer: 0
+  m_Name: SFXManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &6784904380632746954
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6784904380632746965}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &6784904380632746955
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6784904380632746965}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5acc4c84bd7ef4648bc9df2a266dc854, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  player_swing_bladed_weapon_sfx:
+  - {fileID: 5834470938225872258, guid: 75fae846ed60a9344b8226a84c76a726, type: 3}
+  sfx_block_with_weapon:
+  - {fileID: 2312515853737920592, guid: 9ca5bc471c6c2d8438ac5ad19643b556, type: 3}
+  - {fileID: 2312515853737920592, guid: 43c0f46dd84feff42900d3cc2daf44d4, type: 3}
+  - {fileID: 2312515853737920592, guid: 0f98bca08461f3d499f5ceb39c470743, type: 3}
+  sfx_block_with_shield:
+  - {fileID: 2312515853737920592, guid: c12325db91bf9694c94c22c9d0a91a45, type: 3}
+  - {fileID: 2312515853737920592, guid: f58181f15fb090644b41c23446787aad, type: 3}
+  - {fileID: 2312515853737920592, guid: e2b69fe5f0a9ded46a5f0ee0413cac3f, type: 3}
+  - {fileID: 2312515853737920592, guid: f771783c637657e46bfb6a9b0e693c13, type: 3}
+  sfx_player_hit_with_sword:
+  - {fileID: 2312515853737920592, guid: 971e1b9c167bba9428386108452a3d3e, type: 3}
+  - {fileID: 2312515853737920592, guid: 4ad06ae88b7a4f744b90e22356bad4bf, type: 3}
+  - {fileID: 2312515853737920592, guid: f0604f75d3fadb8408749c7ea82aafb4, type: 3}
+  sfx_player_death_by_weapon:
+  - {fileID: 2312515853737920592, guid: 1bc5c3b75c2b9064892dec0e6ba418fd, type: 3}
+  sfx_draw_bladed_weapon:
+  - {fileID: 2312515853737920592, guid: 9d1b3ce8104a655488b2d4d957df1075, type: 3}
+  - {fileID: 2312515853737920592, guid: ac12b25f709d8cf4f9a8976baa55cd58, type: 3}
+  WoodHitSfx:
+  - {fileID: 2312515853737920592, guid: 034a7bff0ebe15c42bbb0c12939f88dc, type: 3}
+  - {fileID: 2312515853737920592, guid: cdb808e915c74774c8562a6a7a770033, type: 3}
+  - {fileID: 2312515853737920592, guid: 4616ad0c19f44d64a9dbfcccd6a7c910, type: 3}
+  - {fileID: 2312515853737920592, guid: 55eb399fc8c07114cb10d867a91d21ef, type: 3}
+  WoodDepletedSfx:
+  - {fileID: 2312515853737920592, guid: e82c319e51251374ea525ef99912871e, type: 3}
+  StoneHitSfx:
+  - {fileID: 2312515853737920592, guid: 987f4674764cb0c4490a0abfc7c4b21a, type: 3}
+  - {fileID: 2312515853737920592, guid: 996f25fe199c8464d9c390d2ca82318e, type: 3}
+  StoneDepletedSfx:
+  - {fileID: 2312515853737920592, guid: c3ce1e30c873f074ab29b9252fd7d73e, type: 3}
+  OreHitSfx:
+  - {fileID: 2312515853737920592, guid: 987f4674764cb0c4490a0abfc7c4b21a, type: 3}
+  - {fileID: 2312515853737920592, guid: 996f25fe199c8464d9c390d2ca82318e, type: 3}
+  OreDepletedSfx:
+  - {fileID: 2312515853737920592, guid: c3ce1e30c873f074ab29b9252fd7d73e, type: 3}
+  footsteps_basic:
+  - {fileID: 2312515853737920592, guid: d0d0e62fffe24e0428908953c6c81fec, type: 3}
+  - {fileID: 2312515853737920592, guid: 9e4edf12b4cc0354db79f3ba91ab0cb3, type: 3}
+  - {fileID: 2312515853737920592, guid: 24e429d755d53494fb18756bd1da8c47, type: 3}
+  - {fileID: 2312515853737920592, guid: 578f5ec6e4d8e08468d86b9995552e20, type: 3}
+  - {fileID: 2312515853737920592, guid: 86d03176e7517f34281a2ed6f42eaf90, type: 3}
+  - {fileID: 2312515853737920592, guid: 1fe157f22e184b04ca2ca4407c67dbfb, type: 3}
+  - {fileID: 2312515853737920592, guid: 7cdccbd4aa3739a47b84eaaeb87dd1be, type: 3}
+  footsteps_on_stone:
+  - {fileID: 2312515853737920592, guid: 16e7a13b1b6c10d428d05d3a6a0a9167, type: 3}
+  - {fileID: 2312515853737920592, guid: 2b6ccc2a180c4d54398d70c71e16703f, type: 3}
+  - {fileID: 2312515853737920592, guid: c1496bdbbcf59b044b44c9b394dac006, type: 3}
+  - {fileID: 2312515853737920592, guid: f4a0ca26ebe022f478ff32f437c291e1, type: 3}
+  footsteps_on_dirt:
+  - {fileID: 2312515853737920592, guid: abacada740603924783caf11cca8e08d, type: 3}
+  - {fileID: 2312515853737920592, guid: 49a995d3e191bbc4ca9b25bc208ed4ee, type: 3}
+  - {fileID: 2312515853737920592, guid: 3642dc17cb8f1ad43b3a795ec229801b, type: 3}
+  - {fileID: 2312515853737920592, guid: 70ca8014b094f8f47972aa299913a68a, type: 3}
+  footsteps_on_leaves:
+  - {fileID: 2312515853737920592, guid: d0cbfddb6b5959a4e9fb5e04dd07e81e, type: 3}
+  - {fileID: 2312515853737920592, guid: 8f4e9a86f84f35b48b538b8b46980ef7, type: 3}
+  - {fileID: 2312515853737920592, guid: c1dd18b0ffd000c4686d41803588027c, type: 3}
+  - {fileID: 2312515853737920592, guid: e8ee71534971e144ba9f12b9ff1ce312, type: 3}
+  - {fileID: 2312515853737920592, guid: f4f01f893703b2342817c5bf5988297c, type: 3}
+  footsteps_metal_on_stone:
+  - {fileID: 2312515853737920592, guid: d9df990490cf2c64bb6f3708f546d60e, type: 3}
+  - {fileID: 2312515853737920592, guid: ceccb13aa3d3f5c4b8592c6c707d90ce, type: 3}
+  - {fileID: 2312515853737920592, guid: 450bf7749400dc64384b2fea9be95e6d, type: 3}
+  - {fileID: 2312515853737920592, guid: f83438a1d2f042846aa30804bb81f052, type: 3}
+  - {fileID: 2312515853737920592, guid: 61fd586e4cfc02e4c97aa7b220339940, type: 3}
+  - {fileID: 2312515853737920592, guid: 04bf496d3ecc7664a8b467b5b105fdc4, type: 3}
+  - {fileID: 2312515853737920592, guid: 49907d495be1904449ac7388a6311c33, type: 3}
+  - {fileID: 2312515853737920592, guid: 0a964c99a69d42142bdafbb209c3368e, type: 3}
+  - {fileID: 2312515853737920592, guid: 87ec5e1ec272e7c499bef34baaf6d4ca, type: 3}
+  - {fileID: 2312515853737920592, guid: 67db29d0a84ed28428bf803c8a0f1778, type: 3}
+  - {fileID: 2312515853737920592, guid: 80ddc3bb67f20104d94ad86f2e86b0cd, type: 3}
+  footsteps_metal_on_wood:
+  - {fileID: 2312515853737920592, guid: 7829537950ab0bb4b86c05454e78e539, type: 3}
+  - {fileID: 2312515853737920592, guid: 05a238e480b971c43ba4fb43e9ec4bbf, type: 3}
+  - {fileID: 2312515853737920592, guid: 9fa07c29a165e8640b60c864cc01499e, type: 3}
+  - {fileID: 2312515853737920592, guid: 114f603a0a9f9c142aecf54cafdc26b9, type: 3}
+  - {fileID: 2312515853737920592, guid: 58458ecef538c7043a2358ef15308e6d, type: 3}
+  - {fileID: 2312515853737920592, guid: 69b6675ecd65b114698ea9535400b578, type: 3}
+  - {fileID: 2312515853737920592, guid: b9a558de21285694396dddd7a174ce85, type: 3}
+  - {fileID: 2312515853737920592, guid: ffcafe040a4996441a79ad7057314903, type: 3}
+  - {fileID: 2312515853737920592, guid: d071d9d79885b234c94a6cf2d97078b8, type: 3}
+  basicItemPickup:
+  - {fileID: 2312515853737920592, guid: 1feaaad38172c384ab6c1f15a320c89f, type: 3}
+  BasicLargeNotificationSFX: {fileID: 2312515853737920592, guid: f1023f2d214fcca4ead8c5618c2ff648,
+    type: 3}

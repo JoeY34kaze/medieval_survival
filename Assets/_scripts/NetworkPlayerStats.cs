@@ -59,12 +59,6 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
 
     private NetworkPlayerCombatHandler combatStateHandler;
 
-    public GameObject[] sfx_block_with_weapon;
-    public GameObject[] sfx_block_with_shield;
-    public GameObject[] sfx_player_hit_with_sword;
-    public GameObject[] sfx_player_death_by_weapon;
-    public GameObject[] sfx_draw_sword;
-
 
     private float usual_character_controller_height;
     private Vector3 usual_character_controller_center;
@@ -540,13 +534,7 @@ public class NetworkPlayerStats : NetworkPlayerStatsBehavior
        
     }
 
-    internal void play_random_sound_effect(GameObject[] sound_fx)
-    {
-        if (sound_fx.Length > 0) {
-            int k = (int)UnityEngine.Random.Range(0, sound_fx.Length);
-            GameObject.Instantiate(sound_fx[k], transform.position, transform.rotation,transform);
-        }
-    }
+
 
     public void OnSubmitModifiedGuildDataClick() {
         NetworkGuildManager.Instance.OnModifyGuildConfirmClick();
@@ -690,7 +678,7 @@ napadenmu playerju da si poupdejta health. ta player pol ko si je updejtov healt
                         if (prev_hp == 0 && final_damage_taken > 0) {
                             //death
                             //poseben sound effect za tak tip smrti?
-                            play_random_sound_effect(this.sfx_player_death_by_weapon);
+                            SFXManager.OnPlayerDeath(transform,true);
                             handle_death_player();
                         }
                     }
@@ -978,7 +966,7 @@ napadenmu playerju da si poupdejta health. ta player pol ko si je updejtov healt
 
         string tag = args.GetNext<string>();
         if (tag.Equals("coll_0") || tag.Equals("coll_1") || tag.Equals("coll_2"))
-            play_random_sound_effect(this.sfx_player_hit_with_sword);
+            SFXManager.OnPlayerHit(transform);
         this.healthBar.fillAmount = this.health / (this.max_health);
         UILogic.TeamPanel.refreshHp(networkObject.NetworkId, this.healthBar.fillAmount);
         if(networkObject.IsOwner)Exploration_and_Battle.Instance.onHostileAction();
@@ -997,7 +985,7 @@ napadenmu playerju da si poupdejta health. ta player pol ko si je updejtov healt
         reticle_hit_controller.CreateReticleHit(tag); //cod2 reticle hit style like
         Exploration_and_Battle.Instance.onHostileAction();
 
-        GetComponent<NetworkPlayerAnimationLogic>().on_weapon_or_tool_collision();//tole ne dela in nevem zakaj ne...
+        GetComponent<NetworkPlayerAnimationLogic>().on_weapon_or_tool_collision(false);//tole ne dela in nevem zakaj ne... ?
     }
 
 
@@ -1509,16 +1497,7 @@ napadenmu playerju da si poupdejta health. ta player pol ko si je updejtov healt
     public override void OnBlocked(RpcArgs args)
     {
         if (args.Info.SendingPlayer.IsHost) {
-
-            if (GetComponent<Animator>().GetBool("shield_equipped"))    
-            {
-                //blocked with shield. i guess neki wooden sound effects
-                play_random_sound_effect(this.sfx_block_with_weapon);
-            }
-            else {
-                //
-                play_random_sound_effect(this.sfx_block_with_shield);
-            }
+            SFXManager.OnBlock(transform,GetComponent<Animator>().GetBool("shield_equipped"));
         }
     }
 
@@ -1529,8 +1508,14 @@ napadenmu playerju da si poupdejta health. ta player pol ko si je updejtov healt
     }
     public override void RespawnWithoutBedRequest(RpcArgs args)
     {
-        if (args.Info.SendingPlayer.NetworkId == networkObject.Owner.NetworkId && networkObject.IsServer)
-            networkObject.SendRpc(RPC_RESPAWN_SIGNAL, Receivers.All, new Vector3(315, 38, 564));
+        if (args.Info.SendingPlayer.NetworkId == networkObject.Owner.NetworkId && networkObject.IsServer) {
+            Location l = Locations.GetNearestRespawnLocation(transform.position);
+            if (l!=null)
+                networkObject.SendRpc(RPC_RESPAWN_SIGNAL, Receivers.All, l.transform.position);
+            else
+                networkObject.SendRpc(RPC_RESPAWN_SIGNAL, Receivers.All, new Vector3 (15419, 413, 15784));
+        }
+            
     }
 
     public override void ServerSendAllThisToNewPlayer(RpcArgs args)

@@ -9,7 +9,7 @@ public class NetworkPlayerAnimationLogic : NetworkPlayerAnimationBehavior
 {
     private Animator anim;
 
-
+    public GameObject grass_displacement;
 
 
     //private bool needNetworkAnimUpdate = false;
@@ -75,7 +75,7 @@ public class NetworkPlayerAnimationLogic : NetworkPlayerAnimationBehavior
             result[1] = 0;
             return result;
         }
-
+        bool slowed = this.combat_handler.is_in_action_that_merits_movement_speed_slow();
 
         float round = 0.0f;
         float round_h = 0.0f;
@@ -93,8 +93,15 @@ public class NetworkPlayerAnimationLogic : NetworkPlayerAnimationBehavior
         else if (Input.GetAxis("Horizontal") < 0) round_h = -1.0f;
         else round_h = 0.0f;
 
+        if (slowed)
+        {
+            round=round*0.75f;
+            round_h=round_h*0.75f;
+        }
+
         result[0] = round;
         result[1] = round_h;
+        
 
         return result;
 
@@ -266,6 +273,12 @@ public class NetworkPlayerAnimationLogic : NetworkPlayerAnimationBehavior
         anim.SetBool("crouched", !current_status);
         //treba je tud upddejtat weight layerja mogoce?
         networkObject.SendRpc(RPC_NETWORK_MOVEMENT_ANIMATION_CROUCHED_UPDATE, Receivers.OthersProximity, !current_status);
+        set_grass_displacement(!current_status);
+    }
+
+    private void set_grass_displacement(bool v)
+    {
+        this.grass_displacement.SetActive(!v);
     }
 
     //----------------------------------KLICANO IZ DRUGIH SCRIPT KER IMA VEZE Z ANIMACIJO -------------------------------
@@ -309,6 +322,7 @@ public class NetworkPlayerAnimationLogic : NetworkPlayerAnimationBehavior
         bool status = args.GetNext<bool>();
         if (networkObject.IsOwner) return;//owner nima kaj delat tukaj ker je nastavu vse potrebno ze v updejtih
         anim.SetBool("crouched",status);
+        set_grass_displacement(!status);
     }
 
     public override void NetworkStartJumpRemote(RpcArgs args)
@@ -414,16 +428,29 @@ public class NetworkPlayerAnimationLogic : NetworkPlayerAnimationBehavior
 
     internal void setCombatState(byte new_mode)
     {
-        if (new_mode == 1) setCombatClass(combat_handler.currently_equipped_weapon);//to bi moral bit ured ker se najprej porihta vse za item, nato pa pride se en rpc da vrze vseskup v combat mode. ce se zjebe zaporedje mamo lahko problem..
+        if (combat_handler.currently_equipped_weapon != null && new_mode == 1)
+            setCombatClass(combat_handler.currently_equipped_weapon);//to bi moral bit ured ker se najprej porihta vse za item, nato pa pride se en rpc da vrze vseskup v combat mode. ce se zjebe zaporedje mamo lahko problem..
+        else if (combat_handler.currently_equipped_shield != null && new_mode == 1)
+            setCombatClass(combat_handler.currently_equipped_shield);
+        else
+            setCombatClass(0);
         anim.SetInteger("combat_mode", new_mode);
         
     }
 
     public void setCombatClass(Predmet p)
     {
-        
-        if(p!=null)
+
+        if (p != null)
             anim.SetInteger("weapon_animation_class", p.getItem().weapon_animation_class);
+        else { //equippan imamo tool
+            anim.SetInteger("weapon_animation_class", 0);//za exit nasred tool use-a na weapon
+        }
+
+    }
+    public void setCombatClass(int p)
+    {
+      anim.SetInteger("weapon_animation_class", p);
     }
 
     internal void setCombatBlocking(bool blocking, byte dir)
@@ -457,18 +484,21 @@ public class NetworkPlayerAnimationLogic : NetworkPlayerAnimationBehavior
     }
 
 
+
     #endregion
+
+
+
 
     internal void startToolAction(Item tool_to_use)
     {
         //ker bomo mel razlicne toole bi blo pametno nastimas se druge fielde na podlagi itema...
-
         anim.SetTrigger("tool_activated");
     }
 
     //--------------------   INVERSE KINEMATICS
 
-    public void on_weapon_or_tool_collision() {
+    public void on_weapon_or_tool_collision(bool weapon) {
         //sprozi se z weapona ali toola ko zadane nek objekt.
         //sprozi se tudi na lokalnemu playerju ko zadane drugega playerja. v isti metodi kjer se izrise povratna informacija o damageu
 
@@ -477,6 +507,9 @@ public class NetworkPlayerAnimationLogic : NetworkPlayerAnimationBehavior
 
         this.IK_swing_active = true;
         this.IK_swing_target = anim.GetIKPosition(AvatarIKGoal.RightHand);
+
+        //if(!weapon)
+         //   anim.SetLayerWeight(1, 0);
 
     }
 
@@ -511,5 +544,20 @@ public class NetworkPlayerAnimationLogic : NetworkPlayerAnimationBehavior
         anim.ResetTrigger("ready_attack");
         anim.ResetTrigger("feign");
         anim.SetTrigger("release_attack");
+    }
+
+    public void OnFootStepAnimationEvent(int running)
+    {
+     
+        //get surface
+        int surface = GetSurfaceType();
+        //get foot armor type
+        bool metal_feet = GetComponent<NetworkPlayerInventory>().has_metal_feet();
+        SFXManager.OnFootstep(transform, surface, metal_feet, running==1);
+    }
+
+    private int GetSurfaceType()
+    {
+        return 0;
     }
 }

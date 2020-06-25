@@ -38,6 +38,7 @@ namespace BeardedManStudios.Forge.Networking.Unity
 			{
 				var option = Instantiate(serverOption);
 				option.transform.SetParent(content);
+				option.transform.localScale = Vector3.one;
 				var browserItem = option.GetComponent<ServerBrowserItem>();
 				if (browserItem != null)
 					browserItem.SetData(name, callback);
@@ -102,6 +103,7 @@ namespace BeardedManStudios.Forge.Networking.Unity
 								// name, address, port, comment, type, mode, players, maxPlayers, protocol
 								CreateServerOption(name, () =>
 								{
+									/*
 									// Determine which protocol should be used when this client connects
 									NetWorker socket = null;
 
@@ -125,7 +127,10 @@ namespace BeardedManStudios.Forge.Networking.Unity
 									if (socket == null)
 										throw new Exception("No socket of type " + protocol + " could be established");
 
-									Connected(socket);
+									Connected(socket);*/
+
+									MultiplayerMenu mm = transform.parent.GetComponentInChildren<MultiplayerMenu>();
+									mm.My_Connect_To(address, port+"", name);
 								});
 							}
 						}

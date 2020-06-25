@@ -8,7 +8,7 @@ public class SoundEffectVolumeController : MonoBehaviour
     void Start()
     {
         if (PlayerPrefs.HasKey("effectsVolume"))
-            GetComponent<AudioSource>().volume = PlayerPrefs.GetFloat("effectsVolume");
+            GetComponent<AudioSource>().volume *= PlayerPrefs.GetFloat("effectsVolume");
     }
 
 

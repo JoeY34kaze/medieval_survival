@@ -100,19 +100,75 @@ public class UILogic : MonoBehaviour
     private ulong last_band_in;
     private ulong last_band_out;
 
+    public GameObject largeNotificationPanel;
+    public static List<NotificationDataObject> Queued_notifications;
 
-    public bool test;
+    private IEnumerator locationChecker;
+    private Location last_location = null;
+
     private void Start()
     {
         if (UILogic.Instance != null) Destroy(this); else UILogic.Instance = this;
         UILogic.PanelGuildHander = this.GuildPanel.GetComponent<panel_guild_handler>();
         UILogic.DecisionsHandler = GetComponentInChildren<decicions_handler_ui>();
         UILogic.TeamPanel = GetComponentInChildren<local_team_panel_handler>();
+
+
+        UILogic.Queued_notifications = new List<NotificationDataObject>();
+        this.locationChecker = locator();
+        StartCoroutine(this.locationChecker);
+
        
     }
+
+    private IEnumerator locator() {
+        yield return new WaitForSeconds(5);
+        while (true)
+        {
+            checkLocation();
+            yield return new WaitForSeconds(10);//samo na clientu so its ok i guess. nevem ec bi z colliderji se jebov
+        }
+    }
+
+    private void checkLocation()
+    {
+        Location current = Locations.GetCurrentLocation(UILogic.localPlayerGameObject.transform.position);
+        if (current != last_location) 
+            Update_location(current);
+    }
+
+    private void Update_location(Location current)
+    {
+        if (current == null)
+            return;
+
+        last_location = current;
+        Enqueue_Notification(current);
+        //largeNotificationHandler.OnLocationChanged(current);
+
+    }
+
+    private void Enqueue_Notification(Location c)
+    {
+        NotificationDataObject d = new NotificationDataObject(c.Title, c.Description);
+        UILogic.Queued_notifications.Add(d);
+
+
+        if (!this.largeNotificationPanel.activeSelf)
+            this.largeNotificationPanel.SetActive(true);
+    }
+
+
     // Update is called once per frame
     void Update()
     {
+
+        if (this.locationChecker == null)
+        {
+            this.locationChecker = locator();
+            StartCoroutine(this.locationChecker);
+        }
+
         if (Input.GetKeyDown(KeyCode.Escape))
         {
             handleEscapePressed();

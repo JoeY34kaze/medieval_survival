@@ -13,6 +13,14 @@ public class NetworkWorldManager : NetworkWorldManagerBehavior
     private IEnumerator upkeep_checker;
 
 
+    public static NetworkWorldManager Instance;
+
+    private void Start()
+    {
+        if (NetworkWorldManager.Instance == null) NetworkWorldManager.Instance = this; // i guess good enough. imas en pattern po ktermu se da izbolsat in bo eventualno treba vse singletone upgrejdat da bojo delal enak. zdle je se precej na yolo ( maj 2020)
+    }
+
+
     private void Update()
     {
         if(networkObject!=null)

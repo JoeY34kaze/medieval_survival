@@ -70,6 +70,9 @@ public class MultiplayerMenu : MonoBehaviour
 
 	public void Connect()
 	{
+		if (ipAddress.text == "") ipAddress.text = "127.0.0.1";
+		if(portNumber.text=="") portNumber.text = "15937";
+
 		if (connectUsingMatchmaking)
 		{
 			ConnectToMatchmaking();
@@ -98,6 +101,35 @@ public class MultiplayerMenu : MonoBehaviour
 				((UDPClient)client).Connect(ipAddress.text, (ushort)port, natServerHost, natServerPort);
 		}
 
+		Connected(client);
+	}
+
+	/// <summary>
+	/// JoeY34kaze-costum koda
+	/// </summary>
+	public void My_Connect_To(string ip, string p, string name)
+	{
+		Debug.Log("Connecting with custom code to "+ip+" : "+p+" . Server name : "+name);
+		ushort port;
+		if (!ushort.TryParse(p, out port))
+		{
+			Debug.LogError("The supplied port number is not within the allowed range 0-" + ushort.MaxValue);
+			return;
+		}
+		NetWorker client;
+		if (useTCP)
+		{
+			client = new TCPClient();
+			((TCPClient)client).Connect(ip, (ushort)port);
+		}
+		else
+		{
+			client = new UDPClient();
+			if (natServerHost.Trim().Length == 0)
+				((UDPClient)client).Connect(ip, (ushort)port);
+			else
+				((UDPClient)client).Connect(ip, (ushort)port, natServerHost, natServerPort);
+		}
 		Connected(client);
 	}
 
@@ -135,6 +167,9 @@ public class MultiplayerMenu : MonoBehaviour
 
 	public void Host()
 	{
+		if (ipAddress.text == "") ipAddress.text = "127.0.0.1";
+		if (portNumber.text == "") portNumber.text = "15937";
+
 		if (useTCP)
 		{
 			server = new TCPServer(64);
